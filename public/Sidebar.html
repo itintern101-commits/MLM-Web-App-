@@ -1,0 +1,79 @@
+﻿<style>
+  :root {
+    --sidebar-width: 280px;
+    --primary-blue: #1a73e8;
+    --bg-white: #ffffff;
+    --border-color: #e0e0e0;
+    --text-main: #3c4043;
+    --text-hover: #1a73e8;
+    --bg-hover: #f8f9fa;
+    --bg-active: #e8f0fe;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  .sidebar {
+    width: var(--sidebar-width);
+    background: var(--bg-white);
+    border-right: 1px solid var(--border-color);
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    padding-top: 30px;
+    box-sizing: border-box;
+    z-index: 1000;
+  }
+
+  .sidebar-header {
+    padding: 0 25px 30px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    margin-bottom: 20px;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 18px 25px;
+    color: var(--text-main);
+    font-size: 1.1rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border-left: 4px solid transparent;
+  }
+
+  .nav-link:hover {
+    background: var(--bg-hover);
+    color: var(--text-hover);
+  }
+
+  .nav-link.active {
+    background: var(--bg-active);
+    color: var(--primary-blue);
+    border-left: 4px solid var(--primary-blue);
+    font-weight: 600;
+  }
+</style>
+
+<div class= sidebar>
+  <div class=sidebar-header>MLM Packaging</div>
+  <nav>
+    <a href=/dashboard.html class=nav-link data-page=dashboard>📊 Dashboard</a>
+    <a href=/createJob.html class=nav-link data-page=createJob>➕ Create New Job</a>
+    <a href=/BatchDetail.html class=nav-link data-page=BatchDetail>📋 Batch Detail</a>
+  </nav>
+</div>
+
+<script>
+  const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
+  const links = document.querySelectorAll('.nav-link');
+  links.forEach(link => {
+    const page = link.dataset.page;
+    if (page === currentPage) link.classList.add('active');
+  });
+</script>

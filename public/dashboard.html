@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #1a73e8;
+      --success: #34a853;
+      --warning: #fbbc04;
+      --danger: #ea4335;
+      --bg: #f1f3f4;
+      --card-bg: #ffffff;
+    }
+
+    body { font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; background: var(--bg); color: #202124; }
+    .main-wrapper { margin-left: 260px; padding: 40px; }
+    
+    h1 { font-size: 3rem; margin-top: 5px; margin-bottom: 5px; font-weight: 800; color: #1a0dab; }
+    .subtitle { font-size: 1.2rem; color: #5f6368; margin-bottom: 30px; }
+    
+    .section-title { font-size: 1.8rem; font-weight: bold; margin-bottom: 25px; display: block; border-left: 8px solid var(--primary); padding-left: 15px; color: #202124; }
+
+    /* Top Status Grid */
+    .status-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; margin-bottom: 40px; }
+    .status-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center; }
+    .status-card h3 { margin: 0; font-size: 1.1rem; color: #5f6368; text-transform: uppercase; }
+    .status-card .val { font-size: 3.5rem; font-weight: 800; margin: 10px 0; }
+
+    /* Compact Process Grid */
+    .process-container { 
+      display: grid; 
+      grid-template-columns: repeat(5, 1fr); 
+      gap: 8px; 
+      margin-bottom: 30px; 
+    }
+
+    .process-item { 
+      padding: 10px 12px; 
+      background: white; 
+      border-radius: 8px; 
+      border-left: 4px solid var(--primary); /* Switched to side border to save height */
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    }
+
+    .process-name { 
+      font-weight: 700; 
+      font-size: 0.75rem; 
+      color: #475569; 
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 120px;
+    }
+
+    .process-time { 
+      font-size: 1.1rem; 
+      font-weight: 800; 
+      color: var(--primary); 
+    }
+
+    /* Machine Capacity Tables */
+    .date-section { margin-bottom: 40px; }
+    .date-header { background: #202124; color: white; padding: 20px 30px; border-radius: 12px 12px 0 0; font-size: 2rem; font-weight: 800; }
+    .capacity-table { width: 100%; border-collapse: collapse; background: white; border-radius: 0 0 12px 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .capacity-table th { background: #f8f9fa; padding: 18px; text-align: left; font-size: 1.1rem; }
+    .capacity-table td { padding: 18px; border-bottom: 1px solid #eee; font-size: 1.1rem; }
+    .machine-label { font-weight: bold; padding: 6px 12px; border-radius: 6px; font-size: 0.9rem; }
+
+    /* Job List */
+    .table-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .filter-select { padding: 10px 15px; border-radius: 8px; border: 1px solid #ccc; }
+    .job-table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .job-table th { background: #f8f9fa; text-align: left; padding: 15px; color: #5f6368; font-size: 0.9rem; }
+    .job-table td { padding: 15px; border-bottom: 1px solid #f1f3f4; font-size: 0.95rem; }
+    
+    .clickable-row:hover { background-color: #f8faff !important; cursor: pointer; }
+    .batch-detail-row { display: none; background-color: #fcfcfc; }
+    
+    /* Batch Inner Table Styles */
+    .batch-inner-table { width: 100%; margin: 5px ; border-radius: 8px; border: 1px solid #e0e0e0; background: white; border-collapse: collapse; }
+    .batch-inner-table th { font-size: 0.8rem; text-transform: uppercase; color: #5f6368; background: #f8f9fa; padding: 12px; border-bottom: 2px solid #eee; }
+    .batch-inner-table td { font-size: 0.9rem; padding: 12px; border-bottom: 1px solid #f1f1f1; }
+
+    /* Status Pills */
+    .pill { padding: 4px 10px; border-radius: 4px; font-weight: 600; font-size: 0.75rem; }
+    .pill-running { background: #e8f0fe; color: #1a73e8; }
+    .pill-delayed { background: #fce8e6; color: #ea4335; }
+    .pill-completed { background: #e6f4ea; color: #34a853; }
+
+    /* Progress & Tags */
+    .tag { padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 0.85rem; display: inline-block; min-width: 100px; text-align: center; }
+    .tag-overdue { background: #fce8e6; color: var(--danger); }
+    .tag-schedule { background: #e6f4ea; color: var(--success); }
+    .tag-almost { background: #fef7e0; color: #b06000; }
+
+    .progress-bar { height: 8px; background: #e8eaed; border-radius: 4px; width: 100px; margin-top: 5px; }
+    .progress-fill { height: 100%; background: var(--primary); border-radius: 4px; transition: width 0.5s; }
+
+    /* New Capacity Card Styles */
+    .capacity-container {
+      margin-bottom: 40px;
+    }
+
+    .capacity-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .cap-card {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      border: 1px solid #eee;
+      transition: transform 0.2s;
+    }
+
+    .cap-card:hover { transform: translateY(-5px); }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .machine-badge {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+    }
+
+    .utilization-text { font-size: 1.8rem; font-weight: 800; color: #202124; }
+
+    .progress-track {
+      background-color: #e8eaed;
+      height: 12px;
+      border-radius: 10px;
+      margin: 15px 0;
+      overflow: hidden;
+    }
+
+    .stats-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.95rem;
+      color: #5f6368;
+    }
+
+    /* Machine Specific Colors */
+    .bg-ijami { background: #e8f0fe; color: #1a73e8; }
+    .bg-hand { background: #fef7e0; color: #b06000; }
+    .bg-out  { background: #f3e5f5; color: #7b1fa2; }
+
+    .fill-ijami { background: #1a73e8; }
+    .fill-hand  { background: #f9ab00; }
+    .fill-out   { background: #7b1fa2; }
+
+    .section-header-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .week-label {
+      background: #fff;
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 1px solid #ddd;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    #btnViewMonth, #btnViewWeek {
+      transition: all 0.2s ease;
+      color: #5f6368;
+    }
+
+    #btnViewMonth:hover, #btnViewWeek:hover {
+      color: var(--primary);
+    }
+
+    /* Active State */
+    #btnViewMonth[style*="white"], #btnViewWeek[style*="white"] {
+      color: var(--primary) !important;
+    }
+  </style>
+</head>
+<body>
+  <div id="sidebar-container"></div>
+  <script>
+    fetch('/Sidebar.html').then(r => r.text()).then(html => {
+      document.getElementById('sidebar-container').innerHTML = html;
+    }).catch(console.error);
+  </script>
+
+  <div class="main-wrapper">
+    <h1>Dashboard</h1>
+    <p class="subtitle">Real-time Production & Machine Capacity Monitor</p>
+
+    <div class="status-grid">
+      <div class="status-card" style="border-top: 8px solid var(--success);">
+        <h3>On Schedule</h3>
+        <div class="val" style="color: var(--success);" id="stat-schedule">00</div>
+      </div>
+      <div class="status-card" style="border-top: 8px solid var(--warning);">
+        <h3>Almost Due</h3>
+        <div class="val" style="color: var(--warning);" id="stat-almost">00</div>
+      </div>
+      <div class="status-card" style="border-top: 8px solid var(--danger);">
+        <h3>Overdue</h3>
+        <div class="val" style="color: var(--danger);" id="stat-overdue">00</div>
+      </div>
+    </div>
+
+    <span class="section-title">PROCESS WORKLOAD & AVERAGE PERFORMANCE</span>
+    <div class="cap-card" style="margin-bottom: 40px; padding: 25px;">
+      <div class="process-container" id="processStatsContainer" 
+          style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;">
+        <p style="color: #94a3b8; font-size: 12px;">Sorting and loading processes...</p>
+      </div>
+    </div>
+
+      <div class="capacity-container">
+        <div class="section-header-flex">
+          <div>
+            <span class="section-title">Machine Load Capacity</span>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <select id="monthPicker" onchange="calculateCapacity()" class="filter-select" style="font-weight: bold; border: 1px solid var(--primary);">
+            </select>
+            <div class="week-label" style="display: flex; align-items: center; gap: 15px;">
+              <button onclick="changeWeek(-1)" style="border: none; background: none; cursor: pointer; color: var(--primary);"><i class="fas fa-chevron-left"></i></button>
+              <div id="currentWeekRange">
+                <i class="far fa-calendar-alt"></i> Loading Week...
+              </div>
+              <button onclick="changeWeek(1)" style="border: none; background: none; cursor: pointer; color: var(--primary);"><i class="fas fa-chevron-right"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="capacity-grid" id="machineCapacityContainer"></div>
+      </div>
+
+         <div class="cap-card" id="chartSection" style="margin-bottom: 40px; display: none;">
+        <div class="section-header-flex">
+          <div>
+            <span class="section-title" id="chartTitle">Machine Load</span>
+            <div id="chartSubtitle" style="font-size: 0.85rem; color: #5f6368; margin-top: -15px; margin-left: 25px;"></div>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <div style="background: #f1f3f4; padding: 4px; border-radius: 8px; display: flex; gap: 4px; margin-right: 20px;">
+              <button id="btnViewMonth" onclick="setChartViewMode('MONTH')" style="border:none; padding: 6px 12px; border-radius: 6px; cursor:pointer; font-weight:600; font-size:0.8rem;">Monthly</button>
+              <button id="btnViewWeek" onclick="setChartViewMode('WEEK')" style="border:none; padding: 6px 12px; border-radius: 6px; cursor:pointer; font-weight:600; font-size:0.8rem;">Weekly</button>
+            </div>
+            <button onclick="document.getElementById('chartSection').style.display='none'" style="border:none; background:none; cursor:pointer; color:#ea4335;"><i class="fas fa-times"></i> Close</button>
+          </div>
+        </div>
+        <div style="height: 300px;">
+          <canvas id="capacityChart"></canvas>
+        </div>
+      </div>
+    <div class="table-header-flex" style="flex-wrap: wrap; gap: 15px;">
+      <span class="section-title" style="margin-bottom: 0;">JOB FULFILLMENT LIST</span>
+      
+      <div style="display: flex; gap: 10px; flex-grow: 1; justify-content: flex-end;">
+        <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search PSN or Client..." 
+          class="filter-select" style="width: 250px;">
+
+      <select class="filter-select" id="salesCodeFilter" onchange="filterTable()">
+          <option value="ALL">All Sales Codes</option>
+          <option value="AO">AO</option>
+          <option value="NY">NY</option>
+      </select>
+        <select class="filter-select" id="priorityFilter" onchange="filterTable()">
+          <option value="ALL">All Priorities</option>
+          <option value="Urgent">Urgent</option>
+          <option value="Cut Queue">Cut Queue</option>
+          <option value="Normal">Normal</option>
+        </select>
+
+        <select class="filter-select" id="statusFilter" onchange="filterTable()">
+          <option value="ALL">All Status</option>
+          <option value="ON SCHEDULE">On Schedule</option>
+          <option value="ALMOST DUE">Almost Due</option>
+          <option value="OVERDUE">Overdue</option>
+        </select>
+      </div>
+    </div>
+
+    <table class="job-table" id="jobTable">
+      <thead>
+        <tr>
+          <th>PSN</th>
+          <th>Client</th>
+          <th>Sales Code</th>
+          <th>PI No.</th>
+          <th>Qty</th>
+          <th>Order Date</th>
+          <th>Delivery Date</th>
+          <th>Progress</th>
+          <th>Priority</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="jobListBody">
+        <tr><td colspan="9" style="text-align:center; padding: 40px;">Loading live data...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    let MASTER_DATA = [];
+    let RAW_CAPACITY = [];
+    let capacityChart = null;
+    let activeMachine = null;
+    let activeViewMode = 'MONTH'; // Default to monthly when clicking a card
+    let CURRENT_VIEW_DATE = new Date(); // Stores the date for the week we are looking at
+    // --- NEW: CALCULATION FOR TOP CARDS START ---
+    let countSchedule = 0;
+    let countAlmost = 0;
+    let countOverdue = 0;
+
+    window.onload = async () => {
+      try {
+        console.log('Dashboard: Starting data fetch...');
+        const resp = await fetch('/api/dashboard');
+        const data = await resp.json();
+
+        console.log('Dashboard: Fetched data:', data);
+        console.log('Dashboard: jobs count:', data?.jobs?.length);
+        console.log('Dashboard: jobListing count:', data?.jobListing?.length);
+        console.log('Dashboard: batchListing count:', data?.batchListing?.length);
+
+        generateMonthOptions();
+        // Use 'jobs' which has the processed batch data with steps
+        MASTER_DATA = data && data.jobs ? data.jobs : [];
+        // Also keep RAW_CAPACITY for backward compatibility
+        RAW_CAPACITY = data && data.rawCapacity ? data.rawCapacity : [];
+
+        console.log('Dashboard: MASTER_DATA:', MASTER_DATA);
+        console.log('Dashboard: RAW_CAPACITY:', RAW_CAPACITY);
+
+        renderDashboard();
+
+        // --- RENDER SPLIT PROCESS BOARD ---
+        const statsContainer = document.getElementById('processStatsContainer');
+        const processList = ["Sheeting","Printing","Lamination","Efluting","Die-cut","Convert","Baseboard", "Hotstamping","Packing","Double-Side-Tape", "Emboss", "Blind Emboss", "Gluing", "Side Glue", "2 Point Glue", "Attach Handle", "Peeling", "Punch Hole", "Slitting LF", "FlexoSlitting", "Spot UV", "Texture", "Trimming", "Varnish", "Waterbase","Delivery"];
+
+        const statsMap = {};
+        if (data.averages) {
+          data.averages.forEach(item => { statsMap[item.name] = item; });
+        }
+
+        const processData = processList.map(name => ({
+          name: name,
+          time: statsMap[name] ? statsMap[name].avgTime : 0,
+          activeCount: statsMap[name] ? statsMap[name].activeCount : 0
+        }));
+
+        // Sort by workload (active jobs) first, then by duration
+        processData.sort((a, b) => b.activeCount - a.activeCount || b.time - a.time);
+
+        statsContainer.innerHTML = processData.map(proc => {
+          const isZeroTime = proc.time === 0;
+          const hasActiveJobs = proc.activeCount > 0;
+          const borderColor = hasActiveJobs ? 'var(--success)' : (isZeroTime ? '#cbd5e1' : 'var(--primary)');
+          
+          return `
+            <div class="process-item" style="border-left: 5px solid ${borderColor}; background: #fff; display: flex; padding: 10px; align-items: center; gap: 8px;">
+              <div style="flex: 1; border-right: 1px dashed #e2e8f0; padding-right: 5px; overflow: hidden;">
+                <div class="process-name" style="font-size: 0.7rem; color: #64748b; margin-bottom: 2px;">${proc.name}</div>
+                <div style="font-size: 1.1rem; font-weight: 800; color: ${isZeroTime ? '#cbd5e1' : '#1a73e8'};">
+                  ${proc.time}<span style="font-size: 0.6rem; font-weight: 600; margin-left: 2px;">DAYS</span>
+                </div>
+              </div>
+              <div style="text-align: center; min-width: 75px;">
+                <div style="font-size: 0.6rem; color: ${hasActiveJobs ? 'var(--success)' : '#94a3b8'}; font-weight: 800; white-space: nowrap;">
+                  ${hasActiveJobs ? '● IN PROGRESS' : 'IDLE'}
+                </div>
+                <div style="font-size: 1.3rem; font-weight: 900; color: ${hasActiveJobs ? '#1e293b' : '#e2e8f0'}; line-height: 1;">
+                  ${proc.activeCount}
+                </div>
+                <div style="font-size: 0.55rem; color: #94a3b8; font-weight: 600;">JOBS</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        // Optional summaries for the Dashboard UI
+        const stats = data.stats || {};
+        const jobsElem = document.getElementById('totalJobs');
+        if (jobsElem) jobsElem.innerText = stats.totalJobs ?? MASTER_DATA.length;
+        const batchesElem = document.getElementById('totalBatches');
+        if (batchesElem) batchesElem.innerText = stats.totalBatches ?? RAW_CAPACITY.length;
+        const qtyElem = document.getElementById('totalQuantity');
+        if (qtyElem) qtyElem.innerText = stats.totalQuantity ?? 0;
+
+        calculateCapacity();
+      } catch (err) {
+        console.error('Dashboard load failed', err);
+      }
+    };
+
+    
+
+    function filterTable() {
+      const searchTerm = document.getElementById('searchInput').value.toUpperCase();
+      const salesCodeType = document.getElementById('salesCodeFilter').value; 
+      const priorityType = document.getElementById('priorityFilter').value;
+      const statusType = document.getElementById('statusFilter').value;
+      
+      // 1. Group the MASTER_DATA (keeping your exact logic)
+      const psnGroups = {};
+      MASTER_DATA.forEach(job => {
+        if (!psnGroups[job.psn]) {
+          psnGroups[job.psn] = {
+            psn: job.psn,
+            client: job.jobName || job.client || "-",
+            salesCode: job.salesCode || job.code || "-",
+            pi: job.piNumber || job.pi || "-",
+            qty: 0,
+            orderDate: job.orderDate || job.date || "-",
+            deliveryDate: job.deliveryDate || "-", 
+            priority: job.priority || "Normal",
+            status: job.status || "ON SCHEDULE",
+            batches: []
+          };
+        }
+        psnGroups[job.psn].batches.push(job);
+        psnGroups[job.psn].qty += Number(job.qty);
+        console.log(psnGroups);
+      });
+
+      let psnList = Object.values(psnGroups);
+
+      // 2. APPLY FILTERS
+      const filteredList = psnList.filter(item => {
+        const matchesSearch = item.psn.toUpperCase().includes(searchTerm) || 
+                              item.client.toUpperCase().includes(searchTerm);
+        
+        const matchesSalesCode = salesCodeType === "ALL" || item.salesCode === salesCodeType; 
+        const matchesPriority = priorityType === "ALL" || item.priority === priorityType;
+        const matchesStatus = statusType === "ALL" || item.status === statusType;
+        
+        return matchesSearch && matchesSalesCode && matchesPriority && matchesStatus;
+      });
+
+
+      filteredList.forEach(item => {
+        if (item.status === "ON SCHEDULE") countSchedule++;
+        else if (item.status === "ALMOST DUE") countAlmost++;
+        else if (item.status === "OVERDUE") countOverdue++;
+      });
+      
+      // Update the HTML values (using padStart to keep the 00 format)
+      document.getElementById('stat-schedule').innerText = String(countSchedule).padStart(2, '0');
+      document.getElementById('stat-almost').innerText = String(countAlmost).padStart(2, '0');
+      document.getElementById('stat-overdue').innerText = String(countOverdue).padStart(2, '0');
+      // --- NEW: CALCULATION FOR TOP CARDS END ---
+
+      // 3. APPLY SMART SORT (Keeping your existing logic)
+      filteredList.sort((a, b) => {
+        const getScore = (item) => {
+          let score = 0;
+          if (item.priority === "Urgent") score += 100;
+          if (item.priority === "Cut Queue") score += 50;
+          if (item.status === "OVERDUE") score += 200;
+          if (item.status === "ALMOST DUE") score += 10;
+          return score;
+        };
+        return getScore(b) - getScore(a);
+      });
+
+      // 4. DRAW THE TABLE
+      drawTable(filteredList);
+    }
+
+    // Separate the drawing logic so it can be called by the filter
+    function drawTable(dataList) {
+      const tbody = document.getElementById('jobListBody');
+      tbody.innerHTML = '';
+      
+      if (dataList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding: 40px;">No matching jobs found.</td></tr>';
+        return;
+      }
+
+      dataList.forEach((group, index) => {
+        const avgProgress = Math.round((group.batches.reduce((sum, b) => sum + (b.progress || 0), 0) / group.batches.length) * 100);
+        const statusClass = group.status === 'OVERDUE' ? 'tag-overdue' : (group.status === 'ALMOST DUE' ? 'tag-almost' : 'tag-schedule');
+        const priorityClass = group.priority === 'Urgent' ? 'tag-overdue' : (group.priority === 'Cut Queue' ? 'tag-almost' : 'tag-schedule');
+        
+        const row = document.createElement('tr');
+        row.className = 'clickable-row';
+        row.onclick = () => toggleBatch(index);
+        row.innerHTML = `
+          <td><strong>${group.psn}</strong></td>
+          <td>${group.client}</td>
+          <td>${group.salesCode}</td>
+          <td>${group.pi}</td>
+          <td>${group.qty.toLocaleString()}</td>
+          <td>${formatDateDMY(group.orderDate)}</td>
+          <td>${formatDateDMY(group.deliveryDate)}</td>
+          <td>
+            ${avgProgress}%
+            <div class="progress-bar"><div class="progress-fill" style="width: ${avgProgress}%;"></div></div>
+          </td>
+          <td><span class="tag ${priorityClass}">${group.priority}</span></td>
+          <td><span class="tag ${statusClass}">${group.status}</span></td>
+        `;
+
+        // Re-use your detailRow logic here...
+        const detailRow = document.createElement('tr');
+        detailRow.id = 'batch-row-' + index;
+        detailRow.className = 'batch-detail-row';
+        
+        // ... (Keep your existing batchRowsHtml generation here) ...
+        let batchRowsHtml = group.batches.map(b => {
+          const currentStep = b.steps ? b.steps.find((s) => !s.isDone) : null;
+          const isDelayed = currentStep && String(currentStep.status).toLowerCase().includes("delayed");
+          const isOverdue = currentStep && currentStep.rawExpDate && currentStep.rawExpDate < new Date().getTime();
+          const showAsDelayed = isDelayed || isOverdue;
+          const statusText = currentStep ? currentStep.name + (showAsDelayed ? ": Delayed" : ": Running") : ("Completed");
+          const pillClass = !currentStep ? "pill-completed" : (showAsDelayed ? "pill-delayed" : "pill-running");
+          return `<tr><td>
+      <a href="${getUpdateUrl(b.batchId)}" target="_top" style="color: var(--primary); font-weight: bold; text-decoration: none;">
+        <i class="fas fa-external-link-alt" style="font-size: 0.7rem;"></i> ${b.batchId}
+      </a>
+    </td><td>${Number(b.qty).toLocaleString()}</td><td>${(b.progress * 100).toFixed(0)}%</td><td><span class="pill ${pillClass}">${statusText}</span></td></tr>`;
+        }).join('');
+
+        detailRow.innerHTML = `<td colspan="10" style="padding: 0;"><div style="padding:20px; background:#fdfdfd; border-bottom:2px solid var(--primary);"><table class="batch-inner-table"><thead><tr><th>Batch ID</th><th>Qty</th><th>Progress</th><th>Status</th></tr></thead><tbody>${batchRowsHtml}</tbody></table></div></td>`;
+
+        tbody.appendChild(row);
+        tbody.appendChild(detailRow);
+      });
+    }
+
+    function getUpdateUrl(batchId) {
+      // Node.js server: direct link to BatchDetail
+      return `/BatchDetail.html?id=${encodeURIComponent(batchId)}`;
+    }
+    // Update renderDashboard to simply call the filter
+    function formatDateDMY(rawDate) {
+      if (!rawDate || rawDate === '-') return '-';
+
+      // Normalize input to Date object:
+      let date;
+      if (typeof rawDate === 'string') {
+        // force as DD/MM/YYYY or MM/DD/YYYY fallback
+        const parts = rawDate.trim().split(/[-\/]/);
+        if (parts.length === 3) {
+          const [a, b, c] = parts;
+          // guess if first part is year or month/day
+          if (a.length === 4) {
+            date = new Date(Number(a), Number(b) - 1, Number(c));
+          } else {
+            // dd/mm/yyyy -> english locale by manual conversion
+            const day = Number(a);
+            const month = Number(b);
+            const year = c.length === 2 ? Number('20' + c) : Number(c);
+            if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+              date = new Date(year, month - 1, day);
+            }
+          }
+        }
+      }
+      if (!date || isNaN(date.getTime())) {
+        date = new Date(rawDate);
+      }
+      if (!date || isNaN(date.getTime())) return '-';
+
+      const dd = String(date.getDate()).padStart(2, '0');
+      const mm = String(date.getMonth() + 1).padStart(2, '0');
+      const yyyy = String(date.getFullYear());
+      return `${dd}/${mm}/${yyyy}`;
+    }
+
+    function renderDashboard() {
+      filterTable(); 
+    }
+
+    function toggleBatch(id) {
+      const row = document.getElementById('batch-row-' + id);
+      const isVisible = row.style.display === 'table-row';
+      document.querySelectorAll('.batch-detail-row').forEach(r => r.style.display = 'none');
+      row.style.display = isVisible ? 'none' : 'table-row';
+    }
+
+     document.getElementById('statusFilter').addEventListener('change', function() {
+      const selectedValue = this.value;
+      const table = document.getElementById('jobTable');
+      const tr = table.getElementsByTagName('tr');
+
+      // Loop through all table rows, skip the header (index 0)
+      for (let i = 1; i < tr.length; i++) {
+        // Priority column is index 7
+        const td = tr[i].getElementsByTagName('td')[9];
+        
+        if (td) {
+          const txtValue = td.textContent || td.innerText;
+          
+          // Show row if it matches selection OR if "ALL" is selected
+          if (selectedValue === "ALL" || txtValue.trim() === selectedValue) {
+            tr[i].style.display = "";
+          } else {
+            tr[i].style.display = "none";
+          }
+        }
+      }
+    });
+
+    // Function to move the week back or forth
+    function changeWeek(direction) {
+      // Move the date by 7 days
+      CURRENT_VIEW_DATE.setDate(CURRENT_VIEW_DATE.getDate() + (direction * 7));
+      calculateCapacity(); // Refresh the UI
+    }
+
+    function calculateCapacity() {
+      const selectedMonthYear = document.getElementById('monthPicker').value;
+      const container = document.getElementById('machineCapacityContainer');
+      const weekLabel = document.getElementById('currentWeekRange');
+      
+      const machines = {
+        "IJIMA": { color: "#1a73e8", bg: "#e8f0fe" },
+        "HANDSWITCH": { color: "#b06000", bg: "#fef7e0" },
+        "OUTSOURCED": { color: "#7b1fa2", bg: "#f3e5f5" }
+      };
+
+      let totals = {
+        "IJIMA": { month: 0, week: 0 },
+        "HANDSWITCH": { month: 0, week: 0 },
+        "OUTSOURCED": { month: 0, week: 0 }
+      };
+
+      // --- CALCULATE DYNAMIC WEEK RANGE BASED ON CURRENT_VIEW_DATE ---
+      const tempDate = new Date(CURRENT_VIEW_DATE);
+      const day = tempDate.getDay();
+      const diff = tempDate.getDate() - day + (day == 0 ? -6 : 1); // Monday
+      
+      const monday = new Date(tempDate.setDate(diff));
+      monday.setHours(0,0,0,0);
+      
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      sunday.setHours(23,59,59,999);
+
+      const fmt = (d) => d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+      weekLabel.innerHTML = `<i class="far fa-calendar-alt"></i> ${fmt(monday)} - ${fmt(sunday)}`;
+
+      RAW_CAPACITY.forEach(item => {
+        const parts = item.date.split("/");
+        // Parse D/M/YYYY format
+        let day = parseInt(parts[0]);
+        let month = parseInt(parts[1]);
+        let year = parseInt(parts[2]);
+        
+        // Create date object
+        const taskDate = new Date(year, month - 1, day);
+        // Format for month year comparison: MM/YY
+        const monthStr = String(month).padStart(2, '0');
+        const yearStr = String(year).substring(2);
+        const taskMonthYear = monthStr + "/" + yearStr;
+
+        // Month filter stays linked to the Dropdown
+        if (taskMonthYear === selectedMonthYear) {
+          if (totals[item.machine]) totals[item.machine].month += item.qty;
+        }
+
+        // Week filter now follows the Back/Next buttons
+        if (taskDate >= monday && taskDate <= sunday) {
+          if (totals[item.machine]) totals[item.machine].week += item.qty;
+        }
+      });
+
+      // ... (Keep the rest of your existing render code inside calculateCapacity) ...
+      container.innerHTML = Object.keys(machines).map(mName => {
+        const m = machines[mName];
+        const data = totals[mName];
+        return `
+          <div class="cap-card" onclick="showMachineChart('${mName}')" style="border-left: 6px solid ${m.color};">
+            <div class="card-top">
+              <span class="machine-badge" style="background:${m.bg}; color:${m.color}">${mName}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+              <div>
+                <div style="font-size: 10px; color: #94a3b8; font-weight: 700;">WEEK VIEW</div>
+                <div style="font-size: 22px; font-weight: 800; color: ${m.color};">
+                  ${data.week.toLocaleString()} <small style="font-size: 11px; font-weight: 500;">PCS</small>
+                </div>
+              </div>
+              <div style="text-align: right; border-left: 1px solid #eee; padding-left: 15px;">
+                <div style="font-size: 10px; color: #94a3b8; font-weight: 700;">MONTH (${selectedMonthYear})</div>
+                <div style="font-size: 18px; font-weight: 800; color: #1e293b;">
+                  ${data.month.toLocaleString()}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // --- UPDATED FIX START ---
+        const chartSection = document.getElementById('chartSection');
+        // Check if the chart is visible and a machine has been selected before
+        if (chartSection && chartSection.style.display === 'block' && typeof activeMachine !== 'undefined' && activeMachine) {
+          updateChartData(activeMachine); // This will refresh the chart with the new month/year
+        }
+
+    }
+
+    function generateMonthOptions() {
+      const picker = document.getElementById('monthPicker');
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+
+      // Generate months: 3 months back to 8 months ahead
+      for (let i = -3; i <= 8; i++) {
+        const d = new Date(currentYear, currentMonth + i, 1);
+        const monthVal = ("0" + (d.getMonth() + 1)).slice(-2); // "03"
+        const yearShort = String(d.getFullYear()).substring(2); // "26"
+        const value = `${monthVal}/${yearShort}`; // "03/26"
+        
+        const monthName = d.toLocaleString('default', { month: 'short' }); // "Mar"
+        const yearFull = d.getFullYear(); // 2026
+
+        const option = document.createElement('option');
+        option.value = value;
+        option.text = `${monthName} ${yearFull}`;
+        
+        // Auto-select the current month
+        if (i === 0) option.selected = true;
+        
+        picker.appendChild(option);
+      }
+    }
+
+   
+
+    function setChartViewMode(mode) {
+      activeViewMode = mode;
+      if (activeMachine) {
+        updateChartData(activeMachine);
+      }
+    }
+
+    function showMachineChart(mName) {
+      activeMachine = mName;
+      activeViewMode = 'MONTH'; // Reset to Month view whenever a new machine is clicked
+      document.getElementById('chartSection').style.display = 'block';
+      updateChartData(mName);
+      document.getElementById('chartSection').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function updateChartData(mName) {
+      const ctx = document.getElementById('capacityChart').getContext('2d');
+      const colors = { 
+        "IJIMA": "#1a73e8", 
+        "HANDSWITCH": "#f9ab00", 
+        "OUTSOURCED": "#7b1fa2" 
+      };
+      
+      const selectedMonthYear = document.getElementById('monthPicker').value; // "MM/YY"
+      const [selMM, selYY] = selectedMonthYear.split("/");
+      
+      // Update Toggle Button UI
+      const btnMonth = document.getElementById('btnViewMonth');
+      const btnWeek = document.getElementById('btnViewWeek');
+      if(btnMonth) btnMonth.style.background = activeViewMode === 'MONTH' ? 'white' : 'transparent';
+      if(btnWeek) btnWeek.style.background = activeViewMode === 'WEEK' ? 'white' : 'transparent';
+
+      let labels = [];
+      let counts = [];
+
+      if (activeViewMode === 'MONTH') {
+        // --- YEARLY VIEW (12 MONTHS) ---
+        const monthsShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        labels = monthsShort;
+        counts = new Array(12).fill(0);
+
+        RAW_CAPACITY.forEach(item => {
+          const parts = item.date.split("/");
+          if (parts.length < 3) return;
+          const d = parseInt(parts[0]);
+          const m = parseInt(parts[1]);
+          const y = parseInt(parts[2]);
+          const yy = String(y).substring(2);
+          if (item.machine === mName && yy === selYY) {
+            counts[m - 1] += item.qty;
+          }
+        });
+        document.getElementById('chartSubtitle').innerText = `Annual Performance for 20${selYY}`;
+
+      } else {
+        // --- MONTHLY VIEW (BY WEEKS) ---
+        const year = 2000 + parseInt(selYY);
+        const month = parseInt(selMM) - 1;
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        
+        let weekTotals = [0, 0, 0, 0, 0, 0]; 
+        
+        RAW_CAPACITY.forEach(item => {
+          const parts = item.date.split("/");
+          if (parts.length < 3) return;
+          const d = parseInt(parts[0]);
+          const m = parseInt(parts[1]);
+          const y = parseInt(parts[2]);
+          const yy = String(y).substring(2);
+          if (item.machine === mName && m === parseInt(selMM) && yy === selYY) {
+            const dateObj = new Date(year, month, d);
+            const dayOfMonth = dateObj.getDate();
+            const weekIndex = Math.ceil((dayOfMonth + firstDay.getDay()) / 7) - 1;
+            weekTotals[weekIndex] += item.qty;
+          }
+        });
+
+        const numWeeks = Math.ceil((lastDay.getDate() + firstDay.getDay()) / 7);
+        for(let i=1; i<=numWeeks; i++) labels.push(`Week ${i}`);
+        counts = weekTotals.slice(0, numWeeks);
+        
+        const monthName = document.getElementById('monthPicker').options[document.getElementById('monthPicker').selectedIndex].text;
+        document.getElementById('chartSubtitle').innerText = `Weekly Breakdown for ${monthName}`;
+      }
+
+      // --- CHART INITIALIZATION ---
+      if (capacityChart) capacityChart.destroy();
+
+      capacityChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Total Qty (PCS)',
+            data: counts,
+            backgroundColor: colors[mName] + 'CC',
+            borderColor: colors[mName],
+            borderWidth: 1,
+            borderRadius: 8 // Slightly rounder bars look more modern
+          }]
+        },
+        // IMPORTANT: Register the plugin here
+        plugins: [ChartDataLabels], 
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          layout: {
+            padding: {
+              top: 30 // Extra space at the top so labels don't hit the ceiling
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            // --- DATA LABELS CONFIGURATION ---
+            datalabels: {
+              anchor: 'end',      // Position at the end of the bar
+              align: 'top',       // Place text above the anchor
+              offset: 4,          // 4px space between bar and text
+              color: '#1e293b',   // Dark slate color
+              font: {
+                weight: '900',
+                size: 12
+              },
+              formatter: (value) => {
+                return value > 0 ? value.toLocaleString() : ''; // Hide '0' for cleaner look
+              }
+            },
+            tooltip: {
+              enabled: true,
+              callbacks: {
+                label: (ctx) => `Total: ${ctx.raw.toLocaleString()} PCS`
+              }
+            }
+          },
+          scales: {
+            y: { 
+              beginAtZero: true,
+              grace: '15%', // Automatically adds 15% extra height to the Y-axis
+              ticks: { 
+                callback: (val) => val.toLocaleString(),
+                color: '#94a3b8'
+              },
+              grid: { color: '#f1f5f9' }
+            },
+            x: { 
+              grid: { display: false },
+              ticks: { color: '#64748b', font: { weight: 'bold' } }
+            }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
