@@ -1,6 +1,7 @@
 ﻿const express = require('express');
 const path = require('path');
 const axios = require('axios');
+require('dotenv').config();
 const { ConfidentialClientApplication } = require('@azure/msal-node');
 
 const app = express();
@@ -52,7 +53,7 @@ const formatDate = (value) => {
 const msalConfig = {
   auth: {
     clientId: process.env.CLIENT_ID,
-    authority: process.env.TENANT_ID,
+    authority: `https://login.microsoftonline.com/${process.env.TENANT_ID}`,
     clientSecret: process.env.CLIENT_SECRET,
   }
 };
