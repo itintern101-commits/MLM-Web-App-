@@ -121,7 +121,7 @@ async function getTableRowsAsObjects(tableName) {
   const result = rows.map((row, idx) => {
     // Handle different response formats from Graph API
     let values = [];
-    
+
     if (row.values) {
       if (Array.isArray(row.values)) {
         // If values is array of arrays, get first element; if array of values, use directly
@@ -132,7 +132,7 @@ async function getTableRowsAsObjects(tableName) {
         console.log(`[getTableRowsAsObjects] ${tableName} row ${idx} split by comma:`, values);
       }
     }
-    
+
     console.log(`[getTableRowsAsObjects] ${tableName} row ${idx} final values:`, values);
 
     const item = {};
@@ -178,13 +178,13 @@ async function getTableColumnCount(tableName) {
 async function addTableRow(tableName, values) {
   const ctx = await getSharePointFileContext();
   console.log(`[addTableRow] Adding row to ${tableName}:`, values.length, 'columns');
-  
+
   const resp = await axios.post(
     `https://graph.microsoft.com/v1.0/drives/${ctx.driveId}/items/${ctx.fileId}/workbook/tables/${tableName}/rows/add`,
     { values: [values] },
     { headers: ctx.headers }
   );
-  
+
   console.log(`[addTableRow] Successfully added to ${tableName}`);
   return resp.data;
 }
@@ -194,7 +194,7 @@ async function generateDashboardData() {
 
   // Get file context once
   const fileContext = await getSharePointFileContext();
-  
+
   // Fetch all rows for BatchListing with numeric index preservation
   const batchRowRes = await axios.get(
     `https://graph.microsoft.com/v1.0/drives/${fileContext.driveId}/items/${fileContext.fileId}/workbook/tables('BatchListing')/rows`,
@@ -209,7 +209,7 @@ async function generateDashboardData() {
 
   // Convert to objects for JobListing
   const jobListing = await getTableRowsAsObjects('JobListing');
-  
+
   console.log('[generateDashboardData] JobListing:', jobListing);
 
   // Create jobInfoMap from JobListing for quick lookup
@@ -234,7 +234,7 @@ async function generateDashboardData() {
 
   // Process BatchListing to create batches with steps structure
   const batches = [];
-  
+
   // Use raw rows with numeric indices for step parsing (if available)
   batchRowsRaw.forEach((rawRow, rowIdx) => {
     // Handle different response formats for raw rows
@@ -248,7 +248,7 @@ async function generateDashboardData() {
         console.log(`[generateDashboardData] Batch row ${rowIdx} split by comma:`, values);
       }
     }
-    
+
     // Extract basic info from numeric indices (matching app.js)
     const psn = String(values[0] || '').trim();
     if (!psn || psn.toLowerCase().includes('done')) {
@@ -272,8 +272,8 @@ async function generateDashboardData() {
 
       if (pName !== '' && pName !== '--') {
         // Check isDone at base + 8
-        let isDone = values[base + 8] === true || 
-                     String(values[base + 8]).toUpperCase() === 'TRUE';
+        let isDone = values[base + 8] === true ||
+          String(values[base + 8]).toUpperCase() === 'TRUE';
 
         if (isDone) ticksFound++;
         if (!activeStepStatus && !isDone) {
@@ -316,10 +316,10 @@ async function generateDashboardData() {
     };
 
     batches.push({
-      row: rowIdx + 1,
+      row: rowIdx,
       psn: psn,
       batchId: String(values[1] || ''),
-      batchDate: values[2] 
+      batchDate: values[2]
         ? new Date(values[2]).toLocaleDateString('en-GB', { year: '2-digit', month: '2-digit', day: '2-digit' })
         : '-',
       jobName: String(values[3] || ''),
@@ -341,7 +341,7 @@ async function generateDashboardData() {
   console.log('[generateDashboardData] Processed batches:', batches);
 
   // Calculate process averages for workload display
-  const processList = ["Sheeting","Printing","Lamination","Efluting","Die-cut","Convert","Baseboard", "Hotstamping","Packing","Double-Side-Tape", "Emboss", "Blind Emboss", "Gluing", "Side Glue", "2 Point Glue", "Attach Handle", "Peeling", "Punch Hole", "Slitting LF", "FlexoSlitting", "Spot UV", "Texture", "Trimming", "Varnish", "Waterbase","Delivery"];
+  const processList = ["Sheeting", "Printing", "Lamination", "Efluting", "Die-cut", "Convert", "Baseboard", "Hotstamping", "Packing", "Double-Side-Tape", "Emboss", "Blind Emboss", "Gluing", "Side Glue", "2 Point Glue", "Attach Handle", "Peeling", "Punch Hole", "Slitting LF", "FlexoSlitting", "Spot UV", "Texture", "Trimming", "Varnish", "Waterbase", "Delivery"];
   const processStats = {};
 
   // Initialize stats for each process
@@ -354,16 +354,25 @@ async function generateDashboardData() {
     };
   });
 
-  // Calculate stats from batch steps - ONLY current active step per batch
   batches.forEach(batch => {
     if (batch.steps && Array.isArray(batch.steps)) {
-      const currentStep = batch.steps.find((step) => !step.isDone);
+
+      // ✅ 1. Handle DONE steps
+      batch.steps.forEach(step => {
+        if (step.isDone && processStats[step.name]) {
+          const durationDays = Math.max(1, Math.ceil(Number(step.duration) || 0));
+          processStats[step.name].totalTime += durationDays;
+          processStats[step.name].count += 1;
+        }
+      });
+
+      // ✅ 2. Handle ONLY current active step
+      const currentStep = batch.steps.find(step => !step.isDone);
+
       if (currentStep && processStats[currentStep.name]) {
-        const durationDays = Math.max(1, Math.ceil(Number(currentStep.duration) || 0));
-        processStats[currentStep.name].totalTime += durationDays;
-        processStats[currentStep.name].count += 1;
         processStats[currentStep.name].activeCount += 1;
       }
+
     }
   });
 
@@ -376,7 +385,7 @@ async function generateDashboardData() {
 
   // Generate rawCapacity data from COMPLETED batches (isDone = true)
   const machineCapacityMap = {};
-  
+
   batches.forEach(batch => {
     if (batch.steps && Array.isArray(batch.steps)) {
       batch.steps.forEach(step => {
@@ -385,13 +394,13 @@ async function generateDashboardData() {
           const machine = step.detail || 'GENERAL';
           const dateKey = step.endDate; // Format: D/M/YYYY
           const key = `${dateKey}|${machine}`;
-          
+
           if (!machineCapacityMap[key]) {
             machineCapacityMap[key] = {
               date: dateKey,
-              machine: machine === 'Ijima' || machine.toLowerCase().includes('ijima') ? 'IJIMA' : 
-                       machine === 'Hand' || machine.toLowerCase().includes('hand') ? 'HANDSWITCH' : 
-                       machine === 'Out' || machine.toLowerCase().includes('out') ? 'OUTSOURCED' : 'GENERAL',
+              machine: machine === 'Ijima' || machine.toLowerCase().includes('ijima') ? 'IJIMA' :
+                machine === 'Hand' || machine.toLowerCase().includes('hand') ? 'HANDSWITCH' :
+                  machine === 'Out' || machine.toLowerCase().includes('out') ? 'OUTSOURCED' : 'GENERAL',
               qty: 0
             };
           }
@@ -400,7 +409,7 @@ async function generateDashboardData() {
       });
     }
   });
-  
+
   const rawCapacity = Object.values(machineCapacityMap);
 
   const totalJobs = jobListing.length;
@@ -664,7 +673,7 @@ app.post('/api/submitData', async (req, res) => {
     console.error('🔥 ERROR OCCURRED');
     console.error('🔥 Error Type:', error.constructor.name);
     console.error('🔥 Error Message:', error.message);
-    
+
     const errorPayload = {
       errorName: error.constructor.name,
       message: error.message,
