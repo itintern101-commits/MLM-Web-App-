@@ -329,9 +329,12 @@
   <body>
     <div id="sidebar-container"></div>
     <script>
-      fetch('/Sidebar.html').then(r => r.text()).then(html => {
-        document.getElementById('sidebar-container').innerHTML = html;
-      }).catch(console.error);
+      fetch("/Sidebar.html")
+        .then((r) => r.text())
+        .then((html) => {
+          document.getElementById("sidebar-container").innerHTML = html;
+        })
+        .catch(console.error);
     </script>
 
     <div id="loader" class="loading-overlay">
@@ -582,42 +585,42 @@
     <script>
       let MASTER_DATA = [];
       let currentEditingRow = null;
-      const autoOpenId = new URLSearchParams(window.location.search).get('id');
+      const autoOpenId = new URLSearchParams(window.location.search).get("id");
 
       let currentSort = {
         column: null,
-        direction: 'asc',
+        direction: "asc",
       };
 
       window.onload = fetchData;
 
       async function fetchData() {
-        document.getElementById('loader').style.display = 'flex';
+        document.getElementById("loader").style.display = "flex";
         try {
-          console.log('BatchDetail: Starting data fetch...');
-          const response = await fetch('/api/dashboard');
+          console.log("BatchDetail: Starting data fetch...");
+          const response = await fetch("/api/dashboard");
           const data = await response.json();
 
-          console.log('BatchDetail: Fetched data:', data);
-          console.log('BatchDetail: jobs:', data?.jobs);
+          console.log("BatchDetail: Fetched data:", data);
+          console.log("BatchDetail: jobs:", data?.jobs);
 
           // Use 'jobs' which has processed batch data with steps
           MASTER_DATA = data && data.jobs ? data.jobs : [];
-          console.log('BatchDetail: MASTER_DATA set to:', MASTER_DATA);
+          console.log("BatchDetail: MASTER_DATA set to:", MASTER_DATA);
 
           renderStats(data);
           renderTable();
 
-          document.getElementById('loader').style.display = 'none';
-          console.log('Data fetched successfully:', MASTER_DATA);
+          document.getElementById("loader").style.display = "none";
+          console.log("Data fetched successfully:", MASTER_DATA);
 
           if (autoOpenId) {
-            console.log('BatchDetail: Auto-opening batch ID:', autoOpenId);
+            console.log("BatchDetail: Auto-opening batch ID:", autoOpenId);
             openUpdatePopup(autoOpenId);
           }
         } catch (error) {
-          console.error('Failed to fetch dashboard data:', error);
-          document.getElementById('loader').style.display = 'none';
+          console.error("Failed to fetch dashboard data:", error);
+          document.getElementById("loader").style.display = "none";
         }
       }
 
@@ -657,14 +660,18 @@
         today.setHours(0, 0, 0, 0);
         const todayTime = today.getTime();
 
-        console.log('renderStats: Processing', total, 'items');
+        console.log("renderStats: Processing", total, "items");
 
         MASTER_DATA.forEach((job, idx) => {
-          console.log('renderStats: Processing job', idx, ':', job);
-          
+          console.log("renderStats: Processing job", idx, ":", job);
+
           // Defensive check: only process if steps exists
           if (!job.steps || !Array.isArray(job.steps)) {
-            console.log('renderStats: Job', idx, 'has no steps array, skipping');
+            console.log(
+              "renderStats: Job",
+              idx,
+              "has no steps array, skipping",
+            );
             return;
           }
 
@@ -689,9 +696,9 @@
           }
         });
 
-        console.log('renderStats: processCounts:', processCounts);
-        console.log('renderStats: delayBreakdown:', delayBreakdown);
-        console.log('renderStats: totalDelayed:', totalDelayed);
+        console.log("renderStats: processCounts:", processCounts);
+        console.log("renderStats: delayBreakdown:", delayBreakdown);
+        console.log("renderStats: totalDelayed:", totalDelayed);
 
         const container = document.getElementById("statsBar");
 
@@ -833,7 +840,11 @@
         filteredData.forEach((job) => {
           // Defensive check for steps
           if (!job.steps || !Array.isArray(job.steps)) {
-            console.warn('renderTable: Job', job.batchId, 'has no valid steps array');
+            console.warn(
+              "renderTable: Job",
+              job.batchId,
+              "has no valid steps array",
+            );
             return;
           }
 
@@ -862,7 +873,7 @@
               </div>
             </td>
             <td><span class="pill ${pillClass}">${pillText}</span></td>
-            <td><button class="update-btn" onclick="openUpdatePopup('${job.batchId}')">Update Status</button></td>
+            <td><button class="update-btn" onclick="openUpdatePopup(${job.row})">Update Status</button></td>
           `;
           tbody.appendChild(tr);
         });
@@ -872,8 +883,12 @@
       function getStatusText(job, todayTime) {
         // Defensive check
         if (!job.steps || !Array.isArray(job.steps)) {
-          console.warn('getStatusText: Job', job.batchId, 'has no valid steps array');
-          return 'Unknown Status';
+          console.warn(
+            "getStatusText: Job",
+            job.batchId,
+            "has no valid steps array",
+          );
+          return "Unknown Status";
         }
 
         const currentStep = job.steps.find((s) => !s.isDone);
@@ -925,10 +940,26 @@
         });
       }
 
-      function openUpdatePopup(batchId) {
-        console.log(batchId);
-        const job = MASTER_DATA.find((j) => j.batchId === batchId);
-        if (!job) return;
+      function openUpdatePopup(batchIdOrRow) {
+        console.log("openUpdatePopup called with:", batchIdOrRow);
+        const numericRow = Number(batchIdOrRow);
+        let job;
+        job = MASTER_DATA.find((j) => String(j.row) === String(batchIdOrRow));
+        if (!isNaN(numericRow) && numericRow > 0) {
+          job = MASTER_DATA.find((j) => Number(j.row) === numericRow);
+        }
+
+        if (!job) {
+          job = MASTER_DATA.find(
+            (j) => String(j.batchId) === String(batchIdOrRow),
+          );
+        }
+
+        if (!job) {
+          console.warn("openUpdatePopup: job not found for", batchIdOrRow);
+          return;
+        }
+
         currentEditingRow = job.row;
 
         const historyContainer = document.getElementById("processHistoryArea");
@@ -1248,7 +1279,7 @@
         }
         if (isDeliveryDone) {
           showDatePickModal((selectedDate) => {
-            console.log("Modal get date:"+selectedDate)
+            console.log("Modal get date:" + selectedDate);
             executeSave(job.row, updates, selectedDate, splitRemark);
           });
         } else {
@@ -1301,22 +1332,22 @@
         // UI Feedback & Execution
         setModalLoading(true);
         try {
-          const response = await fetch('/api/updateProcessQtysOnly', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+          const response = await fetch("/api/updateProcessQtysOnly", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ row: rowIdx, qtyMapArray }),
           });
           const result = await response.json();
           if (response.ok) {
-            showToast(result.message || 'Qty update saved');
+            showToast(result.message || "Qty update saved");
             await fetchData();
             closeModal();
           } else {
-            showToast(result.error || 'Failed to update qty', 'error');
+            showToast(result.error || "Failed to update qty", "error");
           }
         } catch (error) {
           console.error(error);
-          showToast('Network error while updating qty', 'error');
+          showToast("Network error while updating qty", "error");
         } finally {
           setModalLoading(false);
         }
@@ -1330,7 +1361,7 @@
         const finalDeliveryDate =
           deliveryDate === "KEEP_ORIGINAL" ? null : deliveryDate;
 
-        console.log("executeSave"+finalDeliveryDate)
+        console.log("executeSave" + finalDeliveryDate);
         // 2. UI Feedback (Locking the button)
         saveBtn.disabled = true;
         document.getElementById("btnText").innerText = "Processing...";
@@ -1338,22 +1369,27 @@
 
         // 3. Server Call
         try {
-          const response = await fetch('/api/saveMultiBatchUpdate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ row, updates, newDeliveryDate: finalDeliveryDate, splitRemark }),
+          const response = await fetch("/api/saveMultiBatchUpdate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              row,
+              updates,
+              newDeliveryDate: finalDeliveryDate,
+              splitRemark,
+            }),
           });
           const result = await response.json();
 
           if (response.ok) {
-            showToast(result.message || 'Batch updated successfully!');
+            showToast(result.message || "Batch updated successfully!");
             closeModal();
             await fetchData();
           } else {
-            alert('Error: ' + (result.error || 'Update failed'));
+            alert("Error: " + (result.error || "Update failed"));
           }
         } catch (err) {
-          alert('Error: ' + err);
+          alert("Error: " + err);
         } finally {
           resetSaveButton();
         }
@@ -1394,25 +1430,25 @@
         modalButtons.forEach((btn) => (btn.disabled = true));
 
         try {
-          const response = await fetch('/api/revertProcessStep', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ row, baseCol, remark: reason }),
+          const response = await fetch("/api/revertProcessStep", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ row, baseCol, revertRemark: reason }),
           });
           const result = await response.json();
 
           if (response.ok) {
-            showToast(result.message || 'Sequence reverted successfully.');
-            document.getElementById('loader').style.display = 'flex';
+            showToast(result.message || "Sequence reverted successfully.");
+            document.getElementById("loader").style.display = "flex";
             await fetchData();
-            document.getElementById('loader').style.display = 'none';
+            document.getElementById("loader").style.display = "none";
             openUpdatePopup(row);
           } else {
-            alert('Error: ' + (result.error || 'Revert failed'));
+            alert("Error: " + (result.error || "Revert failed"));
             setModalLoading(false);
           }
         } catch (err) {
-          alert('Error: ' + err);
+          alert("Error: " + err);
           setModalLoading(false);
         }
       }
