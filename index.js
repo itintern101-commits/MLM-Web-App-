@@ -50,6 +50,44 @@ const formatDate = (value) => {
   return '-';
 };
 
+const toExcelDateText = (value) => {
+  if (value === undefined || value === null || value === '' || value === '-') return '';
+
+  let raw = typeof value === 'string' ? value.trim() : value;
+  let date = null;
+
+  // Case 1: Excel serial number (e.g., 46090)
+  if (!isNaN(raw)) {
+    const num = Number(raw);
+    if (num > 0) {
+      date = new Date((num - 25569) * 86400 * 1000);
+    }
+  }
+  // Case 2: ISO yyyy-mm-dd
+  else if (typeof raw === 'string' && raw.includes('-') && raw.split('-')[0].length === 4) {
+    date = new Date(raw);
+  }
+  // Case 3: dd/mm/yyyy or dd-mm-yyyy
+  else if (typeof raw === 'string' && (raw.includes('/') || raw.includes('-'))) {
+    const parts = raw.split(/[-\/]/);
+    if (parts.length === 3) {
+      let [d, m, y] = parts;
+      if (y.length === 2) y = '20' + y;
+      date = new Date(y, m - 1, d);
+    }
+  }
+  // Case 4: fallback
+  else {
+    date = new Date(raw);
+  }
+
+  if (!date || isNaN(date.getTime())) return '';
+
+  // Format to yyyy-MM-dd
+  const pad = (n) => (n < 10 ? '0' + n : n);
+  return `'${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+};
+
 const msalConfig = {
   auth: {
     clientId: process.env.CLIENT_ID,
@@ -549,6 +587,8 @@ app.post('/api/submitData', async (req, res) => {
       delivery: normalizedDeliveryDate
     });
 
+    const formatDeliveryDate = toExcelDateText(data.deliveryDate);
+    console.log(formatDeliveryDate);
     // ✅ STEP 6: Prepare job row
     const jobRow = [
       data.psn,
@@ -561,7 +601,8 @@ app.post('/api/submitData', async (req, res) => {
       normalizedDeliveryDate !== '-' ? normalizedDeliveryDate : '',
       data.item || '',
       data.priority || '',
-      data.status || 'ON SCHEDULE'  // Default status if not provided
+      data.status || 'ON SCHEDULE' , // Default status if not provided
+      formatDeliveryDate || ''
     ];
 
     // match table columns exactly for JobListing
