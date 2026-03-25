@@ -566,7 +566,6 @@ app.post('/api/submitData', async (req, res) => {
     const existing = await getTableRowsAsObjects('JobListing');
     console.log('📊 Existing rows fetched:', existing.length);
 
-    // Debug PSN values
     console.log('🔍 Existing PSNs:', existing.map(j => j.PSN || j.psn));
 
     // ✅ STEP 4: Duplicate check
@@ -582,6 +581,7 @@ app.post('/api/submitData', async (req, res) => {
     console.log('⏳ Formatting dates...');
     const normalizedOrderDate = formatDate(data.orderDate);
     const normalizedDeliveryDate = formatDate(data.deliveryDate);
+
     console.log('📅 Formatted dates:', {
       order: normalizedOrderDate,
       delivery: normalizedDeliveryDate
@@ -589,6 +589,7 @@ app.post('/api/submitData', async (req, res) => {
 
     const formatDeliveryDate = toExcelDateText(data.deliveryDate);
     console.log(formatDeliveryDate);
+
     // ✅ STEP 6: Prepare job row
     const jobRow = [
       data.psn,
@@ -601,15 +602,11 @@ app.post('/api/submitData', async (req, res) => {
       normalizedDeliveryDate !== '-' ? normalizedDeliveryDate : '',
       data.item || '',
       data.priority || '',
-      data.status || 'ON SCHEDULE' , // Default status if not provided
+      data.status || 'ON SCHEDULE',
       formatDeliveryDate || ''
     ];
 
-    // match table columns exactly for JobListing
     jobListingColumnCount = await getTableColumnCount('JobListing');
-    if (jobListingColumnCount <= 0) {
-      throw new Error(`JobListing column count invalid: ${jobListingColumnCount}`);
-    }
 
     if (jobRow.length < jobListingColumnCount) {
       while (jobRow.length < jobListingColumnCount) jobRow.push('');
@@ -629,11 +626,7 @@ app.post('/api/submitData', async (req, res) => {
     const createDate = formatDate(new Date().toISOString());
     console.log('⏳ Inserting batch rows...');
 
-    // Discover the actual column count for BatchListing table
     batchListingColumnCount = await getTableColumnCount('BatchListing');
-    if (batchListingColumnCount <= 0) {
-      throw new Error(`BatchListing column count invalid: ${batchListingColumnCount}`);
-    }
     console.log(`📊 BatchListing table has ${batchListingColumnCount} columns`);
 
     for (let batchIndex = 0; batchIndex < data.batches.length; batchIndex++) {
@@ -643,17 +636,17 @@ app.post('/api/submitData', async (req, res) => {
 
       const batchQty = batch.batchQty || 0;
 
-      // Build basic batch info (columns 0-5)
+      // Basic batch info
       const batchRow = [
         data.psn,
         batchId,
         createDate,
         data.jobName || '',
         batchQty,
-        ''  // Status column
+        ''
       ];
 
-      // Build step data block (columns 6-113: 12 steps × 9 columns)
+      // Steps block (108 columns)
       const stepsData = new Array(108).fill('');
       const BLOCK_SIZE = 9;
 
@@ -674,28 +667,47 @@ app.post('/api/submitData', async (req, res) => {
         });
       }
 
-      // Combine basic + steps = 114 columns
+      // Combine
       let finalRow = batchRow.concat(stepsData);
 
-      // Pad/trim to match exact table column count
+      // ✅ --- ADDED QTY STRING LOGIC (Column DP) ---
+      const START_COL = 6;
+
+      let qtyMap = [];
+
+      for (let j = 0; j < 12; j++) {
+        let colIndex = START_COL + (j * BLOCK_SIZE);
+        qtyMap.push(colIndex + ":" + batchQty);
+      }
+
+      const qtyString = qtyMap.join("|");
+
+      // Ensure index 119 exists
+      if (finalRow.length <= 119) {
+        const neededPadding = 120 - finalRow.length;
+        for (let i = 0; i < neededPadding; i++) {
+          finalRow.push('');
+        }
+      }
+
+      // Set Column DP
+      finalRow[119] = qtyString;
+      // ✅ --- END ADD ---
+
+      // Pad/trim to match table
       if (finalRow.length < batchListingColumnCount) {
-        // Pad with empty strings
         const neededPadding = batchListingColumnCount - finalRow.length;
         for (let p = 0; p < neededPadding; p++) {
           finalRow.push('');
         }
       } else if (finalRow.length > batchListingColumnCount) {
-        // Trim to exact size
         finalRow = finalRow.slice(0, batchListingColumnCount);
       }
 
       batchRowLength = finalRow.length;
-      console.log(`📦 Batch row prepared: ${batchRowLength} columns (table expects ${batchListingColumnCount})`);
+
       if (batchRowLength !== batchListingColumnCount) {
-        const err = new Error(`Batch row length mismatch for ${batchId}: finalRow=${batchRowLength}, expected=${batchListingColumnCount}`);
-        err.batchListingColumnCount = batchListingColumnCount;
-        err.batchRowLength = batchRowLength;
-        throw err;
+        throw new Error(`Batch row length mismatch for ${batchId}`);
       }
 
       await addTableRow('BatchListing', finalRow);
@@ -704,42 +716,16 @@ app.post('/api/submitData', async (req, res) => {
 
     console.log('✅ Step 8: All batch rows inserted');
 
-    // ✅ SUCCESS
-    const message = `Success! Job recorded and ${data.batches.length} batch(es) created.`;
-    console.log('🎉 SUCCESS:', message);
-
-    res.json({ message });
+    res.json({
+      message: `Success! Job recorded and ${data.batches.length} batch(es) created.`
+    });
 
   } catch (error) {
-    console.error('🔥 ERROR OCCURRED');
-    console.error('🔥 Error Type:', error.constructor.name);
-    console.error('🔥 Error Message:', error.message);
-
-    const errorPayload = {
-      errorName: error.constructor.name,
-      message: error.message,
-      jobListingColumnCount: error.jobListingColumnCount || jobListingColumnCount || null,
-      batchListingColumnCount: error.batchListingColumnCount || batchListingColumnCount || null,
-      jobRowLength: error.jobRowLength || jobRowLength || null,
-      batchRowLength: error.batchRowLength || batchRowLength || null,
-    };
-
-    console.error('👉 Diagnostic Payload:', JSON.stringify(errorPayload, null, 2));
-
-    if (error.response) {
-      console.error('👉 Graph API Error Status:', error.response.status);
-      console.error('👉 Graph API Error Body:', JSON.stringify(error.response.data, null, 2));
-      errorPayload.graphError = {
-        status: error.response.status,
-        data: error.response.data
-      };
-    }
-
-    console.error('🔥 FINAL RESPONSE:', JSON.stringify(errorPayload, null, 2));
+    console.error('🔥 ERROR:', error.message);
 
     res.status(500).json({
       error: 'Failed to submit data',
-      diagnostics: errorPayload
+      message: error.message
     });
   }
 });
