@@ -69,6 +69,44 @@ const formatDate = (value) => {
   return "-";
 };
 
+const toExcelDateText = (value) => {
+  if (value === undefined || value === null || value === '' || value === '-') return '';
+
+  let raw = typeof value === 'string' ? value.trim() : value;
+  let date = null;
+
+  // Case 1: Excel serial number (e.g., 46090)
+  if (!isNaN(raw)) {
+    const num = Number(raw);
+    if (num > 0) {
+      date = new Date((num - 25569) * 86400 * 1000);
+    }
+  }
+  // Case 2: ISO yyyy-mm-dd
+  else if (typeof raw === 'string' && raw.includes('-') && raw.split('-')[0].length === 4) {
+    date = new Date(raw);
+  }
+  // Case 3: dd/mm/yyyy or dd-mm-yyyy
+  else if (typeof raw === 'string' && (raw.includes('/') || raw.includes('-'))) {
+    const parts = raw.split(/[-\/]/);
+    if (parts.length === 3) {
+      let [d, m, y] = parts;
+      if (y.length === 2) y = '20' + y;
+      date = new Date(y, m - 1, d);
+    }
+  }
+  // Case 4: fallback
+  else {
+    date = new Date(raw);
+  }
+
+  if (!date || isNaN(date.getTime())) return '';
+
+  // Format to yyyy-MM-dd
+  const pad = (n) => (n < 10 ? '0' + n : n);
+  return `'${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+};
+
 const msalConfig = {
   auth: {
     clientId: process.env.CLIENT_ID,
@@ -152,7 +190,7 @@ async function getTableRowsAsObjects(tableName) {
       }
     }
 
-    // console.log(`[getTableRowsAsObjects] ${tableName} row ${idx} final values:`, values);
+    console.log(`[getTableRowsAsObjects] ${tableName} row ${idx} final values:`, values);
 
     const item = {};
     headers.forEach((h, idx) => {
@@ -199,11 +237,7 @@ async function getTableColumnCount(tableName) {
 
 async function addTableRow(tableName, values) {
   const ctx = await getSharePointFileContext();
-  console.log(
-    `[addTableRow] Adding row to ${tableName}:`,
-    values.length,
-    "columns",
-  );
+  console.log(`[addTableRow] Adding row to ${tableName}:`, values.length, 'columns');
 
   const resp = await axios.post(
     `https://graph.microsoft.com/v1.0/drives/${ctx.driveId}/items/${ctx.fileId}/workbook/tables/${tableName}/rows/add`,
@@ -211,7 +245,7 @@ async function addTableRow(tableName, values) {
     { headers: ctx.headers },
   );
 
-  // console.log(`[addTableRow] Successfully added to ${tableName}`);
+  console.log(`[addTableRow] Successfully added to ${tableName}`);
   return resp.data;
 }
 
@@ -234,9 +268,9 @@ async function generateDashboardData() {
   // }
 
   // Convert to objects for JobListing
-  const jobListing = await getTableRowsAsObjects("JobListing");
+  const jobListing = await getTableRowsAsObjects('JobListing');
 
-  // console.log('[generateDashboardData] JobListing:', jobListing);
+  console.log('[generateDashboardData] JobListing:', jobListing);
 
   // Create jobInfoMap from JobListing for quick lookup
   const jobInfoMap = {};
@@ -356,15 +390,11 @@ async function generateDashboardData() {
     batches.push({
       row: rowIdx,
       psn: psn,
-      batchId: String(values[1] || ""),
+      batchId: String(values[1] || ''),
       batchDate: values[2]
-        ? new Date(values[2]).toLocaleDateString("en-GB", {
-            year: "2-digit",
-            month: "2-digit",
-            day: "2-digit",
-          })
-        : "-",
-      jobName: String(values[3] || ""),
+        ? new Date(values[2]).toLocaleDateString('en-GB', { year: '2-digit', month: '2-digit', day: '2-digit' })
+        : '-',
+      jobName: String(values[3] || ''),
       qty: Number(values[4] || 0),
       progress: definedSteps.length > 0 ? ticksFound / definedSteps.length : 0,
       steps: definedSteps,
@@ -383,34 +413,7 @@ async function generateDashboardData() {
   // console.log('[generateDashboardData] Processed batches:', batches);
 
   // Calculate process averages for workload display
-  const processList = [
-    "Sheeting",
-    "Printing",
-    "Lamination",
-    "Efluting",
-    "Die-cut",
-    "Convert",
-    "Baseboard",
-    "Hotstamping",
-    "Packing",
-    "Double-Side-Tape",
-    "Emboss",
-    "Blind Emboss",
-    "Gluing",
-    "Side Glue",
-    "2 Point Glue",
-    "Attach Handle",
-    "Peeling",
-    "Punch Hole",
-    "Slitting LF",
-    "FlexoSlitting",
-    "Spot UV",
-    "Texture",
-    "Trimming",
-    "Varnish",
-    "Waterbase",
-    "Delivery",
-  ];
+  const processList = ["Sheeting", "Printing", "Lamination", "Efluting", "Die-cut", "Convert", "Baseboard", "Hotstamping", "Packing", "Double-Side-Tape", "Emboss", "Blind Emboss", "Gluing", "Side Glue", "2 Point Glue", "Attach Handle", "Peeling", "Punch Hole", "Slitting LF", "FlexoSlitting", "Spot UV", "Texture", "Trimming", "Varnish", "Waterbase", "Delivery"];
   const processStats = {};
 
   // Initialize stats for each process
@@ -426,7 +429,19 @@ async function generateDashboardData() {
   // Calculate stats from batch steps - ONLY current active step per batch
   batches.forEach((batch) => {
     if (batch.steps && Array.isArray(batch.steps)) {
-      const currentStep = batch.steps.find((step) => !step.isDone);
+
+      // ✅ 1. Handle DONE steps
+      batch.steps.forEach(step => {
+        if (step.isDone && processStats[step.name]) {
+          const durationDays = Math.max(1, Math.ceil(Number(step.duration) || 0));
+          processStats[step.name].totalTime += durationDays;
+          processStats[step.name].count += 1;
+        }
+      });
+
+      // ✅ 2. Handle ONLY current active step
+      const currentStep = batch.steps.find(step => !step.isDone);
+
       if (currentStep && processStats[currentStep.name]) {
         const durationDays = Math.max(
           1,
@@ -436,6 +451,7 @@ async function generateDashboardData() {
         processStats[currentStep.name].count += 1;
         processStats[currentStep.name].activeCount += 1;
       }
+
     }
   });
 
@@ -449,7 +465,7 @@ async function generateDashboardData() {
   // Generate rawCapacity data from COMPLETED batches (isDone = true)
   const machineCapacityMap = {};
 
-  batches.forEach((batch) => {
+  batches.forEach(batch => {
     if (batch.steps && Array.isArray(batch.steps)) {
       batch.steps.forEach((step) => {
         // Only count COMPLETED steps (isDone = true)
@@ -461,15 +477,10 @@ async function generateDashboardData() {
           if (!machineCapacityMap[key]) {
             machineCapacityMap[key] = {
               date: dateKey,
-              machine:
-                machine === "Ijima" || machine.toLowerCase().includes("ijima")
-                  ? "IJIMA"
-                  : machine === "Hand" || machine.toLowerCase().includes("hand")
-                    ? "HANDSWITCH"
-                    : machine === "Out" || machine.toLowerCase().includes("out")
-                      ? "OUTSOURCED"
-                      : "GENERAL",
-              qty: 0,
+              machine: machine === 'Ijima' || machine.toLowerCase().includes('ijima') ? 'IJIMA' :
+                machine === 'Hand' || machine.toLowerCase().includes('hand') ? 'HANDSWITCH' :
+                  machine === 'Out' || machine.toLowerCase().includes('out') ? 'OUTSOURCED' : 'GENERAL',
+              qty: 0
             };
           }
           machineCapacityMap[key].qty += batch.qty;
@@ -627,6 +638,8 @@ app.post("/api/submitData", async (req, res) => {
       delivery: normalizedDeliveryDate,
     });
 
+    const formatDeliveryDate = toExcelDateText(data.deliveryDate);
+    console.log(formatDeliveryDate);
     // ✅ STEP 6: Prepare job row
     const jobRow = [
       data.psn,
@@ -635,11 +648,12 @@ app.post("/api/submitData", async (req, res) => {
       data.jobName || "",
       data.jobType || "",
       data.quantity || 0,
-      normalizedOrderDate !== "-" ? normalizedOrderDate : "",
-      normalizedDeliveryDate !== "-" ? normalizedDeliveryDate : "",
-      data.item || "",
-      data.priority || "",
-      data.status || "ON SCHEDULE", // Default status if not provided
+      normalizedOrderDate !== '-' ? normalizedOrderDate : '',
+      normalizedDeliveryDate !== '-' ? normalizedDeliveryDate : '',
+      data.item || '',
+      data.priority || '',
+      data.status || 'ON SCHEDULE' , // Default status if not provided
+      formatDeliveryDate || ''
     ];
 
     // match table columns exactly for JobListing
@@ -760,9 +774,9 @@ app.post("/api/submitData", async (req, res) => {
 
     res.json({ message });
   } catch (error) {
-    console.error("🔥 ERROR OCCURRED");
-    console.error("🔥 Error Type:", error.constructor.name);
-    console.error("🔥 Error Message:", error.message);
+    console.error('🔥 ERROR OCCURRED');
+    console.error('🔥 Error Type:', error.constructor.name);
+    console.error('🔥 Error Message:', error.message);
 
     const errorPayload = {
       errorName: error.constructor.name,

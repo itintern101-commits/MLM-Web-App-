@@ -137,9 +137,27 @@
 
 <div id="sidebar-container"></div>
 <script>
-  fetch('/Sidebar.html').then(r => r.text()).then(html => {
-    document.getElementById('sidebar-container').innerHTML = html;
-  }).catch(console.error);
+  fetch('/Sidebar.html')
+    .then(r => r.text())
+    .then(html => {
+      document.getElementById('sidebar-container').innerHTML = html;
+
+      // ✅ RUN AFTER sidebar is inserted
+      const currentPage = window.location.pathname
+        .split('/')
+        .pop()
+        .replace('.html', '')
+        .toLowerCase();
+
+      document.querySelectorAll('.nav-link').forEach(link => {
+        const page = link.dataset.page.toLowerCase();
+
+        if (page === currentPage) {
+          link.classList.add('active');
+        }
+      });
+    })
+    .catch(console.error);
 </script>
 
 <div id="toast-container"></div>
