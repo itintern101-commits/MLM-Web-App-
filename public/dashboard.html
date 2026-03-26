@@ -536,9 +536,9 @@
             <th>Job Name</th>
             <th>Quantity</th>
             <th>Current Process</th>
-            <th>Duration(Days Delayed)</th>
-            <th>Process Runtime</th>
-            <th>Last Updated</th>
+            <th>In Progress(Days)</th>
+            <th>Days to Due Date</th>
+            <th>Previous Step & Date</th>
           </tr>
         </thead>
         <tbody id="requirementBody">
@@ -902,8 +902,8 @@
           <td>${update.jobName}</td>
           <td>${update.quantity.toLocaleString()}</td>
           <td>${update.currentProcess}</td>
+          <td style="text-align: center;">${update.prevDurationTime} days</td>
           <td><span class="tag ${durationClass}">${update.duration}</span></td>
-          <td>${update.prevDurationTime} days</td>
           <td>${update.lastUpdated}</td>
         `;
         tbody.appendChild(row);
