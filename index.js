@@ -401,6 +401,7 @@ async function generateDashboardData() {
       priority: info.priority,
       deliveryDate: info.deliveryDate,
       status: values[10] || info.status,
+      splitRemark: String(values[118]||"").trim(),
       qtyString: String(values[119] || ""),
     });
   });
