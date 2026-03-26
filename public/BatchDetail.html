@@ -1017,7 +1017,7 @@
                 <div style="padding:10px; border-bottom:1px solid #e2e8f0; background:white; margin-bottom:8px; border-radius:6px; border-left:4px solid ${s.status.includes("Delayed") ? "#ef4444" : "#10b981"}; position:relative;">
                     <div style="display:flex; justify-content:space-between; margin-right:70px;">
                         <span style="font-weight:bold; font-size:0.85rem;">${s.name} (Qty: ${histQty})</span>
-                        <span style="font-size:0.7rem; color:#64748b;">Exp: ${s.expDate}</span>
+                        <span style="font-size:0.7rem; color:#64748b;">Expected Date: ${s.expDate}</span>
                     </div>
                         ${s.detail ? `<div style="font-size:0.7rem; color:var(--primary); font-weight:bold;">Machine: ${s.detail}</div>` : ""}                    <div style="font-size:0.75rem; color:#64748b; margin:4px 0;">
                         ${startTimeLabel} → ${s.endDate} <b>(${s.duration} Days)</b>
@@ -1079,7 +1079,7 @@
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <div>
                         <div style="font-weight: bold; font-size: 0.85rem;">${step.name}</div>
-                        <div style="font-size: 0.65rem; color: ${isOverdue ? "#ef4444" : "#64748b"};">Exp: ${step.expDate} ${isOverdue ? "⚠️" : ""}</div>
+                        <div style="font-size: 0.65rem; color: ${isOverdue ? "#ef4444" : "#64748b"};">Expected Date: ${step.expDate} ${isOverdue ? "⚠️" : ""}</div>
                     </div>
                     <div style="display: flex; gap: 10px;">
                         <label style="font-size: 0.75rem;"><input type="checkbox" class="step-done-check" data-base="${step.baseCol}"> Done</label>
