@@ -8,6 +8,7 @@ const app = express();
 app.use(express.json());
 const PORT = process.env.PORT || 3000;
 
+//Convert various date formats (Excel serial, dd/mm/yyyy, ISO) to consistent dd/mm/yyyy for frontend display
 const formatDate = (value) => {
   if (value === undefined || value === null || value === "" || value === "-")
     return "";
@@ -69,6 +70,7 @@ const formatDate = (value) => {
   return "-";
 };
 
+// Convert date into Excel-safe TEXT format(Use for POST/api/submitData -> (Delivery Format) 'yyyy-MM-dd')
 const toExcelDateText = (value) => {
   if (value === undefined || value === null || value === '' || value === '-') return '';
 
@@ -117,6 +119,7 @@ const msalConfig = {
 
 const cca = new ConfidentialClientApplication(msalConfig);
 
+//Authenticate with Microsoft Graph API using Client Credentials
 async function getAccessToken() {
   const result = await cca.acquireTokenByClientCredential({
     scopes: ["https://graph.microsoft.com/.default"],
@@ -124,16 +127,18 @@ async function getAccessToken() {
   return result.accessToken;
 }
 
+//Get SharePoint file context: siteId, driveId, fileId, and auth headers for API calls
 async function getSharePointFileContext() {
   const token = await getAccessToken();
   const headers = { Authorization: `Bearer ${token}` };
 
+  // Get site ID for the SharePoint site containing the file (adjust the path as needed)
   const siteRes = await axios.get(
     "https://graph.microsoft.com/v1.0/sites/mlmpackagingmy.sharepoint.com:/sites/FileStorage",
     { headers },
   );
   const siteId = siteRes.data.id;
-
+  // Get the first drive in the site (adjust if you know the specific drive name or ID)
   const drivesRes = await axios.get(
     `https://graph.microsoft.com/v1.0/sites/${siteId}/drives`,
     { headers },
@@ -141,39 +146,36 @@ async function getSharePointFileContext() {
   const driveId = drivesRes.data.value[0]?.id;
   if (!driveId) throw new Error("Could not find driveId in site drives");
 
+  // Get the file ID for Database.xlsx in the drive (adjust the path if the file is in a subfolder)
   const fileRes = await axios.get(
     `https://graph.microsoft.com/v1.0/drives/${driveId}/root:/Database.xlsx`,
     { headers },
   );
+
   const fileId = fileRes.data.id;
   if (!fileId) throw new Error("Could not find fileId for Database.xlsx");
 
   return { token, headers, siteId, driveId, fileId };
 }
 
+// Fetch all rows from a specified table and convert to array of objects using header row for keys
 async function getTableRowsAsObjects(tableName) {
   const ctx = await getSharePointFileContext();
 
-  // console.log(`[getTableRowsAsObjects] Fetching ${tableName} from SharePoint`);
-
+  // Get header row to use as keys for objects (assumes header row is in first row of the table)
   const headerRes = await axios.get(
     `https://graph.microsoft.com/v1.0/drives/${ctx.driveId}/items/${ctx.fileId}/workbook/tables/${tableName}/headerRowRange`,
     { headers: ctx.headers },
   );
   const headers = headerRes.data.values?.[0] || [];
-  // console.log(`[getTableRowsAsObjects] ${tableName} headers:`, headers);
-  // console.log(`[getTableRowsAsObjects] ${tableName} header count:`, headers.length);
 
+  // Get all rows in the table (this may return values in different formats depending on Graph API response, so we handle multiple cases)
   const rowsRes = await axios.get(
     `https://graph.microsoft.com/v1.0/drives/${ctx.driveId}/items/${ctx.fileId}/workbook/tables/${tableName}/rows`,
     { headers: ctx.headers },
   );
   const rows = rowsRes.data.value || [];
-  // console.log(`[getTableRowsAsObjects] ${tableName} has ${rows.length} rows`);
-  if (rows.length > 0) {
-    // console.log(`[getTableRowsAsObjects] First row structure:`, rows[0]);
-    // console.log(`[getTableRowsAsObjects] First row values:`, rows[0].values);
-  }
+
 
   const result = rows.map((row, idx) => {
     // Handle different response formats from Graph API
@@ -186,7 +188,7 @@ async function getTableRowsAsObjects(tableName) {
       } else if (typeof row.values === "string") {
         // If values is a single string, split by comma (CSV format)
         values = row.values.split(",");
-        // console.log(`[getTableRowsAsObjects] ${tableName} row ${idx} split by comma:`, values);
+
       }
     }
 
@@ -206,6 +208,7 @@ async function getTableRowsAsObjects(tableName) {
   return result;
 }
 
+// Get the column count of a table by first trying the /columns endpoint, then falling back to headerRowRange if needed (handles different Graph API response formats)
 async function getTableColumnCount(tableName) {
   const ctx = await getSharePointFileContext();
 
@@ -227,18 +230,20 @@ async function getTableColumnCount(tableName) {
       { headers: ctx.headers },
     );
     const headers = headerRes.data.values?.[0] || [];
-    // console.log(`[getTableColumnCount] ${tableName} columns via headerRowRange:`, headers.length);
+
     return headers.length;
   } catch (error) {
-    // console.error(`[getTableColumnCount] Error fetching columns for ${tableName}:`, error.message);
+
     throw error;
   }
 }
 
+// Add a new row to a specified table with given values (values should be an array matching the table's column order)
 async function addTableRow(tableName, values) {
   const ctx = await getSharePointFileContext();
   console.log(`[addTableRow] Adding row to ${tableName}:`, values.length, 'columns');
 
+  // Ensure values is an array of strings/numbers and convert any non-string values to strings (Graph API can be sensitive to data types)
   const resp = await axios.post(
     `https://graph.microsoft.com/v1.0/drives/${ctx.driveId}/items/${ctx.fileId}/workbook/tables/${tableName}/rows/add`,
     { values: [values] },
@@ -250,8 +255,7 @@ async function addTableRow(tableName, values) {
 }
 
 async function generateDashboardData() {
-  // console.log('[generateDashboardData] Starting...');
-
+  
   // Get file context once
   const fileContext = await getSharePointFileContext();
 
@@ -261,11 +265,6 @@ async function generateDashboardData() {
     { headers: fileContext.headers },
   );
   const batchRowsRaw = batchRowRes.data.value || [];
-
-  // console.log('[generateDashboardData] Batch rows count:', batchRowsRaw.length);
-  // if (batchRowsRaw.length > 0) {
-  //   console.log('[generateDashboardData] First batch row values:', batchRowsRaw[0].values);
-  // }
 
   // Convert to objects for JobListing
   const jobListing = await getTableRowsAsObjects('JobListing');
@@ -293,8 +292,6 @@ async function generateDashboardData() {
       };
     }
   });
-  // console.log(jobInfoMap[0]);
-  // console.log('[generateDashboardData] jobInfoMap:', jobInfoMap);
 
   // Process BatchListing to create batches with steps structure
   const batches = [];
@@ -311,14 +308,12 @@ async function generateDashboardData() {
       } else if (typeof rawRow.values === "string") {
         // If values is a single string, split by comma (CSV format)
         values = rawRow.values.split(",");
-        // console.log(`[generateDashboardData] Batch row ${rowIdx} split by comma:`, values);
       }
     }
 
     // Extract basic info from numeric indices (matching app.js)
     const psn = String(values[0] || "").trim();
     if (!psn || psn.toLowerCase().includes("done")) {
-      // console.log('[generateDashboardData] Skipping batch row', rowIdx, '- no PSN or is done');
       return;
     }
 
@@ -410,8 +405,6 @@ async function generateDashboardData() {
     });
   });
 
-  // console.log('[generateDashboardData] Processed batches:', batches);
-
   // Calculate process averages for workload display
   const processList = ["Sheeting", "Printing", "Lamination", "Efluting", "Die-cut", "Convert", "Baseboard", "Hotstamping", "Packing", "Double-Side-Tape", "Emboss", "Blind Emboss", "Gluing", "Side Glue", "2 Point Glue", "Attach Handle", "Peeling", "Punch Hole", "Slitting LF", "FlexoSlitting", "Spot UV", "Texture", "Trimming", "Varnish", "Waterbase", "Delivery"];
   const processStats = {};
@@ -465,6 +458,7 @@ async function generateDashboardData() {
   // Generate rawCapacity data from COMPLETED batches (isDone = true)
   const machineCapacityMap = {};
 
+  // 
   batches.forEach(batch => {
     if (batch.steps && Array.isArray(batch.steps)) {
       batch.steps.forEach((step) => {
@@ -518,21 +512,25 @@ async function generateDashboardData() {
     },
   };
 
-  // console.log('[generateDashboardData] Result:', result);
   return result;
 }
 
+// ============ EXPRESS ROUTES ============
+// Redirect root to dashboard.html
 app.get("/", (req, res) => {
   console.log("[APP] GET / - redirecting to dashboard");
   res.redirect("/dashboard.html");
 });
+// Serve static files from the 'public' directory (make sure to create this and add your frontend files)
 app.use(express.static(path.join(__dirname, "public")));
 
+// API route to test server connectivity
 app.get("/api/test", (req, res) => {
   console.log("[API] GET /api/test");
   res.json({ message: "Node.js backend working" });
 });
 
+// API route to get access token (for testing purposes, not needed by frontend)
 app.get("/api/getToken", async (req, res) => {
   try {
     console.log("[API] GET /api/getToken - attempting to get token");
@@ -545,6 +543,7 @@ app.get("/api/getToken", async (req, res) => {
   }
 });
 
+// API route to get JobListing data
 app.get("/api/jobListing", async (req, res) => {
   try {
     console.log("[API] GET /api/jobListing");
@@ -556,6 +555,7 @@ app.get("/api/jobListing", async (req, res) => {
   }
 });
 
+// API route to get BatchListing data
 app.get("/api/batchListing", async (req, res) => {
   try {
     console.log("[API] GET /api/batchListing");
@@ -567,6 +567,7 @@ app.get("/api/batchListing", async (req, res) => {
   }
 });
 
+// Main API route to get dashboard data (combines JobListing and BatchListing with processing)
 app.get("/api/dashboard", async (req, res) => {
   try {
     console.log("[API] GET /api/dashboard - request received");
@@ -579,6 +580,7 @@ app.get("/api/dashboard", async (req, res) => {
   }
 });
 
+// API route to submit new job and batches
 app.post("/api/submitData", async (req, res) => {
   try {
     console.log("🚀 API HIT: /api/submitData");
@@ -638,6 +640,7 @@ app.post("/api/submitData", async (req, res) => {
       delivery: normalizedDeliveryDate,
     });
 
+    // Format delivery date for Excel (yyyy-MM-dd with leading apostrophe)
     const formatDeliveryDate = toExcelDateText(data.deliveryDate);
     console.log(formatDeliveryDate);
     // ✅ STEP 6: Prepare job row
@@ -652,7 +655,7 @@ app.post("/api/submitData", async (req, res) => {
       normalizedDeliveryDate !== '-' ? normalizedDeliveryDate : '',
       data.item || '',
       data.priority || '',
-      data.status || 'ON SCHEDULE' , // Default status if not provided
+      data.status || 'ON SCHEDULE', // Default status if not provided
       formatDeliveryDate || ''
     ];
 
@@ -1293,7 +1296,7 @@ async function revertProcessStep(rowIdx, baseCol, revertRemark) {
 }
 
 // ============ API ENDPOINTS FOR BATCH UPDATES ============
-
+// Endpoint to update process quantities only (without marking as done)
 app.post("/api/updateProcessQtysOnly", async (req, res) => {
   try {
     console.log("[API] POST /api/updateProcessQtysOnly");
@@ -1309,6 +1312,7 @@ app.post("/api/updateProcessQtysOnly", async (req, res) => {
   }
 });
 
+// Endpoint to save batch updates with waterfall logic and splits
 app.post("/api/saveMultiBatchUpdate", async (req, res) => {
   try {
     console.log("[API] POST /api/saveMultiBatchUpdate");
@@ -1322,6 +1326,7 @@ app.post("/api/saveMultiBatchUpdate", async (req, res) => {
   }
 });
 
+// Endpoint to revert a process step
 app.post("/api/revertProcessStep", async (req, res) => {
   try {
     console.log("[API] POST /api/revertProcessStep");
@@ -1337,6 +1342,7 @@ app.post("/api/revertProcessStep", async (req, res) => {
   }
 });
 
+// =========== START SERVER ============
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

@@ -1,365 +1,379 @@
 <!doctype html>
 <html>
-  <head>
-    <base target="_top" />
-    <style>
-      :root {
-        --primary: #2563eb;
-        --warning: #f59e0b;
-        --danger: #ef4444;
-        --success: #10b981;
-        --sidebar-width: 280px;
-        /* Defined for easy adjustment */
-      }
 
-      body {
-        font-family: "Segoe UI", sans-serif;
-        margin: 0;
-        background: #f8fafc;
-        color: #1e293b;
-      }
+<head>
+  <base target="_top" />
+  <style>
+    :root {
+      --primary: #2563eb;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --success: #10b981;
+      --sidebar-width: 280px;
+      /* Defined for easy adjustment */
+    }
 
-      /* Sidebar Integration Wrapper */
+    body {
+      font-family: "Segoe UI", sans-serif;
+      margin: 0;
+      background: #f8fafc;
+      color: #1e293b;
+    }
+
+    /* Sidebar Integration Wrapper */
+    .main-wrapper {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    /* Header & Stats */
+    .dashboard-header {
+      background: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e2e8f0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      padding: 1rem 2rem;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 1.2rem;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .stat-val {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    /* Table Design */
+    .table-container {
+      padding: 0 2rem 2rem 2rem;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      font-size: 0.85rem;
+    }
+
+    th {
+      background: #f1f5f9;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    th:not(:last-child) {
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      transition: background 0.2s;
+    }
+
+    th:not(:last-child):hover {
+      background-color: #f1f5f9;
+    }
+
+    .sort-icon {
+      display: inline-block;
+      margin-left: 8px;
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      /* Light gray when inactive */
+    }
+
+    th.active-sort .sort-icon {
+      color: #1e40af;
+      /* Bold blue when active */
+    }
+
+    /* Specific Pill Colors for your JS Logic */
+    .pill-partial {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fcd34d;
+    }
+
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    tr:hover {
+      background-color: #d9eafa;
+    }
+
+    /* Status Pills */
+    .pill {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: 500;
+      font-size: 0.75rem;
+    }
+
+    .pill-delayed {
+      background: #fee2e2;
+      color: var(--danger);
+    }
+
+    .pill-running {
+      background: #dcfce7;
+      color: var(--success);
+    }
+
+    .pill-completed {
+      background: #e0e7ff;
+      color: #4338ca;
+    }
+
+    .progress-track {
+      background: #e2e8f0;
+      height: 10px;
+      border-radius: 5px;
+      overflow: hidden;
+      width: 120px;
+      margin-bottom: 2px;
+    }
+
+    .progress-fill {
+      background: var(--primary);
+      height: 100%;
+    }
+
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.8);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .update-btn {
+      background: white;
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .update-btn:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 1024px) {
       .main-wrapper {
-        margin-left: var(--sidebar-width);
-        min-height: 100vh;
-        transition: margin-left 0.3s ease;
-      }
-
-      /* Header & Stats */
-      .dashboard-header {
-        background: white;
-        padding: 1rem 2rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid #e2e8f0;
-        position: sticky;
-        top: 0;
-        z-index: 100;
+        margin-left: 0;
       }
 
       .stats-bar {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1.5rem;
-        padding: 1rem 2rem;
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /*button responsiveness*/
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
       }
 
-      .stat-card {
-        background: white;
-        padding: 1.2rem;
-        border-radius: 8px;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        min-height: 140px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
+      100% {
+        transform: rotate(360deg);
       }
+    }
 
-      .stat-val {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: var(--primary);
+    .btn-disabled {
+      background: #94a3b8 !important;
+      cursor: not-allowed !important;
+      opacity: 0.8;
+    }
+
+    /* Styling for Partially Delivered Pill */
+    .pill-partial {
+      background: #fffbeb;
+      /* Very light amber */
+      color: #b45309;
+      /* Deep amber text */
+      border: 1px solid #fde68a;
+      /* Soft amber border */
+      padding: 4px 10px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      display: inline-block;
+      white-space: nowrap;
+    }
+
+    /*UPDATE QTY ONLY BUTTON*/
+
+    /* Container for the modal actions */
+    .modal-footer {
+      display: flex;
+      gap: 12px;
+      padding: 16px 24px;
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      border-bottom-left-radius: 12px;
+      border-bottom-right-radius: 12px;
+    }
+
+    /* Primary Save Button (Confirm Update) */
+    .btn-primary {
+      flex: 2;
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: #1d4ed8;
+    }
+
+    .btn-primary:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    /* Secondary Button (Update Qty Only) */
+    .btn-secondary {
+      flex: 1;
+      background: white;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+      color: #1e293b;
+    }
+
+    /* Spinner for the primary button */
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
       }
+    }
 
-      /* Table Design */
-      .table-container {
-        padding: 0 2rem 2rem 2rem;
-        overflow-x: auto;
-      }
+    /*ENTER QTY FOR PROCESS*/
 
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        background: white;
-        border-radius: 8px;
-        overflow: hidden;
-        font-size: 0.85rem;
-      }
+    .qty-area {
+      border-left: 3px solid #cbd5e1;
+      margin-left: 4px;
+      transition: border-color 0.2s;
+    }
 
-      th {
-        background: #f1f5f9;
-        padding: 12px;
-        text-align: left;
-        font-weight: 600;
-        border-bottom: 2px solid #e2e8f0;
-      }
+    .qty-area:focus-within {
+      border-left-color: #2563eb;
+      background: #f0f7ff !important;
+    }
 
-      th:not(:last-child) {
-        cursor: pointer;
-        user-select: none;
-        position: relative;
-        transition: background 0.2s;
-      }
+    .step-qty-input:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+    }
+  </style>
+</head>
 
-      th:not(:last-child):hover {
-        background-color: #f1f5f9;
-      }
+<body>
+  <div id="sidebar-container"></div>
+  <script>
+    fetch('/Sidebar.html')
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById('sidebar-container').innerHTML = html;
 
-      .sort-icon {
-        display: inline-block;
-        margin-left: 8px;
-        font-size: 0.8rem;
-        color: #cbd5e1; /* Light gray when inactive */
-      }
+        // ✅ RUN AFTER sidebar is inserted
+        const currentPage = window.location.pathname
+          .split('/')
+          .pop()
+          .replace('.html', '')
+          .toLowerCase();
 
-      th.active-sort .sort-icon {
-        color: #1e40af; /* Bold blue when active */
-      }
+        document.querySelectorAll('.nav-link').forEach(link => {
+          const page = link.dataset.page.toLowerCase();
 
-      /* Specific Pill Colors for your JS Logic */
-      .pill-partial {
-        background: #fef3c7;
-        color: #92400e;
-        border: 1px solid #fcd34d;
-      }
+          if (page === currentPage) {
+            link.classList.add('active');
+          }
+        });
+      })
+      .catch(console.error);
+  </script>
 
-      td {
-        padding: 10px 12px;
-        border-bottom: 1px solid #f1f5f9;
-      }
+  <div id="loader" class="loading-overlay">
+    <h2>Initializing Batch Webpage...</h2>
+  </div>
 
-      tr:hover {
-        background-color: #d9eafa;
-      }
-
-      /* Status Pills */
-      .pill {
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-weight: 500;
-        font-size: 0.75rem;
-      }
-
-      .pill-delayed {
-        background: #fee2e2;
-        color: var(--danger);
-      }
-
-      .pill-running {
-        background: #dcfce7;
-        color: var(--success);
-      }
-
-      .pill-completed {
-        background: #e0e7ff;
-        color: #4338ca;
-      }
-
-      .progress-track {
-        background: #e2e8f0;
-        height: 10px;
-        border-radius: 5px;
-        overflow: hidden;
-        width: 120px;
-        margin-bottom: 2px;
-      }
-
-      .progress-fill {
-        background: var(--primary);
-        height: 100%;
-      }
-
-      .loading-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(255, 255, 255, 0.8);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-      }
-
-      .update-btn {
-        background: white;
-        border: 1px solid var(--primary);
-        color: var(--primary);
-        padding: 5px 10px;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: 0.2s;
-      }
-
-      .update-btn:hover {
-        background: var(--primary);
-        color: white;
-      }
-
-      /* Mobile Responsiveness */
-      @media (max-width: 1024px) {
-        .main-wrapper {
-          margin-left: 0;
-        }
-
-        .stats-bar {
-          grid-template-columns: 1fr;
-        }
-      }
-
-      /*button responsiveness*/
-      @keyframes spin {
-        0% {
-          transform: rotate(0deg);
-        }
-        100% {
-          transform: rotate(360deg);
-        }
-      }
-
-      .btn-disabled {
-        background: #94a3b8 !important;
-        cursor: not-allowed !important;
-        opacity: 0.8;
-      }
-
-      /* Styling for Partially Delivered Pill */
-      .pill-partial {
-        background: #fffbeb; /* Very light amber */
-        color: #b45309; /* Deep amber text */
-        border: 1px solid #fde68a; /* Soft amber border */
-        padding: 4px 10px;
-        font-size: 0.7rem;
-        font-weight: 600;
-        display: inline-block;
-        white-space: nowrap;
-      }
-
-      /*UPDATE QTY ONLY BUTTON*/
-
-      /* Container for the modal actions */
-      .modal-footer {
-        display: flex;
-        gap: 12px;
-        padding: 16px 24px;
-        background: #f8fafc;
-        border-top: 1px solid #e2e8f0;
-        border-bottom-left-radius: 12px;
-        border-bottom-right-radius: 12px;
-      }
-
-      /* Primary Save Button (Confirm Update) */
-      .btn-primary {
-        flex: 2;
-        background: #2563eb;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 6px;
-        font-weight: 600;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        transition: background 0.2s;
-      }
-
-      .btn-primary:hover {
-        background: #1d4ed8;
-      }
-
-      .btn-primary:disabled {
-        background: #94a3b8;
-        cursor: not-allowed;
-      }
-
-      /* Secondary Button (Update Qty Only) */
-      .btn-secondary {
-        flex: 1;
-        background: white;
-        color: #475569;
-        border: 1px solid #cbd5e1;
-        padding: 10px 16px;
-        border-radius: 6px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s;
-      }
-
-      .btn-secondary:hover {
-        background: #f1f5f9;
-        border-color: #94a3b8;
-        color: #1e293b;
-      }
-
-      /* Spinner for the primary button */
-      .spinner {
-        width: 16px;
-        height: 16px;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        border-radius: 50%;
-        border-top-color: white;
-        animation: spin 0.8s linear infinite;
-        display: none;
-      }
-
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
-
-      /*ENTER QTY FOR PROCESS*/
-
-      .qty-area {
-        border-left: 3px solid #cbd5e1;
-        margin-left: 4px;
-        transition: border-color 0.2s;
-      }
-
-      .qty-area:focus-within {
-        border-left-color: #2563eb;
-        background: #f0f7ff !important;
-      }
-
-      .step-qty-input:focus {
-        outline: none;
-        border-color: #2563eb;
-        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
-      }
-    </style>
-  </head>
-
-  <body>
-    <div id="sidebar-container"></div>
-    <script>
-      fetch("/Sidebar.html")
-        .then((r) => r.text())
-        .then((html) => {
-          document.getElementById("sidebar-container").innerHTML = html;
-        })
-        .catch(console.error);
-    </script>
-
-    <div id="loader" class="loading-overlay">
-      <h2>Initializing Batch Webpage...</h2>
-    </div>
-
-    <div class="main-wrapper">
-      <div class="dashboard-header">
-        <h1>Batch Dashboard</h1>
-        <div>
-          <input
-            type="text"
-            id="searchInput"
-            placeholder="Search PSN or Job Name..."
-            onkeyup="renderTable()"
-            style="
+  <div class="main-wrapper">
+    <div class="dashboard-header">
+      <h1>Batch Dashboard</h1>
+      <div>
+        <input type="text" id="searchInput" placeholder="Search PSN or Job Name..." onkeyup="renderTable()" style="
               padding: 8px;
               width: 300px;
               border-radius: 4px;
               border: 1px solid #ccc;
-            "
-          />
-          <button
-            onclick="fetchData()"
-            style="
+            " />
+        <button onclick="fetchData()" style="
               padding: 8px 16px;
               background: var(--primary);
               color: white;
@@ -367,15 +381,11 @@
               border-radius: 4px;
               cursor: pointer;
               margin-left: 10px;
-            "
-          >
-            Refresh Data
-          </button>
+            ">
+          Refresh Data
+        </button>
 
-          <button
-            id="clearSortBtn"
-            onclick="resetSort()"
-            style="
+        <button id="clearSortBtn" onclick="resetSort()" style="
               padding: 8px 16px;
               background: white;
               color: #64748b;
@@ -384,47 +394,44 @@
               cursor: pointer;
               margin-left: 8px;
               display: none; /* Hidden by default */
-            "
-          >
-            Clear Sort
-          </button>
-        </div>
-      </div>
-
-      <div class="stats-bar" id="statsBar"></div>
-
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th onclick="handleSort('psn')">
-                PSN <span class="sort-icon">↕</span>
-              </th>
-              <th onclick="handleSort('batchId')">
-                Batch ID <span class="sort-icon">↕</span>
-              </th>
-              <th onclick="handleSort('jobName')">
-                Job Name <span class="sort-icon">↕</span>
-              </th>
-              <th onclick="handleSort('qty')">
-                Quantity <span class="sort-icon">↕</span>
-              </th>
-              <th onclick="handleSort('progress')">
-                Overall Progress <span class="sort-icon">↕</span>
-              </th>
-              <th onclick="handleSort('status')">
-                Current Status <span class="sort-icon">↕</span>
-              </th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="jobTableBody"></tbody>
-        </table>
+            ">
+          Clear Sort
+        </button>
       </div>
     </div>
-    <div
-      id="toast"
-      style="
+
+    <div class="stats-bar" id="statsBar"></div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="handleSort('psn')">
+              PSN <span class="sort-icon">↕</span>
+            </th>
+            <th onclick="handleSort('batchId')">
+              Batch ID <span class="sort-icon">↕</span>
+            </th>
+            <th onclick="handleSort('jobName')">
+              Job Name <span class="sort-icon">↕</span>
+            </th>
+            <th onclick="handleSort('qty')">
+              Quantity <span class="sort-icon">↕</span>
+            </th>
+            <th onclick="handleSort('progress')">
+              Overall Progress <span class="sort-icon">↕</span>
+            </th>
+            <th onclick="handleSort('status')">
+              Current Status <span class="sort-icon">↕</span>
+            </th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="jobTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div id="toast" style="
         display: none;
         position: fixed;
         bottom: 20px;
@@ -435,12 +442,9 @@
         border-radius: 8px;
         z-index: 2000;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      "
-    ></div>
+      "></div>
 
-    <div
-      id="updateModal"
-      style="
+  <div id="updateModal" style="
         display: none;
         position: fixed;
         top: 0;
@@ -451,10 +455,8 @@
         z-index: 1001;
         justify-content: center;
         align-items: center;
-      "
-    >
-      <div
-        style="
+      ">
+    <div style="
           background: white;
           padding: 2rem;
           border-radius: 12px;
@@ -463,27 +465,19 @@
           max-height: 90vh;
           display: flex;
           flex-direction: column;
-        "
-      >
-        <div
-          style="
+        ">
+      <div style="
             border-bottom: 1px solid #e2e8f0;
             padding-bottom: 10px;
             margin-bottom: 15px;
-          "
-        >
-          <h2 id="modalPsn" style="margin: 0; color: var(--primary)">
-            Update Progress
-          </h2>
-          <p
-            id="modalBatchId"
-            style="margin: 5px 0 0 0; color: #64748b; font-size: 0.9rem"
-          ></p>
-        </div>
+          ">
+        <h2 id="modalPsn" style="margin: 0; color: var(--primary)">
+          Update Progress
+        </h2>
+        <p id="modalBatchId" style="margin: 5px 0 0 0; color: #64748b; font-size: 0.9rem"></p>
+      </div>
 
-        <div
-          id="processHistoryArea"
-          style="
+      <div id="processHistoryArea" style="
             overflow-y: auto;
             flex-grow: 1;
             margin-bottom: 15px;
@@ -491,66 +485,48 @@
             border-radius: 8px;
             background: #fafafa;
             padding: 10px;
-          "
-        ></div>
+          "></div>
 
-        <div id="activeProcessArea">
-          <div
-            style="
+      <div id="activeProcessArea">
+        <div style="
               font-weight: bold;
               margin-bottom: 10px;
               color: #1e293b;
               font-size: 0.9rem;
-            "
-          >
-            Select Processes to Update:
-          </div>
-          <div
-            id="multiProcessList"
-            style="
+            ">
+          Select Processes to Update:
+        </div>
+        <div id="multiProcessList" style="
               max-height: 300px;
               overflow-y: auto;
               border: 1px solid #e2e8f0;
               border-radius: 8px;
               padding: 5px;
               background: #f8fafc;
-            "
-          ></div>
-        </div>
+            "></div>
+      </div>
 
-        <div
-          style="
+      <div style="
             margin-top: 20px;
             display: flex;
             justify-content: flex-end;
             gap: 10px;
-          "
-        >
-          <button
-            onclick="closeModal()"
-            style="
+          ">
+        <button onclick="closeModal()" style="
               padding: 10px 20px;
               border-radius: 6px;
               border: 1px solid #ccc;
               cursor: pointer;
               background: white;
-            "
-          >
-            Cancel
-          </button>
+            ">
+          Cancel
+        </button>
 
-          <button
-            id="updateQtyBtn"
-            class="btn-secondary"
-            onclick="processQtyOnlyUpdate()"
-          >
-            Update Qty Only
-          </button>
+        <button id="updateQtyBtn" class="btn-secondary" onclick="processQtyOnlyUpdate()">
+          Update Qty Only
+        </button>
 
-          <button
-            onclick="processUpdate()"
-            id="saveBtn"
-            style="
+        <button onclick="processUpdate()" id="saveBtn" style="
               padding: 10px 20px;
               border-radius: 6px;
               background: var(--primary);
@@ -562,12 +538,9 @@
               align-items: center;
               gap: 8px;
               transition: all 0.2s;
-            "
-          >
-            <span id="btnText">Confirm Update</span>
-            <div
-              id="btnSpinner"
-              style="
+            ">
+          <span id="btnText">Confirm Update</span>
+          <div id="btnSpinner" style="
                 display: none;
                 width: 14px;
                 height: 14px;
@@ -575,162 +548,161 @@
                 border-top: 2px solid white;
                 border-radius: 50%;
                 animation: spin 0.8s linear infinite;
-              "
-            ></div>
-          </button>
-        </div>
+              "></div>
+        </button>
       </div>
     </div>
+  </div>
 
-    <script>
-      let MASTER_DATA = [];
-      let currentEditingRow = null;
-      const autoOpenId = new URLSearchParams(window.location.search).get("id");
+  <script>
+    let MASTER_DATA = [];
+    let currentEditingRow = null;
+    const autoOpenId = new URLSearchParams(window.location.search).get("id");
 
-      let currentSort = {
-        column: null,
-        direction: "asc",
-      };
+    let currentSort = {
+      column: null,
+      direction: "asc",
+    };
 
-      window.onload = fetchData;
+    window.onload = fetchData;
 
-      async function fetchData() {
-        document.getElementById("loader").style.display = "flex";
-        try {
-          console.log("BatchDetail: Starting data fetch...");
-          const response = await fetch("/api/dashboard");
-          const data = await response.json();
+    async function fetchData() {
+      document.getElementById("loader").style.display = "flex";
+      try {
+        console.log("BatchDetail: Starting data fetch...");
+        const response = await fetch("/api/dashboard");
+        const data = await response.json();
 
-          console.log("BatchDetail: Fetched data:", data);
-          console.log("BatchDetail: jobs:", data?.jobs);
+        console.log("BatchDetail: Fetched data:", data);
+        console.log("BatchDetail: jobs:", data?.jobs);
 
-          // Use 'jobs' which has processed batch data with steps
-          MASTER_DATA = data && data.jobs ? data.jobs : [];
-          console.log("BatchDetail: MASTER_DATA set to:", MASTER_DATA);
+        // Use 'jobs' which has processed batch data with steps
+        MASTER_DATA = data && data.jobs ? data.jobs : [];
+        console.log("BatchDetail: MASTER_DATA set to:", MASTER_DATA);
 
-          renderStats(data);
-          renderTable();
-
-          document.getElementById("loader").style.display = "none";
-          console.log("Data fetched successfully:", MASTER_DATA);
-
-          if (autoOpenId) {
-            console.log("BatchDetail: Auto-opening batch ID:", autoOpenId);
-            openUpdatePopup(autoOpenId);
-          }
-        } catch (error) {
-          console.error("Failed to fetch dashboard data:", error);
-          document.getElementById("loader").style.display = "none";
-        }
-      }
-
-      function handleSort(column) {
-        if (currentSort.column === column) {
-          // Toggle direction if same column clicked
-          currentSort.direction =
-            currentSort.direction === "asc" ? "desc" : "asc";
-        } else {
-          // New column clicked
-          currentSort.column = column;
-          currentSort.direction = "asc";
-        }
+        renderStats(data);
         renderTable();
-      }
 
-      function resetSort() {
-        // Reset the global sort state
-        currentSort.column = null;
+        document.getElementById("loader").style.display = "none";
+        console.log("Data fetched successfully:", MASTER_DATA);
+
+        if (autoOpenId) {
+          console.log("BatchDetail: Auto-opening batch ID:", autoOpenId);
+          openUpdatePopup(autoOpenId);
+        }
+      } catch (error) {
+        console.error("Failed to fetch dashboard data:", error);
+        document.getElementById("loader").style.display = "none";
+      }
+    }
+
+    function handleSort(column) {
+      if (currentSort.column === column) {
+        // Toggle direction if same column clicked
+        currentSort.direction =
+          currentSort.direction === "asc" ? "desc" : "asc";
+      } else {
+        // New column clicked
+        currentSort.column = column;
         currentSort.direction = "asc";
-
-        // Hide the clear button
-        document.getElementById("clearSortBtn").style.display = "none";
-
-        // Re-render table in original MASTER_DATA order
-        renderTable();
       }
+      renderTable();
+    }
 
-      function renderStats(data) {
-        const total = MASTER_DATA.length;
-        const processCounts = {};
-        const delayBreakdown = {};
-        let totalDelayed = 0;
+    function resetSort() {
+      // Reset the global sort state
+      currentSort.column = null;
+      currentSort.direction = "asc";
 
-        // Get Today at Midnight for accurate comparison
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const todayTime = today.getTime();
+      // Hide the clear button
+      document.getElementById("clearSortBtn").style.display = "none";
 
-        console.log("renderStats: Processing", total, "items");
+      // Re-render table in original MASTER_DATA order
+      renderTable();
+    }
 
-        MASTER_DATA.forEach((job, idx) => {
-          console.log("renderStats: Processing job", idx, ":", job);
+    function renderStats(data) {
+      const total = MASTER_DATA.length;
+      const processCounts = {};
+      const delayBreakdown = {};
+      let totalDelayed = 0;
 
-          // Defensive check: only process if steps exists
-          if (!job.steps || !Array.isArray(job.steps)) {
-            console.log(
-              "renderStats: Job",
-              idx,
-              "has no steps array, skipping",
-            );
-            return;
+      // Get Today at Midnight for accurate comparison
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayTime = today.getTime();
+
+      console.log("renderStats: Processing", total, "items");
+
+      MASTER_DATA.forEach((job, idx) => {
+        console.log("renderStats: Processing job", idx, ":", job);
+
+        // Defensive check: only process if steps exists
+        if (!job.steps || !Array.isArray(job.steps)) {
+          console.log(
+            "renderStats: Job",
+            idx,
+            "has no steps array, skipping",
+          );
+          return;
+        }
+
+        const activeStep = job.steps.find((s) => !s.isDone);
+        if (activeStep) {
+          // 1. Count Process Load
+          processCounts[activeStep.name] =
+            (processCounts[activeStep.name] || 0) + 1;
+
+          // 2. Logic Check: Is it manually delayed OR system overdue?
+          const isManuallyDelayed = String(activeStep.status)
+            .toLowerCase()
+            .includes("delayed");
+          const isOverdue =
+            activeStep.rawExpDate && activeStep.rawExpDate < todayTime;
+
+          if (isManuallyDelayed || isOverdue) {
+            delayBreakdown[activeStep.name] =
+              (delayBreakdown[activeStep.name] || 0) + 1;
+            totalDelayed++;
           }
+        }
+      });
 
-          const activeStep = job.steps.find((s) => !s.isDone);
-          if (activeStep) {
-            // 1. Count Process Load
-            processCounts[activeStep.name] =
-              (processCounts[activeStep.name] || 0) + 1;
+      console.log("renderStats: processCounts:", processCounts);
+      console.log("renderStats: delayBreakdown:", delayBreakdown);
+      console.log("renderStats: totalDelayed:", totalDelayed);
 
-            // 2. Logic Check: Is it manually delayed OR system overdue?
-            const isManuallyDelayed = String(activeStep.status)
-              .toLowerCase()
-              .includes("delayed");
-            const isOverdue =
-              activeStep.rawExpDate && activeStep.rawExpDate < todayTime;
+      const container = document.getElementById("statsBar");
 
-            if (isManuallyDelayed || isOverdue) {
-              delayBreakdown[activeStep.name] =
-                (delayBreakdown[activeStep.name] || 0) + 1;
-              totalDelayed++;
-            }
-          }
-        });
-
-        console.log("renderStats: processCounts:", processCounts);
-        console.log("renderStats: delayBreakdown:", delayBreakdown);
-        console.log("renderStats: totalDelayed:", totalDelayed);
-
-        const container = document.getElementById("statsBar");
-
-        // Generate Process Load HTML
-        let loadHtml = Object.entries(processCounts)
-          .sort((a, b) => b[1] - a[1]) // Optional: sort by highest load
-          .map(
-            ([name, count]) => `
+      // Generate Process Load HTML
+      let loadHtml = Object.entries(processCounts)
+        .sort((a, b) => b[1] - a[1]) // Optional: sort by highest load
+        .map(
+          ([name, count]) => `
               <div style="font-size: 0.85rem; display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding: 4px 0;">
                   <span>${name}</span>
                   <span style="font-weight: bold; color: var(--primary);">${count}</span>
               </div>
             `,
-          )
-          .join("");
+        )
+        .join("");
 
-        // Generate Delay Breakdown HTML
-        let delayHtml =
-          Object.entries(delayBreakdown)
-            .sort((a, b) => b[1] - a[1])
-            .map(
-              ([name, count]) => `
+      // Generate Delay Breakdown HTML
+      let delayHtml =
+        Object.entries(delayBreakdown)
+          .sort((a, b) => b[1] - a[1])
+          .map(
+            ([name, count]) => `
                 <div style="font-size: 0.85rem; color: var(--danger); display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #fff1f1;">
                     <span>${name}</span>
                     <span style="font-weight: bold;">${count}</span>
                 </div>
               `,
-            )
-            .join("") ||
-          '<div style="font-size: 0.8rem; color: #94a3b8; margin-top: 10px; text-align: center;">No active delays</div>';
+          )
+          .join("") ||
+        '<div style="font-size: 0.8rem; color: #94a3b8; margin-top: 10px; text-align: center;">No active delays</div>';
 
-        container.innerHTML = `
+      container.innerHTML = `
             <div class="stat-card">
                 <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 8px;">Overall Production Load</div>
                 <div class="stat-val" style="font-size: 2rem;">${total} <span style="font-size: 1rem; font-weight: normal; color: #64748b;">Active Batches</span></div>
@@ -756,112 +728,112 @@
                 </div>
             </div>
           `;
+    }
+
+    function renderTable() {
+      const searchTerm = document
+        .getElementById("searchInput")
+        .value.toLowerCase();
+      const tbody = document.getElementById("jobTableBody");
+      const clearBtn = document.getElementById("clearSortBtn");
+
+      tbody.innerHTML = "";
+
+      if (currentSort.column) {
+        clearBtn.style.display = "inline-block";
+      } else {
+        clearBtn.style.display = "none";
       }
 
-      function renderTable() {
-        const searchTerm = document
-          .getElementById("searchInput")
-          .value.toLowerCase();
-        const tbody = document.getElementById("jobTableBody");
-        const clearBtn = document.getElementById("clearSortBtn");
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayTime = today.getTime();
 
-        tbody.innerHTML = "";
+      // 1. Update UI Arrows in Header
+      updateHeaderUI();
 
-        if (currentSort.column) {
-          clearBtn.style.display = "inline-block";
-        } else {
-          clearBtn.style.display = "none";
-        }
+      // 2. Filter data
+      let filteredData = MASTER_DATA.filter(
+        (job) =>
+          job.psn.toLowerCase().includes(searchTerm) ||
+          job.batchId.toLowerCase().includes(searchTerm) ||
+          job.jobName.toLowerCase().includes(searchTerm),
+      );
 
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const todayTime = today.getTime();
+      // 3. Sort data
+      if (currentSort.column) {
+        filteredData.sort((a, b) => {
+          let valA, valB;
 
-        // 1. Update UI Arrows in Header
-        updateHeaderUI();
-
-        // 2. Filter data
-        let filteredData = MASTER_DATA.filter(
-          (job) =>
-            job.psn.toLowerCase().includes(searchTerm) ||
-            job.batchId.toLowerCase().includes(searchTerm) ||
-            job.jobName.toLowerCase().includes(searchTerm),
-        );
-
-        // 3. Sort data
-        if (currentSort.column) {
-          filteredData.sort((a, b) => {
-            let valA, valB;
-
-            switch (currentSort.column) {
-              case "psn":
-                valA = a.psn;
-                valB = b.psn;
-                break;
-              case "batchId":
-                // Custom logic for "260019-3" - splits by dash and compares numbers
-                const partA = a.batchId.split("-");
-                const partB = b.batchId.split("-");
-                if (partA[0] !== partB[0])
-                  return currentSort.direction === "asc"
-                    ? partA[0] - partB[0]
-                    : partB[0] - partA[0];
-                valA = parseInt(partA[1] || 0);
-                valB = parseInt(partB[1] || 0);
-                break;
-              case "jobName":
-                valA = a.jobName.toLowerCase();
-                valB = b.jobName.toLowerCase();
-                break;
-              case "qty":
-                valA = Number(a.qty);
-                valB = Number(b.qty);
-                break;
-              case "progress":
-                valA = a.progress;
-                valB = b.progress;
-                break;
-              case "status":
-                // Sort based on the logic you use for pillText
-                valA = getStatusText(a, todayTime);
-                valB = getStatusText(b, todayTime);
-                break;
-              default:
-                return 0;
-            }
-
-            if (valA < valB) return currentSort.direction === "asc" ? -1 : 1;
-            if (valA > valB) return currentSort.direction === "asc" ? 1 : -1;
-            return 0;
-          });
-        }
-
-        // 4. Render Rows
-        filteredData.forEach((job) => {
-          // Defensive check for steps
-          if (!job.steps || !Array.isArray(job.steps)) {
-            console.warn(
-              "renderTable: Job",
-              job.batchId,
-              "has no valid steps array",
-            );
-            return;
+          switch (currentSort.column) {
+            case "psn":
+              valA = a.psn;
+              valB = b.psn;
+              break;
+            case "batchId":
+              // Custom logic for "260019-3" - splits by dash and compares numbers
+              const partA = a.batchId.split("-");
+              const partB = b.batchId.split("-");
+              if (partA[0] !== partB[0])
+                return currentSort.direction === "asc"
+                  ? partA[0] - partB[0]
+                  : partB[0] - partA[0];
+              valA = parseInt(partA[1] || 0);
+              valB = parseInt(partB[1] || 0);
+              break;
+            case "jobName":
+              valA = a.jobName.toLowerCase();
+              valB = b.jobName.toLowerCase();
+              break;
+            case "qty":
+              valA = Number(a.qty);
+              valB = Number(b.qty);
+              break;
+            case "progress":
+              valA = a.progress;
+              valB = b.progress;
+              break;
+            case "status":
+              // Sort based on the logic you use for pillText
+              valA = getStatusText(a, todayTime);
+              valB = getStatusText(b, todayTime);
+              break;
+            default:
+              return 0;
           }
 
-          // Use the helper to get the exact text
-          const pillText = getStatusText(job, todayTime);
+          if (valA < valB) return currentSort.direction === "asc" ? -1 : 1;
+          if (valA > valB) return currentSort.direction === "asc" ? 1 : -1;
+          return 0;
+        });
+      }
 
-          // Determine class based on the text content
-          let pillClass = "pill-running";
-          if (pillText.includes("Delayed")) pillClass = "pill-delayed";
-          else if (pillText === "Partially Delivered")
-            pillClass = "pill-partial";
-          else if (pillText === "Completed") pillClass = "pill-completed";
+      // 4. Render Rows
+      filteredData.forEach((job) => {
+        // Defensive check for steps
+        if (!job.steps || !Array.isArray(job.steps)) {
+          console.warn(
+            "renderTable: Job",
+            job.batchId,
+            "has no valid steps array",
+          );
+          return;
+        }
 
-          const doneCount = job.steps.filter((s) => s.isDone).length;
+        // Use the helper to get the exact text
+        const pillText = getStatusText(job, todayTime);
 
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
+        // Determine class based on the text content
+        let pillClass = "pill-running";
+        if (pillText.includes("Delayed")) pillClass = "pill-delayed";
+        else if (pillText === "Partially Delivered")
+          pillClass = "pill-partial";
+        else if (pillText === "Completed") pillClass = "pill-completed";
+
+        const doneCount = job.steps.filter((s) => s.isDone).length;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
             <td><b>${job.psn}</b></td>
             <td><span style="color: #64748b; font-family: monospace;">${job.batchId}</span></td>
             <td>${job.jobName}</td>
@@ -875,145 +847,145 @@
             <td><span class="pill ${pillClass}">${pillText}</span></td>
             <td><button class="update-btn" onclick="openUpdatePopup(${job.row})">Update Status</button></td>
           `;
-          tbody.appendChild(tr);
-        });
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Helper to get status string for sorting
+    function getStatusText(job, todayTime) {
+      // Defensive check
+      if (!job.steps || !Array.isArray(job.steps)) {
+        console.warn(
+          "getStatusText: Job",
+          job.batchId,
+          "has no valid steps array",
+        );
+        return "Unknown Status";
       }
 
-      // Helper to get status string for sorting
-      function getStatusText(job, todayTime) {
-        // Defensive check
-        if (!job.steps || !Array.isArray(job.steps)) {
-          console.warn(
-            "getStatusText: Job",
-            job.batchId,
-            "has no valid steps array",
-          );
-          return "Unknown Status";
-        }
+      const currentStep = job.steps.find((s) => !s.isDone);
+      const lastStep = job.steps[job.steps.length - 1];
 
-        const currentStep = job.steps.find((s) => !s.isDone);
-        const lastStep = job.steps[job.steps.length - 1];
-
-        if (currentStep) {
-          const isManuallyDelayed = String(currentStep.status)
-            .toLowerCase()
-            .includes("delayed");
-          const isOverdue =
-            currentStep.rawExpDate && currentStep.rawExpDate < todayTime;
-          const state = isManuallyDelayed || isOverdue ? "Delayed" : "Running";
-          return `${currentStep.name}: ${state}`;
-        } else {
-          const isPartiallyDelivered =
-            lastStep && String(lastStep.status).includes("Partially Delivered");
-          return isPartiallyDelivered ? "Partially Delivered" : "Completed";
-        }
+      if (currentStep) {
+        const isManuallyDelayed = String(currentStep.status)
+          .toLowerCase()
+          .includes("delayed");
+        const isOverdue =
+          currentStep.rawExpDate && currentStep.rawExpDate < todayTime;
+        const state = isManuallyDelayed || isOverdue ? "Delayed" : "Running";
+        return `${currentStep.name}: ${state}`;
+      } else {
+        const isPartiallyDelivered =
+          lastStep && String(lastStep.status).includes("Partially Delivered");
+        return isPartiallyDelivered ? "Partially Delivered" : "Completed";
       }
+    }
 
-      // Update the <th> visual state
-      function updateHeaderUI() {
-        const headers = {
-          psn: 0,
-          batchId: 1,
-          jobName: 2,
-          qty: 3,
-          progress: 4,
-          status: 5,
-        };
+    // Update the <th> visual state
+    function updateHeaderUI() {
+      const headers = {
+        psn: 0,
+        batchId: 1,
+        jobName: 2,
+        qty: 3,
+        progress: 4,
+        status: 5,
+      };
 
-        const ths = document.querySelectorAll("thead th");
-        ths.forEach((th) => th.classList.remove("active-sort"));
+      const ths = document.querySelectorAll("thead th");
+      ths.forEach((th) => th.classList.remove("active-sort"));
 
-        Object.keys(headers).forEach((key) => {
-          const index = headers[key];
-          const th = ths[index];
-          const icon = th.querySelector(".sort-icon");
+      Object.keys(headers).forEach((key) => {
+        const index = headers[key];
+        const th = ths[index];
+        const icon = th.querySelector(".sort-icon");
 
-          // Add this IF check to prevent the "null" error
-          if (icon) {
-            if (currentSort.column === key) {
-              th.classList.add("active-sort");
-              icon.innerHTML = currentSort.direction === "asc" ? "▲" : "▼";
-            } else {
-              icon.innerHTML = "↕";
-            }
+        // Add this IF check to prevent the "null" error
+        if (icon) {
+          if (currentSort.column === key) {
+            th.classList.add("active-sort");
+            icon.innerHTML = currentSort.direction === "asc" ? "▲" : "▼";
+          } else {
+            icon.innerHTML = "↕";
           }
-        });
+        }
+      });
+    }
+
+    function openUpdatePopup(batchIdOrRow) {
+      console.log("openUpdatePopup called with:", batchIdOrRow);
+      const numericRow = Number(batchIdOrRow);
+      let job;
+      job = MASTER_DATA.find((j) => String(j.row) === String(batchIdOrRow));
+      if (!isNaN(numericRow) && numericRow > 0) {
+        job = MASTER_DATA.find((j) => Number(j.row) === numericRow);
       }
 
-      function openUpdatePopup(batchIdOrRow) {
-        console.log("openUpdatePopup called with:", batchIdOrRow);
-        const numericRow = Number(batchIdOrRow);
-        let job;
-        job = MASTER_DATA.find((j) => String(j.row) === String(batchIdOrRow));
-        if (!isNaN(numericRow) && numericRow > 0) {
-          job = MASTER_DATA.find((j) => Number(j.row) === numericRow);
-        }
+      if (!job) {
+        job = MASTER_DATA.find(
+          (j) => String(j.batchId) === String(batchIdOrRow),
+        );
+      }
 
-        if (!job) {
-          job = MASTER_DATA.find(
-            (j) => String(j.batchId) === String(batchIdOrRow),
-          );
-        }
+      if (!job) {
+        console.warn("openUpdatePopup: job not found for", batchIdOrRow);
+        return;
+      }
 
-        if (!job) {
-          console.warn("openUpdatePopup: job not found for", batchIdOrRow);
-          return;
-        }
+      currentEditingRow = job.row;
 
-        currentEditingRow = job.row;
+      const historyContainer = document.getElementById("processHistoryArea");
+      const multiList = document.getElementById("multiProcessList");
+      multiList.innerHTML = "";
 
-        const historyContainer = document.getElementById("processHistoryArea");
-        const multiList = document.getElementById("multiProcessList");
-        multiList.innerHTML = "";
-
-        const splitRemarkHtml = job.splitRemark
-          ? `<div style="font-size:0.75rem; color:#1e40af; background:#eff6ff; padding:6px; border-radius:4px; margin-top:8px; border:1px solid #bfdbfe;">
+      const splitRemarkHtml = job.splitRemark
+        ? `<div style="font-size:0.75rem; color:#1e40af; background:#eff6ff; padding:6px; border-radius:4px; margin-top:8px; border:1px solid #bfdbfe;">
               <strong>Batch Origin Remark:</strong> ${job.splitRemark}
             </div>`
-          : "";
-        // Headers
-        document.getElementById("modalPsn").innerHTML =
-          `<div style="font-size: 0.9rem; color: #64748b;">${job.psn}</div><div style="margin-top: 4px;">${job.jobName}</div>
+        : "";
+      // Headers
+      document.getElementById("modalPsn").innerHTML =
+        `<div style="font-size: 0.9rem; color: #64748b;">${job.psn}</div><div style="margin-top: 4px;">${job.jobName}</div>
           ${splitRemarkHtml}`;
-        document.getElementById("modalBatchId").innerHTML =
-          `<div style="background: #f1f5f9; padding: 8px; border-radius: 6px; margin-top: 10px;"><span>Batch ID: ${job.batchId}</span> | <span>Current Qty: ${job.qty}</span></div>`;
+      document.getElementById("modalBatchId").innerHTML =
+        `<div style="background: #f1f5f9; padding: 8px; border-radius: 6px; margin-top: 10px;"><span>Batch ID: ${job.batchId}</span> | <span>Current Qty: ${job.qty}</span></div>`;
 
-        // 3. Render History
-        const completedSteps = job.steps.filter((s) => s.isDone);
-        historyContainer.innerHTML =
-          `<div style="font-weight:bold; font-size:0.8rem; margin-bottom:8px; color:#64748b;">COMPLETED HISTORY</div>` +
-          (completedSteps
-            .map((s, index) => {
-              let startTimeLabel;
+      // 3. Render History
+      const completedSteps = job.steps.filter((s) => s.isDone);
+      historyContainer.innerHTML =
+        `<div style="font-weight:bold; font-size:0.8rem; margin-bottom:8px; color:#64748b;">COMPLETED HISTORY</div>` +
+        (completedSteps
+          .map((s, index) => {
+            let startTimeLabel;
 
-              // Calculate histQty outside the if/else so it's available for the return string
-              const histQty = getQtyForProcess(
-                job.qtyString,
-                s.baseCol,
-                job.qty,
-              );
+            // Calculate histQty outside the if/else so it's available for the return string
+            const histQty = getQtyForProcess(
+              job.qtyString,
+              s.baseCol,
+              job.qty,
+            );
 
-              if (index === 0) {
-                try {
-                  const parts = s.endDate.split("/");
-                  const endD = new Date(20 + parts[2], parts[1] - 1, parts[0]);
-                  const startD = new Date(endD);
-                  startD.setDate(
-                    startD.getDate() - (parseInt(s.duration) || 0),
-                  );
-                  startTimeLabel = Utilities_formatDate(startD);
-                } catch (e) {
-                  startTimeLabel = job.batchDate;
-                }
-              } else {
-                startTimeLabel = completedSteps[index - 1].endDate;
+            if (index === 0) {
+              try {
+                const parts = s.endDate.split("/");
+                const endD = new Date(20 + parts[2], parts[1] - 1, parts[0]);
+                const startD = new Date(endD);
+                startD.setDate(
+                  startD.getDate() - (parseInt(s.duration) || 0),
+                );
+                startTimeLabel = Utilities_formatDate(startD);
+              } catch (e) {
+                startTimeLabel = job.batchDate;
               }
+            } else {
+              startTimeLabel = completedSteps[index - 1].endDate;
+            }
 
-              let detailHtml = s.detail
-                ? `<div style="font-size:0.7rem; color:var(--primary); font-weight:bold;">Machine: ${s.detail}</div>`
-                : "";
+            let detailHtml = s.detail
+              ? `<div style="font-size:0.7rem; color:var(--primary); font-weight:bold;">Machine: ${s.detail}</div>`
+              : "";
 
-              return `
+            return `
                 <div style="padding:10px; border-bottom:1px solid #e2e8f0; background:white; margin-bottom:8px; border-radius:6px; border-left:4px solid ${s.status.includes("Delayed") ? "#ef4444" : "#10b981"}; position:relative;">
                     <div style="display:flex; justify-content:space-between; margin-right:70px;">
                         <span style="font-weight:bold; font-size:0.85rem;">${s.name} (Qty: ${histQty})</span>
@@ -1028,53 +1000,53 @@
                     </button>
                     ${s.remark ? `<div style="font-size:0.7rem; color:#991b1b; background:#fff1f1; padding:4px; border-radius:4px; margin-top:4px;">Remark: ${s.remark}</div>` : ""}
                 </div>`;
-            })
-            .join("") ||
-            '<p style="text-align:center; color:#94a3b8; font-size:0.8rem;">No history yet.</p>');
+          })
+          .join("") ||
+          '<p style="text-align:center; color:#94a3b8; font-size:0.8rem;">No history yet.</p>');
 
-        // 4. Render Active Processes (Including Revert Remark visibility)
-        const pendingSteps = job.steps.filter((s) => !s.isDone);
-        const todayTime = new Date().setHours(0, 0, 0, 0);
-        const activeArea = document.getElementById("activeProcessArea");
-        const saveBtn = document.getElementById("saveBtn");
+      // 4. Render Active Processes (Including Revert Remark visibility)
+      const pendingSteps = job.steps.filter((s) => !s.isDone);
+      const todayTime = new Date().setHours(0, 0, 0, 0);
+      const activeArea = document.getElementById("activeProcessArea");
+      const saveBtn = document.getElementById("saveBtn");
 
-        if (pendingSteps.length === 0) {
-          activeArea.style.display = "none";
-          multiList.innerHTML = `<div style="text-align:center; padding:20px; color:#10b981; font-weight:bold;">Batch Fully Completed</div>`;
-        } else {
-          activeArea.style.display = "block";
-          saveBtn.style.display = "block";
-          multiList.innerHTML = "";
+      if (pendingSteps.length === 0) {
+        activeArea.style.display = "none";
+        multiList.innerHTML = `<div style="text-align:center; padding:20px; color:#10b981; font-weight:bold;">Batch Fully Completed</div>`;
+      } else {
+        activeArea.style.display = "block";
+        saveBtn.style.display = "block";
+        multiList.innerHTML = "";
 
-          pendingSteps.forEach((step) => {
-            const isDieCut = step.name === "Die-cut";
-            const processQty = getQtyForProcess(
-              job.qtyString,
-              step.baseCol,
-              job.qty,
-            );
+        pendingSteps.forEach((step) => {
+          const isDieCut = step.name === "Die-cut";
+          const processQty = getQtyForProcess(
+            job.qtyString,
+            step.baseCol,
+            job.qty,
+          );
 
-            const isOverdue = step.rawExpDate && step.rawExpDate < todayTime;
-            const hasExistingDelay = step.status === "Delayed";
+          const isOverdue = step.rawExpDate && step.rawExpDate < todayTime;
+          const hasExistingDelay = step.status === "Delayed";
 
-            // --- CHANGE 1: Logic for Locking ---
-            // Checkbox is locked if already delayed or if overdue
-            const shouldLockCheckbox = hasExistingDelay || isOverdue;
-            // Remark is ONLY Read-Only if it already exists in the Sheet (hasExistingDelay)
-            const isRemarkReadOnly = hasExistingDelay;
+          // --- CHANGE 1: Logic for Locking ---
+          // Checkbox is locked if already delayed or if overdue
+          const shouldLockCheckbox = hasExistingDelay || isOverdue;
+          // Remark is ONLY Read-Only if it already exists in the Sheet (hasExistingDelay)
+          const isRemarkReadOnly = hasExistingDelay;
 
-            let currentRemark = step.remark || "";
-            if (isOverdue && !currentRemark) {
-              currentRemark = "Process Delayed, Type New Remark";
-            }
+          let currentRemark = step.remark || "";
+          if (isOverdue && !currentRemark) {
+            currentRemark = "Process Delayed, Type New Remark";
+          }
 
-            const div = document.createElement("div");
-            div.className = "multi-step-row";
-            div.setAttribute("data-name", step.name);
-            div.style =
-              "padding: 12px; background: white; border-bottom: 2px solid #f1f5f9; display: flex; flex-direction: column; gap: 8px;";
+          const div = document.createElement("div");
+          div.className = "multi-step-row";
+          div.setAttribute("data-name", step.name);
+          div.style =
+            "padding: 12px; background: white; border-bottom: 2px solid #f1f5f9; display: flex; flex-direction: column; gap: 8px;";
 
-            div.innerHTML = `
+          div.innerHTML = `
                 ${step.revertRemark ? `<div style="font-size:0.7rem; color:#b45309; background:#fffbeb; padding:6px; border-radius:4px; border-left:3px solid #f59e0b; margin-bottom:4px;"><strong>Reverted:</strong> ${step.revertRemark}</div>` : ""}
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <div>
@@ -1099,9 +1071,8 @@
                              background: ${isRemarkReadOnly ? "#f1f5f9" : "#fff"}; 
                              color: ${isRemarkReadOnly ? "#64748b" : "#000"};">
 
-                ${
-                  isDieCut
-                    ? `
+                ${isDieCut
+              ? `
                   <div class="diecut-area" style="margin-top:8px; display: none;">
                     <span style="font-size:0.75rem; color:#64748b; display:block; margin-bottom:4px;">Machine Selection:</span>
                     <select class="step-detail-select" style="width:100%; font-size:0.75rem; padding:6px; border:1px solid #cbd5e1; border-radius:4px; background: #fff;">
@@ -1110,8 +1081,8 @@
                       <option value="Hand switch" ${step.detail === "Hand switch" ? "selected" : ""}>Hand switch</option>
                     </select>
                   </div>`
-                    : ""
-                }
+              : ""
+            }
 
                 <div class="qty-area" style="display:flex; align-items:center; gap:10px; background:#f8fafc; padding:8px; border-radius:4px;">
                     <span style="font-size:0.75rem; color:#64748b;">Process Qty:</span>
@@ -1119,378 +1090,378 @@
                 </div>
             `;
 
-            const dCheck = div.querySelector(".step-delay-check");
-            const doneCheck = div.querySelector(".step-done-check");
-            const rInput = div.querySelector(".step-remark-input");
-            const dieCutArea = div.querySelector(".diecut-area");
+          const dCheck = div.querySelector(".step-delay-check");
+          const doneCheck = div.querySelector(".step-done-check");
+          const rInput = div.querySelector(".step-remark-input");
+          const dieCutArea = div.querySelector(".diecut-area");
 
-            dCheck.onchange = () => {
-              rInput.style.display = dCheck.checked ? "block" : "none";
-            };
-            doneCheck.onchange = () => {
-              if (dieCutArea)
-                dieCutArea.style.display = doneCheck.checked ? "block" : "none";
-            };
+          dCheck.onchange = () => {
+            rInput.style.display = dCheck.checked ? "block" : "none";
+          };
+          doneCheck.onchange = () => {
+            if (dieCutArea)
+              dieCutArea.style.display = doneCheck.checked ? "block" : "none";
+          };
 
-            multiList.appendChild(div);
-          });
-        }
-
-        document.getElementById("updateModal").style.display = "flex";
-        setModalLoading(false);
+          multiList.appendChild(div);
+        });
       }
 
-      function processUpdate() {
-        const saveBtn = document.getElementById("saveBtn");
-        const btnText = document.getElementById("btnText");
-        const btnSpinner = document.getElementById("btnSpinner");
+      document.getElementById("updateModal").style.display = "flex";
+      setModalLoading(false);
+    }
 
-        // 1. GATHER DATA
-        const job = MASTER_DATA.find((j) => j.row === currentEditingRow);
-        if (!job) return;
+    function processUpdate() {
+      const saveBtn = document.getElementById("saveBtn");
+      const btnText = document.getElementById("btnText");
+      const btnSpinner = document.getElementById("btnSpinner");
 
-        // CRITICAL FIX: Ensure qtyString is never null
-        const currentQtyString = job.qtyString || "0";
+      // 1. GATHER DATA
+      const job = MASTER_DATA.find((j) => j.row === currentEditingRow);
+      if (!job) return;
 
-        const stepRows = document.querySelectorAll(".multi-step-row");
-        const updates = [];
-        let validationError = false;
-        let firstIncompleteFound = false;
-        let isDeliveryDone = false;
-        let needsSplitRemark = false;
+      // CRITICAL FIX: Ensure qtyString is never null
+      const currentQtyString = job.qtyString || "0";
 
-        for (let i = 0; i < stepRows.length; i++) {
-          const row = stepRows[i];
-          const done = row.querySelector(".step-done-check").checked;
-          const delay = row.querySelector(".step-delay-check").checked;
-          const stepName = row.getAttribute("data-name");
+      const stepRows = document.querySelectorAll(".multi-step-row");
+      const updates = [];
+      let validationError = false;
+      let firstIncompleteFound = false;
+      let isDeliveryDone = false;
+      let needsSplitRemark = false;
 
-          if (!done) {
-            firstIncompleteFound = true;
-          }
+      for (let i = 0; i < stepRows.length; i++) {
+        const row = stepRows[i];
+        const done = row.querySelector(".step-done-check").checked;
+        const delay = row.querySelector(".step-delay-check").checked;
+        const stepName = row.getAttribute("data-name");
 
-          if (done && stepName === "Delivery") {
-            isDeliveryDone = true;
-          }
+        if (!done) {
+          firstIncompleteFound = true;
+        }
 
-          // Sequential Check
-          if (done && firstIncompleteFound) {
-            alert(
-              `Sequential Error: You cannot complete "${stepName}" because a previous process is still pending.`,
+        if (done && stepName === "Delivery") {
+          isDeliveryDone = true;
+        }
+
+        // Sequential Check
+        if (done && firstIncompleteFound) {
+          alert(
+            `Sequential Error: You cannot complete "${stepName}" because a previous process is still pending.`,
+          );
+          validationError = true;
+          break;
+        }
+
+        // Process row data if user interacted with it
+        if (done || delay) {
+          const base = parseInt(
+            row.querySelector(".step-done-check").dataset.base,
+          );
+          const rInput = row.querySelector(".step-remark-input");
+          const remark = rInput.value;
+          const qtyInput = row.querySelector(".step-qty-input");
+          const qty = qtyInput ? parseInt(qtyInput.value) : job.qty;
+          let detail = "";
+
+          if (done) {
+            // 1. DYNAMIC VALIDATION: Check against THIS process's historical ceiling
+            // We use getQtyForProcess to see what this batch currently 'owns' for this step
+            const recordedProcessQty = parseInt(
+              getQtyForProcess(currentQtyString, base, job.qty),
             );
-            validationError = true;
-            break;
-          }
 
-          // Process row data if user interacted with it
-          if (done || delay) {
-            const base = parseInt(
-              row.querySelector(".step-done-check").dataset.base,
-            );
-            const rInput = row.querySelector(".step-remark-input");
-            const remark = rInput.value;
-            const qtyInput = row.querySelector(".step-qty-input");
-            const qty = qtyInput ? parseInt(qtyInput.value) : job.qty;
-            let detail = "";
-
-            if (done) {
-              // 1. DYNAMIC VALIDATION: Check against THIS process's historical ceiling
-              // We use getQtyForProcess to see what this batch currently 'owns' for this step
-              const recordedProcessQty = parseInt(
-                getQtyForProcess(currentQtyString, base, job.qty),
-              );
-
-              if (isNaN(qty) || qty <= 0) {
-                alert(`Please enter a valid quantity for ${stepName}.`);
-                validationError = true;
-                break;
-              }
-
-              if (qty > recordedProcessQty) {
-                alert(
-                  `Validation Error: ${stepName} cannot exceed ${recordedProcessQty}.\n\n` +
-                    `Note: If you need more units, they are likely in a split-off batch.`,
-                );
-                validationError = true;
-                break;
-              }
-
-              // 2. DETECT SPLIT: If the new input is less than what was recorded
-              if (qty < recordedProcessQty) {
-                needsSplitRemark = true;
-              }
-            }
-
-            // Highlight Logic: If the remark was auto-filled and the user added to it
-            if (
-              remark.includes("PROCESS PASSED EXPECTED DATE") &&
-              remark.length > 30
-            ) {
-              rInput.style.border = "2px solid #10b981"; // Visual highlight for added reason
-            }
-
-            if (done && qty < job.qty) {
-              needsSplitRemark = true;
-            }
-
-            // Die-cut Validation
-            if (stepName === "Die-cut" && done) {
-              const select = row.querySelector(".step-detail-select");
-              if (select.value === "") {
-                alert("Please choose a Die-Cut machine option.");
-                validationError = true;
-                return;
-              }
-              detail = select.value;
-            }
-
-            if (done && (isNaN(qty) || qty <= 0)) {
+            if (isNaN(qty) || qty <= 0) {
               alert(`Please enter a valid quantity for ${stepName}.`);
               validationError = true;
               break;
             }
 
-            updates.push({
-              baseCol: base,
-              isDone: done,
-              isDelayed: delay,
-              remark: remark,
-              qty: qty,
-              detail: detail,
-              qtyString: currentQtyString, // Use the safe variable
-            });
+            if (qty > recordedProcessQty) {
+              alert(
+                `Validation Error: ${stepName} cannot exceed ${recordedProcessQty}.\n\n` +
+                `Note: If you need more units, they are likely in a split-off batch.`,
+              );
+              validationError = true;
+              break;
+            }
+
+            // 2. DETECT SPLIT: If the new input is less than what was recorded
+            if (qty < recordedProcessQty) {
+              needsSplitRemark = true;
+            }
           }
-        }
 
-        if (validationError) return;
-        if (updates.length === 0) {
-          alert("Please select at least one process to update.");
-          return;
-        }
+          // Highlight Logic: If the remark was auto-filled and the user added to it
+          if (
+            remark.includes("PROCESS PASSED EXPECTED DATE") &&
+            remark.length > 30
+          ) {
+            rInput.style.border = "2px solid #10b981"; // Visual highlight for added reason
+          }
 
-        // HANDLE SPLIT REMARK
-        let splitRemark = "";
-        if (needsSplitRemark) {
-          splitRemark = prompt(
-            "A split batch will be created. Please enter a reason/remark for the NEW batch:",
-            "",
-          );
-          if (splitRemark === null) return;
-        }
-        if (isDeliveryDone) {
-          showDatePickModal((selectedDate) => {
-            console.log("Modal get date:" + selectedDate);
-            executeSave(job.row, updates, selectedDate, splitRemark);
+          if (done && qty < job.qty) {
+            needsSplitRemark = true;
+          }
+
+          // Die-cut Validation
+          if (stepName === "Die-cut" && done) {
+            const select = row.querySelector(".step-detail-select");
+            if (select.value === "") {
+              alert("Please choose a Die-Cut machine option.");
+              validationError = true;
+              return;
+            }
+            detail = select.value;
+          }
+
+          if (done && (isNaN(qty) || qty <= 0)) {
+            alert(`Please enter a valid quantity for ${stepName}.`);
+            validationError = true;
+            break;
+          }
+
+          updates.push({
+            baseCol: base,
+            isDone: done,
+            isDelayed: delay,
+            remark: remark,
+            qty: qty,
+            detail: detail,
+            qtyString: currentQtyString, // Use the safe variable
           });
-        } else {
-          executeSave(job.row, updates, null, splitRemark);
         }
       }
 
-      async function processQtyOnlyUpdate() {
-        const rowIdx = currentEditingRow;
-        const job = MASTER_DATA.find((j) => j.row === rowIdx);
-        if (!job) return;
+      if (validationError) return;
+      if (updates.length === 0) {
+        alert("Please select at least one process to update.");
+        return;
+      }
 
-        const qtyMapArray = [];
-        let validationError = false;
-
-        // 1. GATHER FROM HISTORY (Completed Steps)
-        // We grab these from the MASTER_DATA since they aren't inputs in the UI
-        job.steps
-          .filter((s) => s.isDone)
-          .forEach((s) => {
-            const histQty = getQtyForProcess(job.qtyString, s.baseCol, job.qty);
-            qtyMapArray.push({
-              baseCol: s.baseCol,
-              qty: parseInt(histQty),
-            });
-          });
-
-        // 2. GATHER FROM UI (Active/Pending Steps)
-        const qtyInputs = document.querySelectorAll(
-          ".multi-step-row .step-qty-input",
+      // HANDLE SPLIT REMARK
+      let splitRemark = "";
+      if (needsSplitRemark) {
+        splitRemark = prompt(
+          "A split batch will be created. Please enter a reason/remark for the NEW batch:",
+          "",
         );
-        qtyInputs.forEach((input) => {
-          const val = parseInt(input.value);
-          const base = parseInt(input.dataset.base);
+        if (splitRemark === null) return;
+      }
+      if (isDeliveryDone) {
+        showDatePickModal((selectedDate) => {
+          console.log("Modal get date:" + selectedDate);
+          executeSave(job.row, updates, selectedDate, splitRemark);
+        });
+      } else {
+        executeSave(job.row, updates, null, splitRemark);
+      }
+    }
 
-          if (isNaN(val) || val <= 0) {
-            alert("Please enter a valid quantity for all processes.");
-            validationError = true;
-            return;
-          }
+    async function processQtyOnlyUpdate() {
+      const rowIdx = currentEditingRow;
+      const job = MASTER_DATA.find((j) => j.row === rowIdx);
+      if (!job) return;
 
-          // Only add if not already added by history (safety check)
-          if (!qtyMapArray.find((item) => item.baseCol === base)) {
-            qtyMapArray.push({ baseCol: base, qty: val });
-          }
+      const qtyMapArray = [];
+      let validationError = false;
+
+      // 1. GATHER FROM HISTORY (Completed Steps)
+      // We grab these from the MASTER_DATA since they aren't inputs in the UI
+      job.steps
+        .filter((s) => s.isDone)
+        .forEach((s) => {
+          const histQty = getQtyForProcess(job.qtyString, s.baseCol, job.qty);
+          qtyMapArray.push({
+            baseCol: s.baseCol,
+            qty: parseInt(histQty),
+          });
         });
 
-        if (validationError) return;
+      // 2. GATHER FROM UI (Active/Pending Steps)
+      const qtyInputs = document.querySelectorAll(
+        ".multi-step-row .step-qty-input",
+      );
+      qtyInputs.forEach((input) => {
+        const val = parseInt(input.value);
+        const base = parseInt(input.dataset.base);
 
-        // UI Feedback & Execution
-        setModalLoading(true);
-        try {
-          const response = await fetch("/api/updateProcessQtysOnly", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ row: rowIdx, qtyMapArray }),
-          });
-          const result = await response.json();
-          if (response.ok) {
-            showToast(result.message || "Qty update saved");
-            await fetchData();
-            closeModal();
-          } else {
-            showToast(result.error || "Failed to update qty", "error");
-          }
-        } catch (error) {
-          console.error(error);
-          showToast("Network error while updating qty", "error");
-        } finally {
-          setModalLoading(false);
-        }
-      }
-
-      async function executeSave(row, updates, deliveryDate, splitRemark) {
-        const saveBtn = document.getElementById("saveBtn");
-
-        // 1. Determine if we send a new date or keep existing
-        // If deliveryDate is "KEEP_ORIGINAL", we send null
-        const finalDeliveryDate =
-          deliveryDate === "KEEP_ORIGINAL" ? null : deliveryDate;
-
-        console.log("executeSave" + finalDeliveryDate);
-        // 2. UI Feedback (Locking the button)
-        saveBtn.disabled = true;
-        document.getElementById("btnText").innerText = "Processing...";
-        document.getElementById("btnSpinner").style.display = "block";
-
-        // 3. Server Call
-        try {
-          const response = await fetch("/api/saveMultiBatchUpdate", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              row,
-              updates,
-              newDeliveryDate: finalDeliveryDate,
-              splitRemark,
-            }),
-          });
-          const result = await response.json();
-
-          if (response.ok) {
-            showToast(result.message || "Batch updated successfully!");
-            closeModal();
-            await fetchData();
-          } else {
-            alert("Error: " + (result.error || "Update failed"));
-          }
-        } catch (err) {
-          alert("Error: " + err);
-        } finally {
-          resetSaveButton();
-        }
-      }
-
-      function closeModal() {
-        const modal = document.getElementById("updateModal");
-        if (modal) modal.style.display = "none";
-
-        currentEditingRow = null;
-
-        // IMPORTANT: Re-enable all buttons so they work next time the popup opens
-        const modalButtons = document.querySelectorAll("#updateModal button");
-        modalButtons.forEach((btn) => (btn.disabled = false));
-
-        const multiList = document.getElementById("multiProcessList");
-        if (multiList) multiList.innerHTML = "";
-      }
-
-      async function revertStep(row, baseCol) {
-        const job = MASTER_DATA.find((j) => j.row === row);
-        const step = job.steps.find((s) => s.baseCol === baseCol);
-
-        const confirmMsg = `Reverting "${step.name}" will also reset all completed steps after it. \n\nPLEASE ENTER REASON FOR REVERT:`;
-        const reason = prompt(confirmMsg);
-
-        if (reason === null) return;
-
-        if (reason.trim() === "") {
-          alert("You must provide a reason to revert.");
+        if (isNaN(val) || val <= 0) {
+          alert("Please enter a valid quantity for all processes.");
+          validationError = true;
           return;
         }
 
-        setModalLoading(true);
+        // Only add if not already added by history (safety check)
+        if (!qtyMapArray.find((item) => item.baseCol === base)) {
+          qtyMapArray.push({ baseCol: base, qty: val });
+        }
+      });
 
-        // Visual feedback: Disable buttons
-        const modalButtons = document.querySelectorAll("#updateModal button");
-        modalButtons.forEach((btn) => (btn.disabled = true));
+      if (validationError) return;
 
-        try {
-          const response = await fetch("/api/revertProcessStep", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ row, baseCol, revertRemark: reason }),
-          });
-          const result = await response.json();
+      // UI Feedback & Execution
+      setModalLoading(true);
+      try {
+        const response = await fetch("/api/updateProcessQtysOnly", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ row: rowIdx, qtyMapArray }),
+        });
+        const result = await response.json();
+        if (response.ok) {
+          showToast(result.message || "Qty update saved");
+          await fetchData();
+          closeModal();
+        } else {
+          showToast(result.error || "Failed to update qty", "error");
+        }
+      } catch (error) {
+        console.error(error);
+        showToast("Network error while updating qty", "error");
+      } finally {
+        setModalLoading(false);
+      }
+    }
 
-          if (response.ok) {
-            showToast(result.message || "Sequence reverted successfully.");
-            document.getElementById("loader").style.display = "flex";
-            await fetchData();
-            document.getElementById("loader").style.display = "none";
-            openUpdatePopup(row);
-          } else {
-            alert("Error: " + (result.error || "Revert failed"));
-            setModalLoading(false);
-          }
-        } catch (err) {
-          alert("Error: " + err);
+    async function executeSave(row, updates, deliveryDate, splitRemark) {
+      const saveBtn = document.getElementById("saveBtn");
+
+      // 1. Determine if we send a new date or keep existing
+      // If deliveryDate is "KEEP_ORIGINAL", we send null
+      const finalDeliveryDate =
+        deliveryDate === "KEEP_ORIGINAL" ? null : deliveryDate;
+
+      console.log("executeSave" + finalDeliveryDate);
+      // 2. UI Feedback (Locking the button)
+      saveBtn.disabled = true;
+      document.getElementById("btnText").innerText = "Processing...";
+      document.getElementById("btnSpinner").style.display = "block";
+
+      // 3. Server Call
+      try {
+        const response = await fetch("/api/saveMultiBatchUpdate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            row,
+            updates,
+            newDeliveryDate: finalDeliveryDate,
+            splitRemark,
+          }),
+        });
+        const result = await response.json();
+
+        if (response.ok) {
+          showToast(result.message || "Batch updated successfully!");
+          closeModal();
+          await fetchData();
+        } else {
+          alert("Error: " + (result.error || "Update failed"));
+        }
+      } catch (err) {
+        alert("Error: " + err);
+      } finally {
+        resetSaveButton();
+      }
+    }
+
+    function closeModal() {
+      const modal = document.getElementById("updateModal");
+      if (modal) modal.style.display = "none";
+
+      currentEditingRow = null;
+
+      // IMPORTANT: Re-enable all buttons so they work next time the popup opens
+      const modalButtons = document.querySelectorAll("#updateModal button");
+      modalButtons.forEach((btn) => (btn.disabled = false));
+
+      const multiList = document.getElementById("multiProcessList");
+      if (multiList) multiList.innerHTML = "";
+    }
+
+    async function revertStep(row, baseCol) {
+      const job = MASTER_DATA.find((j) => j.row === row);
+      const step = job.steps.find((s) => s.baseCol === baseCol);
+
+      const confirmMsg = `Reverting "${step.name}" will also reset all completed steps after it. \n\nPLEASE ENTER REASON FOR REVERT:`;
+      const reason = prompt(confirmMsg);
+
+      if (reason === null) return;
+
+      if (reason.trim() === "") {
+        alert("You must provide a reason to revert.");
+        return;
+      }
+
+      setModalLoading(true);
+
+      // Visual feedback: Disable buttons
+      const modalButtons = document.querySelectorAll("#updateModal button");
+      modalButtons.forEach((btn) => (btn.disabled = true));
+
+      try {
+        const response = await fetch("/api/revertProcessStep", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ row, baseCol, revertRemark: reason }),
+        });
+        const result = await response.json();
+
+        if (response.ok) {
+          showToast(result.message || "Sequence reverted successfully.");
+          document.getElementById("loader").style.display = "flex";
+          await fetchData();
+          document.getElementById("loader").style.display = "none";
+          openUpdatePopup(row);
+        } else {
+          alert("Error: " + (result.error || "Revert failed"));
           setModalLoading(false);
         }
+      } catch (err) {
+        alert("Error: " + err);
+        setModalLoading(false);
       }
+    }
 
-      // Helper to reset button if modal stays open or on error
-      function resetSaveButton() {
-        const saveBtn = document.getElementById("saveBtn");
-        const btnText = document.getElementById("btnText");
-        const btnSpinner = document.getElementById("btnSpinner");
+    // Helper to reset button if modal stays open or on error
+    function resetSaveButton() {
+      const saveBtn = document.getElementById("saveBtn");
+      const btnText = document.getElementById("btnText");
+      const btnSpinner = document.getElementById("btnSpinner");
 
-        saveBtn.disabled = false;
-        saveBtn.classList.remove("btn-disabled");
-        btnText.innerText = "Confirm Update";
-        btnSpinner.style.display = "none";
-      }
+      saveBtn.disabled = false;
+      saveBtn.classList.remove("btn-disabled");
+      btnText.innerText = "Confirm Update";
+      btnSpinner.style.display = "none";
+    }
 
-      //HELPER FUNCTIONS
+    //HELPER FUNCTIONS
 
-      function showToast(msg) {
-        const t = document.getElementById("toast");
-        t.innerText = msg;
-        t.style.display = "block";
-        setTimeout(() => (t.style.display = "none"), 3000);
-      }
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.innerText = msg;
+      t.style.display = "block";
+      setTimeout(() => (t.style.display = "none"), 3000);
+    }
 
-      function Utilities_formatDate(date) {
-        const d = date.getDate().toString().padStart(2, "0");
-        const m = (date.getMonth() + 1).toString().padStart(2, "0");
-        const y = date.getFullYear().toString().slice(-2);
-        return `${d}/${m}/${y}`;
-      }
+    function Utilities_formatDate(date) {
+      const d = date.getDate().toString().padStart(2, "0");
+      const m = (date.getMonth() + 1).toString().padStart(2, "0");
+      const y = date.getFullYear().toString().slice(-2);
+      return `${d}/${m}/${y}`;
+    }
 
-      function showDatePickModal(callback) {
-        const overlay = document.createElement("div");
-        overlay.style =
-          "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; display:flex; align-items:center; justify-content:center; padding:20px;";
+    function showDatePickModal(callback) {
+      const overlay = document.createElement("div");
+      overlay.style =
+        "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000; display:flex; align-items:center; justify-content:center; padding:20px;";
 
-        const box = document.createElement("div");
-        box.style =
-          "background:white; padding:24px; border-radius:12px; width:100%; max-width:350px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.1);";
+      const box = document.createElement("div");
+      box.style =
+        "background:white; padding:24px; border-radius:12px; width:100%; max-width:350px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.1);";
 
-        box.innerHTML = `
+      box.innerHTML = `
           <h3 style="margin-top:0; font-size:1.1rem; color:#1e293b;">Final Delivery Date</h3>
           <p style="font-size:0.85rem; color:#64748b; margin-bottom:16px;">Delivery complete. Would you like to update the delivery date for this Job?</p>
           
@@ -1503,63 +1474,64 @@
           </div>
         `;
 
-        overlay.appendChild(box);
-        document.body.appendChild(overlay);
+      overlay.appendChild(box);
+      document.body.appendChild(overlay);
 
-        const dateInput = document.getElementById("tempDeliveryDate");
-        const today = new Date();
-        dateInput.valueAsDate = today;
+      const dateInput = document.getElementById("tempDeliveryDate");
+      const today = new Date();
+      dateInput.valueAsDate = today;
 
-        // Set min date to today
-        const minDateString = today.toISOString().split("T")[0];
-        dateInput.setAttribute("min", minDateString);
+      // Set min date to today
+      const minDateString = today.toISOString().split("T")[0];
+      dateInput.setAttribute("min", minDateString);
 
-        // OPTION 1: Confirm new date
-        document.getElementById("confirmDate").onclick = () => {
-          const val = dateInput.value;
-          if (!val) {
-            alert("Please select a date.");
-            return;
-          }
-          document.body.removeChild(overlay);
-          callback(val);
-        };
-
-        // OPTION 2: Keep existing (returns a special flag)
-        document.getElementById("keepDate").onclick = () => {
-          document.body.removeChild(overlay);
-          callback("KEEP_ORIGINAL");
-        };
-
-        // OPTION 3: Cancel everything
-        document.getElementById("cancelDate").onclick = () => {
-          document.body.removeChild(overlay);
-        };
-      }
-
-      function setModalLoading(isLoading) {
-        const modalButtons = document.querySelectorAll("#updateModal button");
-        modalButtons.forEach((btn) => {
-          btn.disabled = isLoading;
-          // Optional: make it look disabled
-          btn.style.opacity = isLoading ? "0.5" : "1";
-          btn.style.cursor = isLoading ? "not-allowed" : "pointer";
-        });
-      }
-
-      function getQtyForProcess(qtyString, baseCol, defaultQty) {
-        // If the string is empty or just "0", it hasn't been serialized yet, return default
-        if (!qtyString || qtyString === "0") return defaultQty;
-
-        const parts = qtyString.split("|");
-        for (let p of parts) {
-          const pair = p.split(":");
-          if (pair.length === 2 && parseInt(pair[0]) === baseCol) {
-            return pair[1];
-          }
+      // OPTION 1: Confirm new date
+      document.getElementById("confirmDate").onclick = () => {
+        const val = dateInput.value;
+        if (!val) {
+          alert("Please select a date.");
+          return;
         }
-        return defaultQty;
+        document.body.removeChild(overlay);
+        callback(val);
+      };
+
+      // OPTION 2: Keep existing (returns a special flag)
+      document.getElementById("keepDate").onclick = () => {
+        document.body.removeChild(overlay);
+        callback("KEEP_ORIGINAL");
+      };
+
+      // OPTION 3: Cancel everything
+      document.getElementById("cancelDate").onclick = () => {
+        document.body.removeChild(overlay);
+      };
+    }
+
+    function setModalLoading(isLoading) {
+      const modalButtons = document.querySelectorAll("#updateModal button");
+      modalButtons.forEach((btn) => {
+        btn.disabled = isLoading;
+        // Optional: make it look disabled
+        btn.style.opacity = isLoading ? "0.5" : "1";
+        btn.style.cursor = isLoading ? "not-allowed" : "pointer";
+      });
+    }
+
+    function getQtyForProcess(qtyString, baseCol, defaultQty) {
+      // If the string is empty or just "0", it hasn't been serialized yet, return default
+      if (!qtyString || qtyString === "0") return defaultQty;
+
+      const parts = qtyString.split("|");
+      for (let p of parts) {
+        const pair = p.split(":");
+        if (pair.length === 2 && parseInt(pair[0]) === baseCol) {
+          return pair[1];
+        }
       }
-    </script>
-  </body>
+      return defaultQty;
+    }
+  </script>
+</body>
+
 </html>

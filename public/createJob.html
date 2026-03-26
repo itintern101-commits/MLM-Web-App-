@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <base target="_top">
   <style>
@@ -12,49 +13,208 @@
       --danger: #d93025;
       --warning: #f2994a;
     }
-    
-    body { font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; background: var(--bg); color: var(--text); }
-    .main-wrapper { margin-left: 280px; padding: 30px; min-height: 100vh; }
-    .container { width: 100%; max-width: 950px; background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin: auto; }
-    
-    h2 { color: var(--primary); margin: 0 0 25px 0; font-size: 24px; border-bottom: 2px solid var(--bg); padding-bottom: 15px; }
-    h3 { font-size: 16px; color: #4e5969; margin-bottom: 15px; border-left: 4px solid var(--primary); padding-left: 10px; }
 
-    .section-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 25px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
-    .span-full { grid-column: 1 / -1; }
-    
-    .input-group { display: flex; flex-direction: column; gap: 6px; }
-    label { font-weight: 600; font-size: 13px; color: #4e5969; }
-    input, select { padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: white; outline: none; transition: border 0.3s; }
-    input:focus { border-color: var(--primary); }
-    .input-error { border: 2px solid var(--danger) !important; background: #fff1f0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .main-wrapper {
+      margin-left: 280px;
+      padding: 30px;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 950px;
+      background: white;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      margin: auto;
+    }
+
+    h2 {
+      color: var(--primary);
+      margin: 0 0 25px 0;
+      font-size: 24px;
+      border-bottom: 2px solid var(--bg);
+      padding-bottom: 15px;
+    }
+
+    h3 {
+      font-size: 16px;
+      color: #4e5969;
+      margin-bottom: 15px;
+      border-left: 4px solid var(--primary);
+      padding-left: 10px;
+    }
+
+    .section-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 25px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .span-full {
+      grid-column: 1 / -1;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 13px;
+      color: #4e5969;
+    }
+
+    input,
+    select {
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      background: white;
+      outline: none;
+      transition: border 0.3s;
+    }
+
+    input:focus {
+      border-color: var(--primary);
+    }
+
+    .input-error {
+      border: 2px solid var(--danger) !important;
+      background: #fff1f0;
+    }
 
     /* Process Selection */
-    .process-pool { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
-    .proc-pill { background: #f8fafc; border: 1px solid var(--border); padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 12px; transition: 0.2s; }
-    .proc-pill:hover { border-color: var(--primary); background: #eef2ff; }
-    .proc-pill.selected { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; border-style: dashed; }
+    .process-pool {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
 
-    .selected-sequence { background: #f8fafc; border-radius: 12px; padding: 15px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border: 2px dashed var(--border); min-height: 50px; }
-    .seq-item { background: var(--primary); color: white; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-    .remove-btn { cursor: pointer; opacity: 0.8; font-size: 14px; }
-    .btn-clear { background: var(--danger); color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; opacity: 0.9; }
-    .btn-clear:hover { opacity: 1; }
+    .proc-pill {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: 0.2s;
+    }
+
+    .proc-pill:hover {
+      border-color: var(--primary);
+      background: #eef2ff;
+    }
+
+    .proc-pill.selected {
+      background: #e2e8f0;
+      color: #94a3b8;
+      cursor: not-allowed;
+      border-style: dashed;
+    }
+
+    .selected-sequence {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 15px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      border: 2px dashed var(--border);
+      min-height: 50px;
+    }
+
+    .seq-item {
+      background: var(--primary);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .remove-btn {
+      cursor: pointer;
+      opacity: 0.8;
+      font-size: 14px;
+    }
+
+    .btn-clear {
+      background: var(--danger);
+      color: white;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: bold;
+      opacity: 0.9;
+    }
+
+    .btn-clear:hover {
+      opacity: 1;
+    }
 
     /* Batch UI - Redesigned for Drag & Drop */
-    .batch-container { border: 1px solid var(--border); border-radius: 12px; margin-bottom: 30px; background: #fff; overflow: hidden; }
-    .batch-header { background: #f1f5f9; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
-    .batch-title { font-weight: 800; color: #334155; }
-    
-    .vertical-steps { display: flex; flex-direction: column; padding: 10px; gap: 8px; }
-    
-      /* Updated Grid for 4 columns: Num, Name, Date, Handle */
-    .step-row { 
-      display: grid; 
-      grid-template-columns: 50px 1fr 180px 40px; 
-      align-items: center; 
-      padding: 12px; 
+    .batch-container {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 30px;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .batch-header {
+      background: #f1f5f9;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .batch-title {
+      font-weight: 800;
+      color: #334155;
+    }
+
+    .vertical-steps {
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      gap: 8px;
+    }
+
+    /* Updated Grid for 4 columns: Num, Name, Date, Handle */
+    .step-row {
+      display: grid;
+      grid-template-columns: 50px 1fr 180px 40px;
+      align-items: center;
+      padding: 12px;
       background: white;
       border: 1px solid #eef2ff;
       border-left: 5px solid var(--primary);
@@ -71,14 +231,26 @@
       background: transparent;
       outline: none;
       cursor: pointer;
-      appearance: auto; /* Shows the dropdown arrow */
-      padding-right: 20px; /* Space for the arrow */
+      appearance: auto;
+      /* Shows the dropdown arrow */
+      padding-right: 20px;
+      /* Space for the arrow */
     }
 
-    .step-row:active { cursor: grabbing; }
-    .step-row:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.05); transform: translateX(5px); }
-    
-    .dragging { opacity: 0.4; border: 2px dashed var(--primary); background: #f0f7ff; }
+    .step-row:active {
+      cursor: grabbing;
+    }
+
+    .step-row:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      transform: translateX(5px);
+    }
+
+    .dragging {
+      opacity: 0.4;
+      border: 2px dashed var(--primary);
+      background: #f0f7ff;
+    }
 
     .step-num-badge {
       background: #f1f5f9;
@@ -93,7 +265,7 @@
       font-size: 13px;
     }
 
-  
+
 
     /* Drag handle styling */
     .drag-handle {
@@ -114,280 +286,383 @@
     .drag-handle:active {
       cursor: grabbing;
     }
-    .delivery-row { 
-      background: #fffbeb !important; 
-      border-left: 5px solid var(--warning) !important; 
+
+    .delivery-row {
+      background: #fffbeb !important;
+      border-left: 5px solid var(--warning) !important;
       cursor: default !important;
       transform: none !important;
     }
 
-    .btn-submit { background: var(--success); color: white; border: none; padding: 18px; width: 100%; border-radius: 10px; cursor: pointer; font-size: 18px; font-weight: bold; margin-top: 10px; }
-    .loading { display: none; text-align: center; margin-top: 15px; color: var(--primary); font-weight: bold; }
+    .btn-submit {
+      background: var(--success);
+      color: white;
+      border: none;
+      padding: 18px;
+      width: 100%;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
 
-    #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: none; }
-    .toast { background: rgba(45, 55, 72, 0.95); color: white; padding: 16px 32px; border-radius: 12px; min-width: 350px; text-align: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2); display: flex; justify-content: center; align-items: center; font-size: 16px; font-weight: 600; pointer-events: auto; animation: popDown 0.4s forwards; }
-    .toast.error { border-bottom: 4px solid var(--danger); }
-    .toast.success { border-bottom: 4px solid var(--success); }
+    .loading {
+      display: none;
+      text-align: center;
+      margin-top: 15px;
+      color: var(--primary);
+      font-weight: bold;
+    }
 
-    @keyframes popDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    @keyframes fadeOutUp { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-20px); opacity: 0; } }
+    #toast-container {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: rgba(45, 55, 72, 0.95);
+      color: white;
+      padding: 16px 32px;
+      border-radius: 12px;
+      min-width: 350px;
+      text-align: center;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 16px;
+      font-weight: 600;
+      pointer-events: auto;
+      animation: popDown 0.4s forwards;
+    }
+
+    .toast.error {
+      border-bottom: 4px solid var(--danger);
+    }
+
+    .toast.success {
+      border-bottom: 4px solid var(--success);
+    }
+
+    @keyframes popDown {
+      from {
+        transform: translateY(-50px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeOutUp {
+      from {
+        transform: translateY(0);
+        opacity: 1;
+      }
+
+      to {
+        transform: translateY(-20px);
+        opacity: 0;
+      }
+    }
   </style>
 </head>
+
 <body>
 
-<div id="sidebar-container"></div>
-<script>
-  fetch('/Sidebar.html')
-    .then(r => r.text())
-    .then(html => {
-      document.getElementById('sidebar-container').innerHTML = html;
+  <div id="sidebar-container"></div>
+  <script>
+    fetch('/Sidebar.html')
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById('sidebar-container').innerHTML = html;
 
-      // ✅ RUN AFTER sidebar is inserted
-      const currentPage = window.location.pathname
-        .split('/')
-        .pop()
-        .replace('.html', '')
-        .toLowerCase();
+        // ✅ RUN AFTER sidebar is inserted
+        const currentPage = window.location.pathname
+          .split('/')
+          .pop()
+          .replace('.html', '')
+          .toLowerCase();
 
-      document.querySelectorAll('.nav-link').forEach(link => {
-        const page = link.dataset.page.toLowerCase();
+        document.querySelectorAll('.nav-link').forEach(link => {
+          const page = link.dataset.page.toLowerCase();
 
-        if (page === currentPage) {
-          link.classList.add('active');
-        }
-      });
-    })
-    .catch(console.error);
-</script>
+          if (page === currentPage) {
+            link.classList.add('active');
+          }
+        });
+      })
+      .catch(console.error);
+  </script>
 
-<div id="toast-container"></div>
+  <div id="toast-container"></div>
 
-<div class="main-wrapper">
-  <div class="container">
-    <h2>📋 Create Job & Batch Entry</h2>
+  <div class="main-wrapper">
+    <div class="container">
+      <h2>📋 Create Job & Batch Entry</h2>
 
-    <div class="section-card">
-      <h3>1. Main Job Details</h3>
-      <div class="grid">
-        <div class="input-group"><label>PSN</label><input type="text" id="psn" placeholder="e.g. 260000"></div>
-        <div class="input-group"><label>PI Number</label><input type="text" id="piNumber" placeholder="0000/26"></div>
-        <div class="input-group"><label>Total Quantity</label><input type="number" id="totalQuantity" oninput="distributeQuantities()"></div>
-        <div class="input-group span-full"><label>Job Name</label><input type="text" id="jobName"></div>
-        <div class="input-group"><label>Order Date</label><input type="date" id="orderDate"></div>
-        <div class="input-group"><label>Final Delivery Date</label><input type="date" id="deliveryDate"></div>
-        <div class="input-group"><label>Item Name</label><input type="text" id="item"></div>
-        
-        <div class="input-group">
-          <label>Sales Code</label>
-          <select id="salesCode"><option value="AO">AO</option><option value="SHU">SHU</option><option value="NT">NT</option><option value="AK">AK</option></select>
-        </div>
-        <div class="input-group">
-          <label>Job Type</label>
-          <select id="jobType"><option value="Offset">Offset</option><option value="FSC">FSC</option><option value="Flexo">Flexo</option></select>
-        </div>
-        <div class="input-group">
-          <label>Priority</label>
-          <select id="priority"><option value="Normal">Normal</option><option value="Cut Queue">Cut Queue</option><option value="Urgent">Urgent</option></select>
+      <div class="section-card">
+        <h3>1. Main Job Details</h3>
+        <div class="grid">
+          <div class="input-group"><label>PSN</label><input type="text" id="psn" placeholder="e.g. 260000"></div>
+          <div class="input-group"><label>PI Number</label><input type="text" id="piNumber" placeholder="0000/26"></div>
+          <div class="input-group"><label>Total Quantity</label><input type="number" id="totalQuantity"
+              oninput="distributeQuantities()"></div>
+          <div class="input-group span-full"><label>Job Name</label><input type="text" id="jobName"></div>
+          <div class="input-group"><label>Order Date</label><input type="date" id="orderDate"></div>
+          <div class="input-group"><label>Final Delivery Date</label><input type="date" id="deliveryDate"></div>
+          <div class="input-group"><label>Item Name</label><input type="text" id="item"></div>
+
+          <div class="input-group">
+            <label>Sales Code</label>
+            <select id="salesCode">
+              <option value="AO">AO</option>
+              <option value="SHU">SHU</option>
+              <option value="NT">NT</option>
+              <option value="AK">AK</option>
+              <option value="NY">NY</option>
+              <option value="OC">OC</option>
+              <option value="PAO">PAO</option>
+              <option value="PNY">PNY</option>
+              <option value="SO">SO</option>
+              <option value="SC">SC</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>Job Type</label>
+            <select id="jobType">
+              <option value="Offset">Offset</option>
+              <option value="FSC">FSC</option>
+              <option value="Flexo & MMB/SOS">Flexo & MMB/SOS</option>
+              <option value="Fully Outsourced">Fully Outsourced</option>
+              <option value="FSCFully Outsourced">FSC Fully Outsourced</option>
+              <option value="Drawdown">Drawdown</option>
+              <option value="K SERIES">K SERIES</option>
+              <option value="Mock-Up">Mock-Up</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>Priority</label>
+            <select id="priority">
+              <option value="Normal">Normal</option>
+              <option value="Cut Queue">Cut Queue</option>
+              <option value="Urgent">Urgent</option>
+            </select>
+          </div>
         </div>
       </div>
+
+      <div class="section-card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h3>2. Build Production Sequence</h3>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <button class="btn-clear" onclick="clearSequence()">Clear All Steps</button>
+            <span id="counter" style="font-size:12px; font-weight:bold; color: var(--primary);">0 / 11</span>
+          </div>
+        </div>
+        <div class="process-pool" id="processPool"></div>
+        <div class="selected-sequence" id="selectedSequence">
+          <span style="color:#94a3b8; font-size:13px;">No steps selected...</span>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <h3>3. Batching</h3>
+        <div class="grid">
+          <div class="input-group">
+            <label>Number of Batches</label>
+            <select id="batchCount" onchange="refreshUI(); distributeQuantities()" style="max-width: 250px;">
+              <option value="1">1 Batch</option>
+              <option value="2">2 Batches</option>
+              <option value="3">3 Batches</option>
+              <option value="4">4 Batches</option>
+              <option value="5">5 Batches</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div id="batchArea"></div>
+
+      <button class="btn-submit" id="submitBtn" onclick="submitForm()">Create Entry & Save</button>
+      <div id="loadingMsg" class="loading">⌛ Saving to Database...</div>
     </div>
-
-    <div class="section-card">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h3>2. Build Production Sequence</h3>
-        <div style="display:flex; gap:10px; align-items:center;">
-          <button class="btn-clear" onclick="clearSequence()">Clear All Steps</button>
-          <span id="counter" style="font-size:12px; font-weight:bold; color: var(--primary);">0 / 11</span>
-        </div>
-      </div>
-      <div class="process-pool" id="processPool"></div>
-      <div class="selected-sequence" id="selectedSequence">
-        <span style="color:#94a3b8; font-size:13px;">No steps selected...</span>
-      </div>
-    </div>
-
-    <div class="section-card">
-      <h3>3. Batching</h3>
-      <div class="grid">
-        <div class="input-group">
-          <label>Number of Batches</label>
-          <select id="batchCount" onchange="refreshUI(); distributeQuantities()" style="max-width: 250px;">
-            <option value="1">1 Batch</option><option value="2">2 Batches</option><option value="3">3 Batches</option><option value="4">4 Batches</option><option value="5">5 Batches</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <div id="batchArea"></div>
-
-    <button class="btn-submit" id="submitBtn" onclick="submitForm()">Create Entry & Save</button>
-    <div id="loadingMsg" class="loading">⌛ Saving to Database...</div>
   </div>
-</div>
 
-<script>
-  function showToast(message, type = 'error') {
-    const container = document.getElementById('toast-container');
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    let icon = type === 'error' ? '⚠️ ' : (type === 'success' ? '✅ ' : 'ℹ️ ');
-    toast.innerHTML = `<span>${icon} ${message}</span>`;
-    container.appendChild(toast);
-    setTimeout(() => {
-      toast.style.animation = 'fadeOutUp 0.5s forwards';
-      setTimeout(() => toast.remove(), 500);
-    }, 3000);
-  }
+  <script>
+    function showToast(message, type = 'error') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      let icon = type === 'error' ? '⚠️ ' : (type === 'success' ? '✅ ' : 'ℹ️ ');
+      toast.innerHTML = `<span>${icon} ${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.animation = 'fadeOutUp 0.5s forwards';
+        setTimeout(() => toast.remove(), 500);
+      }, 3000);
+    }
 
-  const processList = ["Sheeting","Printing","Lamination","Efluting","Die-cut","Convert","Baseboard", "Hotstamping","Packing","Double-Side-Tape", "Emboss", "Blind Emboss", "Gluing", "Side Glue", "2 Point Glue", "Attach Handle", "Peeling", "Punch Hole", "Slitting LF", "FlexoSlitting", "Spot UV", "Texture", "Trimming", "Varnish", "Waterbase"];
-  let selectedSteps = [];
+    const processList = ["Sheeting", "Printing", "Lamination", "Efluting", "Die-cut", "Convert", "Baseboard", "Hotstamping", "Packing", "Double-Side-Tape", "Emboss", "Blind Emboss", "Gluing", "Side Glue", "2 Point Glue", "Attach Handle", "Peeling", "Punch Hole", "Slitting LF", "FlexoSlitting", "Spot UV", "Texture", "Trimming", "Varnish", "Waterbase"];
+    let selectedSteps = [];
 
-  window.onload = () => {
-    document.getElementById('orderDate').value = new Date().toISOString().split('T')[0];
-    renderPool();
-  };
+    window.onload = () => {
+      document.getElementById('orderDate').value = new Date().toISOString().split('T')[0];
+      renderPool();
+    };
 
-  function renderPool() {
-    const pool = document.getElementById('processPool');
-    pool.innerHTML = processList.map(p => {
-      const isSel = selectedSteps.includes(p);
-      return `<div class="proc-pill ${isSel ? 'selected' : ''}" onclick="addStep('${p}')">${p}</div>`;
-    }).join('');
-    document.getElementById('counter').innerText = `${selectedSteps.length} / 11`;
-  }
+    function renderPool() {
+      const pool = document.getElementById('processPool');
+      pool.innerHTML = processList.map(p => {
+        const isSel = selectedSteps.includes(p);
+        return `<div class="proc-pill ${isSel ? 'selected' : ''}" onclick="addStep('${p}')">${p}</div>`;
+      }).join('');
+      document.getElementById('counter').innerText = `${selectedSteps.length} / 11`;
+    }
 
-  function addStep(p) {
-    if (selectedSteps.length >= 11) { showToast("Max 11 steps", "warning"); return; }
-    if (!selectedSteps.includes(p)) {
-      selectedSteps.push(p);
+    function addStep(p) {
+      if (selectedSteps.length >= 11) { showToast("Max 11 steps", "warning"); return; }
+      if (!selectedSteps.includes(p)) {
+        selectedSteps.push(p);
+        renderSeq();
+        refreshUI();
+        distributeQuantities();
+      }
+    }
+
+    function removeStep(i) {
+      selectedSteps.splice(i, 1);
       renderSeq();
       refreshUI();
       distributeQuantities();
     }
-  }
 
-  function removeStep(i) {
-    selectedSteps.splice(i, 1);
-    renderSeq();
-    refreshUI();
-    distributeQuantities();
-  }
-
-  function distributeQuantities() {
-    const total = parseInt(document.getElementById('totalQuantity').value) || 0;
-    const count = parseInt(document.getElementById('batchCount').value);
-    const area = document.getElementById('batchArea');
-    if (area.innerHTML === "" && selectedSteps.length > 0) refreshUI();
-    if (total <= 0) return;
-    let baseQty = Math.floor((total / count) / 100) * 100; 
-    let currentSum = 0;
-    for (let i = 1; i <= count; i++) {
-      let val = (i === count) ? (total - currentSum) : baseQty;
-      const input = document.getElementById(`qty_b${i}`);
-      if(input) input.value = val;
-      currentSum += val;
+    function distributeQuantities() {
+      const total = parseInt(document.getElementById('totalQuantity').value) || 0;
+      const count = parseInt(document.getElementById('batchCount').value);
+      const area = document.getElementById('batchArea');
+      if (area.innerHTML === "" && selectedSteps.length > 0) refreshUI();
+      if (total <= 0) return;
+      let baseQty = Math.floor((total / count) / 100) * 100;
+      let currentSum = 0;
+      for (let i = 1; i <= count; i++) {
+        let val = (i === count) ? (total - currentSum) : baseQty;
+        const input = document.getElementById(`qty_b${i}`);
+        if (input) input.value = val;
+        currentSum += val;
+      }
     }
-  }
 
-  function clearSequence() {
-    if(selectedSteps.length === 0) return;
-    selectedSteps = [];
-    renderSeq();
-    refreshUI();
-    showToast("Sequence cleared.", "success");
-  }
-
-  function renderSeq() {
-    const container = document.getElementById('selectedSequence');
-    renderPool();
-    if(selectedSteps.length === 0) {
-      container.innerHTML = '<span style="color:#94a3b8; font-size:13px;">No steps selected...</span>';
-      return;
+    function clearSequence() {
+      if (selectedSteps.length === 0) return;
+      selectedSteps = [];
+      renderSeq();
+      refreshUI();
+      showToast("Sequence cleared.", "success");
     }
-    container.innerHTML = selectedSteps.map((p, i) => `
-      <div class="seq-item">${i+1}. ${p} <span class="remove-btn" onclick="removeStep(${i})">✕</span></div>
+
+    function renderSeq() {
+      const container = document.getElementById('selectedSequence');
+      renderPool();
+      if (selectedSteps.length === 0) {
+        container.innerHTML = '<span style="color:#94a3b8; font-size:13px;">No steps selected...</span>';
+        return;
+      }
+      container.innerHTML = selectedSteps.map((p, i) => `
+      <div class="seq-item">${i + 1}. ${p} <span class="remove-btn" onclick="removeStep(${i})">✕</span></div>
     `).join('');
-  }
+    }
 
-  function handleQtyChange(changedIdx) {
-    const total = parseInt(document.getElementById('totalQuantity').value) || 0;
-    const count = parseInt(document.getElementById('batchCount').value);
-    let currentSum = 0;
-    for (let i = 1; i <= changedIdx; i++) currentSum += parseInt(document.getElementById(`qty_b${i}`).value) || 0;
-    if (currentSum > total) { showToast("Exceeds Total!", "error"); distributeQuantities(); return; }
-    const remainingCount = count - changedIdx;
-    if (remainingCount > 0) {
-      const remaining = total - currentSum;
-      let nextBase = Math.floor((remaining / remainingCount) / 100) * 100;
-      let tempSum = currentSum;
-      for (let i = changedIdx + 1; i <= count; i++) {
-        let val = (i === count) ? (total - tempSum) : nextBase;
-        document.getElementById(`qty_b${i}`).value = Math.max(0, val);
-        tempSum += val;
+    function handleQtyChange(changedIdx) {
+      const total = parseInt(document.getElementById('totalQuantity').value) || 0;
+      const count = parseInt(document.getElementById('batchCount').value);
+      let currentSum = 0;
+      for (let i = 1; i <= changedIdx; i++) currentSum += parseInt(document.getElementById(`qty_b${i}`).value) || 0;
+      if (currentSum > total) { showToast("Exceeds Total!", "error"); distributeQuantities(); return; }
+      const remainingCount = count - changedIdx;
+      if (remainingCount > 0) {
+        const remaining = total - currentSum;
+        let nextBase = Math.floor((remaining / remainingCount) / 100) * 100;
+        let tempSum = currentSum;
+        for (let i = changedIdx + 1; i <= count; i++) {
+          let val = (i === count) ? (total - tempSum) : nextBase;
+          document.getElementById(`qty_b${i}`).value = Math.max(0, val);
+          tempSum += val;
+        }
       }
     }
-  }
 
-  function validateDate(batch, step, input) {
-    input.classList.remove('input-error');
-    const selectedDate = new Date(input.value);
-    const today = new Date(); today.setHours(0,0,0,0);
-    if (selectedDate < today) { showToast("Past date forbidden"); input.classList.add('input-error'); input.value = ""; return; }
-    if (step > 1) {
-      const prevInput = document.getElementById(`date_b${batch}_s${step - 1}`);
-      if (prevInput && prevInput.value && selectedDate <= new Date(prevInput.value)) {
-        showToast(`Must be after Step ${step-1}`); input.classList.add('input-error'); input.value = "";
+    function validateDate(batch, step, input) {
+      input.classList.remove('input-error');
+      const selectedDate = new Date(input.value);
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      if (selectedDate < today) { showToast("Past date forbidden"); input.classList.add('input-error'); input.value = ""; return; }
+      if (step > 1) {
+        const prevInput = document.getElementById(`date_b${batch}_s${step - 1}`);
+        if (prevInput && prevInput.value && selectedDate <= new Date(prevInput.value)) {
+          showToast(`Must be after Step ${step - 1}`); input.classList.add('input-error'); input.value = "";
+        }
       }
     }
-  }
 
-  // --- DRAG AND DROP LOGIC ---
-  let draggedElement = null;
+    // --- DRAG AND DROP LOGIC ---
+    let draggedElement = null;
 
-  function handleDragStart(e) {
-    draggedElement = e.currentTarget;
-    e.dataTransfer.effectAllowed = 'move';
-    draggedElement.classList.add('dragging');
-  }
-
-  function handleDragOver(e) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  }
-
-  function handleDrop(e) {
-    e.preventDefault();
-    const targetElement = e.currentTarget;
-    draggedElement.classList.remove('dragging');
-
-    if (targetElement !== draggedElement && !targetElement.classList.contains('delivery-row')) {
-      // Swap Values logic
-      const dSelect = draggedElement.querySelector('select');
-      const dDate = draggedElement.querySelector('input[type="date"]');
-      const tSelect = targetElement.querySelector('select');
-      const tDate = targetElement.querySelector('input[type="date"]');
-
-      const tempName = dSelect.value;
-      const tempDate = dDate.value;
-
-      dSelect.value = tSelect.value;
-      dDate.value = tDate.value;
-
-      tSelect.value = tempName;
-      tDate.value = tempDate;
-      
-      showToast("Steps Swapped!", "success");
+    function handleDragStart(e) {
+      draggedElement = e.currentTarget;
+      e.dataTransfer.effectAllowed = 'move';
+      draggedElement.classList.add('dragging');
     }
-  }
 
- function refreshUI() {
-  const count = parseInt(document.getElementById('batchCount').value);
-  const area = document.getElementById('batchArea');
-  if (selectedSteps.length === 0) { area.innerHTML = ''; return; }
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    }
 
-  let html = '';
-  for (let b = 1; b <= count; b++) {
-    html += `
+    function handleDrop(e) {
+      e.preventDefault();
+      const targetElement = e.currentTarget;
+      draggedElement.classList.remove('dragging');
+
+      if (targetElement !== draggedElement && !targetElement.classList.contains('delivery-row')) {
+        // Swap Values logic
+        const dSelect = draggedElement.querySelector('select');
+        const dDate = draggedElement.querySelector('input[type="date"]');
+        const tSelect = targetElement.querySelector('select');
+        const tDate = targetElement.querySelector('input[type="date"]');
+
+        const tempName = dSelect.value;
+        const tempDate = dDate.value;
+
+        dSelect.value = tSelect.value;
+        dDate.value = tDate.value;
+
+        tSelect.value = tempName;
+        tDate.value = tempDate;
+
+        showToast("Steps Swapped!", "success");
+      }
+    }
+
+    function refreshUI() {
+      const count = parseInt(document.getElementById('batchCount').value);
+      const area = document.getElementById('batchArea');
+      if (selectedSteps.length === 0) { area.innerHTML = ''; return; }
+
+      let html = '';
+      for (let b = 1; b <= count; b++) {
+        html += `
       <div class="batch-container">
         <div class="batch-header">
           <span class="batch-title">BATCH ${b}</span>
@@ -399,9 +674,9 @@
         <div class="vertical-steps">
     `;
 
-    selectedSteps.forEach((proc, i) => {
-      const sNum = i + 1;
-      html += `
+        selectedSteps.forEach((proc, i) => {
+          const sNum = i + 1;
+          html += `
         <div class="step-row" draggable="true" ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
           <div class="step-num"><div class="step-num-badge">${sNum}</div></div>
           <div class="step-name">
@@ -412,9 +687,9 @@
           <input type="date" id="date_b${b}_s${sNum}" onchange="validateDate(${b}, ${sNum}, this)">
           <div class="drag-handle" title="Hold to drag and reorder">✋</div>
         </div>`;
-    });
+        });
 
-    html += `
+        html += `
         <div class="step-row delivery-row" style="grid-template-columns: 50px 1fr 180px 40px;">
           <div class="step-num">★</div>
           <div class="step-name">
@@ -423,104 +698,105 @@
           <input type="date" id="date_b${b}_s${selectedSteps.length + 1}" onchange="validateDate(${b}, ${selectedSteps.length + 1}, this)">
           <div></div> </div>
       </div></div>`;
-  }
-  area.innerHTML = html;
-}
-
-
-  
-  async function submitForm() {
-    console.log("Hi I am Here");
-    const psn = document.getElementById('psn').value;
-    const piNumber = document.getElementById('piNumber').value;
-    const totalQty = parseInt(document.getElementById('totalQuantity').value);
-    const orderDate = document.getElementById('orderDate').value;
-    const deliveryDate = document.getElementById('deliveryDate').value;
-    const jobName = document.getElementById('jobName').value;
-    const item = document.getElementById('item').value;
-
-    if (!psn || !jobName || !piNumber || !totalQty || selectedSteps.length === 0 || !orderDate || !deliveryDate) {
-      showToast("Check PSN, Job Name, Qty, Dates and Steps."); return;
-    }
-
-    let allData = [];
-    const bCount = parseInt(document.getElementById('batchCount').value);
-
-    for (let b = 1; b <= bCount; b++) {
-      let steps = [];
-      for (let s = 1; s <= selectedSteps.length; s++) {
-        const customName = document.getElementById(`name_b${b}_s${s}`).value;
-        const d = document.getElementById(`date_b${b}_s${s}`).value;
-        if (!d) { showToast(`Date missing in Batch ${b}`); return; }
-        steps.push({ processName: customName, expDate: d });
       }
-      const deliveryD = document.getElementById(`date_b${b}_s${selectedSteps.length + 1}`).value;
-      if (!deliveryD) { showToast(`Delivery date missing B${b}`); return; }
-      steps.push({ processName: "Delivery", expDate: deliveryD });
-
-      allData.push({
-        batchId: bCount > 1 ? `${psn}-${b}` : psn,
-        batchQty: parseInt(document.getElementById(`qty_b${b}`).value),
-        steps: steps
-      });
+      area.innerHTML = html;
     }
 
-    document.getElementById('submitBtn').disabled = true;
-    document.getElementById('loadingMsg').style.display = 'block';
-    const dashboard_url = '/dashboard.html';
-    console.log(allData);
-    try {
-      const response = await fetch('/api/submitData', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          psn,
-          piNumber,
-          jobName,
-          quantity: totalQty,
-          orderDate,
-          deliveryDate,
-          item,
-          salesCode: document.getElementById('salesCode').value,
-          jobType: document.getElementById('jobType').value,
-          priority: document.getElementById('priority').value,
-          batches: allData
-        }),
-      });
 
-      const result = await response.json();
 
-      if (response.ok) {
-        showToast('✅ Entry Saved Successfully!', 'success');
-        executeRedirect(dashboard_url);
-      } else {
-        showToast(result.error || 'Failed to save entry', 'error');
+    async function submitForm() {
+      console.log("Hi I am Here");
+      const psn = document.getElementById('psn').value;
+      const piNumber = document.getElementById('piNumber').value;
+      const totalQty = parseInt(document.getElementById('totalQuantity').value);
+      const orderDate = document.getElementById('orderDate').value;
+      const deliveryDate = document.getElementById('deliveryDate').value;
+      const jobName = document.getElementById('jobName').value;
+      const item = document.getElementById('item').value;
+
+      if (!psn || !jobName || !piNumber || !totalQty || selectedSteps.length === 0 || !orderDate || !deliveryDate) {
+        showToast("Check PSN, Job Name, Qty, Dates and Steps."); return;
+      }
+
+      let allData = [];
+      const bCount = parseInt(document.getElementById('batchCount').value);
+
+      for (let b = 1; b <= bCount; b++) {
+        let steps = [];
+        for (let s = 1; s <= selectedSteps.length; s++) {
+          const customName = document.getElementById(`name_b${b}_s${s}`).value;
+          const d = document.getElementById(`date_b${b}_s${s}`).value;
+          if (!d) { showToast(`Date missing in Batch ${b}`); return; }
+          steps.push({ processName: customName, expDate: d });
+        }
+        const deliveryD = document.getElementById(`date_b${b}_s${selectedSteps.length + 1}`).value;
+        if (!deliveryD) { showToast(`Delivery date missing B${b}`); return; }
+        steps.push({ processName: "Delivery", expDate: deliveryD });
+
+        allData.push({
+          batchId: bCount > 1 ? `${psn}-${b}` : psn,
+          batchQty: parseInt(document.getElementById(`qty_b${b}`).value),
+          steps: steps
+        });
+      }
+
+      document.getElementById('submitBtn').disabled = true;
+      document.getElementById('loadingMsg').style.display = 'block';
+      const dashboard_url = '/dashboard.html';
+      console.log(allData);
+      try {
+        const response = await fetch('/api/submitData', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            psn,
+            piNumber,
+            jobName,
+            quantity: totalQty,
+            orderDate,
+            deliveryDate,
+            item,
+            salesCode: document.getElementById('salesCode').value,
+            jobType: document.getElementById('jobType').value,
+            priority: document.getElementById('priority').value,
+            batches: allData
+          }),
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          showToast('✅ Entry Saved Successfully!', 'success');
+          executeRedirect(dashboard_url);
+        } else {
+          showToast(result.error || 'Failed to save entry', 'error');
+          document.getElementById('submitBtn').disabled = false;
+          document.getElementById('loadingMsg').style.display = 'none';
+        }
+      } catch (error) {
+        console.error(error);
+        showToast('Network or server error while saving entry', 'error');
         document.getElementById('submitBtn').disabled = false;
         document.getElementById('loadingMsg').style.display = 'none';
       }
-    } catch (error) {
-      console.error(error);
-      showToast('Network or server error while saving entry', 'error');
-      document.getElementById('submitBtn').disabled = false;
-      document.getElementById('loadingMsg').style.display = 'none';
     }
-  }
- 
 
-  function executeRedirect(dashboard_url) {
-  // Use the global variable we stored earlier
-  if (window.top && window.top.location) {
-    try {
-      // Standard way to redirect the entire Google Script IFRAME
-      window.top.location.href = dashboard_url;
-    } catch (e) {
-      // Fallback if top-level access is restricted by the browser
-      window.location.replace(dashboard_url);
+
+    function executeRedirect(dashboard_url) {
+      // Use the global variable we stored earlier
+      if (window.top && window.top.location) {
+        try {
+          // Standard way to redirect the entire Google Script IFRAME
+          window.top.location.href = dashboard_url;
+        } catch (e) {
+          // Fallback if top-level access is restricted by the browser
+          window.location.replace(dashboard_url);
+        }
+      } else {
+        window.location.href = dashboard_url;
+      }
     }
-  } else {
-    window.location.href = dashboard_url;
-  }
-}
-</script>
+  </script>
 </body>
+
 </html>
