@@ -264,7 +264,6 @@ async function addTableRow(tableName, values) {
 }
 
 async function generateDashboardData() {
-
   // Get file context once
   const fileContext = await getSharePointFileContext();
 
@@ -416,6 +415,7 @@ async function generateDashboardData() {
       status: values[10] || info.status,
       splitRemark: String(values[118] || "").trim(),
       qtyString: String(values[119] || ""),
+      maxQtyString:String(values[121]||""),
     });
   });
 
@@ -544,11 +544,10 @@ async function generateDashboardData() {
     return status === "completed" || status === "done";
   }).length;
 
-
   // Calculate requirement updates
   const requirementUpdates = [];
 
-  batches.forEach(batch => {
+  batches.forEach((batch) => {
     if (!batch.steps || batch.steps.length === 0) return;
     // Find current step index (first step without isDone, meaning not done)
     let currentStepIndex = -1;
@@ -563,10 +562,10 @@ async function generateDashboardData() {
     const currentStep = batch.steps[currentStepIndex];
     console.log(currentStep);
     const expectedDateStr = currentStep.expDate;
-    if (!expectedDateStr || expectedDateStr === '-') return;
+    if (!expectedDateStr || expectedDateStr === "-") return;
 
     // Parse expected date (dd/mm/yyyy)
-    const [day, month, year] = expectedDateStr.split('/').map(Number);
+    const [day, month, year] = expectedDateStr.split("/").map(Number);
     const expectedDate = new Date(year, month - 1, day);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -583,23 +582,22 @@ async function generateDashboardData() {
       duration = `Delay ${Math.abs(diffDays)} days`;
     }
 
-    let lastUpdated = '';
-    let prevDurationTime = '';
+    let lastUpdated = "";
+    let prevDurationTime = "";
     console.log(currentStepIndex);
     if (currentStepIndex > 0) {
       const prevStep = batch.steps[currentStepIndex - 1];
       const prevDurationStr = prevStep.endDate;
-      if (!prevDurationStr || prevDurationStr === '-') return;
+      if (!prevDurationStr || prevDurationStr === "-") return;
 
       // Parse expected date (dd/mm/yyyy)
-      const [day, month, year] = prevDurationStr.split('/').map(Number);
+      const [day, month, year] = prevDurationStr.split("/").map(Number);
       const prevDuration = new Date(year, month - 1, day);
 
       const prevdiffTime = prevDuration - today;
       const prevdiffDays = Math.ceil(prevdiffTime / (1000 * 60 * 60 * 24));
       prevDurationTime = `${Math.abs(prevdiffDays)}`;
-      lastUpdated = `${prevStep.name}-${prevStep.endDate}` || '';
-
+      lastUpdated = `${prevStep.name}-${prevStep.endDate}` || "";
     }
 
     requirementUpdates.push({
@@ -611,10 +609,9 @@ async function generateDashboardData() {
       duration,
       lastUpdated,
       isDelayed: diffDays < 0,
-      prevDurationTime
+      prevDurationTime,
     });
   });
-
 
   const result = {
     jobs: batches,
@@ -1240,15 +1237,14 @@ async function saveMultiBatchUpdate(payload) {
 
         // SPLIT LOGIC
         if (isSplitting) {
-          const diff = currentAvailable - u.qty;
+          const diff = Number(qtyMap[u.baseCol] || trackingQty) - u.qty;
           // Use a clean snapshot of the row BEFORE current changes for the child
           const newBatch = await createSplitBatchFromWaterfall(
             runningRowData,
-            qtyMap,
             diff,
             u.baseCol,
             payload.splitRemark || "",
-            localNewIds, // <--- Pass the tracker
+            localNewIds,
           );
 
           // Record the ID we just used so the next split knows it's taken
@@ -1261,8 +1257,11 @@ async function saveMultiBatchUpdate(payload) {
 
           trackingQty = u.qty;
           for (let i = 0; i < 12; i++) {
-            let futureBase = START_COL + i * BLOCK_SIZE;
-            if (futureBase >= u.baseCol) qtyMap[futureBase] = trackingQty;
+            let base = START_COL + i * BLOCK_SIZE;
+            if (base >= u.baseCol) {
+              qtyMap[base] = trackingQty;
+              maxQtyMap[base] = trackingQty; // Update the ceiling
+            }
           }
         } else {
           qtyMap[u.baseCol] = u.qty;
@@ -1276,6 +1275,7 @@ async function saveMultiBatchUpdate(payload) {
       .map((k) => `${k}:${qtyMap[k]}`)
       .join("|");
     await updateBatchListingCell(rowIdx, 119, newQtyString);
+    await updateBatchListingCell(rowIdx, 121, serializeMap(maxQtyMap));
     await updateBatchListingCell(rowIdx, 4, trackingQty);
 
     return { success: true };
@@ -1290,7 +1290,6 @@ async function saveMultiBatchUpdate(payload) {
  */
 async function createSplitBatchFromWaterfall(
   parentData,
-  parentQtyMap,
   diffQty,
   splitAtBase,
   userRemark,
@@ -1308,15 +1307,11 @@ async function createSplitBatchFromWaterfall(
   newRow[4] = diffQty;
   newRow[118] = userRemark;
 
-  // Build New Child Qty Map
-  let childMap = {};
-  for (let i = 0; i < 12; i++) {
-    childMap[START_COL + i * BLOCK_SIZE] = diffQty;
-  }
-  newRow[119] = Object.keys(childMap)
-    .sort((a, b) => a - b)
-    .map((k) => `${k}:${childMap[k]}`)
-    .join("|");
+
+
+  const childMapStr = serializeMap(generateUniformMap(diffQty));
+  newRow[119] = childMapStr; // Current Qty
+  newRow[121] = childMapStr; // Max Qty Remark (Column 121)
 
   // RESET Forward Steps for the new split row
   for (let i = 0; i < 12; i++) {
@@ -1379,6 +1374,9 @@ async function revertProcessStep(rowIdx, baseCol, revertRemark) {
     // Fetch the entire row
     const rowValues = await getBatchListingRow(rowIdx);
 
+    let currentQtyMap = parseMapString(rowValues[119], rowValues[4]);
+    let maxQtyMap = parseMapString(rowValues[121], rowValues[4]);
+
     // Iterate through all steps from the target baseCol onwards
     for (let i = 0; i < TOTAL_STEPS; i++) {
       let currentStepBase = START_COL + i * BLOCK_SIZE;
@@ -1391,6 +1389,9 @@ async function revertProcessStep(rowIdx, baseCol, revertRemark) {
         const wasDone =
           rowValues[currentStepBase + 8] === true ||
           String(rowValues[currentStepBase + 8]).toUpperCase() === "TRUE";
+
+          const originalMax = maxQtyMap[currentStepBase] || rowValues[4];
+        currentQtyMap[currentStepBase] = originalMax;
 
         // Clear completion data
         await updateBatchListingCell(rowIdx, currentStepBase + 2, ""); // End Date
@@ -1424,11 +1425,20 @@ async function revertProcessStep(rowIdx, baseCol, revertRemark) {
     }
 
     console.log("[revertProcessStep] Revert completed successfully");
+    await updateBatchListingCell(rowIdx, 119, serializeMap(currentQtyMap));
     return { success: true, message: "Process step reverted" };
   } catch (error) {
     console.error("[revertProcessStep] Error:", error.message);
     throw error;
   }
+}
+
+
+function serializeMap(map) {
+  return Object.keys(map)
+    .sort((a, b) => a - b)
+    .map(k => `${k}:${map[k]}`)
+    .join("|");
 }
 
 // ============ API ENDPOINTS FOR BATCH UPDATES ============

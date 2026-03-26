@@ -1307,6 +1307,7 @@
         const rowIdx = currentEditingRow;
         const job = MASTER_DATA.find((j) => j.row === rowIdx);
         if (!job) return;
+        const maxQtyMap = parseMapString(job.maxQtyString, job.qty); // From Col 121
 
         const qtyMapArray = [];
         let validationError = false;
@@ -1327,21 +1328,19 @@
         const qtyInputs = document.querySelectorAll(
           ".multi-step-row .step-qty-input",
         );
-        qtyInputs.forEach((input) => {
+        for (let input of qtyInputs) {
           const val = parseInt(input.value);
           const base = parseInt(input.dataset.base);
+          const maxAllowed = parseInt(maxQtyMap[base] || job.qty);
 
-          if (isNaN(val) || val <= 0) {
-            alert("Please enter a valid quantity for all processes.");
-            validationError = true;
+          if (val > maxAllowed) {
+            alert(
+              `Error: Quantity for this step cannot exceed the Max Limit of ${maxAllowed}.`,
+            );
             return;
           }
-
-          // Only add if not already added by history (safety check)
-          if (!qtyMapArray.find((item) => item.baseCol === base)) {
-            qtyMapArray.push({ baseCol: base, qty: val });
-          }
-        });
+          qtyMapArray.push({ baseCol: base, qty: val });
+        }
 
         if (validationError) return;
 
@@ -1590,6 +1589,16 @@
         if (year < 100) year += 2000;
 
         return new Date(year, month, day).getTime();
+      }
+
+      function parseMapString(str, fallbackQty) {
+        if (!str || str === "0" || str === "") return {};
+        const map = {};
+        str.split("|").forEach((pair) => {
+          const [k, v] = pair.split(":");
+          if (k) map[k] = v;
+        });
+        return map;
       }
     </script>
   </body>
