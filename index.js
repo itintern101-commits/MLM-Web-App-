@@ -192,7 +192,7 @@ async function getTableRowsAsObjects(tableName) {
       }
     }
 
-    console.log(`[getTableRowsAsObjects] ${tableName} row ${idx} final values:`, values);
+    // console.log(`[getTableRowsAsObjects] ${tableName} row ${idx} final values:`, values);
 
     const item = {};
     headers.forEach((h, idx) => {
@@ -201,10 +201,10 @@ async function getTableRowsAsObjects(tableName) {
     return item;
   });
 
-  console.log(
-    `[getTableRowsAsObjects] Converted ${tableName} to objects:`,
-    result.slice(0, 2),
-  );
+  // console.log(
+  //   `[getTableRowsAsObjects] Converted ${tableName} to objects:`,
+  //   result.slice(0, 2),
+  // );
   return result;
 }
 
@@ -255,7 +255,7 @@ async function addTableRow(tableName, values) {
 }
 
 async function generateDashboardData() {
-  
+
   // Get file context once
   const fileContext = await getSharePointFileContext();
 
@@ -269,7 +269,7 @@ async function generateDashboardData() {
   // Convert to objects for JobListing
   const jobListing = await getTableRowsAsObjects('JobListing');
 
-  console.log('[generateDashboardData] JobListing:', jobListing);
+  // console.log('[generateDashboardData] JobListing:', jobListing);
 
   // Create jobInfoMap from JobListing for quick lookup
   const jobInfoMap = {};
@@ -497,12 +497,85 @@ async function generateDashboardData() {
     return status === "completed" || status === "done";
   }).length;
 
+
+  // Calculate requirement updates
+  const requirementUpdates = [];
+
+  batches.forEach(batch => {
+    if (!batch.steps || batch.steps.length === 0) return;
+    // Find current step index (first step without isDone, meaning not done)
+    let currentStepIndex = -1;
+    for (let i = 0; i < batch.steps.length; i++) {
+      if (!batch.steps[i].isDone) {
+        currentStepIndex = i;
+        break;
+      }
+    }
+    if (currentStepIndex === -1) return; // all steps done
+
+    const currentStep = batch.steps[currentStepIndex];
+    console.log(currentStep);
+    const expectedDateStr = currentStep.expDate;
+    if (!expectedDateStr || expectedDateStr === '-') return;
+
+    // Parse expected date (dd/mm/yyyy)
+    const [day, month, year] = expectedDateStr.split('/').map(Number);
+    const expectedDate = new Date(year, month - 1, day);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const diffTime = expectedDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays > 2) return; // not urgent
+
+    let duration;
+    if (diffDays >= 0) {
+      duration = `left ${diffDays} days`;
+    } else {
+      duration = `Delay ${Math.abs(diffDays)} days`;
+    }
+
+    let lastUpdated = '';
+    let prevDurationTime = '';
+    console.log(currentStepIndex);
+    if (currentStepIndex > 0) {
+      const prevStep = batch.steps[currentStepIndex - 1];
+      const prevDurationStr = prevStep.endDate;
+      if (!prevDurationStr || prevDurationStr === '-') return;
+
+      // Parse expected date (dd/mm/yyyy)
+      const [day, month, year] = prevDurationStr.split('/').map(Number);
+      const prevDuration = new Date(year, month - 1, day);
+
+      const prevdiffTime = prevDuration - today;
+      const prevdiffDays = Math.ceil(prevdiffTime / (1000 * 60 * 60 * 24));
+      prevDurationTime = `${Math.abs(prevdiffDays)}`;
+      lastUpdated = `${prevStep.name}-${prevStep.endDate}` || '';
+
+    }
+
+    requirementUpdates.push({
+      psn: batch.psn,
+      batchId: batch.batchId,
+      jobName: batch.jobName,
+      quantity: batch.qty,
+      currentProcess: currentStep.name,
+      duration,
+      lastUpdated,
+      isDelayed: diffDays < 0,
+      prevDurationTime
+    });
+  });
+
+
   const result = {
     jobs: batches,
     jobListing: batches, // For compatibility with both old and new frontend
     batchListing: batches, // Also return as batchListing for backward compat
     averages: averages, // For process workload display
     rawCapacity: rawCapacity, // For machine capacity display
+    requirementUpdates: requirementUpdates, // New requirement update listing
     stats: {
       totalJobs,
       totalBatches,
