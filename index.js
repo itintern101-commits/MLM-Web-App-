@@ -396,10 +396,10 @@ async function generateDashboardData() {
       batchId: String(values[1] || ""),
       batchDate: values[2]
         ? new Date(values[2]).toLocaleDateString("en-GB", {
-          year: "2-digit",
-          month: "2-digit",
-          day: "2-digit",
-        })
+            year: "2-digit",
+            month: "2-digit",
+            day: "2-digit",
+          })
         : "-",
       jobName: String(values[3] || ""),
       qty: Number(values[4] || 0),
@@ -583,8 +583,8 @@ async function generateDashboardData() {
       duration = `Overdue ${Math.abs(diffDays)} days`;
     }
 
-    let lastUpdated = '';
-    let prevDurationTime = '';
+    let lastUpdated = "";
+    let prevDurationTime = "";
     if (currentStepIndex > 0) {
       const prevStep = batch.steps[currentStepIndex - 1];
       const prevDurationStr = prevStep.endDate;
@@ -991,6 +991,36 @@ async function updateBatchListingCell(tableRowIndex, colIndex, value) {
 }
 
 /**
+ * Updates an entire row in the BatchListing table in one API call.
+ * @param {number} tableRowIndex - 0-based index of the row in the table
+ * @param {Array} fullRowValues - The complete array of values for that row (all columns)
+ */
+async function updateBatchListingRow(tableRowIndex, fullRowValues) {
+  const ctx = await getSharePointFileContext();
+  const physicalRow = parseInt(tableRowIndex) + 4; // Your existing offset logic
+
+  // We target the range from Column A (0) to the end of your data (e.g., Column ZZ or DP)
+  const lastColLetter = indexToColumnLetter(fullRowValues.length - 1);
+  const rangeAddress = `A${physicalRow}:${lastColLetter}${physicalRow}`;
+
+  const url = `https://graph.microsoft.com/v1.0/drives/${ctx.driveId}/items/${ctx.fileId}/workbook/worksheets('BatchListing')/range(address='${rangeAddress}')`;
+
+  // Ensure booleans are strings if your Excel logic requires "TRUE"/"FALSE"
+  const formattedValues = fullRowValues.map((val) => {
+    if (val === true) return "TRUE";
+    if (val === false) return "FALSE";
+    return val === null || val === undefined ? "" : val;
+  });
+
+  await axios.patch(
+    url,
+    { values: [formattedValues] },
+    { headers: ctx.headers },
+  );
+  console.log(`[Row Update] Successfully patched Row ${physicalRow}`);
+}
+
+/**
  * Update JobListing delivery date by PSN match
  */
 async function updateJobListingDeliveryDateByPsn(psn, deliveryDate) {
@@ -1093,25 +1123,21 @@ function excelToJSDate(serial) {
 }
 
 async function saveMultiBatchUpdate(payload) {
-  const rowIdx = parseInt(payload.row); // 1-based Excel row number (e.g., 19)
-  let localNewIds = [];
-  const BLOCK_SIZE = 9;
+  const rowIdx = parseInt(payload.row);
   const START_COL = 6;
+  const BLOCK_SIZE = 9;
 
   try {
-    // 1. FETCH CURRENT ROW DATA
-    const runningRowData = await getBatchListingRow(rowIdx);
+    // 1. Fetch current row
+    let runningRowData = await getBatchListingRow(rowIdx);
     const psn = String(runningRowData[0] || "").trim();
     const todayISO = new Date().toISOString().split("T")[0];
-
     let trackingQty = Number(runningRowData[4] || 0);
-    // 2. PARSE QTY MAP
-    const existingQtyString = String(runningRowData[119] || "");
-    const existingMaxString = String(runningRowData[120] || "");
+
+    // Parse Maps
     let qtyMap = {};
     let maxQtyMap = {};
 
-    // Helper to parse strings into objects
     const parseToMap = (str, target) => {
       if (str && str !== "0") {
         str.split("|").forEach((p) => {
@@ -1120,15 +1146,8 @@ async function saveMultiBatchUpdate(payload) {
         });
       }
     };
-    parseToMap(existingQtyString, qtyMap);
-    parseToMap(existingMaxString, maxQtyMap);
-
-    // SAFETY: Fill missing map entries
-    for (let i = 0; i < 12; i++) {
-      let base = START_COL + i * BLOCK_SIZE;
-      if (!maxQtyMap[base]) maxQtyMap[base] = trackingQty;
-      if (!qtyMap[base]) qtyMap[base] = trackingQty;
-    }
+    parseToMap(String(runningRowData[119] || ""), qtyMap);
+    parseToMap(String(runningRowData[120] || ""), maxQtyMap);
 
     const updates = (payload.updates || []).sort(
       (a, b) => a.baseCol - b.baseCol,
@@ -1136,141 +1155,88 @@ async function saveMultiBatchUpdate(payload) {
 
     for (const u of updates) {
       const currentProcessName = String(runningRowData[u.baseCol] || "").trim();
-      const currentStepMax = Number(maxQtyMap[u.baseCol]);
-      const inputQty = Number(u.qty);
+      const currentStepMax = Number(maxQtyMap[u.baseCol] || trackingQty);
       const isDeliveryStep = currentProcessName
         .toLowerCase()
         .includes("delivery");
-      console.log(u.isDone);
-      console.log(inputQty);
-      console.log(currentStepMax);
-      const isSplitting = u.isDone && inputQty < currentStepMax;
+      const isSplitting = u.isDone && Number(u.qty) < currentStepMax;
 
-      // STATUS & REMARKS
-      let statusVal = "";
-      if (u.isDone) {
-        // If it's a delivery step and we are splitting the quantity, mark as Partially Delivered
-        if (isDeliveryStep && isSplitting) {
-          statusVal = "Partially Delivered";
-        } else {
-          statusVal = u.isDelayed ? "Delayed" : "Completed";
-        }
-      } else if (u.isDelayed) {
-        statusVal = "Delayed";
-      }
-      await updateBatchListingCell(rowIdx, u.baseCol + 5, statusVal);
-      await updateBatchListingCell(
-        rowIdx,
-        u.baseCol + 6,
-        u.isDelayed ? u.remark || "" : "",
-      );
-
-      if (u.detail)
-        await updateBatchListingCell(rowIdx, u.baseCol + 4, u.detail);
+      // Update memory array instead of API
+      runningRowData[u.baseCol + 5] = u.isDone
+        ? isDeliveryStep && isSplitting
+          ? "Partially Delivered"
+          : u.isDelayed
+            ? "Delayed"
+            : "Completed"
+        : u.isDelayed
+          ? "Delayed"
+          : "";
+      runningRowData[u.baseCol + 6] = u.isDelayed ? u.remark || "" : "";
+      if (u.detail) runningRowData[u.baseCol + 4] = u.detail;
 
       if (u.isDone) {
-        const currentAvailable = Number(qtyMap[u.baseCol] || trackingQty);
-
-        // --- UPDATED DURATION LOGIC ---
+        // Duration Logic
         let prevDateRaw = null;
         for (
-          let prevBase = u.baseCol - BLOCK_SIZE;
-          prevBase >= START_COL;
-          prevBase -= BLOCK_SIZE
+          let pb = u.baseCol - BLOCK_SIZE;
+          pb >= START_COL;
+          pb -= BLOCK_SIZE
         ) {
-          if (runningRowData[prevBase + 2]) {
-            prevDateRaw = runningRowData[prevBase + 2];
+          if (runningRowData[pb + 2]) {
+            prevDateRaw = runningRowData[pb + 2];
             break;
           }
         }
-
-        // Fallback to Batch Date (Column Index 2) if no previous step found
         if (!prevDateRaw) prevDateRaw = runningRowData[2];
 
-        // CONVERT: Use the helper to handle Serial Numbers vs ISO Strings
         const startDate = excelToJSDate(prevDateRaw) || new Date();
-
-        // Set hours to 0 to ensure we only count full calendar days
-        const d1 = new Date(todayISO);
-        const d2 = new Date(startDate.toISOString().split("T")[0]);
-
-        const diffTime = d1.getTime() - d2.getTime();
         const diffDays = Math.max(
           1,
-          Math.ceil(diffTime / (1000 * 60 * 60 * 24)),
+          Math.ceil(
+            (new Date(todayISO) -
+              new Date(startDate.toISOString().split("T")[0])) /
+              86400000,
+          ),
         );
 
-        // Update Sheet
-        await updateBatchListingCell(rowIdx, u.baseCol + 2, todayISO);
-        await updateBatchListingCell(rowIdx, u.baseCol + 3, diffDays);
-        await updateBatchListingCell(rowIdx, u.baseCol + 8, true);
-
-        // Update local memory for sequential steps in the same save
         runningRowData[u.baseCol + 2] = todayISO;
+        runningRowData[u.baseCol + 3] = diffDays;
         runningRowData[u.baseCol + 8] = true;
-        runningRowData[u.baseCol + 5] = u.isDelayed ? "Delayed" : "Completed";
 
-        // DELIVERY SYNC
-        const targetDate = payload.deliveryDate || payload.newDeliveryDate;
-        if (isDeliveryStep && targetDate && targetDate !== "KEEP_ORIGINAL") {
-          await updateJobListingDeliveryDateByPsn(psn, targetDate);
-        }
-
-        // SPLIT LOGIC
         if (isSplitting) {
-          const diff = currentStepMax - inputQty;
-
-          // 1. Update the parent's current tracking quantity
-          trackingQty = inputQty;
-
-          // 2. FIX: Update the Ceiling for ALL steps (0 to 11)
-          // This removes "ghost" quantities from the entire original batch
+          const diff = currentStepMax - Number(u.qty);
+          trackingQty = Number(u.qty);
           for (let i = 0; i < 12; i++) {
             let base = START_COL + i * BLOCK_SIZE;
-            // We update EVERY base, not just the ones >= u.baseCol
             qtyMap[base] = trackingQty;
             maxQtyMap[base] = trackingQty;
           }
-
-          // 3. Sync memory for the next split or for the finalize step
-          runningRowData[4] = trackingQty;
-          runningRowData[119] = Object.keys(qtyMap)
-            .map((k) => `${k}:${qtyMap[k]}`)
-            .join("|");
-          runningRowData[120] = Object.keys(maxQtyMap)
-            .map((k) => `${k}:${maxQtyMap[k]}`)
-            .join("|");
-
-          const newBatch = await createSplitBatchFromWaterfall(
+          // Important: Handle the creation of the new split batch row here
+          await createSplitBatchFromWaterfall(
             runningRowData,
             diff,
             u.baseCol,
             payload.splitRemark || "Split Batch",
-            localNewIds,
+            [],
           );
-
-          if (newBatch && newBatch.values) {
-            localNewIds.push(newBatch.values[0][1]);
-          }
         } else {
-          qtyMap[u.baseCol] = inputQty;
+          qtyMap[u.baseCol] = u.qty;
         }
-        // Update memory for sequential logic
-        runningRowData[u.baseCol + 2] = todayISO;
-        runningRowData[u.baseCol + 8] = true;
       }
     }
 
-    // FINALIZE
     const finalizeMap = (map) =>
       Object.keys(map)
         .sort((a, b) => a - b)
         .map((k) => `${k}:${map[k]}`)
         .join("|");
+    // Update the final tracking columns in the memory array
+    runningRowData[4] = trackingQty;
+    runningRowData[119] = finalizeMap(qtyMap);
+    runningRowData[120] = finalizeMap(maxQtyMap);
 
-    await updateBatchListingCell(rowIdx, 119, finalizeMap(qtyMap));
-    await updateBatchListingCell(rowIdx, 120, finalizeMap(maxQtyMap));
-    await updateBatchListingCell(rowIdx, 4, trackingQty);
+    // 2. ONE SINGLE API CALL TO SAVE EVERYTHING
+    await updateBatchListingRow(rowIdx, runningRowData);
 
     return { success: true };
   } catch (error) {
@@ -1405,75 +1371,54 @@ async function updateProcessQtysOnly(rowIdx, qtyMapArray) {
  * Revert a process step
  */
 async function revertProcessStep(rowIdx, baseCol, revertRemark) {
-  const ctx = await getSharePointFileContext();
-  const START_COL = 6;
-  const BLOCK_SIZE = 9;
-  const TOTAL_STEPS = 12;
-
   try {
-    if (!revertRemark || revertRemark.trim() === "") {
+    if (!revertRemark || revertRemark.trim() === "")
       throw new Error("Revert remark is mandatory.");
-    }
 
-    console.log(
-      `[revertProcessStep] Reverting row ${rowIdx}, baseCol ${baseCol}`,
-    );
-
-    // Fetch the entire row
-    const rowValues = await getBatchListingRow(rowIdx);
+    // 1. Fetch the entire row once
+    let rowValues = await getBatchListingRow(rowIdx);
 
     let currentQtyMap = parseMapString(rowValues[119], rowValues[4]);
     let maxQtyMap = parseMapString(rowValues[120], rowValues[4]);
 
-    // Iterate through all steps from the target baseCol onwards
-    for (let i = 0; i < TOTAL_STEPS; i++) {
-      let currentStepBase = START_COL + i * BLOCK_SIZE;
+    // 2. Modify the array in memory
+    for (let i = 0; i < 12; i++) {
+      let currentStepBase = 6 + i * 9;
 
       if (currentStepBase >= baseCol) {
         const pName = rowValues[currentStepBase];
         if (!pName || pName === "" || pName === "--") continue;
 
-        // Check if this step was completed
         const wasDone =
           rowValues[currentStepBase + 8] === true ||
           String(rowValues[currentStepBase + 8]).toUpperCase() === "TRUE";
 
-        const originalMax = maxQtyMap[currentStepBase] || rowValues[4];
-        currentQtyMap[currentStepBase] = originalMax;
+        // Reset Qty to Max
+        currentQtyMap[currentStepBase] =
+          maxQtyMap[currentStepBase] || rowValues[4];
 
-        // Clear completion data
-        await updateBatchListingCell(rowIdx, currentStepBase + 2, ""); // End Date
-        await updateBatchListingCell(rowIdx, currentStepBase + 3, ""); // Duration
-        await updateBatchListingCell(rowIdx, currentStepBase + 6, ""); // Completion Remark
-        await updateBatchListingCell(rowIdx, currentStepBase + 8, false); // Untick
+        // Clear Step Data in memory array
+        rowValues[currentStepBase + 2] = ""; // End Date
+        rowValues[currentStepBase + 3] = ""; // Duration
+        rowValues[currentStepBase + 6] = ""; // Completion Remark
+        rowValues[currentStepBase + 8] = false; // IsDone
 
-        // Handle remarks/status
         if (currentStepBase === baseCol) {
-          // Target step
-          await updateBatchListingCell(rowIdx, currentStepBase + 5, "Reverted"); // Status
-          await updateBatchListingCell(
-            rowIdx,
-            currentStepBase + 7,
-            revertRemark,
-          ); // Revert Remark
+          rowValues[currentStepBase + 5] = "Reverted";
+          rowValues[currentStepBase + 7] = revertRemark;
         } else if (wasDone) {
-          // Sequential completed steps
-          await updateBatchListingCell(rowIdx, currentStepBase + 5, ""); // Status
-          await updateBatchListingCell(
-            rowIdx,
-            currentStepBase + 7,
-            "Auto-reverted (Sequential)",
-          ); // Revert Remark
-        } else {
-          // Pending steps
-          await updateBatchListingCell(rowIdx, currentStepBase + 5, ""); // Status
-          await updateBatchListingCell(rowIdx, currentStepBase + 7, ""); // Revert Remark
+          rowValues[currentStepBase + 5] = "";
+          rowValues[currentStepBase + 7] = "Auto-reverted (Sequential)";
         }
       }
     }
 
-    console.log("[revertProcessStep] Revert completed successfully");
-    await updateBatchListingCell(rowIdx, 119, serializeMap(currentQtyMap));
+    // 3. Update the Map string in the array
+    rowValues[119] = serializeMap(currentQtyMap);
+
+    // 4. SAVE THE WHOLE ROW AT ONCE
+    await updateBatchListingRow(rowIdx, rowValues);
+
     return { success: true, message: "Process step reverted" };
   } catch (error) {
     console.error("[revertProcessStep] Error:", error.message);
@@ -1554,7 +1499,7 @@ app.get("/api/admin/repair-all", async (req, res) => {
 
     const rowsRes = await axios.get(
       `https://graph.microsoft.com/v1.0/drives/${ctx.driveId}/items/${ctx.fileId}/workbook/tables('BatchListing')/rows`,
-      { headers: ctx.headers }
+      { headers: ctx.headers },
     );
 
     const rows = rowsRes.data.value || [];
@@ -1575,7 +1520,7 @@ app.get("/api/admin/repair-all", async (req, res) => {
       for (let s = 0; s < 12; s++) {
         let base = START_COL + s * BLOCK_SIZE;
         let pName = String(values[base] || "").trim();
-        
+
         // If there's a name, this is a real process for this specific batch
         if (pName !== "" && pName !== "--") {
           activeProcessCols.push(base);
@@ -1585,26 +1530,31 @@ app.get("/api/admin/repair-all", async (req, res) => {
       // --- STEP 2: BUILD THE PRECISE STRINGS ---
       // Format: "6:10000|15:10000" only for the columns we found above
       const fixedString = activeProcessCols
-        .map(colIdx => `${colIdx}:${actualBatchQty}`)
+        .map((colIdx) => `${colIdx}:${actualBatchQty}`)
         .join("|");
 
       // --- STEP 3: COMPARE & UPDATE ---
       const existingQtyString = String(values[119] || "");
-      
+
       // Only update if the string is different (prevents unnecessary API calls)
       // or if it contains values larger than the actual batch qty
-      if (existingQtyString !== fixedString || existingQtyString.includes("30000")) {
-        
+      if (
+        existingQtyString !== fixedString ||
+        existingQtyString.includes("30000")
+      ) {
         await updateBatchListingCell(i, 119, fixedString); // Current Qty Map
         await updateBatchListingCell(i, 120, fixedString); // Max Qty Map
 
         repairCount++;
-        console.log(`[Fixed] Row ${i}: Found ${activeProcessCols.length} processes. Synced to ${actualBatchQty}`);
+        console.log(
+          `[Fixed] Row ${i}: Found ${activeProcessCols.length} processes. Synced to ${actualBatchQty}`,
+        );
       }
     }
 
-    res.send(`<h1>Repair Complete</h1><p>Processed ${rows.length} rows. Fixed <b>${repairCount}</b> mismatches.</p>`);
-
+    res.send(
+      `<h1>Repair Complete</h1><p>Processed ${rows.length} rows. Fixed <b>${repairCount}</b> mismatches.</p>`,
+    );
   } catch (error) {
     console.error("Repair Error:", error.message);
     res.status(500).send(error.message);
