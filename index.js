@@ -264,7 +264,6 @@ async function addTableRow(tableName, values) {
 }
 
 async function generateDashboardData() {
-
   // Get file context once
   const fileContext = await getSharePointFileContext();
 
@@ -416,6 +415,7 @@ async function generateDashboardData() {
       status: values[10] || info.status,
       splitRemark: String(values[118] || "").trim(),
       qtyString: String(values[119] || ""),
+      maxQtyString: String(values[120] || ""),
     });
   });
 
@@ -544,11 +544,10 @@ async function generateDashboardData() {
     return status === "completed" || status === "done";
   }).length;
 
-
   // Calculate requirement updates
   const requirementUpdates = [];
 
-  batches.forEach(batch => {
+  batches.forEach((batch) => {
     if (!batch.steps || batch.steps.length === 0) return;
     // Find current step index (first step without isDone, meaning not done)
     let currentStepIndex = -1;
@@ -562,10 +561,10 @@ async function generateDashboardData() {
 
     const currentStep = batch.steps[currentStepIndex];
     const expectedDateStr = currentStep.expDate;
-    if (!expectedDateStr || expectedDateStr === '-') return;
+    if (!expectedDateStr || expectedDateStr === "-") return;
 
     // Parse expected date (dd/mm/yyyy)
-    const [day, month, year] = expectedDateStr.split('/').map(Number);
+    const [day, month, year] = expectedDateStr.split("/").map(Number);
     const expectedDate = new Date(year, month - 1, day);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -589,17 +588,16 @@ async function generateDashboardData() {
     if (currentStepIndex > 0) {
       const prevStep = batch.steps[currentStepIndex - 1];
       const prevDurationStr = prevStep.endDate;
-      if (!prevDurationStr || prevDurationStr === '-') return;
+      if (!prevDurationStr || prevDurationStr === "-") return;
 
       // Parse expected date (dd/mm/yyyy)
-      const [day, month, year] = prevDurationStr.split('/').map(Number);
+      const [day, month, year] = prevDurationStr.split("/").map(Number);
       const prevDuration = new Date(year, month - 1, day);
 
       const prevdiffTime = prevDuration - today;
       const prevdiffDays = Math.ceil(prevdiffTime / (1000 * 60 * 60 * 24));
       prevDurationTime = `${Math.abs(prevdiffDays)}`;
-      lastUpdated = `${prevStep.name}-${prevStep.endDate}` || '';
-
+      lastUpdated = `${prevStep.name}-${prevStep.endDate}` || "";
     }
 
     requirementUpdates.push({
@@ -612,10 +610,9 @@ async function generateDashboardData() {
       lastUpdated,
       dueDays: diffDays,
       isDelayed: diffDays < 0,
-      prevDurationTime
+      prevDurationTime,
     });
   });
-
 
   const result = {
     jobs: batches,
@@ -702,12 +699,12 @@ app.get("/api/dashboard", async (req, res) => {
 });
 
 // API route to submit new job and batches
-app.post('/api/submitData', async (req, res) => {
+app.post("/api/submitData", async (req, res) => {
   try {
-    console.log('🚀 API HIT: /api/submitData');
+    console.log("🚀 API HIT: /api/submitData");
 
     const data = req.body;
-    console.log('📥 Incoming data:', JSON.stringify(data, null, 2));
+    console.log("📥 Incoming data:", JSON.stringify(data, null, 2));
 
     let jobListingColumnCount = null;
     let batchListingColumnCount = null;
@@ -716,42 +713,49 @@ app.post('/api/submitData', async (req, res) => {
 
     // ✅ STEP 1: Validate input
     if (!data || !data.psn || !data.batches) {
-      console.error('❌ Validation failed:', data);
-      return res.status(400).json({ error: 'Invalid submit payload' });
+      console.error("❌ Validation failed:", data);
+      return res.status(400).json({ error: "Invalid submit payload" });
     }
-    console.log('✅ Step 1: Validation passed');
+    console.log("✅ Step 1: Validation passed");
 
     // ✅ STEP 2: Check batches array
     if (!Array.isArray(data.batches)) {
-      console.error('❌ batches is not an array:', data.batches);
-      return res.status(400).json({ error: 'batches must be an array' });
+      console.error("❌ batches is not an array:", data.batches);
+      return res.status(400).json({ error: "batches must be an array" });
     }
-    console.log('✅ Step 2: batches is valid array');
+    console.log("✅ Step 2: batches is valid array");
 
     // ✅ STEP 3: Get existing rows
-    console.log('⏳ Fetching existing JobListing...');
-    const existing = await getTableRowsAsObjects('JobListing');
-    console.log('📊 Existing rows fetched:', existing.length);
+    console.log("⏳ Fetching existing JobListing...");
+    const existing = await getTableRowsAsObjects("JobListing");
+    console.log("📊 Existing rows fetched:", existing.length);
 
-    console.log('🔍 Existing PSNs:', existing.map(j => j.PSN || j.psn));
+    console.log(
+      "🔍 Existing PSNs:",
+      existing.map((j) => j.PSN || j.psn),
+    );
 
     // ✅ STEP 4: Duplicate check
-    if (existing.some((job) =>
-      String(job['Product Serial Number'] || job.PSN || job.psn).trim() === String(data.psn).trim()
-    )) {
-      console.error('❌ Duplicate PSN found:', data.psn);
-      return res.status(409).json({ error: 'Duplicate PSN' });
+    if (
+      existing.some(
+        (job) =>
+          String(job["Product Serial Number"] || job.PSN || job.psn).trim() ===
+          String(data.psn).trim(),
+      )
+    ) {
+      console.error("❌ Duplicate PSN found:", data.psn);
+      return res.status(409).json({ error: "Duplicate PSN" });
     }
-    console.log('✅ Step 4: No duplicate found');
+    console.log("✅ Step 4: No duplicate found");
 
     // ✅ STEP 5: Format dates
-    console.log('⏳ Formatting dates...');
+    console.log("⏳ Formatting dates...");
     const normalizedOrderDate = formatDate(data.orderDate);
     const normalizedDeliveryDate = formatDate(data.deliveryDate);
 
-    console.log('📅 Formatted dates:', {
+    console.log("📅 Formatted dates:", {
       order: normalizedOrderDate,
-      delivery: normalizedDeliveryDate
+      delivery: normalizedDeliveryDate,
     });
 
     const formatDeliveryDate = toExcelDateText(data.deliveryDate);
@@ -760,46 +764,51 @@ app.post('/api/submitData', async (req, res) => {
     // ✅ STEP 6: Prepare job row
     const jobRow = [
       data.psn,
-      data.piNumber || '',
-      data.salesCode || '',
-      data.jobName || '',
-      data.jobType || '',
+      data.piNumber || "",
+      data.salesCode || "",
+      data.jobName || "",
+      data.jobType || "",
       data.quantity || 0,
-      normalizedOrderDate !== '-' ? normalizedOrderDate : '',
-      normalizedDeliveryDate !== '-' ? normalizedDeliveryDate : '',
-      data.item || '',
-      data.priority || '',
-      data.status || 'ON SCHEDULE',
-      formatDeliveryDate || ''
+      normalizedOrderDate !== "-" ? normalizedOrderDate : "",
+      normalizedDeliveryDate !== "-" ? normalizedDeliveryDate : "",
+      data.item || "",
+      data.priority || "",
+      data.status || "ON SCHEDULE",
+      formatDeliveryDate || "",
     ];
 
-    jobListingColumnCount = await getTableColumnCount('JobListing');
+    jobListingColumnCount = await getTableColumnCount("JobListing");
 
     if (jobRow.length < jobListingColumnCount) {
-      while (jobRow.length < jobListingColumnCount) jobRow.push('');
+      while (jobRow.length < jobListingColumnCount) jobRow.push("");
     } else if (jobRow.length > jobListingColumnCount) {
       jobRow.splice(jobListingColumnCount);
     }
 
     jobRowLength = jobRow.length;
-    console.log('📦 Job row to insert:', jobRow, `length=${jobRowLength}`, `expected=${jobListingColumnCount}`);
+    console.log(
+      "📦 Job row to insert:",
+      jobRow,
+      `length=${jobRowLength}`,
+      `expected=${jobListingColumnCount}`,
+    );
 
     // ✅ STEP 7: Insert job row
-    console.log('⏳ Inserting into JobListing...');
-    await addTableRow('JobListing', jobRow);
-    console.log('✅ Step 7: Job row inserted');
+    console.log("⏳ Inserting into JobListing...");
+    await addTableRow("JobListing", jobRow);
+    console.log("✅ Step 7: Job row inserted");
 
     // ✅ STEP 8: Insert batch rows
     const createDate = formatDate(new Date().toISOString());
-    console.log('⏳ Inserting batch rows...');
+    console.log("⏳ Inserting batch rows...");
 
-    batchListingColumnCount = await getTableColumnCount('BatchListing');
+    batchListingColumnCount = await getTableColumnCount("BatchListing");
     console.log(`📊 BatchListing table has ${batchListingColumnCount} columns`);
 
     for (let batchIndex = 0; batchIndex < data.batches.length; batchIndex++) {
       const batch = data.batches[batchIndex];
       const batchId = `${data.psn}-${batchIndex + 1}`;
-      console.log('➡️ Processing batch:', batchId);
+      console.log("➡️ Processing batch:", batchId);
 
       const batchQty = batch.batchQty || 0;
 
@@ -808,28 +817,28 @@ app.post('/api/submitData', async (req, res) => {
         data.psn,
         batchId,
         createDate,
-        data.jobName || '',
+        data.jobName || "",
         batchQty,
-        ''
+        "",
       ];
 
       // Steps block (108 columns)
-      const stepsData = new Array(108).fill('');
+      const stepsData = new Array(108).fill("");
       const BLOCK_SIZE = 9;
 
       if (batch.steps && Array.isArray(batch.steps)) {
         batch.steps.forEach((step, index) => {
           if (index < 12) {
             const baseIdx = index * BLOCK_SIZE;
-            stepsData[baseIdx] = step.processName || '';
-            stepsData[baseIdx + 1] = formatDate(step.expDate) || '';
-            stepsData[baseIdx + 2] = formatDate(step.endDate) || '';
-            stepsData[baseIdx + 3] = step.duration || '';
-            stepsData[baseIdx + 4] = step.detail || '';
-            stepsData[baseIdx + 5] = step.status || '';
-            stepsData[baseIdx + 6] = step.remark || '';
-            stepsData[baseIdx + 7] = step.revertRemark || '';
-            stepsData[baseIdx + 8] = step.isDone ? 'TRUE' : 'FALSE';
+            stepsData[baseIdx] = step.processName || "";
+            stepsData[baseIdx + 1] = formatDate(step.expDate) || "";
+            stepsData[baseIdx + 2] = formatDate(step.endDate) || "";
+            stepsData[baseIdx + 3] = step.duration || "";
+            stepsData[baseIdx + 4] = step.detail || "";
+            stepsData[baseIdx + 5] = step.status || "";
+            stepsData[baseIdx + 6] = step.remark || "";
+            stepsData[baseIdx + 7] = step.revertRemark || "";
+            stepsData[baseIdx + 8] = step.isDone ? "TRUE" : "FALSE";
           }
         });
       }
@@ -843,7 +852,7 @@ app.post('/api/submitData', async (req, res) => {
       let qtyMap = [];
 
       for (let j = 0; j < 12; j++) {
-        let colIndex = START_COL + (j * BLOCK_SIZE);
+        let colIndex = START_COL + j * BLOCK_SIZE;
         qtyMap.push(colIndex + ":" + batchQty);
       }
 
@@ -853,7 +862,7 @@ app.post('/api/submitData', async (req, res) => {
       if (finalRow.length <= 120) {
         const neededPadding = 121 - finalRow.length;
         for (let i = 0; i < neededPadding; i++) {
-          finalRow.push('');
+          finalRow.push("");
         }
       }
 
@@ -865,7 +874,7 @@ app.post('/api/submitData', async (req, res) => {
       if (finalRow.length < batchListingColumnCount) {
         const neededPadding = batchListingColumnCount - finalRow.length;
         for (let p = 0; p < neededPadding; p++) {
-          finalRow.push('');
+          finalRow.push("");
         }
       } else if (finalRow.length > batchListingColumnCount) {
         finalRow = finalRow.slice(0, batchListingColumnCount);
@@ -877,22 +886,21 @@ app.post('/api/submitData', async (req, res) => {
         throw new Error(`Batch row length mismatch for ${batchId}`);
       }
 
-      await addTableRow('BatchListing', finalRow);
-      console.log('✅ Batch inserted:', batchId);
+      await addTableRow("BatchListing", finalRow);
+      console.log("✅ Batch inserted:", batchId);
     }
 
-    console.log('✅ Step 8: All batch rows inserted');
+    console.log("✅ Step 8: All batch rows inserted");
 
     res.json({
-      message: `Success! Job recorded and ${data.batches.length} batch(es) created.`
+      message: `Success! Job recorded and ${data.batches.length} batch(es) created.`,
     });
-
   } catch (error) {
-    console.error('🔥 ERROR:', error.message);
+    console.error("🔥 ERROR:", error.message);
 
     res.status(500).json({
-      error: 'Failed to submit data',
-      message: error.message
+      error: "Failed to submit data",
+      message: error.message,
     });
   }
 });
@@ -1086,7 +1094,7 @@ function excelToJSDate(serial) {
 
 async function saveMultiBatchUpdate(payload) {
   const rowIdx = parseInt(payload.row); // 1-based Excel row number (e.g., 19)
-  localNewIds = [];
+  let localNewIds = [];
   const BLOCK_SIZE = 9;
   const START_COL = 6;
 
@@ -1094,38 +1102,45 @@ async function saveMultiBatchUpdate(payload) {
     // 1. FETCH CURRENT ROW DATA
     const runningRowData = await getBatchListingRow(rowIdx);
     const psn = String(runningRowData[0] || "").trim();
-    const today = new Date();
-    const todayISO = today.toISOString().split("T")[0];
+    const todayISO = new Date().toISOString().split("T")[0];
 
-    const normalize = (v) =>
-      String(v).replace(/\.0$/, "").replace(/\s/g, "").toLowerCase();
-
+    let trackingQty = Number(runningRowData[4] || 0);
     // 2. PARSE QTY MAP
     const existingQtyString = String(runningRowData[119] || "");
+    const existingMaxString = String(runningRowData[120] || "");
     let qtyMap = {};
-    if (
-      existingQtyString &&
-      existingQtyString !== "0" &&
-      existingQtyString !== ""
-    ) {
-      existingQtyString.split("|").forEach((pair) => {
-        const parts = pair.split(":");
-        if (parts.length === 2) qtyMap[parts[0]] = parts[1];
-      });
+    let maxQtyMap = {};
+
+    // Helper to parse strings into objects
+    const parseToMap = (str, target) => {
+      if (str && str !== "0") {
+        str.split("|").forEach((p) => {
+          const pts = p.split(":");
+          if (pts.length === 2) target[pts[0]] = pts[1];
+        });
+      }
+    };
+    parseToMap(existingQtyString, qtyMap);
+    parseToMap(existingMaxString, maxQtyMap);
+
+    // SAFETY: Fill missing map entries
+    for (let i = 0; i < 12; i++) {
+      let base = START_COL + i * BLOCK_SIZE;
+      if (!maxQtyMap[base]) maxQtyMap[base] = trackingQty;
+      if (!qtyMap[base]) qtyMap[base] = trackingQty;
     }
 
     const updates = (payload.updates || []).sort(
       (a, b) => a.baseCol - b.baseCol,
     );
-    let trackingQty = Number(runningRowData[4]);
 
     for (const u of updates) {
       const currentProcessName = String(runningRowData[u.baseCol] || "").trim();
+      const currentStepQty = Number(qtyMap[u.baseCol] || trackingQty);
       const isDeliveryStep = currentProcessName
         .toLowerCase()
         .includes("delivery");
-      const isSplitting =
-        u.isDone && u.qty < Number(qtyMap[u.baseCol] || trackingQty);
+      const isSplitting = u.isDone && u.qty < currentStepQty;
 
       // STATUS & REMARKS
       let statusVal = "";
@@ -1199,42 +1214,58 @@ async function saveMultiBatchUpdate(payload) {
 
         // SPLIT LOGIC
         if (isSplitting) {
-          const diff = currentAvailable - u.qty;
-          // Use a clean snapshot of the row BEFORE current changes for the child
-          const newBatch = await createSplitBatchFromWaterfall(
-            runningRowData,
-            qtyMap,
-            diff,
-            u.baseCol,
-            payload.splitRemark || "",
-            localNewIds, // <--- Pass the tracker
-          );
+          const diff = currentStepQty - u.qty;
 
-          // Record the ID we just used so the next split knows it's taken
-          if (newBatch && newBatch.values) {
-            // Depending on your addTableRow response, extract the ID
-            // If addTableRow returns the row data:
-            const generatedId = newBatch.values[0][1];
-            localNewIds.push(generatedId);
+          // 1. Update the parent's current tracking quantity
+          trackingQty = u.qty;
+
+          // 2. FIX: Update the Ceiling for ALL steps (0 to 11)
+          // This removes "ghost" quantities from the entire original batch
+          for (let i = 0; i < 12; i++) {
+            let base = START_COL + i * BLOCK_SIZE;
+            // We update EVERY base, not just the ones >= u.baseCol
+            qtyMap[base] = trackingQty;
+            maxQtyMap[base] = trackingQty;
           }
 
-          trackingQty = u.qty;
-          for (let i = 0; i < 12; i++) {
-            let futureBase = START_COL + i * BLOCK_SIZE;
-            if (futureBase >= u.baseCol) qtyMap[futureBase] = trackingQty;
+          // 3. Sync memory for the next split or for the finalize step
+          runningRowData[4] = trackingQty;
+          runningRowData[119] = Object.keys(qtyMap)
+            .map((k) => `${k}:${qtyMap[k]}`)
+            .join("|");
+          runningRowData[120] = Object.keys(maxQtyMap)
+            .map((k) => `${k}:${maxQtyMap[k]}`)
+            .join("|");
+
+          const newBatch = await createSplitBatchFromWaterfall(
+            runningRowData,
+            diff,
+            u.baseCol,
+            payload.splitRemark || "Split Batch",
+            localNewIds,
+          );
+
+          if (newBatch && newBatch.values) {
+            localNewIds.push(newBatch.values[0][1]);
           }
         } else {
           qtyMap[u.baseCol] = u.qty;
         }
+        // Update memory for sequential logic
+        runningRowData[u.baseCol + 2] = todayISO;
+        runningRowData[u.baseCol + 8] = true;
       }
     }
 
     // FINALIZE
-    const newQtyString = Object.keys(qtyMap)
-      .sort((a, b) => a - b)
-      .map((k) => `${k}:${qtyMap[k]}`)
-      .join("|");
-    await updateBatchListingCell(rowIdx, 119, newQtyString);
+    const finalizeMap = (map) =>
+      Object.keys(map)
+        .sort((a, b) => a - b)
+        .map((k) => `${k}:${map[k]}`)
+        .join("|");
+
+    await updateBatchListingCell(rowIdx, 119, finalizeMap(qtyMap));
+    await updateBatchListingCell(rowIdx, 120, finalizeMap(maxQtyMap));
     await updateBatchListingCell(rowIdx, 4, trackingQty);
 
     return { success: true };
@@ -1249,14 +1280,25 @@ async function saveMultiBatchUpdate(payload) {
  */
 async function createSplitBatchFromWaterfall(
   parentData,
-  parentQtyMap,
   diffQty,
   splitAtBase,
   userRemark,
   localNewIds,
 ) {
-  const BLOCK_SIZE = 9;
+  const childMaxMap = {};
   const START_COL = 6;
+  const BLOCK_SIZE = 9;
+
+  for (let i = 0; i < 12; i++) {
+    let base = START_COL + i * BLOCK_SIZE;
+    // The child batch's max capacity is the split amount
+    childMaxMap[base] = diffQty;
+  }
+
+  const childMaxString = Object.keys(childMaxMap)
+    .sort((a, b) => Number(a) - Number(b))
+    .map((k) => `${k}:${childMaxMap[k]}`)
+    .join("|");
 
   // Clone the parent array
   let newRow = [...parentData];
@@ -1267,15 +1309,8 @@ async function createSplitBatchFromWaterfall(
   newRow[4] = diffQty;
   newRow[118] = userRemark;
 
-  // Build New Child Qty Map
-  let childMap = {};
-  for (let i = 0; i < 12; i++) {
-    childMap[START_COL + i * BLOCK_SIZE] = diffQty;
-  }
-  newRow[119] = Object.keys(childMap)
-    .sort((a, b) => a - b)
-    .map((k) => `${k}:${childMap[k]}`)
-    .join("|");
+  newRow[119] = childMaxString;
+  newRow[120] = childMaxString;
 
   // RESET Forward Steps for the new split row
   for (let i = 0; i < 12; i++) {
@@ -1300,17 +1335,29 @@ async function createSplitBatchFromWaterfall(
  */
 async function updateProcessQtysOnly(rowIdx, qtyMapArray) {
   try {
-    console.log(`[updateProcessQtysOnly] Updating row ${rowIdx} quantities`);
+    const rowValues = await getBatchListingRow(rowIdx);
+    const maxQtyMap = parseMapString(rowValues[120], rowValues[4]);
+
+    // Validation Check
+    for (const item of qtyMapArray) {
+      const maxAllowed = parseInt(maxQtyMap[item.baseCol] || rowValues[4]);
+      if (item.qty > maxAllowed) {
+        throw new Error(
+          `Quantity ${item.qty} for baseCol ${item.baseCol} exceeds the maximum allowed (${maxAllowed}).`,
+        );
+      }
+    }
 
     const serialized = qtyMapArray
       .map((obj) => `${obj.baseCol}:${obj.qty}`)
       .join("|");
 
-    // Update Column DP (index 119)
     await updateBatchListingCell(rowIdx, 119, serialized);
 
-    console.log("[updateProcessQtysOnly] Quantities updated successfully");
-    return { success: true, message: "Quantities updated" };
+    return {
+      success: true,
+      message: "Quantities updated within allowed limits.",
+    };
   } catch (error) {
     console.error("[updateProcessQtysOnly] Error:", error.message);
     throw error;
@@ -1338,6 +1385,9 @@ async function revertProcessStep(rowIdx, baseCol, revertRemark) {
     // Fetch the entire row
     const rowValues = await getBatchListingRow(rowIdx);
 
+    let currentQtyMap = parseMapString(rowValues[119], rowValues[4]);
+    let maxQtyMap = parseMapString(rowValues[120], rowValues[4]);
+
     // Iterate through all steps from the target baseCol onwards
     for (let i = 0; i < TOTAL_STEPS; i++) {
       let currentStepBase = START_COL + i * BLOCK_SIZE;
@@ -1350,6 +1400,9 @@ async function revertProcessStep(rowIdx, baseCol, revertRemark) {
         const wasDone =
           rowValues[currentStepBase + 8] === true ||
           String(rowValues[currentStepBase + 8]).toUpperCase() === "TRUE";
+
+        const originalMax = maxQtyMap[currentStepBase] || rowValues[4];
+        currentQtyMap[currentStepBase] = originalMax;
 
         // Clear completion data
         await updateBatchListingCell(rowIdx, currentStepBase + 2, ""); // End Date
@@ -1383,11 +1436,31 @@ async function revertProcessStep(rowIdx, baseCol, revertRemark) {
     }
 
     console.log("[revertProcessStep] Revert completed successfully");
+    await updateBatchListingCell(rowIdx, 119, serializeMap(currentQtyMap));
     return { success: true, message: "Process step reverted" };
   } catch (error) {
     console.error("[revertProcessStep] Error:", error.message);
     throw error;
   }
+}
+
+function serializeMap(map) {
+  return Object.keys(map)
+    .sort((a, b) => a - b)
+    .map((k) => `${k}:${map[k]}`)
+    .join("|");
+}
+
+function parseMapString(str, fallbackQty) {
+  if (!str || str === "0" || str === "" || str === "undefined") {
+    return {};
+  }
+  const map = {};
+  str.split("|").forEach((pair) => {
+    const [k, v] = pair.split(":");
+    if (k) map[k] = v;
+  });
+  return map;
 }
 
 // ============ API ENDPOINTS FOR BATCH UPDATES ============

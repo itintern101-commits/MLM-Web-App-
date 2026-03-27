@@ -1008,6 +1008,11 @@
                 s.baseCol,
                 job.qty,
               );
+              const maxQty = getMaxQtyForProcess(
+                job.maxQtyString,
+                s.baseCol,
+                job.qty,
+              );
 
               if (index === 0) {
                 try {
@@ -1032,7 +1037,7 @@
               return `
                 <div style="padding:10px; border-bottom:1px solid #e2e8f0; background:white; margin-bottom:8px; border-radius:6px; border-left:4px solid ${s.status.includes("Delayed") ? "#ef4444" : "#10b981"}; position:relative;">
                     <div style="display:flex; justify-content:space-between; margin-right:70px;">
-                        <span style="font-weight:bold; font-size:0.85rem;">${s.name} (Qty: ${histQty})</span>
+                        <span style="font-weight:bold; font-size:0.85rem;">${s.name} (Qty: ${histQty} / Max: ${maxQty})</span>
                         <span style="font-size:0.7rem; color:#64748b;">Expected Date: ${s.expDate}</span>
                     </div>
                         ${s.detail ? `<div style="font-size:0.7rem; color:var(--primary); font-weight:bold;">Machine: ${s.detail}</div>` : ""}                    <div style="font-size:0.75rem; color:#64748b; margin:4px 0;">
@@ -1066,6 +1071,11 @@
             const isDieCut = step.name === "Die-cut";
             const processQty = getQtyForProcess(
               job.qtyString,
+              step.baseCol,
+              job.qty,
+            );
+            const maxQty = getMaxQtyForProcess(
+              job.maxQtyString,
               step.baseCol,
               job.qty,
             );
@@ -1128,11 +1138,20 @@
                   </div>`
                     : ""
                 }
-
-                <div class="qty-area" style="display:flex; align-items:center; gap:10px; background:#f8fafc; padding:8px; border-radius:4px;">
-                    <span style="font-size:0.75rem; color:#64748b;">Process Qty:</span>
-                    <input type="number" class="step-qty-input" data-base="${step.baseCol}" value="${processQty}" style="width:100%; padding:4px; border:1px solid #cbd5e1; border-radius:4px; font-size:0.8rem;">
-                </div>
+                <div class="qty-area" style="display:flex; align-items:center; gap:10px; background:#f8fafc; padding:8px; border-radius:4px; border: 1px solid #e2e8f0;">
+                        <div style="flex: 1;">
+                            <span style="font-size:0.7rem; color:#64748b; display:block;">Process Qty:</span>
+                            <input type="number" class="step-qty-input" 
+                                  data-base="${step.baseCol}" 
+                                  value="${processQty}" 
+                                  max="${maxQty}" 
+                                  style="width:100%; padding:4px; border:1px solid #cbd5e1; border-radius:4px; font-size:0.8rem;">
+                        </div>
+                        <div style="text-align: right; padding-left: 10px; border-left: 1px dashed #cbd5e1;">
+                            <span style="font-size:0.65rem; color:#94a3b8; display:block; text-transform: uppercase;">Max Allowed</span>
+                            <span style="font-size:0.85rem; color:#475569; font-weight:bold;">${maxQty}</span>
+                        </div>
+                    </div>
             `;
 
             const dCheck = div.querySelector(".step-delay-check");
@@ -1165,8 +1184,8 @@
         const job = MASTER_DATA.find((j) => j.row === currentEditingRow);
         if (!job) return;
 
-        // CRITICAL FIX: Ensure qtyString is never null
-        const currentQtyString = job.qtyString || "0";
+        // NEW: Grab the Max Qty String (Column 121)
+        const maxQtyString = job.maxQtyString || "";
 
         const stepRows = document.querySelectorAll(".multi-step-row");
         const updates = [];
@@ -1198,7 +1217,6 @@
             break;
           }
 
-          // Process row data if user interacted with it
           if (done || delay) {
             const base = parseInt(
               row.querySelector(".step-done-check").dataset.base,
@@ -1206,50 +1224,38 @@
             const rInput = row.querySelector(".step-remark-input");
             const remark = rInput.value;
             const qtyInput = row.querySelector(".step-qty-input");
+
+            // NEW: Get current input and compare against MAX allowed for THIS step
             const qty = qtyInput ? parseInt(qtyInput.value) : job.qty;
-            let detail = "";
+            const maxAllowed = parseInt(
+              getMaxQtyForProcess(maxQtyString, base, job.qty),
+            );
 
             if (done) {
-              // 1. DYNAMIC VALIDATION: Check against THIS process's historical ceiling
-              // We use getQtyForProcess to see what this batch currently 'owns' for this step
-              const recordedProcessQty = parseInt(
-                getQtyForProcess(currentQtyString, base, job.qty),
-              );
-
               if (isNaN(qty) || qty <= 0) {
                 alert(`Please enter a valid quantity for ${stepName}.`);
                 validationError = true;
                 break;
               }
 
-              if (qty > recordedProcessQty) {
+              // VALIDATION: Check against the Max Qty Map (Col 121)
+              if (qty > maxAllowed) {
                 alert(
-                  `Validation Error: ${stepName} cannot exceed ${recordedProcessQty}.\n\n` +
-                    `Note: If you need more units, they are likely in a split-off batch.`,
+                  `Validation Error: ${stepName} cannot exceed the maximum allowed limit of ${maxAllowed}.\n\n` +
+                    `Note: If you need to process more than this, please check if units were already moved to a separate batch ID.`,
                 );
                 validationError = true;
                 break;
               }
 
-              // 2. DETECT SPLIT: If the new input is less than what was recorded
-              if (qty < recordedProcessQty) {
+              // DETECT SPLIT: User is processing fewer than current job qty
+              if (qty < job.qty) {
                 needsSplitRemark = true;
               }
             }
 
-            // Highlight Logic: If the remark was auto-filled and the user added to it
-            if (
-              remark.includes("PROCESS PASSED EXPECTED DATE") &&
-              remark.length > 30
-            ) {
-              rInput.style.border = "2px solid #10b981"; // Visual highlight for added reason
-            }
-
-            if (done && qty < job.qty) {
-              needsSplitRemark = true;
-            }
-
             // Die-cut Validation
+            let detail = "";
             if (stepName === "Die-cut" && done) {
               const select = row.querySelector(".step-detail-select");
               if (select.value === "") {
@@ -1260,12 +1266,6 @@
               detail = select.value;
             }
 
-            if (done && (isNaN(qty) || qty <= 0)) {
-              alert(`Please enter a valid quantity for ${stepName}.`);
-              validationError = true;
-              break;
-            }
-
             updates.push({
               baseCol: base,
               isDone: done,
@@ -1273,7 +1273,7 @@
               remark: remark,
               qty: qty,
               detail: detail,
-              qtyString: currentQtyString, // Use the safe variable
+              maxQty: maxAllowed, // Passing this to backend for reference
             });
           }
         }
@@ -1288,14 +1288,14 @@
         let splitRemark = "";
         if (needsSplitRemark) {
           splitRemark = prompt(
-            "A split batch will be created. Please enter a reason/remark for the NEW batch:",
+            "A split batch will be created for the remaining units. Please enter a reason/remark for the NEW batch:",
             "",
           );
-          if (splitRemark === null) return;
+          if (splitRemark === null) return; // User cancelled prompt
         }
+
         if (isDeliveryDone) {
           showDatePickModal((selectedDate) => {
-            console.log("Modal get date:" + selectedDate);
             executeSave(job.row, updates, selectedDate, splitRemark);
           });
         } else {
@@ -1307,6 +1307,7 @@
         const rowIdx = currentEditingRow;
         const job = MASTER_DATA.find((j) => j.row === rowIdx);
         if (!job) return;
+        const maxQtyMap = parseMapString(job.maxQtyString, job.qty); // From Col 121
 
         const qtyMapArray = [];
         let validationError = false;
@@ -1327,21 +1328,19 @@
         const qtyInputs = document.querySelectorAll(
           ".multi-step-row .step-qty-input",
         );
-        qtyInputs.forEach((input) => {
+        for (let input of qtyInputs) {
           const val = parseInt(input.value);
           const base = parseInt(input.dataset.base);
+          const maxAllowed = parseInt(maxQtyMap[base] || job.qty);
 
-          if (isNaN(val) || val <= 0) {
-            alert("Please enter a valid quantity for all processes.");
-            validationError = true;
+          if (val > maxAllowed) {
+            alert(
+              `Error: Quantity for this step cannot exceed the Max Limit of ${maxAllowed}.`,
+            );
             return;
           }
-
-          // Only add if not already added by history (safety check)
-          if (!qtyMapArray.find((item) => item.baseCol === base)) {
-            qtyMapArray.push({ baseCol: base, qty: val });
-          }
-        });
+          qtyMapArray.push({ baseCol: base, qty: val });
+        }
 
         if (validationError) return;
 
@@ -1590,6 +1589,29 @@
         if (year < 100) year += 2000;
 
         return new Date(year, month, day).getTime();
+      }
+
+      function parseMapString(str, fallbackQty) {
+        if (!str || str === "0" || str === "") return {};
+        const map = {};
+        str.split("|").forEach((pair) => {
+          const [k, v] = pair.split(":");
+          if (k) map[k] = v;
+        });
+        return map;
+      }
+
+      function getMaxQtyForProcess(maxQtyString, baseCol, defaultQty) {
+        if (!maxQtyString || maxQtyString === "0" || maxQtyString === "")
+          return defaultQty;
+        const parts = maxQtyString.split("|");
+        for (let p of parts) {
+          const pair = p.split(":");
+          if (pair.length === 2 && parseInt(pair[0]) === baseCol) {
+            return pair[1];
+          }
+        }
+        return defaultQty;
       }
     </script>
   </body>
