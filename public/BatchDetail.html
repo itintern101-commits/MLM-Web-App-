@@ -1317,10 +1317,18 @@
         job.steps
           .filter((s) => s.isDone)
           .forEach((s) => {
-            const histQty = getQtyForProcess(job.qtyString, s.baseCol, job.qty);
+            const histQty = parseInt(
+              getQtyForProcess(job.qtyString, s.baseCol, job.qty),
+            );
+            const maxAllowed = parseInt(maxQtyMap[s.baseCol] || job.qty);
+
+            // FIX: Clamp the historical value to the current Max.
+            // This prevents sending "30000" if the batch has since been split to 10000.
+            const safeQty = Math.min(histQty, maxAllowed);
+
             qtyMapArray.push({
               baseCol: s.baseCol,
-              qty: parseInt(histQty),
+              qty: safeQty,
             });
           });
 
@@ -1563,17 +1571,20 @@
       }
 
       function getQtyForProcess(qtyString, baseCol, defaultQty) {
-        // If the string is empty or just "0", it hasn't been serialized yet, return default
-        if (!qtyString || qtyString === "0") return defaultQty;
+        // Ensure defaultQty is a number
+        const fallback = Number(defaultQty || 0);
+        if (!qtyString || qtyString === "0" || qtyString === "")
+          return fallback;
 
-        const parts = qtyString.split("|");
+        const parts = String(qtyString).split("|");
         for (let p of parts) {
           const pair = p.split(":");
-          if (pair.length === 2 && parseInt(pair[0]) === baseCol) {
-            return pair[1];
+          // Compare as numbers to avoid type mismatches
+          if (pair.length === 2 && Number(pair[0]) === Number(baseCol)) {
+            return Number(pair[1]);
           }
         }
-        return defaultQty;
+        return fallback;
       }
 
       function parseDateStringToTime(dateStr) {
@@ -1602,16 +1613,20 @@
       }
 
       function getMaxQtyForProcess(maxQtyString, baseCol, defaultQty) {
+        const fallback = Number(defaultQty || 0);
         if (!maxQtyString || maxQtyString === "0" || maxQtyString === "")
-          return defaultQty;
-        const parts = maxQtyString.split("|");
+          return fallback;
+
+        const parts = String(maxQtyString).split("|");
         for (let p of parts) {
           const pair = p.split(":");
-          if (pair.length === 2 && parseInt(pair[0]) === baseCol) {
-            return pair[1];
+          if (pair.length === 2 && Number(pair[0]) === Number(baseCol)) {
+            return Number(pair[1]);
           }
         }
-        return defaultQty;
+        // If the specific column isn't found in the MAX string,
+        // it MUST be capped by the defaultQty (the current batch size).
+        return fallback;
       }
     </script>
   </body>

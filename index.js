@@ -1133,11 +1133,15 @@ async function saveMultiBatchUpdate(payload) {
 
     for (const u of updates) {
       const currentProcessName = String(runningRowData[u.baseCol] || "").trim();
-      const currentStepQty = Number(qtyMap[u.baseCol] || trackingQty);
+      const currentStepMax = Number(maxQtyMap[u.baseCol]);
+      const inputQty = Number(u.qty);
       const isDeliveryStep = currentProcessName
         .toLowerCase()
         .includes("delivery");
-      const isSplitting = u.isDone && u.qty < currentStepQty;
+      console.log(u.isDone);
+      console.log(inputQty);
+      console.log(currentStepMax);
+      const isSplitting = u.isDone && inputQty < currentStepMax;
 
       // STATUS & REMARKS
       let statusVal = "";
@@ -1211,10 +1215,10 @@ async function saveMultiBatchUpdate(payload) {
 
         // SPLIT LOGIC
         if (isSplitting) {
-          const diff = currentStepQty - u.qty;
+          const diff = currentStepMax - inputQty;
 
           // 1. Update the parent's current tracking quantity
-          trackingQty = u.qty;
+          trackingQty = inputQty;
 
           // 2. FIX: Update the Ceiling for ALL steps (0 to 11)
           // This removes "ghost" quantities from the entire original batch
@@ -1246,7 +1250,7 @@ async function saveMultiBatchUpdate(payload) {
             localNewIds.push(newBatch.values[0][1]);
           }
         } else {
-          qtyMap[u.baseCol] = u.qty;
+          qtyMap[u.baseCol] = inputQty;
         }
         // Update memory for sequential logic
         runningRowData[u.baseCol + 2] = todayISO;
@@ -1333,28 +1337,61 @@ async function createSplitBatchFromWaterfall(
 async function updateProcessQtysOnly(rowIdx, qtyMapArray) {
   try {
     const rowValues = await getBatchListingRow(rowIdx);
-    const maxQtyMap = parseMapString(rowValues[120], rowValues[4]);
+    const overallQty = Number(rowValues[4] || 0);
 
-    // Validation Check
-    for (const item of qtyMapArray) {
-      const maxAllowed = parseInt(maxQtyMap[item.baseCol] || rowValues[4]);
-      if (item.qty > maxAllowed) {
-        throw new Error(
-          `Quantity ${item.qty} for baseCol ${item.baseCol} exceeds the maximum allowed (${maxAllowed}).`,
-        );
-      }
+    // Parse Max Map (Column 120)
+    const maxQtyMapString = String(rowValues[120] || "");
+    let maxQtyMap = {};
+    if (maxQtyMapString && maxQtyMapString !== "0") {
+      maxQtyMapString.split("|").forEach((pair) => {
+        const parts = pair.split(":");
+        if (parts.length === 2) maxQtyMap[parts[0]] = Number(parts[1]);
+      });
     }
 
-    const serialized = qtyMapArray
-      .map((obj) => `${obj.baseCol}:${obj.qty}`)
+    // Parse Existing Current Map (Column 119)
+    let currentQtyMap = {};
+    const existingQtyStr = String(rowValues[119] || "");
+    if (existingQtyStr && existingQtyStr !== "0") {
+      existingQtyStr.split("|").forEach((p) => {
+        const pts = p.split(":");
+        if (pts.length === 2) currentQtyMap[pts[0]] = Number(pts[1]);
+      });
+    }
+
+    // VALIDATION & MERGE
+    for (const item of qtyMapArray) {
+      const base = String(item.baseCol);
+      const newQty = Number(item.qty);
+      const maxAllowed =
+        maxQtyMap[base] !== undefined ? maxQtyMap[base] : overallQty;
+      const existingQty = currentQtyMap[base];
+
+      if (newQty !== existingQty && newQty > maxAllowed) {
+        throw new Error(
+          `Validation Failed: Column ${base} requested ${newQty}, but Max is ${maxAllowed}.`,
+        );
+      }
+
+      // Only validate the items being UPDATED right now
+      if (newQty > maxAllowed) {
+        throw new Error(
+          `Validation Failed: Column ${base} requested ${newQty}, but Max is ${maxAllowed}.`,
+        );
+      }
+      // Update the map in memory
+      currentQtyMap[base] = newQty;
+    }
+
+    // Serialize back to Column 119
+    const serialized = Object.keys(currentQtyMap)
+      .sort((a, b) => Number(a) - Number(b))
+      .map((k) => `${k}:${currentQtyMap[k]}`)
       .join("|");
 
     await updateBatchListingCell(rowIdx, 119, serialized);
 
-    return {
-      success: true,
-      message: "Quantities updated within allowed limits.",
-    };
+    return { success: true };
   } catch (error) {
     console.error("[updateProcessQtysOnly] Error:", error.message);
     throw error;
@@ -1504,6 +1541,70 @@ app.post("/api/revertProcessStep", async (req, res) => {
     res
       .status(500)
       .json({ error: "Failed to revert process step", details: error.message });
+  }
+});
+
+app.get("/api/admin/repair-all", async (req, res) => {
+  try {
+    console.log("[Admin] Starting Precise Table Repair...");
+    const ctx = await getSharePointFileContext();
+
+    const rowsRes = await axios.get(
+      `https://graph.microsoft.com/v1.0/drives/${ctx.driveId}/items/${ctx.fileId}/workbook/tables('BatchListing')/rows`,
+      { headers: ctx.headers }
+    );
+
+    const rows = rowsRes.data.value || [];
+    if (rows.length === 0) return res.send("No rows found.");
+
+    let repairCount = 0;
+    const START_COL = 6;
+    const BLOCK_SIZE = 9;
+
+    for (let i = 0; i < rows.length; i++) {
+      const values = rows[i].values?.[0] || [];
+      const actualBatchQty = Number(values[4] || 0); // Column E
+      if (actualBatchQty <= 0) continue;
+
+      // --- STEP 1: COUNT DEFINED PROCESSES ---
+      // We only want to include columns that actually have a process name
+      let activeProcessCols = [];
+      for (let s = 0; s < 12; s++) {
+        let base = START_COL + s * BLOCK_SIZE;
+        let pName = String(values[base] || "").trim();
+        
+        // If there's a name, this is a real process for this specific batch
+        if (pName !== "" && pName !== "--") {
+          activeProcessCols.push(base);
+        }
+      }
+
+      // --- STEP 2: BUILD THE PRECISE STRINGS ---
+      // Format: "6:10000|15:10000" only for the columns we found above
+      const fixedString = activeProcessCols
+        .map(colIdx => `${colIdx}:${actualBatchQty}`)
+        .join("|");
+
+      // --- STEP 3: COMPARE & UPDATE ---
+      const existingQtyString = String(values[119] || "");
+      
+      // Only update if the string is different (prevents unnecessary API calls)
+      // or if it contains values larger than the actual batch qty
+      if (existingQtyString !== fixedString || existingQtyString.includes("30000")) {
+        
+        await updateBatchListingCell(i, 119, fixedString); // Current Qty Map
+        await updateBatchListingCell(i, 120, fixedString); // Max Qty Map
+
+        repairCount++;
+        console.log(`[Fixed] Row ${i}: Found ${activeProcessCols.length} processes. Synced to ${actualBatchQty}`);
+      }
+    }
+
+    res.send(`<h1>Repair Complete</h1><p>Processed ${rows.length} rows. Fixed <b>${repairCount}</b> mismatches.</p>`);
+
+  } catch (error) {
+    console.error("Repair Error:", error.message);
+    res.status(500).send(error.message);
   }
 });
 
