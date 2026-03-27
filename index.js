@@ -397,10 +397,10 @@ async function generateDashboardData() {
       batchId: String(values[1] || ""),
       batchDate: values[2]
         ? new Date(values[2]).toLocaleDateString("en-GB", {
-            year: "2-digit",
-            month: "2-digit",
-            day: "2-digit",
-          })
+          year: "2-digit",
+          month: "2-digit",
+          day: "2-digit",
+        })
         : "-",
       jobName: String(values[3] || ""),
       qty: Number(values[4] || 0),
@@ -561,7 +561,6 @@ async function generateDashboardData() {
     if (currentStepIndex === -1) return; // all steps done
 
     const currentStep = batch.steps[currentStepIndex];
-    console.log(currentStep);
     const expectedDateStr = currentStep.expDate;
     if (!expectedDateStr || expectedDateStr === '-') return;
 
@@ -577,15 +576,16 @@ async function generateDashboardData() {
     if (diffDays > 2) return; // not urgent
 
     let duration;
-    if (diffDays >= 0) {
-      duration = `left ${diffDays} days`;
+    if (diffDays == 0) {
+      duration = `Due today`;
+    } else if (diffDays > 0) {
+      duration = `${diffDays} days left`;
     } else {
-      duration = `Delay ${Math.abs(diffDays)} days`;
+      duration = `Overdue ${Math.abs(diffDays)} days`;
     }
 
     let lastUpdated = '';
     let prevDurationTime = '';
-    console.log(currentStepIndex);
     if (currentStepIndex > 0) {
       const prevStep = batch.steps[currentStepIndex - 1];
       const prevDurationStr = prevStep.endDate;
@@ -610,6 +610,7 @@ async function generateDashboardData() {
       currentProcess: currentStep.name,
       duration,
       lastUpdated,
+      dueDays: diffDays,
       isDelayed: diffDays < 0,
       prevDurationTime
     });
@@ -848,17 +849,17 @@ app.post('/api/submitData', async (req, res) => {
 
       const qtyString = qtyMap.join("|");
 
-      // Ensure index 119 exists
-      if (finalRow.length <= 119) {
-        const neededPadding = 120 - finalRow.length;
+      // Ensure index 120 exists (DP = 119, DQ = 120)
+      if (finalRow.length <= 120) {
+        const neededPadding = 121 - finalRow.length;
         for (let i = 0; i < neededPadding; i++) {
           finalRow.push('');
         }
       }
 
-      // Set Column DP
-      finalRow[119] = qtyString;
-      // ✅ --- END ADD ---
+      // Set Column DP & DQ
+      finalRow[119] = qtyString; // DP
+      finalRow[120] = qtyString; // DQ
 
       // Pad/trim to match table
       if (finalRow.length < batchListingColumnCount) {
