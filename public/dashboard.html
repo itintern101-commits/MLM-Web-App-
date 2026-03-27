@@ -66,6 +66,19 @@
       border-radius: 15px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
       text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .status-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+    }
+
+    .status-card.active-status {
+      border-top-width: 10px;
+      border-top-color: #1a73e8;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
     }
 
     .status-card h3 {
@@ -99,6 +112,14 @@
       justify-content: space-between;
       align-items: center;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    }
+
+    .clickable-process:hover {
+      cursor: pointer;
+    }
+
+    .process-item.selected {
+      background: #e8f0fe !important;
     }
 
     .process-name {
@@ -254,6 +275,25 @@
     .pill-completed {
       background: #e6f4ea;
       color: #34a853;
+    }
+
+    .process-step-badge {
+      background: #e8f0fe;
+      color: #1a73e8;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      margin-right: 6px;
+      font-weight: 700;
+    }
+
+    .process-date-badge {
+      background: #fff4e5;
+      color: #b06000;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      font-weight: 600;
     }
 
     /* Progress & Tags */
@@ -449,18 +489,17 @@
 
   <div class="main-wrapper">
     <h1>Dashboard</h1>
-    <p class="subtitle">Real-time Production & Machine Capacity Monitor</p>
 
     <div class="status-grid">
-      <div class="status-card" style="border-top: 8px solid var(--success);">
+      <div class="status-card" data-status="ON SCHEDULE" style="border-top: 8px solid var(--success);">
         <h3>On Schedule</h3>
         <div class="val" style="color: var(--success);" id="stat-schedule">00</div>
       </div>
-      <div class="status-card" style="border-top: 8px solid var(--warning);">
+      <div class="status-card" data-status="ALMOST DUE" style="border-top: 8px solid var(--warning);">
         <h3>Almost Due</h3>
         <div class="val" style="color: var(--warning);" id="stat-almost">00</div>
       </div>
-      <div class="status-card" style="border-top: 8px solid var(--danger);">
+      <div class="status-card" data-status="OVERDUE" style="border-top: 8px solid var(--danger);">
         <h3>Overdue</h3>
         <div class="val" style="color: var(--danger);" id="stat-overdue">00</div>
       </div>
@@ -471,6 +510,24 @@
       <div class="process-container" id="processStatsContainer"
         style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;">
         <p style="color: #94a3b8; font-size: 12px;">Sorting and loading processes...</p>
+      </div>
+
+      <div id="processJobsTable" style="display: none; margin-top: 20px;">
+        <span class="section-title">Jobs in Process: <span class="process-step-badge" id="selectedProcessName"
+            style="font-size:25px;"></span></span>
+        <table class="job-table" id="processJobsTableContent">
+          <thead>
+            <tr>
+              <th>PSN</th>
+              <th>Batch ID</th>
+              <th>Job Name</th>
+              <th>Quantity</th>
+              <th>Status(Expected Date)</th>
+              <th>Expected Date</th>
+            </tr>
+          </thead>
+          <tbody id="processJobsBody"></tbody>
+        </table>
       </div>
     </div>
 
@@ -527,7 +584,18 @@
 
     <!-- REQUIREMENT UPDATE LISTING -->
     <div style="margin-bottom :30px">
-      <span class="section-title">REQUIREMENT UPDATE LISTING</span>
+      <div class="table-header-flex" style="flex-wrap: wrap; gap: 15px;">
+        <span class="section-title" style="margin-bottom: 0;">REQUIREMENT UPDATE LISTING</span>
+        <div style="display: flex; gap: 10px; flex-grow: 1; justify-content: flex-end;">
+          <input type="text" id="reqSearchInput" onkeyup="filterRequirementUpdates()"
+            placeholder="Search PSN or Job Name..." class="filter-select" style="width: 250px;">
+          <select class="filter-select" id="reqStatusFilter" onchange="filterRequirementUpdates()">
+            <option value="ALL">All Status</option>
+            <option value="OVERDUE">Overdue</option>
+            <option value="ALMOST DUE">Almost Due</option>
+          </select>
+        </div>
+      </div>
       <table class="job-table" id="requirementTable">
         <thead>
           <tr>
@@ -537,13 +605,14 @@
             <th>Quantity</th>
             <th>Current Process</th>
             <th>In Progress(Days)</th>
-            <th>Days to Due Date</th>
-            <th>Previous Step & Date</th>
+            <th style="cursor:pointer;" onclick="setReqSort('dueDays')">Days to Due Date <span id="reqSortIcon">▲</span>
+            </th>
+            <th>Previous Step & EndDate</th>
           </tr>
         </thead>
         <tbody id="requirementBody">
           <tr>
-            <td colspan="7" style="text-align:center; padding: 20px;">Loading requirement updates...</td>
+            <td colspan="8" style="text-align:center; padding: 20px;">Loading requirement updates...</td>
           </tr>
         </tbody>
       </table>
@@ -557,16 +626,16 @@
 
         <select class="filter-select" id="salesCodeFilter" onchange="filterTable()">
           <option value="ALL">All Sales Codes</option>
-              <option value="AO">AO</option>
-              <option value="SHU">SHU</option>
-              <option value="NT">NT</option>
-              <option value="AK">AK</option>
-              <option value="NY">NY</option>
-              <option value="OC">OC</option>
-              <option value="PAO">PAO</option>
-              <option value="PNY">PNY</option>
-              <option value="SO">SO</option>
-              <option value="SC">SC</option>
+          <option value="AO">AO</option>
+          <option value="SHU">SHU</option>
+          <option value="NT">NT</option>
+          <option value="AK">AK</option>
+          <option value="NY">NY</option>
+          <option value="OC">OC</option>
+          <option value="PAO">PAO</option>
+          <option value="PNY">PNY</option>
+          <option value="SO">SO</option>
+          <option value="SC">SC</option>
         </select>
         <select class="filter-select" id="priorityFilter" onchange="filterTable()">
           <option value="ALL">All Priorities</option>
@@ -596,7 +665,7 @@
           <th>Delivery Date</th>
           <th>Progress</th>
           <th>Priority</th>
-          <th>Status</th>
+          <th>Status(Delivery)</th>
         </tr>
       </thead>
       <tbody id="jobListBody">
@@ -614,6 +683,8 @@
     let activeMachine = null;
     let activeViewMode = 'MONTH'; // Default to monthly when clicking a card
     let CURRENT_VIEW_DATE = new Date(); // Stores the date for the week we are looking at
+    let requirementUpdates = [];
+    let selectedProcess = null;
     // --- NEW: CALCULATION FOR TOP CARDS START ---
     let countSchedule = 0;
     let countAlmost = 0;
@@ -625,10 +696,10 @@
         const resp = await fetch('/api/dashboard');
         const data = await resp.json();
 
-        console.log('Dashboard: Fetched data:', data);
-        console.log('Dashboard: jobs count:', data?.jobs?.length);
-        console.log('Dashboard: jobListing count:', data?.jobListing?.length);
-        console.log('Dashboard: batchListing count:', data?.batchListing?.length);
+        // console.log('Dashboard: Fetched data:', data);
+        // console.log('Dashboard: jobs count:', data?.jobs?.length);
+        // console.log('Dashboard: jobListing count:', data?.jobListing?.length);
+        // console.log('Dashboard: batchListing count:', data?.batchListing?.length);
 
         generateMonthOptions();
         // Use 'jobs' which has the processed batch data with steps
@@ -636,7 +707,7 @@
         // Also keep RAW_CAPACITY for backward compatibility
         RAW_CAPACITY = data && data.rawCapacity ? data.rawCapacity : [];
 
-        console.log('Dashboard: MASTER_DATA:', MASTER_DATA);
+        // console.log('Dashboard: MASTER_DATA:', MASTER_DATA);
 
         renderDashboard();
 
@@ -664,7 +735,7 @@
           const borderColor = hasActiveJobs ? 'var(--success)' : (isZeroTime ? '#cbd5e1' : 'var(--primary)');
 
           return `
-            <div class="process-item" style="border-left: 5px solid ${borderColor}; background: #fff; display: flex; padding: 10px; align-items: center; gap: 8px;">
+            <div class="process-item clickable-process" onclick="showProcessJobs('${proc.name}')" style="border-left: 5px solid ${borderColor}; background: #fff; display: flex; padding: 10px; align-items: center; gap: 8px;">
               <div style="flex: 1; border-right: 1px dashed #e2e8f0; padding-right: 5px; overflow: hidden;">
                 <div class="process-name" style="font-size: 0.7rem; color: #64748b; margin-bottom: 2px;">${proc.name}</div>
                 <div style="font-size: 1.1rem; font-weight: 800; color: ${isZeroTime ? '#cbd5e1' : '#1a73e8'};">
@@ -694,7 +765,22 @@
         if (qtyElem) qtyElem.innerText = stats.totalQuantity ?? 0;
 
         calculateCapacity();
-        renderRequirementUpdates(data.requirementUpdates || []);
+        requirementUpdates = data.requirementUpdates || [];
+        filterRequirementUpdates();
+
+        document.querySelectorAll('.status-card').forEach(card => {
+          card.addEventListener('click', () => {
+            const status = card.dataset.status;
+            if (!status) return;
+
+            document.getElementById('statusFilter').value = status;
+            filterTable();
+            document.querySelectorAll('.status-card').forEach(c => c.classList.remove('active-status'));
+            card.classList.add('active-status');
+
+            document.getElementById('jobTable').scrollIntoView({ behavior: 'smooth', block: 'start' });
+          });
+        });
       } catch (err) {
         console.error('Dashboard load failed', err);
       }
@@ -727,10 +813,25 @@
         }
         psnGroups[job.psn].batches.push(job);
         psnGroups[job.psn].qty += Number(job.qty);
-        console.log(psnGroups);
+        // console.log(psnGroups);
       });
 
       let psnList = Object.values(psnGroups);
+
+      // Calculate total counts BEFORE filtering
+      countSchedule = 0;
+      countAlmost = 0;
+      countOverdue = 0;
+      psnList.forEach(item => {
+        if (item.status === "ON SCHEDULE") countSchedule++;
+        else if (item.status === "ALMOST DUE") countAlmost++;
+        else if (item.status === "OVERDUE") countOverdue++;
+      });
+
+      // Update the HTML values (using padStart to keep the 00 format)
+      document.getElementById('stat-schedule').innerText = String(countSchedule).padStart(2, '0');
+      document.getElementById('stat-almost').innerText = String(countAlmost).padStart(2, '0');
+      document.getElementById('stat-overdue').innerText = String(countOverdue).padStart(2, '0');
 
       // 2. APPLY FILTERS
       const filteredList = psnList.filter(item => {
@@ -743,19 +844,6 @@
 
         return matchesSearch && matchesSalesCode && matchesPriority && matchesStatus;
       });
-
-
-      filteredList.forEach(item => {
-        if (item.status === "ON SCHEDULE") countSchedule++;
-        else if (item.status === "ALMOST DUE") countAlmost++;
-        else if (item.status === "OVERDUE") countOverdue++;
-      });
-
-      // Update the HTML values (using padStart to keep the 00 format)
-      document.getElementById('stat-schedule').innerText = String(countSchedule).padStart(2, '0');
-      document.getElementById('stat-almost').innerText = String(countAlmost).padStart(2, '0');
-      document.getElementById('stat-overdue').innerText = String(countOverdue).padStart(2, '0');
-      // --- NEW: CALCULATION FOR TOP CARDS END ---
 
       // 3. APPLY SMART SORT (Keeping your existing logic)
       filteredList.sort((a, b) => {
@@ -1221,6 +1309,226 @@
           }
         }
       });
+    }
+
+    let reqSortField = 'dueDays';
+    let reqSortAsc = true;
+
+    function filterRequirementUpdates() {
+      const searchTerm = document.getElementById('reqSearchInput').value.toUpperCase();
+      const statusFilter = document.getElementById('reqStatusFilter').value;
+
+      let filtered = requirementUpdates.filter(update => {
+        const matchesSearch =
+          update.psn.toUpperCase().includes(searchTerm) ||
+          update.jobName.toUpperCase().includes(searchTerm) ||
+          update.batchId.toUpperCase().includes(searchTerm);
+
+        const matchesStatus =
+          statusFilter === 'ALL' ||
+          (statusFilter === 'OVERDUE' && update.isDelayed) ||
+          (statusFilter === 'ALMOST DUE' && !update.isDelayed);
+
+        return matchesSearch && matchesStatus;
+      });
+
+      // ✅ Correct sorting logic
+      if (reqSortField === 'dueDays') {
+        filtered.sort((a, b) => {
+          const aDays = a.dueDays;
+          const bDays = b.dueDays;
+
+          const aOverdue = aDays < 0;
+          const bOverdue = bDays < 0;
+
+          // 🔴 Overdue always first
+          if (aOverdue && !bOverdue) return reqSortAsc ? -1 : 1;
+          if (!aOverdue && bOverdue) return reqSortAsc ? 1 : -1;
+
+          // 🔴 Both overdue → bigger delay first (-13 before -3)
+          if (aOverdue && bOverdue) {
+            return reqSortAsc ? (aDays - bDays) : (bDays - aDays);
+          }
+
+          // 🟡🟢 Due today & upcoming → smaller first (0 → 2 → 5)
+          return reqSortAsc ? (aDays - bDays) : (bDays - aDays);
+        });
+      }
+
+      renderRequirementUpdates(filtered);
+    }
+
+
+    function parseReqDays(duration) {
+      if (duration.includes('Overdue')) return -999;
+      if (duration.includes('Due today')) return 0;
+      const match = duration.match(/(\d+) days? left/);
+      return match ? parseInt(match[1]) : 999;
+    }
+
+    function setReqSort(field) {
+      if (reqSortField === field) {
+        reqSortAsc = !reqSortAsc;
+      } else {
+        reqSortField = field;
+        reqSortAsc = true;
+      }
+      document.getElementById('reqSortIcon').innerText = reqSortAsc ? '▲' : '▼';
+      filterRequirementUpdates();
+    }
+
+    function renderRequirementUpdates(updates) {
+      const tbody = document.getElementById('requirementBody');
+      tbody.innerHTML = '';
+      if (updates.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px;">No urgent updates required.</td></tr>';
+        return;
+      }
+      updates.forEach(update => {
+        const row = document.createElement('tr');
+        row.className = 'clickable-row';
+        const durationClass = update.isDelayed ? 'tag-overdue' : 'tag-almost';
+        const parts = (update.lastUpdated || '').split('-');
+        const step = parts.slice(0, -1).join(' ') || '-';
+        const date = parts[parts.length - 1] || '-';
+        row.innerHTML = `
+          <td><strong>${update.psn}</strong></td>
+          <td>
+            <a href="${getUpdateUrl(update.batchId)}" target="_top" style="color: var(--primary); font-weight: bold; text-decoration: none;">
+              <i class="fas fa-external-link-alt" style="font-size: 0.7rem;"></i> ${update.batchId}
+            </a>
+          </td>
+          <td>${update.jobName}</td>
+          <td>${update.quantity.toLocaleString()}</td>
+          <td>${update.currentProcess}</td>
+          <td style="text-align: center;">${update.prevDurationTime} days</td>
+          <td><span class="tag ${durationClass}">${update.duration}</span></td>
+          <td>
+            <span class="process-step-badge">${step}</span>
+            <span class="process-date-badge">${date}</span>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function showProcessJobs(processName) {
+      const table = document.getElementById('processJobsTable');
+      if (selectedProcess === processName && table.style.display === 'block') {
+        table.style.display = 'none';
+        selectedProcess = null;
+        document.querySelectorAll('.process-item').forEach(item => item.classList.remove('selected'));
+        return;
+      }
+
+      selectedProcess = processName;
+      document.querySelectorAll('.process-item').forEach(item => item.classList.remove('selected'));
+      const items = document.querySelectorAll('.process-item');
+      items.forEach(item => {
+        if (item.querySelector('.process-name').textContent === processName) {
+          item.classList.add('selected');
+        }
+      });
+      renderProcessJobs(processName);
+    }
+
+    function renderProcessJobs(processName) {
+      const jobs = MASTER_DATA.filter(job => {
+        const currentStep = job.steps ? job.steps.find(s => !s.isDone) : null;
+        return currentStep && currentStep.name === processName;
+      });
+
+      jobs.sort((a, b) => {
+        const aDays = calculateDaysToDueFromStep(a);
+        const bDays = calculateDaysToDueFromStep(b);
+        if (aDays < 0 && bDays >= 0) return -1;
+        if (bDays < 0 && aDays >= 0) return 1;
+        if (aDays < 0 && bDays < 0) return aDays - bDays; // more overdue first
+        return aDays - bDays; // closest due first
+      });
+
+      const tbody = document.getElementById('processJobsBody');
+      tbody.innerHTML = jobs.map(job => {
+        const days = calculateDaysToDueFromStep(job);
+        const priority = getPriorityText(days);
+        const priorityClass = getPriorityClass(priority);
+        const currentStep = job.steps ? job.steps.find(s => !s.isDone) : null;
+        const stepLabel = currentStep ? currentStep.name : '-';
+        const expDateLabel = currentStep && currentStep.expDate ? currentStep.expDate : '-';
+
+        return `<tr>
+          <td>${job.psn}</td>
+          <td><a href="${getUpdateUrl(job.batchId)}" target="_top" style="color: var(--primary); font-weight: bold; text-decoration: none;"><i class="fas fa-external-link-alt" style="font-size: 0.7rem;"></i> ${job.batchId}</a></td>
+          <td>${job.jobName || job.client || '-'}</td>
+          <td>${Number(job.qty).toLocaleString()}</td>
+          <td><span class="tag ${priorityClass}">${priority}</span></td>
+          <td><span class="process-date-badge">${expDateLabel}</span></td>
+        </tr>`;
+      }).join('');
+
+      document.getElementById('processJobsTable').style.display = 'block';
+      document.getElementById('selectedProcessName').innerText = processName;
+    }
+
+    function calculateDaysToDue(deliveryDate) {
+      // keep for backwards compatibility
+      if (!deliveryDate || deliveryDate === '-') return 999;
+      const date = parseDate(deliveryDate);
+      if (!date) return 999;
+      const now = new Date();
+      const diffTime = date - now;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays;
+    }
+
+    function calculateDaysToDueFromStep(job) {
+      if (!job || !job.steps || job.steps.length === 0) return 999;
+      const currentStep = job.steps.find(s => !s.isDone);
+      if (!currentStep) return 999;
+      if (!currentStep.expDate || currentStep.expDate === '-') return 999;
+      const date = parseDate(currentStep.expDate);
+      if (!date) return 999;
+      const now = new Date();
+      const diffTime = date - now;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays;
+    }
+
+    function parseDate(rawDate) {
+      if (!rawDate || rawDate === '-') return null;
+      let date;
+      if (typeof rawDate === 'string') {
+        const parts = rawDate.trim().split(/[-\/]/);
+        if (parts.length === 3) {
+          const [a, b, c] = parts;
+          if (a.length === 4) {
+            date = new Date(Number(a), Number(b) - 1, Number(c));
+          } else {
+            const day = Number(a);
+            const month = Number(b);
+            const year = c.length === 2 ? Number('20' + c) : Number(c);
+            if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+              date = new Date(year, month - 1, day);
+            }
+          }
+        }
+      }
+      if (!date || isNaN(date.getTime())) {
+        date = new Date(rawDate);
+      }
+      return date && !isNaN(date.getTime()) ? date : null;
+    }
+
+    function getPriorityText(days) {
+      if (days < 0) return 'Overdue';
+      if (days === 0) return 'Due Today';
+      return `${days} Days Left`;
+    }
+
+    function getPriorityClass(priority) {
+      if (priority.includes('Overdue')) return 'tag-overdue';
+      if (priority.includes('Due Today') || priority.includes('1 Day') || priority.includes('2 Days')) return 'tag-almost';
+      return 'tag-schedule';
     }
   </script>
 </body>
