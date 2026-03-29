@@ -894,7 +894,14 @@
               </div>
             </td>
             <td><span class="pill ${pillClass}">${pillText}</span></td>
-            <td><button class="update-btn" onclick="openUpdatePopup(${job.row})">Update Status</button></td>
+            <td style="display: flex; gap: 8px;">
+              <button class="update-btn" onclick="openUpdatePopup(${job.row})">Update Status</button>
+              <button class="edit-btn" 
+                      onclick="openEditPopup(${job.row})" 
+                      style="background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600;">
+                Edit Batch
+              </button>
+            </td>
           `;
           tbody.appendChild(tr);
         });
@@ -1001,8 +1008,26 @@
           (completedSteps
             .map((s, index) => {
               let startTimeLabel;
+              const globalIndex =
+                job.steps.findIndex((step) => step.baseCol === s.baseCol) + 1;
+              const idxInCompleted = completedSteps.indexOf(s);
 
-              // Calculate histQty outside the if/else so it's available for the return string
+              if (idxInCompleted === 0) {
+                try {
+                  const parts = s.endDate.split("/");
+                  const endD = new Date(20 + parts[2], parts[1] - 1, parts[0]);
+                  const startD = new Date(endD);
+                  startD.setDate(
+                    startD.getDate() - (parseInt(s.duration) || 0),
+                  );
+                  startTimeLabel = Utilities_formatDate(startD);
+                } catch (e) {
+                  startTimeLabel = job.batchDate;
+                }
+              } else {
+                startTimeLabel = completedSteps[idxInCompleted - 1].endDate;
+              }
+
               const histQty = getQtyForProcess(
                 job.qtyString,
                 s.baseCol,
@@ -1037,6 +1062,9 @@
               return `
                 <div style="padding:10px; border-bottom:1px solid #e2e8f0; background:white; margin-bottom:8px; border-radius:6px; border-left:4px solid ${s.status.includes("Delayed") ? "#ef4444" : "#10b981"}; position:relative;">
                     <div style="display:flex; justify-content:space-between; margin-right:70px;">
+                        <div style="background: #f1f5f9; color: #64748b; border-radius: 4px; padding: 2px 6px; font-size: 0.7rem; font-weight: bold; min-width: 20px; text-align: center; border: 1px solid #e2e8f0;">
+                            ${globalIndex}
+                        </div>
                         <span style="font-weight:bold; font-size:0.85rem;">${s.name} (Qty: ${histQty} / Max: ${maxQty})</span>
                         <span style="font-size:0.7rem; color:#64748b;">Expected Date: ${s.expDate}</span>
                     </div>
@@ -1068,6 +1096,7 @@
           multiList.innerHTML = "";
 
           pendingSteps.forEach((step) => {
+            const globalIndex = job.steps.findIndex(s => s.baseCol === step.baseCol) + 1;
             const isDieCut = step.name === "Die-cut";
             const processQty = getQtyForProcess(
               job.qtyString,
@@ -1102,16 +1131,21 @@
             div.innerHTML = `
                 ${step.revertRemark ? `<div style="font-size:0.7rem; color:#b45309; background:#fffbeb; padding:6px; border-radius:4px; border-left:3px solid #f59e0b; margin-bottom:4px;"><strong>Reverted:</strong> ${step.revertRemark}</div>` : ""}
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                        <div style="font-weight: bold; font-size: 0.85rem;">${step.name}</div>
-                        <div style="font-size: 0.65rem; color: ${isOverdue ? "#ef4444" : "#64748b"};">Expected Date: ${step.expDate} ${isOverdue ? "⚠️" : ""}</div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="background: #e2e8f0; color: #475569; border-radius: 4px; padding: 2px 6px; font-size: 0.75rem; font-weight: bold; min-width: 20px; text-align: center;">
+                            ${globalIndex}
+                        </div>
+                        <div>
+                            <div style="font-weight: bold; font-size: 0.85rem;">${step.name}</div>
+                            <div style="font-size: 0.65rem; color: ${isOverdue ? "#ef4444" : "#64748b"};">Expected Date: ${step.expDate} ${isOverdue ? "⚠️" : ""}</div>
+                        </div>
                     </div>
                     <div style="display: flex; gap: 10px;">
                         <label style="font-size: 0.75rem;"><input type="checkbox" class="step-done-check" data-base="${step.baseCol}"> Done</label>
                         <label style="font-size: 0.75rem;">
                             <input type="checkbox" class="step-delay-check" data-base="${step.baseCol}" 
-                                   ${shouldLockCheckbox ? "checked" : ""} 
-                                   ${shouldLockCheckbox ? "disabled" : ""}> Delay
+                                  ${shouldLockCheckbox ? "checked" : ""} 
+                                  ${shouldLockCheckbox ? "disabled" : ""}> Delay
                         </label>
                     </div>
                 </div>
@@ -1558,6 +1592,146 @@
         document.getElementById("cancelDate").onclick = () => {
           document.body.removeChild(overlay);
         };
+      }
+
+      function openEditPopup(batchIdOrRow) {
+        const job = MASTER_DATA.find(
+          (j) => String(j.row) === String(batchIdOrRow),
+        );
+        if (!job) return;
+
+        currentEditingRow = job.row;
+
+        // 1. Setup Headers (Reuse your existing modal IDs)
+        document.getElementById("modalPsn").innerHTML =
+          `<div style="font-size: 0.8rem; color: #ef4444; font-weight:bold;">EDIT MODE</div>${job.jobName}`;
+        document.getElementById("modalBatchId").innerHTML =
+          `Batch: ${job.batchId} | <span style="color: #64748b;">Adjusting Expected Dates</span>`;
+
+        // 2. Button Visibility Logic
+        const qtyBtn = document.getElementById("updateQtyBtn");
+        const saveBtn = document.getElementById("saveBtn");
+        const btnText = document.getElementById("btnText");
+
+        if (qtyBtn) qtyBtn.style.display = "none"; // Hide Qty button in Edit mode
+        btnText.innerText = "Confirm All Dates";
+
+        // 3. Set the Click Handler to our new Date-only function
+        saveBtn.onclick = () => processDateEditUpdate();
+
+        // 4. Render the special Date rows
+        renderDateEditRows(job);
+
+        // 5. Show Modal
+        document.getElementById("updateModal").style.display = "flex";
+      }
+
+      function renderDateEditRows(job) {
+        const multiList = document.getElementById("multiProcessList");
+        multiList.innerHTML = "";
+
+        job.steps.forEach((step, index) => {
+          // Added index here
+          const div = document.createElement("div");
+          div.className = "date-edit-row";
+          div.setAttribute("data-base", step.baseCol);
+          div.style =
+            "padding: 12px; background: white; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; gap: 15px;";
+
+          let dateValue = "";
+          if (step.expDate && step.expDate.includes("/")) {
+            const parts = step.expDate.split("/");
+            dateValue = `20${parts[2]}-${parts[1].padStart(2, "0")}-${parts[0].padStart(2, "0")}`;
+          }
+
+          div.innerHTML = `
+              <div style="flex: 2; display: flex; align-items: center; gap: 10px;">
+                  <div style="background: #fee2e2; color: #b91c1c; border-radius: 4px; padding: 2px 6px; font-size: 0.75rem; font-weight: bold; min-width: 20px; text-align: center;">
+                      ${index + 1}
+                  </div>
+                  <div>
+                      <div style="font-weight: bold; font-size: 0.85rem; color: #1e293b;">${step.name}</div>
+                      <div style="font-size: 0.7rem; color: #64748b;">Current: ${step.expDate || "None"}</div>
+                  </div>
+              </div>
+              <div style="flex: 3;">
+                  <input type="date" 
+                        class="edit-exp-date-input" 
+                        data-original="${dateValue}" 
+                        value="${dateValue}"
+                        style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; color: #334155;">
+              </div>
+          `;
+          multiList.appendChild(div);
+        });
+      }
+
+      async function processDateEditUpdate() {
+        setModalLoading(true);
+        // Ensure we are selecting the correct rows
+        const rows = document.querySelectorAll(".date-edit-row");
+        const updates = [];
+
+        rows.forEach((row) => {
+          // FIX: Match the class name used in renderDateEditRows ("edit-exp-date-input")
+          const input = row.querySelector(".edit-exp-date-input");
+
+          // Safety check: if for some reason the input doesn't exist, skip this row
+          if (!input) {
+            console.warn("Input not found in row:", row);
+            return;
+          }
+
+          const baseCol = parseInt(row.getAttribute("data-base"));
+          const originalValue = input.getAttribute("data-original"); // YYYY-MM-DD
+          const newValueRaw = input.value; // YYYY-MM-DD
+
+          if (!newValueRaw) return;
+
+          // Only update if the value has actually changed
+          if (newValueRaw !== originalValue) {
+            // Convert YYYY-MM-DD to DD/MM/YY for backend string consistency
+            const [y, m, d] = newValueRaw.split("-");
+            const formattedDate = `${d}/${m}/${y.substring(2)}`;
+
+            updates.push({
+              baseCol: baseCol,
+              newExpDate: formattedDate,
+            });
+          }
+        });
+
+        if (updates.length === 0) {
+          showToast("No changes detected.", "info");
+          setModalLoading(false);
+          return;
+        }
+
+        try {
+          const response = await fetch("/api/updateProcessDates", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              row: currentEditingRow,
+              updates: updates,
+            }),
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            showToast("Expected dates updated!", "success");
+            closeModal();
+            if (typeof loadBatchData === "function") loadBatchData();
+            fetchData();
+          } else {
+            throw new Error(result.details || "Update failed");
+          }
+        } catch (error) {
+          showToast("Error: " + error.message, "error");
+        } finally {
+          setModalLoading(false);
+        }
       }
 
       function setModalLoading(isLoading) {
