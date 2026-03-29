@@ -8,6 +8,17 @@ const app = express();
 app.use(express.json());
 const PORT = process.env.PORT || 3000;
 
+//Date format not string 
+const toExcelDate = (date) => {
+  if (!(date instanceof Date)) return null;
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`; // ✅ Excel safe
+};
+
 //Convert various date formats (Excel serial, dd/mm/yyyy, ISO) to consistent dd/mm/yyyy for frontend display
 const formatDate = (value) => {
   if (value === undefined || value === null || value === "" || value === "-")
@@ -389,18 +400,12 @@ async function generateDashboardData() {
       deliveryDate: "-",
       status: "ON SCHEDULE",
     };
-
+    console.log(values[2]);
     batches.push({
       row: rowIdx,
       psn: psn,
       batchId: String(values[1] || ""),
-      batchDate: values[2]
-        ? new Date(values[2]).toLocaleDateString("en-GB", {
-          year: "2-digit",
-          month: "2-digit",
-          day: "2-digit",
-        })
-        : "-",
+      batchDate: excelToJSDate(values[2]),
       jobName: String(values[3] || ""),
       qty: Number(values[4] || 0),
       progress: definedSteps.length > 0 ? ticksFound / definedSteps.length : 0,
@@ -462,6 +467,7 @@ async function generateDashboardData() {
 
   // Calculate stats from batch steps - ONLY current active step per batch
   batches.forEach((batch) => {
+  
     if (batch.steps && Array.isArray(batch.steps)) {
       // ✅ 1. Handle DONE steps
       batch.steps.forEach((step) => {
@@ -598,6 +604,21 @@ async function generateDashboardData() {
       const prevdiffDays = Math.ceil(prevdiffTime / (1000 * 60 * 60 * 24));
       prevDurationTime = `${Math.abs(prevdiffDays)}`;
       lastUpdated = `${prevStep.name}-${prevStep.endDate}` || "";
+    } else {
+      // First step: use batch creation date
+      const batchDateStr = batch.batchDate;
+      if (!batchDateStr || batchDateStr === "-") return;
+
+      const batchDate = new Date(batchDateStr);
+      const batchDiffTime = today - batchDate;
+      const batchDiffDays = Math.ceil(batchDiffTime / (1000 * 60 * 60 * 24));
+      prevDurationTime = `${batchDiffDays}`;
+      const formattedBatchDate = batchDate.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+      lastUpdated = `Created-${formattedBatchDate}`;
     }
 
     requirementUpdates.push({
@@ -799,7 +820,7 @@ app.post("/api/submitData", async (req, res) => {
     console.log("✅ Step 7: Job row inserted");
 
     // ✅ STEP 8: Insert batch rows
-    const createDate = formatDate(new Date().toISOString());
+    const createDate = toExcelDate(new Date());
     console.log("⏳ Inserting batch rows...");
 
     batchListingColumnCount = await getTableColumnCount("BatchListing");
@@ -826,6 +847,12 @@ app.post("/api/submitData", async (req, res) => {
       const stepsData = new Array(108).fill("");
       const BLOCK_SIZE = 9;
 
+
+      for (let j = 0; j < 12; j++) {
+        const baseIdx = j * BLOCK_SIZE;
+        stepsData[baseIdx + 8] = "FALSE";
+      }
+
       if (batch.steps && Array.isArray(batch.steps)) {
         batch.steps.forEach((step, index) => {
           if (index < 12) {
@@ -838,6 +865,7 @@ app.post("/api/submitData", async (req, res) => {
             stepsData[baseIdx + 5] = step.status || "";
             stepsData[baseIdx + 6] = step.remark || "";
             stepsData[baseIdx + 7] = step.revertRemark || "";
+            // ✅ overwrite if provided
             stepsData[baseIdx + 8] = step.isDone ? "TRUE" : "FALSE";
           }
         });
@@ -846,17 +874,24 @@ app.post("/api/submitData", async (req, res) => {
       // Combine
       let finalRow = batchRow.concat(stepsData);
 
-      // ✅ --- ADDED QTY STRING LOGIC (Column DP) ---
+      // ✅ NEW DYNAMIC QTY STRING LOGIC
       const START_COL = 6;
 
-      let qtyMap = [];
+      let activeProcessCols = [];
 
       for (let j = 0; j < 12; j++) {
-        let colIndex = START_COL + j * BLOCK_SIZE;
-        qtyMap.push(colIndex + ":" + batchQty);
+        let baseIdx = j * BLOCK_SIZE;
+        let processName = String(stepsData[baseIdx] || "").trim();
+
+        if (processName !== "" && processName !== "--") {
+          let colIndex = START_COL + j * BLOCK_SIZE;
+          activeProcessCols.push(colIndex);
+        }
       }
 
-      const qtyString = qtyMap.join("|");
+      const qtyString = activeProcessCols
+        .map(colIdx => `${colIdx}:${batchQty}`)
+        .join("|");
 
       // Ensure index 120 exists (DP = 119, DQ = 120)
       if (finalRow.length <= 120) {
@@ -866,9 +901,10 @@ app.post("/api/submitData", async (req, res) => {
         }
       }
 
-      // Set Column DP & DQ
-      finalRow[119] = qtyString; // DP
-      finalRow[120] = qtyString; // DQ
+      // Set Column DP & DQ 
+      finalRow[114] = "FALSE";
+      finalRow[119] = qtyString;
+      finalRow[120] = qtyString;
 
       // Pad/trim to match table
       if (finalRow.length < batchListingColumnCount) {
@@ -906,7 +942,6 @@ app.post("/api/submitData", async (req, res) => {
 });
 
 // ============ HELPER FUNCTIONS FOR BATCH UPDATES ============
-
 /**
  * Normalize PSN: trim, lowercase, remove trailing '.0'
  */
@@ -1575,7 +1610,7 @@ app.get("/api/admin/repair-all", async (req, res) => {
       for (let s = 0; s < 12; s++) {
         let base = START_COL + s * BLOCK_SIZE;
         let pName = String(values[base] || "").trim();
-        
+
         // If there's a name, this is a real process for this specific batch
         if (pName !== "" && pName !== "--") {
           activeProcessCols.push(base);
@@ -1590,11 +1625,11 @@ app.get("/api/admin/repair-all", async (req, res) => {
 
       // --- STEP 3: COMPARE & UPDATE ---
       const existingQtyString = String(values[119] || "");
-      
+
       // Only update if the string is different (prevents unnecessary API calls)
       // or if it contains values larger than the actual batch qty
       if (existingQtyString !== fixedString || existingQtyString.includes("30000")) {
-        
+
         await updateBatchListingCell(i, 119, fixedString); // Current Qty Map
         await updateBatchListingCell(i, 120, fixedString); // Max Qty Map
 

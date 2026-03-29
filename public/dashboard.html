@@ -202,7 +202,7 @@
       background: white;
       border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      box-shadow: none;
     }
 
     .job-table th {
@@ -211,6 +211,9 @@
       padding: 15px;
       color: #5f6368;
       font-size: 0.9rem;
+      position: sticky;
+      top: 0;
+      z-index: 1;
     }
 
     .job-table td {
@@ -222,6 +225,32 @@
     .clickable-row:hover {
       background-color: #f8faff !important;
       cursor: pointer;
+    }
+
+    /* Row background colors for priority */
+    .row-overdue {
+      background-color: #fce8e6 !important; /* Red background for overdue */
+    }
+
+    .row-almost-due {
+      background-color: #fef7e0 !important; /* Light orange background for almost due */
+    }
+
+    .row-normal {
+      background-color: white !important; /* White background for normal */
+    }
+
+    /* Row background colors for priority */
+    .row-overdue {
+      background-color: #fce8e6 !important; /* Red background for overdue */
+    }
+
+    .row-almost-due {
+      background-color: #fef7e0 !important; /* Light orange background for almost due */
+    }
+
+    .row-normal {
+      background-color: white !important; /* White background for normal */
     }
 
     .batch-detail-row {
@@ -513,21 +542,26 @@
       </div>
 
       <div id="processJobsTable" style="display: none; margin-top: 20px;">
-        <span class="section-title">Jobs in Process: <span class="process-step-badge" id="selectedProcessName"
-            style="font-size:25px;"></span></span>
-        <table class="job-table" id="processJobsTableContent">
-          <thead>
-            <tr>
-              <th>PSN</th>
-              <th>Batch ID</th>
-              <th>Job Name</th>
-              <th>Quantity</th>
-              <th>Status(Expected Date)</th>
-              <th>Expected Date</th>
-            </tr>
-          </thead>
-          <tbody id="processJobsBody"></tbody>
-        </table>
+        <span class="section-title">Jobs in Process: <span class="process-step-badge" id="selectedProcessName" style="font-size:25px;"></span></span>
+        <div style="max-height: 600px; overflow-y: auto; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+          <table class="job-table" id="processJobsTableContent" style="max-height: none; overflow: visible;">
+            <thead>
+              <tr>
+                <th>PSN</th>
+                <th>Batch ID</th>
+                <th>Job Name</th>
+                <th>Quantity</th>
+                <th>Status(Expected Date)</th>
+                <th>Expected Date</th>
+              </tr>
+            </thead>
+            <tbody id="processJobsBody">
+              <tr>
+                <td colspan="6" style="text-align:center; padding: 20px;">Click on a process above to view jobs in progress.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -596,26 +630,28 @@
           </select>
         </div>
       </div>
-      <table class="job-table" id="requirementTable">
-        <thead>
-          <tr>
-            <th>PSN</th>
-            <th>Batch ID</th>
-            <th>Job Name</th>
-            <th>Quantity</th>
-            <th>Current Process</th>
-            <th>In Progress(Days)</th>
-            <th style="cursor:pointer;" onclick="setReqSort('dueDays')">Days to Due Date <span id="reqSortIcon">▲</span>
-            </th>
-            <th>Previous Step & EndDate</th>
-          </tr>
-        </thead>
-        <tbody id="requirementBody">
-          <tr>
-            <td colspan="8" style="text-align:center; padding: 20px;">Loading requirement updates...</td>
-          </tr>
-        </tbody>
-      </table>
+      <div style="max-height: 600px; overflow-y: auto; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+        <table class="job-table" id="requirementTable" style="max-height: none; overflow: visible;">
+          <thead>
+            <tr>
+              <th>PSN</th>
+              <th>Batch ID</th>
+              <th>Job Name</th>
+              <th>Quantity</th>
+              <th>Current Process</th>
+              <th>In Progress(Days)</th>
+              <th style="cursor:pointer;" onclick="setReqSort('dueDays')">Days to Due Date <span id="reqSortIcon">▲</span>
+              </th>
+              <th>Previous Step & EndDate</th>
+            </tr>
+          </thead>
+          <tbody id="requirementBody">
+            <tr>
+              <td colspan="8" style="text-align:center; padding: 20px;">Loading requirement updates...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
     <div class="table-header-flex" style="flex-wrap: wrap; gap: 15px;">
       <span class="section-title" style="margin-bottom: 0;">JOB FULFILLMENT LIST</span>
@@ -653,27 +689,29 @@
       </div>
     </div>
 
-    <table class="job-table" id="jobTable">
-      <thead>
-        <tr>
-          <th>PSN</th>
-          <th>Client</th>
-          <th>Sales Code</th>
-          <th>PI No.</th>
-          <th>Qty</th>
-          <th>Order Date</th>
-          <th>Delivery Date</th>
-          <th>Progress</th>
-          <th>Priority</th>
-          <th>Status(Delivery)</th>
-        </tr>
-      </thead>
-      <tbody id="jobListBody">
-        <tr>
-          <td colspan="9" style="text-align:center; padding: 40px;">Loading live data...</td>
-        </tr>
-      </tbody>
-    </table>
+    <div style="max-height: 600px; overflow-y: auto; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+      <table class="job-table" id="jobTable" style="max-height: none; overflow: visible;">
+        <thead>
+          <tr>
+            <th>PSN</th>
+            <th>Client</th>
+            <th>Sales Code</th>
+            <th>PI No.</th>
+            <th>Qty</th>
+            <th>Order Date</th>
+            <th>Delivery Date</th>
+            <th>Progress</th>
+            <th>Priority</th>
+            <th>Status(Delivery)</th>
+          </tr>
+        </thead>
+        <tbody id="jobListBody">
+          <tr>
+            <td colspan="9" style="text-align:center; padding: 40px;">Loading live data...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <script>
@@ -876,9 +914,10 @@
         const avgProgress = Math.round((group.batches.reduce((sum, b) => sum + (b.progress || 0), 0) / group.batches.length) * 100);
         const statusClass = group.status === 'OVERDUE' ? 'tag-overdue' : (group.status === 'ALMOST DUE' ? 'tag-almost' : 'tag-schedule');
         const priorityClass = group.priority === 'Urgent' ? 'tag-overdue' : (group.priority === 'Cut Queue' ? 'tag-almost' : 'tag-schedule');
+        const rowClass = getRowClass(group, 'job');
 
         const row = document.createElement('tr');
-        row.className = 'clickable-row';
+        row.className = `clickable-row ${rowClass}`;
         row.onclick = () => toggleBatch(index);
         row.innerHTML = `
           <td><strong>${group.psn}</strong></td>
@@ -1386,7 +1425,8 @@
       }
       updates.forEach(update => {
         const row = document.createElement('tr');
-        row.className = 'clickable-row';
+        const rowClass = getRowClass(update, 'requirement');
+        row.className = `clickable-row ${rowClass}`;
         const durationClass = update.isDelayed ? 'tag-overdue' : 'tag-almost';
         const parts = (update.lastUpdated || '').split('-');
         const step = parts.slice(0, -1).join(' ') || '-';
@@ -1413,11 +1453,14 @@
     }
 
     function showProcessJobs(processName) {
-      const table = document.getElementById('processJobsTable');
-      if (selectedProcess === processName && table.style.display === 'block') {
-        table.style.display = 'none';
+      const tbody = document.getElementById('processJobsBody');
+      const tableDiv = document.getElementById('processJobsTable');
+      if (selectedProcess === processName) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px;">Click on a process above to view jobs in progress.</td></tr>';
         selectedProcess = null;
         document.querySelectorAll('.process-item').forEach(item => item.classList.remove('selected'));
+        document.getElementById('selectedProcessName').innerText = '';
+        tableDiv.style.display = 'none';
         return;
       }
 
@@ -1429,6 +1472,7 @@
           item.classList.add('selected');
         }
       });
+      tableDiv.style.display = 'block';
       renderProcessJobs(processName);
     }
 
@@ -1452,11 +1496,12 @@
         const days = calculateDaysToDueFromStep(job);
         const priority = getPriorityText(days);
         const priorityClass = getPriorityClass(priority);
+        const rowClass = getRowClass(job, 'process');
         const currentStep = job.steps ? job.steps.find(s => !s.isDone) : null;
         const stepLabel = currentStep ? currentStep.name : '-';
         const expDateLabel = currentStep && currentStep.expDate ? currentStep.expDate : '-';
 
-        return `<tr>
+        return `<tr class="${rowClass}">
           <td>${job.psn}</td>
           <td><a href="${getUpdateUrl(job.batchId)}" target="_top" style="color: var(--primary); font-weight: bold; text-decoration: none;"><i class="fas fa-external-link-alt" style="font-size: 0.7rem;"></i> ${job.batchId}</a></td>
           <td>${job.jobName || job.client || '-'}</td>
@@ -1466,7 +1511,6 @@
         </tr>`;
       }).join('');
 
-      document.getElementById('processJobsTable').style.display = 'block';
       document.getElementById('selectedProcessName').innerText = processName;
     }
 
@@ -1520,15 +1564,35 @@
     }
 
     function getPriorityText(days) {
-      if (days < 0) return 'Overdue';
+      if (days < 0) return `Overdue ${Math.abs(days)} days`;
       if (days === 0) return 'Due Today';
       return `${days} Days Left`;
     }
 
-    function getPriorityClass(priority) {
-      if (priority.includes('Overdue')) return 'tag-overdue';
-      if (priority.includes('Due Today') || priority.includes('1 Day') || priority.includes('2 Days')) return 'tag-almost';
+    function getPriorityClass(priorityText) {
+      if (priorityText.includes('Overdue')) return 'tag-overdue';
+      if (priorityText.includes('Due Today') || priorityText.includes('Days Left')) return 'tag-almost';
       return 'tag-schedule';
+    }
+
+    function getRowClass(item, tableType) {
+      if (tableType === 'process') {
+        // For process workload table
+        const days = calculateDaysToDueFromStep(item);
+        if (days < 0) return 'row-overdue';
+        if (days <= 2) return 'row-almost-due';
+        return 'row-normal';
+      } else if (tableType === 'requirement') {
+        // For requirement updates
+        if (item.isDelayed) return 'row-overdue';
+        return 'row-almost-due'; // Since requirement updates only show urgent ones
+      } else if (tableType === 'job') {
+        // For job fulfillment list
+        if (item.status === 'OVERDUE' || item.priority === 'Urgent') return 'row-overdue';
+        if (item.status === 'ALMOST DUE' || item.priority === 'Cut Queue') return 'row-almost-due';
+        return 'row-normal';
+      }
+      return 'row-normal';
     }
   </script>
 </body>
