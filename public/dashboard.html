@@ -240,7 +240,11 @@
       background-color: white !important; /* White background for normal */
     }
 
-    /* Row background colors for priority */
+    .row-completed {
+      background-color: #e6f4ea !important; /* Light green for completed */
+    }
+
+    /* Row background colors for priority (duplicated block kept for safe override) */
     .row-overdue {
       background-color: #fce8e6 !important; /* Red background for overdue */
     }
@@ -256,6 +260,13 @@
     .batch-detail-row {
       display: none;
       background-color: #fcfcfc;
+    }
+
+    .batch-inner-table thead {
+      position: sticky;
+      top: 0;
+      background: #f8f9fa;
+      z-index: 10;
     }
 
     /* Batch Inner Table Styles */
@@ -306,6 +317,11 @@
       color: #34a853;
     }
 
+    .pill-almost {
+      background: #fef7e0;
+      color: #b06000;
+    }
+
     .process-step-badge {
       background: #e8f0fe;
       color: #1a73e8;
@@ -353,7 +369,7 @@
 
     .progress-bar {
       height: 8px;
-      background: #e8eaed;
+      background: #9ca3af;
       border-radius: 4px;
       width: 100px;
       margin-top: 5px;
@@ -487,6 +503,11 @@
     #btnViewWeek[style*="white"] {
       color: var(--primary) !important;
     }
+
+    #searchInput {
+      flex-grow: 1;
+      width: auto;
+    }
   </style>
 </head>
 
@@ -543,6 +564,15 @@
 
       <div id="processJobsTable" style="display: none; margin-top: 20px;">
         <span class="section-title">Jobs in Process: <span class="process-step-badge" id="selectedProcessName" style="font-size:25px;"></span></span>
+        <div class="table-header-flex" style="margin: 10px 0 10px; gap: 10px; align-items: center; justify-content: flex-end;">
+          <input type="text" id="processSearchInput" onkeyup="filterProcessJobs()" placeholder="Search PSN, BatchID, Job..." class="filter-select" style="width: 240px;">
+          <select id="processDueFilter" onchange="filterProcessJobs()" class="filter-select" style="width: 180px;">
+            <option value="ALL">All Due Status</option>
+            <option value="OVERDUE">Overdue</option>
+            <option value="DUE_TODAY">Due Today</option>
+            <option value="NEAR_DUE">Near Due (1-2d)</option>
+          </select>
+        </div>
         <div style="max-height: 600px; overflow-y: auto; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
           <table class="job-table" id="processJobsTableContent" style="max-height: none; overflow: visible;">
             <thead>
@@ -551,7 +581,7 @@
                 <th>Batch ID</th>
                 <th>Job Name</th>
                 <th>Quantity</th>
-                <th>Status(Expected Date)</th>
+                <th>Priority(Expected Date)</th>
                 <th>Expected Date</th>
               </tr>
             </thead>
@@ -680,6 +710,16 @@
           <option value="Normal">Normal</option>
         </select>
 
+        <select class="filter-select" id="jobTypeFilter" onchange="filterTable()">
+          <option value="ALL">All Job Types</option>
+          <option value="Offset">Offset</option>
+          <option value="FSC">FSC</option>
+          <option value="Flexo & MMB/SOS">Flexo & MMB/SOS</option>
+          <option value="Fully Outsourced">Fully Outsourced</option>
+          <option value="FSCFully Outsourced">FSC Fully Outsourced</option>
+          <option value="Drawdown">Drawdown</option>
+        </select>
+
         <select class="filter-select" id="statusFilter" onchange="filterTable()">
           <option value="ALL">All Status</option>
           <option value="ON SCHEDULE">On Schedule</option>
@@ -723,6 +763,8 @@
     let CURRENT_VIEW_DATE = new Date(); // Stores the date for the week we are looking at
     let requirementUpdates = [];
     let selectedProcess = null;
+    let processJobsCache = [];
+    let activeProcessName = null;
     // --- NEW: CALCULATION FOR TOP CARDS START ---
     let countSchedule = 0;
     let countAlmost = 0;
@@ -830,6 +872,7 @@
       const searchTerm = document.getElementById('searchInput').value.toUpperCase();
       const salesCodeType = document.getElementById('salesCodeFilter').value;
       const priorityType = document.getElementById('priorityFilter').value;
+      const jobTypeType = document.getElementById('jobTypeFilter').value;
       const statusType = document.getElementById('statusFilter').value;
 
       // 1. Group the MASTER_DATA (keeping your exact logic)
@@ -841,6 +884,7 @@
             client: job.jobName || job.client || "-",
             salesCode: job.salesCode || job.code || "-",
             pi: job.piNumber || job.pi || "-",
+            jobType: job.jobType || "-",
             qty: 0,
             orderDate: job.orderDate || job.date || "-",
             deliveryDate: job.deliveryDate || "-",
@@ -874,13 +918,15 @@
       // 2. APPLY FILTERS
       const filteredList = psnList.filter(item => {
         const matchesSearch = item.psn.toUpperCase().includes(searchTerm) ||
-          item.client.toUpperCase().includes(searchTerm);
+          item.client.toUpperCase().includes(searchTerm) ||
+          item.pi.toUpperCase().includes(searchTerm);
 
         const matchesSalesCode = salesCodeType === "ALL" || item.salesCode === salesCodeType;
         const matchesPriority = priorityType === "ALL" || item.priority === priorityType;
+        const matchesJobType = jobTypeType === "ALL" || item.jobType === jobTypeType;
         const matchesStatus = statusType === "ALL" || item.status === statusType;
 
-        return matchesSearch && matchesSalesCode && matchesPriority && matchesStatus;
+        return matchesSearch && matchesSalesCode && matchesPriority && matchesJobType && matchesStatus;
       });
 
       // 3. APPLY SMART SORT (Keeping your existing logic)
@@ -943,19 +989,30 @@
         // ... (Keep your existing batchRowsHtml generation here) ...
         let batchRowsHtml = group.batches.map(b => {
           const currentStep = b.steps ? b.steps.find((s) => !s.isDone) : null;
-          const isDelayed = currentStep && String(currentStep.status).toLowerCase().includes("delayed");
-          const isOverdue = currentStep && currentStep.rawExpDate && currentStep.rawExpDate < new Date().getTime();
-          const showAsDelayed = isDelayed || isOverdue;
-          const statusText = currentStep ? currentStep.name + (showAsDelayed ? ": Delayed" : ": Running") : ("Completed");
-          const pillClass = !currentStep ? "pill-completed" : (showAsDelayed ? "pill-delayed" : "pill-running");
-          return `<tr><td>
+          const days = calculateDaysToDueFromStep(b);
+          const isOverdue = days < 0;
+          const isDueToday = days === 0;
+          const isNearDue = days > 0 && days <= 2;
+
+          let batchStatusClass = 'row-normal';
+          if (!currentStep) batchStatusClass = 'row-completed';
+          else if (isOverdue) batchStatusClass = 'row-overdue';
+          else if (isDueToday || isNearDue) batchStatusClass = 'row-almost-due';
+
+          const statusText = currentStep ? `${currentStep.name}${isOverdue ? ': Delayed' : (isDueToday ? ': Due Today' : (isNearDue ? ': Almost Due' : ': Running'))}` : 'Completed';
+          const pillClass = !currentStep ? 'pill-completed' : (isOverdue ? 'pill-delayed' : (isDueToday || isNearDue ? 'pill-almost' : 'pill-running'));
+
+          return `<tr class="${batchStatusClass}"><td>
       <a href="${getUpdateUrl(b.batchId)}" target="_top" style="color: var(--primary); font-weight: bold; text-decoration: none;">
         <i class="fas fa-external-link-alt" style="font-size: 0.7rem;"></i> ${b.batchId}
       </a>
-    </td><td>${Number(b.qty).toLocaleString()}</td><td>${(b.progress * 100).toFixed(0)}%</td><td><span class="pill ${pillClass}">${statusText}</span></td></tr>`;
+    </td><td>${Number(b.qty).toLocaleString()}</td><td>
+      ${(b.progress * 100).toFixed(0)}%
+      <div class="progress-bar" style="width: 80px;"><div class="progress-fill" style="width: ${(b.progress * 100).toFixed(0)}%;"></div></div>
+    </td><td><span class="pill ${pillClass}">${statusText}</span></td></tr>`;
         }).join('');
 
-        detailRow.innerHTML = `<td colspan="10" style="padding: 0;"><div style="padding:20px; background:#fdfdfd; border-bottom:2px solid var(--primary);"><table class="batch-inner-table"><thead><tr><th>Batch ID</th><th>Qty</th><th>Progress</th><th>Status</th></tr></thead><tbody>${batchRowsHtml}</tbody></table></div></td>`;
+        detailRow.innerHTML = `<td colspan="10" style="padding: 0;"><div style="padding:20px; background:#fdfdfd; border-bottom:2px solid var(--primary);"><table class="batch-inner-table"><tbody><tr style="background: #f8f9fa; font-weight: bold;"><td>Batch ID</td><td>Qty</td><td>Progress</td><td>Status</td></tr>${batchRowsHtml}</tbody></table></div></td>`;
 
         tbody.appendChild(row);
         tbody.appendChild(detailRow);
@@ -1038,10 +1095,19 @@
     }
 
     function toggleBatch(id) {
-      const row = document.getElementById('batch-row-' + id);
-      const isVisible = row.style.display === 'table-row';
-      document.querySelectorAll('.batch-detail-row').forEach(r => r.style.display = 'none');
-      row.style.display = isVisible ? 'none' : 'table-row';
+      const detailRow = document.getElementById('batch-row-' + id);
+      const isVisible = detailRow.style.display === 'table-row';
+      document.querySelectorAll('.batch-detail-row').forEach(r => {
+        r.style.display = 'none';
+        r.classList.remove('sticky-expanded-section');
+        // Remove sticky from all job rows
+        const prevRow = r.previousElementSibling;
+        if (prevRow) prevRow.classList.remove('sticky-job-row');
+      });
+      if (!isVisible) {
+        detailRow.style.display = 'table-row';
+        detailRow.classList.add('sticky-expanded-section');
+      }
     }
 
     document.getElementById('statusFilter').addEventListener('change', function () {
@@ -1204,6 +1270,12 @@
     }
 
     function showMachineChart(mName) {
+      if (activeMachine === mName && document.getElementById('chartSection').style.display === 'block') {
+        // Same machine clicked, close the chart
+        document.getElementById('chartSection').style.display = 'none';
+        activeMachine = null;
+        return;
+      }
       activeMachine = mName;
       activeViewMode = 'MONTH'; // Reset to Month view whenever a new machine is clicked
       document.getElementById('chartSection').style.display = 'block';
@@ -1477,6 +1549,7 @@
     }
 
     function renderProcessJobs(processName) {
+      activeProcessName = processName;
       const jobs = MASTER_DATA.filter(job => {
         const currentStep = job.steps ? job.steps.find(s => !s.isDone) : null;
         return currentStep && currentStep.name === processName;
@@ -1491,14 +1564,46 @@
         return aDays - bDays; // closest due first
       });
 
+      processJobsCache = jobs;
+      document.getElementById('selectedProcessName').innerText = processName;
+      drawProcessJobs(jobs);
+    }
+
+    function filterProcessJobs() {
+      const searchTerm = document.getElementById('processSearchInput').value.toUpperCase();
+      const dueFilter = document.getElementById('processDueFilter').value;
+
+      const filtered = processJobsCache.filter(job => {
+        const currentStep = job.steps ? job.steps.find(s => !s.isDone) : null;
+        const jobName = (job.jobName || job.client || '').toUpperCase();
+        const matchSearch = job.psn.toUpperCase().includes(searchTerm) ||
+          job.batchId.toUpperCase().includes(searchTerm) ||
+          jobName.includes(searchTerm);
+
+        if (!matchSearch) return false;
+
+        const days = calculateDaysToDueFromStep(job);
+
+        if (dueFilter === 'OVERDUE' && days >= 0) return false;
+        if (dueFilter === 'DUE_TODAY' && days !== 0) return false;
+        if (dueFilter === 'NEAR_DUE' && !(days > 0 && days <= 2)) return false;
+
+        return true;
+      });
+
+      drawProcessJobs(filtered);
+    }
+
+    function drawProcessJobs(jobs) {
       const tbody = document.getElementById('processJobsBody');
+      if (!tbody) return;
+
       tbody.innerHTML = jobs.map(job => {
         const days = calculateDaysToDueFromStep(job);
         const priority = getPriorityText(days);
         const priorityClass = getPriorityClass(priority);
         const rowClass = getRowClass(job, 'process');
         const currentStep = job.steps ? job.steps.find(s => !s.isDone) : null;
-        const stepLabel = currentStep ? currentStep.name : '-';
         const expDateLabel = currentStep && currentStep.expDate ? currentStep.expDate : '-';
 
         return `<tr class="${rowClass}">
@@ -1511,8 +1616,11 @@
         </tr>`;
       }).join('');
 
-      document.getElementById('selectedProcessName').innerText = processName;
+      if (jobs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px;">No jobs match the filter.</td></tr>';
+      }
     }
+
 
     function calculateDaysToDue(deliveryDate) {
       // keep for backwards compatibility
