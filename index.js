@@ -8,7 +8,7 @@ const app = express();
 app.use(express.json());
 const PORT = process.env.PORT || 3000;
 
-//Date format not string 
+//Date format not string
 const toExcelDate = (date) => {
   if (!(date instanceof Date)) return null;
 
@@ -101,7 +101,11 @@ const formatDateForExcel = (value) => {
   }
 
   // ✅ 2. Handle DD/MM/YYYY or YYYY-MM-DD
-  if (!date && typeof raw === "string" && (raw.includes("/") || raw.includes("-"))) {
+  if (
+    !date &&
+    typeof raw === "string" &&
+    (raw.includes("/") || raw.includes("-"))
+  ) {
     const parts = raw.replace(/\s+/g, "").split(/[-\/]/);
 
     if (parts.length === 3) {
@@ -545,7 +549,6 @@ async function generateDashboardData() {
 
   // Calculate stats from batch steps - ONLY current active step per batch
   batches.forEach((batch) => {
-  
     if (batch.steps && Array.isArray(batch.steps)) {
       // ✅ 1. Handle DONE steps
       batch.steps.forEach((step) => {
@@ -858,7 +861,6 @@ app.post("/api/submitData", async (req, res) => {
     });
 
     const formatDeliveryDate = toExcelDateText(data.deliveryDate);
-   
 
     // ✅ STEP 6: Prepare job row
     const jobRow = [
@@ -925,7 +927,6 @@ app.post("/api/submitData", async (req, res) => {
       const stepsData = new Array(108).fill("");
       const BLOCK_SIZE = 9;
 
-
       for (let j = 0; j < 12; j++) {
         const baseIdx = j * BLOCK_SIZE;
         stepsData[baseIdx + 8] = "FALSE";
@@ -968,7 +969,7 @@ app.post("/api/submitData", async (req, res) => {
       }
 
       const qtyString = activeProcessCols
-        .map(colIdx => `${colIdx}:${batchQty}`)
+        .map((colIdx) => `${colIdx}:${batchQty}`)
         .join("|");
 
       // Ensure index 120 exists (DP = 119, DQ = 120)
@@ -979,7 +980,7 @@ app.post("/api/submitData", async (req, res) => {
         }
       }
 
-      // Set Column DP & DQ 
+      // Set Column DP & DQ
       finalRow[114] = "FALSE";
       finalRow[119] = qtyString;
       finalRow[120] = qtyString;
@@ -1319,7 +1320,7 @@ async function saveMultiBatchUpdate(payload) {
         // DELIVERY SYNC
         const targetDate = payload.deliveryDate || payload.newDeliveryDate;
         if (isDeliveryStep && targetDate && targetDate !== "KEEP_ORIGINAL") {
-          await updateJobListingDeliveryDateByPsn(psn, targetDate);       
+          await updateJobListingDeliveryDateByPsn(psn, targetDate);
         }
 
         if (isSplitting) {
@@ -1549,28 +1550,37 @@ async function saveDateUpdates(payload) {
   const rowIdx = parseInt(payload.row);
 
   try {
-    // 1. Fetch current row state from SharePoint (as per your previous pattern)
     let runningRowData = await getBatchListingRow(rowIdx);
 
-    // 2. Loop through the updates provided by the frontend
-    // payload.updates looks like: [{ baseCol: 6, newExpDate: "2026-03-30" }]
     if (payload.updates && Array.isArray(payload.updates)) {
       payload.updates.forEach((u) => {
-        // In your header structure:
-        // Processes1 = baseCol (e.g., index 6)
-        // processExpDate1 = baseCol + 1 (e.g., index 7)
         const expDateColIndex = u.baseCol + 1;
-        console.log(u);
-        console.log("expdte:"+ u.newExpDate);
-        // Update the memory array with the new date
-        runningRowData[expDateColIndex] = formatDateForExcel(u.newExpDate);
+
+        // u.newExpDate is "DD/MM/YY" from your frontend
+        const parts = u.newExpDate.split("/");
+        const day = parseInt(parts[0]);
+        const month = parseInt(parts[1]) - 1; // 0-indexed
+        const year = parseInt("20" + parts[2]);
+
+        // 1. Create a date object in LOCAL Malaysia time
+        // 2. Set the time to 12:00 PM (Noon) to act as a GMT+8 buffer
+        const safeDate = new Date(year, month, day, 12, 0, 0);
+
+        // 3. Convert back to your specific string format
+        // This ensures the value sent to Excel is a PURE string
+        const d = String(safeDate.getDate()).padStart(2, "0");
+        const m = String(safeDate.getMonth() + 1).padStart(2, "0");
+        const y = String(safeDate.getFullYear()).substring(2);
+
+        const finalString = `${d}/${m}/${y}`;
+
+        // 4. Wrap in a single quote if the backend is still auto-converting
+        // This is the "Nuclear Option" to stop Excel from changing the date
+        runningRowData[expDateColIndex] = `'${finalString}`;
       });
     }
 
-    // 3. ONE SINGLE API CALL TO SAVE EVERYTHING
-    // Uses your existing Graph API helper
     await updateBatchListingRow(rowIdx, runningRowData);
-
     return { success: true };
   } catch (error) {
     console.error("[saveDateUpdates] Failed:", error.message);
@@ -1702,11 +1712,12 @@ app.get("/api/admin/repair-all", async (req, res) => {
       // --- STEP 3: COMPARE & UPDATE ---
       const existingQtyString = String(values[119] || "");
 
-
       // Only update if the string is different (prevents unnecessary API calls)
       // or if it contains values larger than the actual batch qty
-      if (existingQtyString !== fixedString || existingQtyString.includes("30000")) {
-
+      if (
+        existingQtyString !== fixedString ||
+        existingQtyString.includes("30000")
+      ) {
         await updateBatchListingCell(i, 119, fixedString); // Current Qty Map
         await updateBatchListingCell(i, 120, fixedString); // Max Qty Map
 
