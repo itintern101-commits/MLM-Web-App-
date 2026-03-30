@@ -1264,6 +1264,12 @@ async function saveMultiBatchUpdate(payload) {
         runningRowData[u.baseCol + 3] = diffDays;
         runningRowData[u.baseCol + 8] = true;
 
+        // DELIVERY SYNC
+        const targetDate = payload.deliveryDate || payload.newDeliveryDate;
+        if (isDeliveryStep && targetDate && targetDate !== "KEEP_ORIGINAL") {
+          await updateJobListingDeliveryDateByPsn(psn, targetDate);          await updateJobListingDeliveryDateByPsn(psn, targetDate);
+        }
+
         if (isSplitting) {
           const diff = currentStepMax - Number(u.qty);
           trackingQty = Number(u.qty);
