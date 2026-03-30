@@ -1532,7 +1532,8 @@ async function saveDateUpdates(payload) {
         // Processes1 = baseCol (e.g., index 6)
         // processExpDate1 = baseCol + 1 (e.g., index 7)
         const expDateColIndex = u.baseCol + 1;
-
+        console.log(u);
+        console.log("expdte:"+ u.newExpDate);
         // Update the memory array with the new date
         runningRowData[expDateColIndex] = formatDateForExcel(u.newExpDate);
       });
