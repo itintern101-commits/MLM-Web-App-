@@ -1591,6 +1591,20 @@ app.post("/api/revertProcessStep", async (req, res) => {
   }
 });
 
+app.post("/api/updateProcessDates", async (req, res) => {
+  try {
+    console.log("[API] POST /api/updateProcessDates");
+    const result = await saveDateUpdates(req.body);
+    res.json(result);
+  } catch (error) {
+    console.error("[API] Error updating process dates:", error);
+    res.status(500).json({
+      error: "Failed to update expected dates",
+      details: error.message,
+    });
+  }
+});
+
 app.get("/api/admin/repair-all", async (req, res) => {
   try {
     console.log("[Admin] Starting Precise Table Repair...");
