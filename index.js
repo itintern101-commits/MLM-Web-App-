@@ -1239,7 +1239,7 @@ async function saveMultiBatchUpdate(payload) {
         // DELIVERY SYNC
         const targetDate = payload.deliveryDate || payload.newDeliveryDate;
         if (isDeliveryStep && targetDate && targetDate !== "KEEP_ORIGINAL") {
-          await updateJobListingDeliveryDateByPsn(psn, targetDate);          await updateJobListingDeliveryDateByPsn(psn, targetDate);
+          await updateJobListingDeliveryDateByPsn(psn, targetDate);          
         }
 
         if (isSplitting) {
@@ -1482,7 +1482,7 @@ async function saveDateUpdates(payload) {
         const expDateColIndex = u.baseCol + 1;
 
         // Update the memory array with the new date
-        runningRowData[expDateColIndex] = u.newExpDate;
+        runningRowData[expDateColIndex] = formatDate(u.newExpDate);
       });
     }
 
@@ -1495,59 +1495,6 @@ async function saveDateUpdates(payload) {
     console.error("[saveDateUpdates] Failed:", error.message);
     throw error;
   }
-}
-
-async function processDateEditUpdate() {
-    setModalLoading(true);
-    const rows = document.querySelectorAll(".date-edit-row");
-    const updates = [];
-
-    rows.forEach(row => {
-        const input = row.querySelector(".edit-exp-date-input");
-        const baseCol = parseInt(row.getAttribute("data-base"));
-        const newVal = input.value; // YYYY-MM-DD
-        const oldVal = input.getAttribute("data-original");
-
-        if (newVal && newVal !== oldVal) {
-            // Format back to DD/MM/YY for Excel string consistency
-            const [y, m, d] = newVal.split("-");
-            const formattedDate = `${d}/${m}/${y.substring(2)}`;
-            
-            updates.push({
-                baseCol: baseCol,
-                newExpDate: formattedDate
-            });
-        }
-    });
-
-    if (updates.length === 0) {
-        showToast("No date changes detected.", "info");
-        setModalLoading(false);
-        return;
-    }
-
-    try {
-        const response = await fetch('/api/updateProcessDates', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                row: currentEditingRow,
-                updates: updates
-            })
-        });
-
-        const res = await response.json();
-        if (res.success) {
-            showToast("Successfully updated expected dates!", "success");
-            closeModal();
-            // Refresh data to show new dates in UI
-            if (window.loadBatchData) window.loadBatchData(); 
-        }
-    } catch (e) {
-        showToast("Update failed: " + e.message, "error");
-    } finally {
-        setModalLoading(false);
-    }
 }
 
 function serializeMap(map) {

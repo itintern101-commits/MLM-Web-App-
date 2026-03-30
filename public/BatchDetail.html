@@ -983,6 +983,15 @@
           return;
         }
 
+        const qtyBtn = document.getElementById("updateQtyBtn");
+        const saveBtn = document.getElementById("saveBtn");
+        const btnText = document.getElementById("btnText");
+
+        // RESET MODAL TO "UPDATE" MODE
+        if (qtyBtn) qtyBtn.style.display = "inline-block"; // Show the Split/Qty button again
+        btnText.innerText = "Update Progress"; // Reset text from "Confirm Update"
+        saveBtn.onclick = () => processUpdate(); // Point back to the original update function
+
         currentEditingRow = job.row;
 
         const historyContainer = document.getElementById("processHistoryArea");
@@ -1085,7 +1094,6 @@
         const pendingSteps = job.steps.filter((s) => !s.isDone);
         const todayTime = new Date().setHours(0, 0, 0, 0);
         const activeArea = document.getElementById("activeProcessArea");
-        const saveBtn = document.getElementById("saveBtn");
 
         if (pendingSteps.length === 0) {
           activeArea.style.display = "none";
@@ -1096,7 +1104,8 @@
           multiList.innerHTML = "";
 
           pendingSteps.forEach((step) => {
-            const globalIndex = job.steps.findIndex(s => s.baseCol === step.baseCol) + 1;
+            const globalIndex =
+              job.steps.findIndex((s) => s.baseCol === step.baseCol) + 1;
             const isDieCut = step.name === "Die-cut";
             const processQty = getQtyForProcess(
               job.qtyString,
@@ -1612,13 +1621,39 @@
         const qtyBtn = document.getElementById("updateQtyBtn");
         const saveBtn = document.getElementById("saveBtn");
         const btnText = document.getElementById("btnText");
+        const activeArea = document.getElementById("activeProcessArea");
 
         if (qtyBtn) qtyBtn.style.display = "none"; // Hide Qty button in Edit mode
-        btnText.innerText = "Confirm All Dates";
+        btnText.innerText = "Confirm Update";
+        activeArea.style.display = "block"; // Ensure the main area is visible
 
         // 3. Set the Click Handler to our new Date-only function
         saveBtn.onclick = () => processDateEditUpdate();
 
+        const historyContainer = document.getElementById("processHistoryArea");
+        const completedSteps = job.steps.filter((s) => s.isDone);
+
+        historyContainer.innerHTML =
+          `<div style="font-weight:bold; font-size:0.8rem; margin-bottom:8px; color:#64748b;">COMPLETED HISTORY</div>` +
+          (completedSteps
+            .map((s) => {
+              const globalIndex =
+                job.steps.findIndex((step) => step.baseCol === s.baseCol) + 1;
+              return `
+                <div style="padding:10px; border-bottom:1px solid #e2e8f0; background:white; margin-bottom:8px; border-radius:6px; border-left:4px solid #10b981;">
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <div style="background: #f1f5f9; color: #64748b; border-radius: 4px; padding: 2px 6px; font-size: 0.7rem; font-weight: bold;">
+                      ${globalIndex}
+                    </div>
+                    <span style="font-weight:bold; font-size:0.85rem;">${s.name}</span>
+                  </div>
+                  <div style="font-size:0.75rem; color:#64748b; margin-top:4px;">
+                    Finished: ${s.endDate}
+                  </div>
+                </div>`;
+            })
+            .join("") ||
+            '<p style="text-align:center; color:#94a3b8; font-size:0.8rem;">No history yet.</p>');
         // 4. Render the special Date rows
         renderDateEditRows(job);
 
