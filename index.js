@@ -1493,6 +1493,38 @@ async function revertProcessStep(rowIdx, baseCol, revertRemark) {
   }
 }
 
+async function saveDateUpdates(payload) {
+  const rowIdx = parseInt(payload.row);
+
+  try {
+    // 1. Fetch current row state from SharePoint (as per your previous pattern)
+    let runningRowData = await getBatchListingRow(rowIdx);
+
+    // 2. Loop through the updates provided by the frontend
+    // payload.updates looks like: [{ baseCol: 6, newExpDate: "2026-03-30" }]
+    if (payload.updates && Array.isArray(payload.updates)) {
+      payload.updates.forEach((u) => {
+        // In your header structure:
+        // Processes1 = baseCol (e.g., index 6)
+        // processExpDate1 = baseCol + 1 (e.g., index 7)
+        const expDateColIndex = u.baseCol + 1;
+
+        // Update the memory array with the new date
+        runningRowData[expDateColIndex] = formatDateForExcel(u.newExpDate);
+      });
+    }
+
+    // 3. ONE SINGLE API CALL TO SAVE EVERYTHING
+    // Uses your existing Graph API helper
+    await updateBatchListingRow(rowIdx, runningRowData);
+
+    return { success: true };
+  } catch (error) {
+    console.error("[saveDateUpdates] Failed:", error.message);
+    throw error;
+  }
+}
+
 function serializeMap(map) {
   return Object.keys(map)
     .sort((a, b) => a - b)
@@ -1556,6 +1588,20 @@ app.post("/api/revertProcessStep", async (req, res) => {
     res
       .status(500)
       .json({ error: "Failed to revert process step", details: error.message });
+  }
+});
+
+app.post("/api/updateProcessDates", async (req, res) => {
+  try {
+    console.log("[API] POST /api/updateProcessDates");
+    const result = await saveDateUpdates(req.body);
+    res.json(result);
+  } catch (error) {
+    console.error("[API] Error updating process dates:", error);
+    res.status(500).json({
+      error: "Failed to update expected dates",
+      details: error.message,
+    });
   }
 });
 
