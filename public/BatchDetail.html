@@ -1181,21 +1181,24 @@
                   </div>`
                     : ""
                 }
-                <div class="qty-area" style="display:flex; align-items:center; gap:10px; background:#f8fafc; padding:8px; border-radius:4px; border: 1px solid #e2e8f0;">
-                        <div style="flex: 1;">
-                            <span style="font-size:0.7rem; color:#64748b; display:block;">Process Qty:</span>
-                            <input type="number" class="step-qty-input" 
-                                  data-base="${step.baseCol}" 
-                                  value="${processQty}" 
-                                  max="${maxQty}" 
-                                  style="width:100%; padding:4px; border:1px solid #cbd5e1; border-radius:4px; font-size:0.8rem;">
-                        </div>
-                        <div style="text-align: right; padding-left: 10px; border-left: 1px dashed #cbd5e1;">
-                            <span style="font-size:0.65rem; color:#94a3b8; display:block; text-transform: uppercase;">Max Allowed</span>
-                            <span style="font-size:0.85rem; color:#475569; font-weight:bold;">${maxQty}</span>
-                        </div>
-                    </div>
-            `;
+                  <div class="qty-area" style="display:flex; align-items:center; gap:10px; background:#f8fafc; padding:8px; border-radius:4px; border: 1px solid #e2e8f0;">
+                      <div style="flex: 1;">
+                          <span style="font-size:0.7rem; color:#64748b; display:block;">Process Qty:</span>
+                          <input type="number" 
+                                class="step-qty-input" 
+                                data-base="${step.baseCol}" 
+                                data-system-max="${maxQty}" 
+                                value="${processQty}" 
+                                style="width:100%; padding:4px; border:1px solid #cbd5e1; border-radius:4px; font-size:0.8rem;">
+                      </div>
+                      <div style="text-align: right; padding-left: 10px; border-left: 1px dashed #cbd5e1;">
+                          <span style="font-size:0.65rem; color:#94a3b8; display:block; text-transform: uppercase;">Max Allowed</span>
+                          <span class="waterfall-max-label" 
+                                id="label-${step.baseCol}" 
+                                style="font-size:0.85rem; color:#475569; font-weight:bold;">${maxQty}</span>
+                      </div>
+                  </div>
+              `;
 
             const dCheck = div.querySelector(".step-delay-check");
             const doneCheck = div.querySelector(".step-done-check");
@@ -1212,8 +1215,15 @@
 
             multiList.appendChild(div);
           });
+
+          multiList.addEventListener("input", (e) => {
+            if (e.target.classList.contains("step-qty-input")) {
+              syncWaterfallUI();
+            }
+          });
         }
 
+        syncWaterfallUI(); // Initial run to set the limits
         document.getElementById("updateModal").style.display = "flex";
         setModalLoading(false);
       }
@@ -1231,6 +1241,31 @@
         const maxQtyString = job.maxQtyString || "";
 
         const stepRows = document.querySelectorAll(".multi-step-row");
+
+        for (let row of stepRows) {
+          const input = row.querySelector(".step-qty-input");
+          const val = parseInt(input.value);
+          const maxVal = parseInt(
+            row.querySelector(".waterfall-max-label").innerText,
+          );
+          const stepName = row.getAttribute("data-name");
+          const errorSource = input.getAttribute("data-error-source");
+
+          if (val > maxVal) {
+            let errorMsg = `Invalid Qty for ${stepName}. `;
+            if (errorSource === "System Limit") {
+              errorMsg += `Exceeds the maximum allowed in the system (${maxVal}).`;
+            } else {
+              errorMsg += `Cannot exceed the quantity processed in "${errorSource}" (${maxVal}).`;
+            }
+
+            showToast(errorMsg, "error");
+            input.focus();
+            input.style.backgroundColor = "#fee2e2";
+            return; // STOP SAVE
+          }
+        }
+
         const updates = [];
         let validationError = false;
         let firstIncompleteFound = false;
@@ -1894,6 +1929,68 @@
         // If the specific column isn't found in the MAX string,
         // it MUST be capped by the defaultQty (the current batch size).
         return fallback;
+      }
+
+      function syncWaterfallUI() {
+        const rows = document.querySelectorAll(".multi-step-row");
+        let currentActiveCeiling = Infinity;
+        let limitingStepName = ""; // Track who is causing the limit
+
+        rows.forEach((row) => {
+          const input = row.querySelector(".step-qty-input");
+          const label = row.querySelector(".waterfall-max-label");
+          const currentStepName = row.getAttribute("data-name");
+          if (!input || !label) return;
+
+          const systemMax =
+            parseInt(input.getAttribute("data-system-max")) || 0;
+          const userValue = parseInt(input.value);
+
+          // 1. Logic: Is the System Max lower, or is an Upper Process lower?
+          let effectiveMax;
+          let isLimitedByUpper = false;
+
+          if (systemMax <= currentActiveCeiling) {
+            effectiveMax = systemMax;
+          } else {
+            effectiveMax = currentActiveCeiling;
+            isLimitedByUpper = true;
+          }
+
+          // 2. Update Label UI
+          label.innerText = effectiveMax;
+
+          // 3. Visual Feedback
+          if (userValue > effectiveMax) {
+            input.style.border = "2px solid #ef4444";
+            label.style.color = "#ef4444";
+            // Set a custom attribute so processUpdate knows who caused the error
+            input.setAttribute(
+              "data-error-source",
+              isLimitedByUpper ? limitingStepName : "System Limit",
+            );
+          } else {
+            input.style.border = "1px solid #cbd5e1";
+            label.style.color = isLimitedByUpper ? "#f59e0b" : "#475569"; // Orange if limited by upper
+            input.removeAttribute("data-error-source");
+          }
+
+          // 4. Update the Ceiling for the NEXT rows
+          // If this step's input is lower than the current ceiling, it becomes the new ceiling
+          if (
+            !isNaN(userValue) &&
+            userValue > 0 &&
+            userValue < currentActiveCeiling
+          ) {
+            currentActiveCeiling = userValue;
+            limitingStepName = currentStepName;
+          } else if (effectiveMax < currentActiveCeiling) {
+            // Even if user hasn't typed, the effective max (System Max) of this step
+            // naturally limits the steps below it.
+            currentActiveCeiling = effectiveMax;
+            limitingStepName = currentStepName;
+          }
+        });
       }
     </script>
   </body>
