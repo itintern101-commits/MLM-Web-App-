@@ -84,12 +84,10 @@ const displayDate = (value) => {
 const formatDateForExcel = (value) => {
   if (!value || value === "-") return "";
 
-  // reuse your existing function OR parse again
   let raw = typeof value === "string" ? value.trim() : value;
-
   let date;
 
-  // handle Excel serial
+  // ✅ 1. Excel serial number
   if (!isNaN(raw) && raw !== "") {
     const num = Number(raw);
     if (num > 0) {
@@ -97,14 +95,40 @@ const formatDateForExcel = (value) => {
     }
   }
 
-  // normal parse
+  // ✅ 2. Handle DD/MM/YYYY or YYYY-MM-DD
+  if (!date && typeof raw === "string" && (raw.includes("/") || raw.includes("-"))) {
+    const parts = raw.replace(/\s+/g, "").split(/[-\/]/);
+
+    if (parts.length === 3) {
+      let [p1, p2, p3] = parts;
+      let day, month, year;
+
+      if (Number(p1) > 31) {
+        // YYYY-MM-DD
+        year = p1;
+        month = p2;
+        day = p3;
+      } else {
+        // DD/MM/YYYY
+        day = p1;
+        month = p2;
+        year = p3;
+      }
+
+      if (year.length === 2) year = "20" + year;
+
+      date = new Date(Number(year), Number(month) - 1, Number(day));
+    }
+  }
+
+  // ✅ 3. Fallback
   if (!date) {
     date = new Date(raw);
   }
 
   if (isNaN(date)) return "";
 
-  // ✅ RETURN ISO (THIS IS THE KEY)
+  // ✅ FINAL: ISO format for Excel
   return date.toISOString().split("T")[0];
 };
 
@@ -1508,7 +1532,8 @@ async function saveDateUpdates(payload) {
         // Processes1 = baseCol (e.g., index 6)
         // processExpDate1 = baseCol + 1 (e.g., index 7)
         const expDateColIndex = u.baseCol + 1;
-
+        console.log(u);
+        console.log("expdte:"+ u.newExpDate);
         // Update the memory array with the new date
         runningRowData[expDateColIndex] = formatDateForExcel(u.newExpDate);
       });
