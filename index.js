@@ -1510,7 +1510,7 @@ async function saveDateUpdates(payload) {
         const expDateColIndex = u.baseCol + 1;
 
         // Update the memory array with the new date
-        runningRowData[expDateColIndex] = formatDate(u.newExpDate);
+        runningRowData[expDateColIndex] = formatDateForExcel(u.newExpDate);
       });
     }
 
