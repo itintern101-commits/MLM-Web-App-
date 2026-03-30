@@ -8,7 +8,7 @@ const app = express();
 app.use(express.json());
 const PORT = process.env.PORT || 3000;
 
-//Date format not string
+//Date format not string 
 const toExcelDate = (date) => {
   if (!(date instanceof Date)) return null;
 
@@ -20,7 +20,7 @@ const toExcelDate = (date) => {
 };
 
 //Convert various date formats (Excel serial, dd/mm/yyyy, ISO) to consistent dd/mm/yyyy for frontend display
-const formatDate = (value) => {
+const displayDate = (value) => {
   if (value === undefined || value === null || value === "" || value === "-")
     return "";
 
@@ -79,6 +79,33 @@ const formatDate = (value) => {
   }
 
   return "-";
+};
+
+const formatDateForExcel = (value) => {
+  if (!value || value === "-") return "";
+
+  // reuse your existing function OR parse again
+  let raw = typeof value === "string" ? value.trim() : value;
+
+  let date;
+
+  // handle Excel serial
+  if (!isNaN(raw) && raw !== "") {
+    const num = Number(raw);
+    if (num > 0) {
+      date = new Date(Math.round((num - 25569) * 86400 * 1000));
+    }
+  }
+
+  // normal parse
+  if (!date) {
+    date = new Date(raw);
+  }
+
+  if (isNaN(date)) return "";
+
+  // ✅ RETURN ISO (THIS IS THE KEY)
+  return date.toISOString().split("T")[0];
 };
 
 // Convert date into Excel-safe TEXT format(Use for POST/api/submitData -> (Delivery Format) 'yyyy-MM-dd')
@@ -300,11 +327,11 @@ async function generateDashboardData() {
         pi: job["PI Number"] || job.PI_Number || job.pi || job.PI_No || "-",
         code: job.salesCode || job.Sales_Code || job.code || "-",
         client: job["Job Name"] || job.Job_Name || job.client || "-",
-        orderDate: formatDate(
+        orderDate: displayDate(
           job["Order Date"] || job.Order_Date || job.orderDate,
         ),
         priority: job.Priority || "NORMAL",
-        deliveryDate: formatDate(
+        deliveryDate: displayDate(
           job["Delivery Date"] || job.Delivery_Date || job.deliveryDate,
         ),
         status: job.Status || "ON SCHEDULE",
@@ -364,7 +391,7 @@ async function generateDashboardData() {
 
         // Helper to safely parse dates
         const parseDateValue = (val) => {
-          const formatted = formatDate(val);
+          const formatted = displayDate(val);
           if (formatted === "-") return "-";
           return formatted;
         };
@@ -400,7 +427,6 @@ async function generateDashboardData() {
       deliveryDate: "-",
       status: "ON SCHEDULE",
     };
-    console.log(values[2]);
     batches.push({
       row: rowIdx,
       psn: psn,
@@ -467,6 +493,7 @@ async function generateDashboardData() {
 
   // Calculate stats from batch steps - ONLY current active step per batch
   batches.forEach((batch) => {
+  
     if (batch.steps && Array.isArray(batch.steps)) {
       // ✅ 1. Handle DONE steps
       batch.steps.forEach((step) => {
@@ -770,8 +797,8 @@ app.post("/api/submitData", async (req, res) => {
 
     // ✅ STEP 5: Format dates
     console.log("⏳ Formatting dates...");
-    const normalizedOrderDate = formatDate(data.orderDate);
-    const normalizedDeliveryDate = formatDate(data.deliveryDate);
+    const normalizedOrderDate = formatDateForExcel(data.orderDate);
+    const normalizedDeliveryDate = formatDateForExcel(data.deliveryDate);
 
     console.log("📅 Formatted dates:", {
       order: normalizedOrderDate,
@@ -779,7 +806,7 @@ app.post("/api/submitData", async (req, res) => {
     });
 
     const formatDeliveryDate = toExcelDateText(data.deliveryDate);
-    console.log(formatDeliveryDate);
+   
 
     // ✅ STEP 6: Prepare job row
     const jobRow = [
@@ -846,6 +873,7 @@ app.post("/api/submitData", async (req, res) => {
       const stepsData = new Array(108).fill("");
       const BLOCK_SIZE = 9;
 
+
       for (let j = 0; j < 12; j++) {
         const baseIdx = j * BLOCK_SIZE;
         stepsData[baseIdx + 8] = "FALSE";
@@ -856,8 +884,8 @@ app.post("/api/submitData", async (req, res) => {
           if (index < 12) {
             const baseIdx = index * BLOCK_SIZE;
             stepsData[baseIdx] = step.processName || "";
-            stepsData[baseIdx + 1] = formatDate(step.expDate) || "";
-            stepsData[baseIdx + 2] = formatDate(step.endDate) || "";
+            stepsData[baseIdx + 1] = formatDateForExcel(step.expDate) || "";
+            stepsData[baseIdx + 2] = formatDateForExcel(step.endDate) || "";
             stepsData[baseIdx + 3] = step.duration || "";
             stepsData[baseIdx + 4] = step.detail || "";
             stepsData[baseIdx + 5] = step.status || "";
@@ -888,7 +916,7 @@ app.post("/api/submitData", async (req, res) => {
       }
 
       const qtyString = activeProcessCols
-        .map((colIdx) => `${colIdx}:${batchQty}`)
+        .map(colIdx => `${colIdx}:${batchQty}`)
         .join("|");
 
       // Ensure index 120 exists (DP = 119, DQ = 120)
@@ -899,7 +927,7 @@ app.post("/api/submitData", async (req, res) => {
         }
       }
 
-      // Set Column DP & DQ
+      // Set Column DP & DQ 
       finalRow[114] = "FALSE";
       finalRow[119] = qtyString;
       finalRow[120] = qtyString;
@@ -1076,7 +1104,7 @@ async function updateJobListingDeliveryDateByPsn(psn, deliveryDate) {
 
         // --- PREPARE DIFFERENT FORMATS ---
         // Column H gets the display format (dd/mm/yyyy)
-        const formatH = formatDate(deliveryDate);
+        const formatH = formatDateForExcel(deliveryDate);
         // Column L gets the Excel-safe text format ('yyyy-MM-dd)
         const formatL = toExcelDateText(deliveryDate);
 
@@ -1563,20 +1591,6 @@ app.post("/api/revertProcessStep", async (req, res) => {
   }
 });
 
-app.post("/api/updateProcessDates", async (req, res) => {
-  try {
-    console.log("[API] POST /api/updateProcessDates");
-    const result = await saveDateUpdates(req.body);
-    res.json(result);
-  } catch (error) {
-    console.error("[API] Error updating process dates:", error);
-    res.status(500).json({
-      error: "Failed to update expected dates",
-      details: error.message,
-    });
-  }
-});
-
 app.get("/api/admin/repair-all", async (req, res) => {
   try {
     console.log("[Admin] Starting Precise Table Repair...");
@@ -1621,12 +1635,11 @@ app.get("/api/admin/repair-all", async (req, res) => {
       // --- STEP 3: COMPARE & UPDATE ---
       const existingQtyString = String(values[119] || "");
 
+
       // Only update if the string is different (prevents unnecessary API calls)
       // or if it contains values larger than the actual batch qty
-      if (
-        existingQtyString !== fixedString ||
-        existingQtyString.includes("30000")
-      ) {
+      if (existingQtyString !== fixedString || existingQtyString.includes("30000")) {
+
         await updateBatchListingCell(i, 119, fixedString); // Current Qty Map
         await updateBatchListingCell(i, 120, fixedString); // Max Qty Map
 
