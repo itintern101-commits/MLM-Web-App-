@@ -416,7 +416,7 @@
         <h3>1. Main Job Details</h3>
         <div class="grid">
           <div class="input-group"><label>PSN</label><input type="text" id="psn" placeholder="e.g. 260000"></div>
-          <div class="input-group"><label>PI Number</label><input type="text" id="piNumber" placeholder="0000/26"></div>
+          <div class="input-group"><label>PI Number</label><input type="text" id="piNumber" placeholder="XXXX/26" onblur="formatPINumber(this)"></div>
           <div class="input-group"><label>Total Quantity</label><input type="number" id="totalQuantity"
               oninput="distributeQuantities()"></div>
           <div class="input-group span-full"><label>Job Name</label><input type="text" id="jobName"></div>
@@ -432,7 +432,7 @@
               <option value="NT">NT</option>
               <option value="AK">AK</option>
               <option value="NY">NY</option>
-              <option value="OC">OC</option>
+              <option value="OC">OC</option>  
               <option value="PAO">PAO</option>
               <option value="PNY">PNY</option>
               <option value="SO">SO</option>
@@ -514,11 +514,29 @@
       }, 3000);
     }
 
+    function formatPINumber(input) {
+      let value = input.value.replace(/[^0-9]/g, ''); // Only allow digits
+      if (value.length > 4) value = value.substring(0, 4); // Max 4 digits
+      const currentYear = new Date().getFullYear().toString().slice(-2); // Last 2 digits of year
+      input.value = value + '/' + currentYear;
+    }
+
+    function syncDeliveryDates() {
+      const finalDeliveryDate = document.getElementById('deliveryDate').value;
+      if (!finalDeliveryDate) return;
+      const count = parseInt(document.getElementById('batchCount').value);
+      for (let b = 1; b <= count; b++) {
+        const deliveryInput = document.getElementById(`date_b${b}_s${selectedSteps.length + 1}`);
+        if (deliveryInput) deliveryInput.value = finalDeliveryDate;
+      }
+    }
+
     const processList = ["Sheeting", "Printing", "Lamination", "Efluting", "Die-cut", "Convert", "Baseboard", "Hotstamping", "Packing", "Double-Side-Tape", "Emboss", "Blind Emboss", "Gluing", "Side Glue", "2 Point Glue", "Attach Handle", "Peeling", "Punch Hole", "Slitting LF", "FlexoSlitting", "Spot UV", "Texture", "Trimming", "Varnish", "Waterbase"];
     let selectedSteps = [];
 
     window.onload = () => {
       document.getElementById('orderDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('deliveryDate').addEventListener('change', syncDeliveryDates);
       renderPool();
     };
 
@@ -700,6 +718,7 @@
       </div></div>`;
       }
       area.innerHTML = html;
+      syncDeliveryDates();
     }
 
 

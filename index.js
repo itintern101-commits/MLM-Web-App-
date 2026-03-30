@@ -87,11 +87,16 @@ const formatDateForExcel = (value) => {
   let raw = typeof value === "string" ? value.trim() : value;
   let date;
 
-  // ✅ 1. Excel serial number
+  // ✅ 1. Excel serial number (FIXED timezone)
   if (!isNaN(raw) && raw !== "") {
     const num = Number(raw);
     if (num > 0) {
-      date = new Date(Math.round((num - 25569) * 86400 * 1000));
+      const utcDate = new Date(Math.round((num - 25569) * 86400 * 1000));
+      date = new Date(
+        utcDate.getUTCFullYear(),
+        utcDate.getUTCMonth(),
+        utcDate.getUTCDate()
+      );
     }
   }
 
@@ -132,8 +137,10 @@ const formatDateForExcel = (value) => {
 
   if (isNaN(date)) return "";
 
-  // ✅ FINAL: ISO format for Excel
-  return date.toISOString().split("T")[0];
+  // ✅ FINAL: LOCAL FORMAT (NO TIMEZONE SHIFT)
+  const pad = (n) => (n < 10 ? "0" + n : n);
+
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 };
 
 // Convert date into Excel-safe TEXT format(Use for POST/api/submitData -> (Delivery Format) 'yyyy-MM-dd')
@@ -144,22 +151,34 @@ const toExcelDateText = (value) => {
   let raw = typeof value === "string" ? value.trim() : value;
   let date = null;
 
-  // Case 1: Excel serial number (e.g., 46090)
+  // ✅ Case 1: Excel serial
   if (!isNaN(raw)) {
     const num = Number(raw);
     if (num > 0) {
-      date = new Date((num - 25569) * 86400 * 1000);
+      const utcDate = new Date(Math.round((num - 25569) * 86400 * 1000));
+      date = new Date(
+        utcDate.getUTCFullYear(),
+        utcDate.getUTCMonth(),
+        utcDate.getUTCDate()
+      );
     }
   }
-  // Case 2: ISO yyyy-mm-dd
+
+  // ✅ Case 2: ISO yyyy-mm-dd
   else if (
     typeof raw === "string" &&
     raw.includes("-") &&
     raw.split("-")[0].length === 4
   ) {
-    date = new Date(raw);
+    const temp = new Date(raw);
+    date = new Date(
+      temp.getFullYear(),
+      temp.getMonth(),
+      temp.getDate()
+    );
   }
-  // Case 3: dd/mm/yyyy or dd-mm-yyyy
+
+  // ✅ Case 3: dd/mm/yyyy
   else if (
     typeof raw === "string" &&
     (raw.includes("/") || raw.includes("-"))
@@ -171,14 +190,20 @@ const toExcelDateText = (value) => {
       date = new Date(y, m - 1, d);
     }
   }
-  // Case 4: fallback
+
+  // ✅ Case 4: fallback
   else {
-    date = new Date(raw);
+    const temp = new Date(raw);
+    date = new Date(
+      temp.getFullYear(),
+      temp.getMonth(),
+      temp.getDate()
+    );
   }
 
   if (!date || isNaN(date.getTime())) return "";
 
-  // Format to yyyy-MM-dd
+  // ✅ Format yyyy-MM-dd (TEXT for Excel)
   const pad = (n) => (n < 10 ? "0" + n : n);
   return `'${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 };
@@ -344,7 +369,7 @@ async function generateDashboardData() {
   const jobListing = await getTableRowsAsObjects("JobListing");
 
   // console.log('[generateDashboardData] JobListing:', jobListing);
-
+ 
   // Create jobInfoMap from JobListing for quick lookup
   const jobInfoMap = {};
   jobListing.forEach((job) => {
@@ -355,6 +380,7 @@ async function generateDashboardData() {
         pi: job["PI Number"] || job.PI_Number || job.pi || job.PI_No || "-",
         code: job.salesCode || job.Sales_Code || job.code || "-",
         client: job["Job Name"] || job.Job_Name || job.client || "-",
+        jobType: job["Job Type"],
         orderDate: displayDate(
           job["Order Date"] || job.Order_Date || job.orderDate,
         ),
@@ -366,7 +392,7 @@ async function generateDashboardData() {
       };
     }
   });
-
+ 
   // Process BatchListing to create batches with steps structure
   const batches = [];
 
@@ -450,6 +476,7 @@ async function generateDashboardData() {
       pi: "-",
       code: "-",
       client: "-",
+      jobType: "-",
       orderDate: "-",
       priority: "NORMAL",
       deliveryDate: "-",
@@ -468,6 +495,7 @@ async function generateDashboardData() {
       piNumber: info.pi,
       salesCode: info.code,
       clientName: info.client,
+      jobType: info.jobType,
       orderDate: info.orderDate,
       priority: info.priority,
       deliveryDate: info.deliveryDate,
@@ -687,7 +715,7 @@ async function generateDashboardData() {
       prevDurationTime,
     });
   });
-
+ 
   const result = {
     jobs: batches,
     jobListing: batches, // For compatibility with both old and new frontend
@@ -849,7 +877,7 @@ app.post("/api/submitData", async (req, res) => {
       data.status || "ON SCHEDULE",
       formatDeliveryDate || "",
     ];
-
+    
     jobListingColumnCount = await getTableColumnCount("JobListing");
 
     if (jobRow.length < jobListingColumnCount) {
