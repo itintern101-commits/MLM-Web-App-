@@ -508,12 +508,33 @@
     let selectedSteps = [];
     let draggedElement = null;
 
-    // Initialize the form with default values and set up event listeners for dynamic interactions like date synchronization and process rendering
+    // Initialize the form with default values and set up event listeners for dynamic interactions like date synchronization, instant tabbing, and process rendering
     window.onload = () => {
       document.getElementById('orderDate').value = new Date().toISOString().split('T')[0];
       document.getElementById('deliveryDate').addEventListener('change', syncDeliveryDates);
       renderPool();
+      setupCreateJobEnterNavigation();
     };
+
+    // Form shortcut: Enter navigates fields in order for faster data entry (PSN + PI + Qty + Job Name + Item Name)
+    function setupCreateJobEnterNavigation() {
+      const order = ['psn', 'piNumber', 'totalQuantity', 'jobName', 'item'];
+
+      order.forEach((id, idx) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('keydown', (evt) => {
+          if (evt.key === 'Enter') {
+            evt.preventDefault();
+            const next = document.getElementById(order[idx + 1]);
+            if (next) {
+              next.focus();
+              if (typeof next.select === 'function') next.select();
+            }
+          }
+        });
+      });
+    }
 
     // --- Helper Functions ---
     // Universal toast function for showing messages to the user with different types (error, success, warning)
@@ -637,18 +658,31 @@
       }
     }
 
-    // Function to validate the date input for each step, ensuring that it is not in the past and that it follows the correct sequence order relative to previous steps, with visual feedback for errors
+    // Function to validate the date input for each step, ensuring that it is not in the past and that it follows the correct sequence order relative to previous steps
     function validateDate(batch, step, input) {
       input.classList.remove('input-error');
       const selectedDate = new Date(input.value);
-      const today = new Date(); today.setHours(0, 0, 0, 0);
-      if (selectedDate < today) { showToast("Past date forbidden"); input.classList.add('input-error'); input.value = ""; return; }
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (selectedDate < today) {
+        showToast("Past date forbidden", "error");
+        input.classList.add('input-error');
+        input.value = "";
+        return;
+      }
+
       if (step > 1) {
         const prevInput = document.getElementById(`date_b${batch}_s${step - 1}`);
         if (prevInput && prevInput.value && selectedDate <= new Date(prevInput.value)) {
-          showToast(`Must be after Step ${step - 1}`); input.classList.add('input-error'); input.value = "";
+          showToast(`Must be after Step ${step - 1}`, "error");
+          input.classList.add('input-error');
+          input.value = "";
+          return;
         }
       }
+
+      // No auto-copy to next date; user sets each step manually.
     }
 
 
@@ -740,6 +774,25 @@
       }
       area.innerHTML = html;
       syncDeliveryDates();
+
+      // Bind Enter key behavior for dynamically generated step date fields in each batch row
+      document.querySelectorAll('#batchArea input[type="date"]').forEach((dateInput) => {
+        dateInput.addEventListener('keydown', (evt) => {
+          if (evt.key === 'Enter') {
+            evt.preventDefault();
+            const match = dateInput.id.match(/^date_b(\d+)_s(\d+)$/);
+            if (match) {
+              const batch = match[1];
+              const step = parseInt(match[2], 10);
+              const next = document.getElementById(`date_b${batch}_s${step + 1}`);
+              if (next) {
+                next.focus();
+                if (typeof next.select === 'function') next.select();
+              }
+            }
+          }
+        });
+      });
     }
 
 

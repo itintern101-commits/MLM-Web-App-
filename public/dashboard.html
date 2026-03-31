@@ -55,7 +55,14 @@
     /* Top Status Grid */
     .status-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, minmax(220px, 1fr));
+      gap: 25px;
+      margin-bottom: 20px;
+    }
+
+    .totals-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(300px, 1fr));
       gap: 25px;
       margin-bottom: 40px;
     }
@@ -67,7 +74,7 @@
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
       text-align: center;
       cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
     }
 
     .status-card:hover {
@@ -75,10 +82,24 @@
       box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
     }
 
+    .status-card {
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .job-table tbody tr:hover,
+    .clickable-row:hover,
+    #processJobsTableContent tbody tr:hover {
+      background-color: #f5f9ff;
+    }
+
     .status-card.active-status {
       border-top-width: 10px;
       border-top-color: #1a73e8;
       box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+    }
+
+    .status-card.total-summary {
+      border: 1px solid #d0e4ff;
     }
 
     .status-card h3 {
@@ -550,6 +571,17 @@
   <div class="main-wrapper">
     <h1>Dashboard</h1>
 
+    <!-- <div class="totals-grid">
+      <div class="status-card total-summary" style="border-top: 8px solid #1976d2;">
+        <h3>Total Jobs</h3>
+        <div class="val" style="color: #1976d2;" id="stat-total-jobs">0</div>
+      </div>
+      <div class="status-card total-summary" style="border-top: 8px solid #0b8043;">
+        <h3>Total Batches</h3>
+        <div class="val" style="color: #0b8043;" id="stat-total-batches">0</div>
+      </div>
+    </div> -->
+    
     <div class="status-grid">
       <div class="status-card" data-status="ON SCHEDULE" style="border-top: 8px solid var(--success);">
         <h3>On Schedule</h3>
@@ -564,6 +596,7 @@
         <div class="val" style="color: var(--danger);" id="stat-overdue">00</div>
       </div>
     </div>
+
 
     <span class="section-title">PROCESS WORKLOAD & AVERAGE PERFORMANCE</span>
     <div class="cap-card" style="margin-bottom: 40px; padding: 25px;">
@@ -785,6 +818,11 @@
     let countSchedule = 0;
     let countAlmost = 0;
     let countOverdue = 0;
+    let countScheduleBatches = 0;
+    let countAlmostBatches = 0;
+    let countOverdueBatches = 0;
+    let totalJobs = 0;
+    let totalBatches = 0;
 
 
     function showToast(message, type = 'info') {
@@ -954,16 +992,32 @@
       countSchedule = 0;
       countAlmost = 0;
       countOverdue = 0;
+      countScheduleBatches = 0;
+      countAlmostBatches = 0;
+      countOverdueBatches = 0;
+      totalJobs = psnList.length;
+      totalBatches = psnList.reduce((acc, item) => acc + (item.batches ? item.batches.length : 0), 0);
+
       psnList.forEach(item => {
-        if (item.status === "ON SCHEDULE") countSchedule++;
-        else if (item.status === "ALMOST DUE") countAlmost++;
-        else if (item.status === "OVERDUE") countOverdue++;
+        if (item.status === "ON SCHEDULE") {
+          countSchedule++;
+          countScheduleBatches += item.batches.length;
+        } else if (item.status === "ALMOST DUE") {
+          countAlmost++;
+          countAlmostBatches += item.batches.length;
+        } else if (item.status === "OVERDUE") {
+          countOverdue++;
+          countOverdueBatches += item.batches.length;
+        }
       });
 
       // Update the HTML values (using padStart to keep the 00 format)
       document.getElementById('stat-schedule').innerText = String(countSchedule).padStart(2, '0');
       document.getElementById('stat-almost').innerText = String(countAlmost).padStart(2, '0');
       document.getElementById('stat-overdue').innerText = String(countOverdue).padStart(2, '0');
+
+      // document.getElementById('stat-total-jobs').innerText = String(totalJobs);
+      // document.getElementById('stat-total-batches').innerText = String(totalBatches);
 
       // 2. APPLY FILTERS
       const filteredList = psnList.filter(item => {
