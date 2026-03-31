@@ -229,32 +229,39 @@
 
     /* Row background colors for priority */
     .row-overdue {
-      background-color: #fce8e6 !important; /* Red background for overdue */
+      background-color: #fce8e6 !important;
+      /* Red background for overdue */
     }
 
     .row-almost-due {
-      background-color: #fef7e0 !important; /* Light orange background for almost due */
+      background-color: #fef7e0 !important;
+      /* Light orange background for almost due */
     }
 
     .row-normal {
-      background-color: white !important; /* White background for normal */
+      background-color: white !important;
+      /* White background for normal */
     }
 
     .row-completed {
-      background-color: #e6f4ea !important; /* Light green for completed */
+      background-color: #e6f4ea !important;
+      /* Light green for completed */
     }
 
     /* Row background colors for priority (duplicated block kept for safe override) */
     .row-overdue {
-      background-color: #fce8e6 !important; /* Red background for overdue */
+      background-color: #fce8e6 !important;
+      /* Red background for overdue */
     }
 
     .row-almost-due {
-      background-color: #fef7e0 !important; /* Light orange background for almost due */
+      background-color: #fef7e0 !important;
+      /* Light orange background for almost due */
     }
 
     .row-normal {
-      background-color: white !important; /* White background for normal */
+      background-color: white !important;
+      /* White background for normal */
     }
 
     .batch-detail-row {
@@ -513,6 +520,9 @@
 
 <body>
   <div id="sidebar-container"></div>
+  <div id="toast-container"
+    style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: none;">
+  </div>
   <script>
     fetch('/Sidebar.html')
       .then(r => r.text())
@@ -563,9 +573,12 @@
       </div>
 
       <div id="processJobsTable" style="display: none; margin-top: 20px;">
-        <span class="section-title">Jobs in Process: <span class="process-step-badge" id="selectedProcessName" style="font-size:25px;"></span></span>
-        <div class="table-header-flex" style="margin: 10px 0 10px; gap: 10px; align-items: center; justify-content: flex-end;">
-          <input type="text" id="processSearchInput" onkeyup="filterProcessJobs()" placeholder="Search PSN, BatchID, Job..." class="filter-select" style="width: 240px;">
+        <span class="section-title">Jobs in Process: <span class="process-step-badge" id="selectedProcessName"
+            style="font-size:25px;"></span></span>
+        <div class="table-header-flex"
+          style="margin: 10px 0 10px; gap: 10px; align-items: center; justify-content: flex-end;">
+          <input type="text" id="processSearchInput" onkeyup="filterProcessJobs()"
+            placeholder="Search PSN, BatchID, Job..." class="filter-select" style="width: 240px;">
           <select id="processDueFilter" onchange="filterProcessJobs()" class="filter-select" style="width: 180px;">
             <option value="ALL">All Due Status</option>
             <option value="OVERDUE">Overdue</option>
@@ -573,7 +586,8 @@
             <option value="NEAR_DUE">Near Due (1-2d)</option>
           </select>
         </div>
-        <div style="max-height: 600px; overflow-y: auto; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+        <div
+          style="max-height: 600px; overflow-y: auto; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
           <table class="job-table" id="processJobsTableContent" style="max-height: none; overflow: visible;">
             <thead>
               <tr>
@@ -587,7 +601,8 @@
             </thead>
             <tbody id="processJobsBody">
               <tr>
-                <td colspan="6" style="text-align:center; padding: 20px;">Click on a process above to view jobs in progress.</td>
+                <td colspan="6" style="text-align:center; padding: 20px;">Click on a process above to view jobs in
+                  progress.</td>
               </tr>
             </tbody>
           </table>
@@ -670,7 +685,8 @@
               <th>Quantity</th>
               <th>Current Process</th>
               <th>In Progress(Days)</th>
-              <th style="cursor:pointer;" onclick="setReqSort('dueDays')">Days to Due Date <span id="reqSortIcon">▲</span>
+              <th style="cursor:pointer;" onclick="setReqSort('dueDays')">Days to Due Date <span
+                  id="reqSortIcon">▲</span>
               </th>
               <th>Previous Step & EndDate</th>
             </tr>
@@ -770,8 +786,42 @@
     let countAlmost = 0;
     let countOverdue = 0;
 
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      const color = type === 'success' ? '#28a745' : type === 'error' ? '#d93025' : '#1a73e8';
+      toast.className = 'toast';
+      toast.style.background = 'rgba(45, 55, 72, 0.95)';
+      toast.style.color = 'white';
+      toast.style.padding = '12px 20px';
+      toast.style.borderRadius = '10px';
+      toast.style.minWidth = '280px';
+      toast.style.textAlign = 'center';
+      toast.style.boxShadow = '0 10px 20px rgba(0,0,0,0.2)';
+      toast.style.fontWeight = '600';
+      toast.style.pointerEvents = 'auto';
+      toast.style.borderBottom = `4px solid ${color}`;
+      toast.innerText = message;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.transition = 'opacity 0.4s, transform 0.4s';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-20px)';
+        setTimeout(() => toast.remove(), 400);
+      }, 3000);
+    }
+
+
+    // Fetch data and initialize dashboard on load  
     window.onload = async () => {
       try {
+        const toastMessage = sessionStorage.getItem('toastMessage');
+        if (toastMessage) {
+          showToast(toastMessage, 'success');
+          sessionStorage.removeItem('toastMessage');
+        }
         console.log('Dashboard: Starting data fetch...');
         const resp = await fetch('/api/dashboard');
         const data = await resp.json();
@@ -867,7 +917,7 @@
     };
 
 
-
+    // Main function to filter, sort, and display the job table
     function filterTable() {
       const searchTerm = document.getElementById('searchInput').value.toUpperCase();
       const salesCodeType = document.getElementById('salesCodeFilter').value;
@@ -956,6 +1006,7 @@
         return;
       }
 
+      // For each PSN group, create a row and a hidden detail row for batches
       dataList.forEach((group, index) => {
         const avgProgress = Math.round((group.batches.reduce((sum, b) => sum + (b.progress || 0), 0) / group.batches.length) * 100);
         const statusClass = group.status === 'OVERDUE' ? 'tag-overdue' : (group.status === 'ALMOST DUE' ? 'tag-almost' : 'tag-schedule');
@@ -1019,10 +1070,12 @@
       });
     }
 
+    // Helper function to generate the URL for batch details
     function getUpdateUrl(batchId) {
       // Node.js server: direct link to BatchDetail
       return `/BatchDetail.html?id=${encodeURIComponent(batchId)}`;
     }
+
     // Update renderDashboard to simply call the filter
     function formatDateDMY(rawDate) {
       if (!rawDate || rawDate === '-') return '-';
@@ -1059,10 +1112,12 @@
       return `${dd}/${mm}/${yyyy}`;
     }
 
+    // Main function to render the dashboard, now simplified to just call filterTable
     function renderDashboard() {
       filterTable();
     }
 
+    // New function to render the requirement updates table
     function renderRequirementUpdates(updates) {
       const tbody = document.getElementById('requirementBody');
       tbody.innerHTML = '';
@@ -1094,6 +1149,7 @@
       });
     }
 
+    // Function to toggle batch details visibility
     function toggleBatch(id) {
       const detailRow = document.getElementById('batch-row-' + id);
       const isVisible = detailRow.style.display === 'table-row';
@@ -1140,6 +1196,7 @@
       calculateCapacity(); // Refresh the UI
     }
 
+    // Main function to calculate and render the capacity cards based on RAW_CAPACITY and current filters
     function calculateCapacity() {
       const selectedMonthYear = document.getElementById('monthPicker').value;
       const container = document.getElementById('machineCapacityContainer');
@@ -1233,6 +1290,7 @@
 
     }
 
+    // Function to generate month options for the dropdown, showing 3 months back and 8 months ahead
     function generateMonthOptions() {
       const picker = document.getElementById('monthPicker');
       const now = new Date();
@@ -1261,7 +1319,7 @@
     }
 
 
-
+    // Function to set the active view mode and refresh chart data if a machine is selected
     function setChartViewMode(mode) {
       activeViewMode = mode;
       if (activeMachine) {
@@ -1269,6 +1327,7 @@
       }
     }
 
+    // Function to display the chart for a specific machine, or hide it if the same machine is clicked again
     function showMachineChart(mName) {
       if (activeMachine === mName && document.getElementById('chartSection').style.display === 'block') {
         // Same machine clicked, close the chart
@@ -1283,6 +1342,7 @@
       document.getElementById('chartSection').scrollIntoView({ behavior: 'smooth' });
     }
 
+    // Main function to update the chart data based on the selected machine and view mode
     function updateChartData(mName) {
       const ctx = document.getElementById('capacityChart').getContext('2d');
       const colors = {
@@ -1425,6 +1485,7 @@
     let reqSortField = 'dueDays';
     let reqSortAsc = true;
 
+    // Main function to filter, sort, and display the requirement updates table
     function filterRequirementUpdates() {
       const searchTerm = document.getElementById('reqSearchInput').value.toUpperCase();
       const statusFilter = document.getElementById('reqStatusFilter').value;
@@ -1469,7 +1530,7 @@
       renderRequirementUpdates(filtered);
     }
 
-
+    // Helper function to convert duration text to a sortable number of days
     function parseReqDays(duration) {
       if (duration.includes('Overdue')) return -999;
       if (duration.includes('Due today')) return 0;
@@ -1477,6 +1538,7 @@
       return match ? parseInt(match[1]) : 999;
     }
 
+    // Function to handle sorting when the header is clicked
     function setReqSort(field) {
       if (reqSortField === field) {
         reqSortAsc = !reqSortAsc;
@@ -1488,6 +1550,7 @@
       filterRequirementUpdates();
     }
 
+    // Function to render the requirement updates table based on the filtered and sorted data
     function renderRequirementUpdates(updates) {
       const tbody = document.getElementById('requirementBody');
       tbody.innerHTML = '';
@@ -1524,6 +1587,7 @@
       });
     }
 
+    // Variable to cache the currently displayed process jobs for filtering
     function showProcessJobs(processName) {
       const tbody = document.getElementById('processJobsBody');
       const tableDiv = document.getElementById('processJobsTable');
@@ -1548,6 +1612,7 @@
       renderProcessJobs(processName);
     }
 
+    // Cache for the currently displayed process jobs to enable client-side filtering without re-processing the entire dataset
     function renderProcessJobs(processName) {
       activeProcessName = processName;
       const jobs = MASTER_DATA.filter(job => {
@@ -1569,6 +1634,7 @@
       drawProcessJobs(jobs);
     }
 
+    // Function to filter the currently displayed process jobs based on search input and due date filters without re-querying the entire dataset
     function filterProcessJobs() {
       const searchTerm = document.getElementById('processSearchInput').value.toUpperCase();
       const dueFilter = document.getElementById('processDueFilter').value;
@@ -1594,6 +1660,7 @@
       drawProcessJobs(filtered);
     }
 
+    // Function to render the process jobs table based on the currently selected process and applied filters
     function drawProcessJobs(jobs) {
       const tbody = document.getElementById('processJobsBody');
       if (!tbody) return;
@@ -1621,7 +1688,7 @@
       }
     }
 
-
+    // Helper function to calculate days to due date from a given delivery date string, with robust parsing and error handling
     function calculateDaysToDue(deliveryDate) {
       // keep for backwards compatibility
       if (!deliveryDate || deliveryDate === '-') return 999;
@@ -1633,6 +1700,7 @@
       return diffDays;
     }
 
+    // New helper function to calculate days to due date based on the current step's expected date, with robust parsing and error handling
     function calculateDaysToDueFromStep(job) {
       if (!job || !job.steps || job.steps.length === 0) return 999;
       const currentStep = job.steps.find(s => !s.isDone);
@@ -1646,6 +1714,7 @@
       return diffDays;
     }
 
+    // Robust date parsing function that can handle various formats and gracefully return null for invalid inputs
     function parseDate(rawDate) {
       if (!rawDate || rawDate === '-') return null;
       let date;
@@ -1671,18 +1740,21 @@
       return date && !isNaN(date.getTime()) ? date : null;
     }
 
+    // Helper function to convert days to due into a user-friendly priority text
     function getPriorityText(days) {
       if (days < 0) return `Overdue ${Math.abs(days)} days`;
       if (days === 0) return 'Due Today';
       return `${days} Days Left`;
     }
 
+    // Helper function to determine the CSS class for the priority tag based on the priority text
     function getPriorityClass(priorityText) {
       if (priorityText.includes('Overdue')) return 'tag-overdue';
       if (priorityText.includes('Due Today') || priorityText.includes('Days Left')) return 'tag-almost';
       return 'tag-schedule';
     }
 
+    // Helper function to determine the CSS class for the entire row based on the job's status and due date, with different logic for process jobs vs requirement updates
     function getRowClass(item, tableType) {
       if (tableType === 'process') {
         // For process workload table

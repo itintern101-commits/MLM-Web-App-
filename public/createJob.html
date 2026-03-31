@@ -416,7 +416,8 @@
         <h3>1. Main Job Details</h3>
         <div class="grid">
           <div class="input-group"><label>PSN</label><input type="text" id="psn" placeholder="e.g. 260000"></div>
-          <div class="input-group"><label>PI Number</label><input type="text" id="piNumber" placeholder="XXXX/26" onblur="formatPINumber(this)"></div>
+          <div class="input-group"><label>PI Number</label><input type="text" id="piNumber" placeholder="XXXX/26"
+              onblur="formatPINumber(this)"></div>
           <div class="input-group"><label>Total Quantity</label><input type="number" id="totalQuantity"
               oninput="distributeQuantities()"></div>
           <div class="input-group span-full"><label>Job Name</label><input type="text" id="jobName"></div>
@@ -427,12 +428,13 @@
           <div class="input-group">
             <label>Sales Code</label>
             <select id="salesCode">
+              <option value="">Please Choose Sales Code</option>
               <option value="AO">AO</option>
               <option value="SHU">SHU</option>
               <option value="NT">NT</option>
               <option value="AK">AK</option>
               <option value="NY">NY</option>
-              <option value="OC">OC</option>  
+              <option value="OC">OC</option>
               <option value="PAO">PAO</option>
               <option value="PNY">PNY</option>
               <option value="SO">SO</option>
@@ -442,6 +444,7 @@
           <div class="input-group">
             <label>Job Type</label>
             <select id="jobType">
+              <option value="">Please Choose Job Type</option>
               <option value="Offset">Offset</option>
               <option value="FSC">FSC</option>
               <option value="Flexo & MMB/SOS">Flexo & MMB/SOS</option>
@@ -501,6 +504,19 @@
   </div>
 
   <script>
+    const processList = ["Sheeting", "Printing", "Lamination", "Efluting", "Die-cut", "Convert", "Baseboard", "Hotstamping", "Packing", "Double-Side-Tape", "Emboss", "Blind Emboss", "Gluing", "Side Glue", "2 Point Glue", "Attach Handle", "Peeling", "Punch Hole", "Slitting LF", "FlexoSlitting", "Spot UV", "Texture", "Trimming", "Varnish", "Waterbase"];
+    let selectedSteps = [];
+    let draggedElement = null;
+
+    // Initialize the form with default values and set up event listeners for dynamic interactions like date synchronization and process rendering
+    window.onload = () => {
+      document.getElementById('orderDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('deliveryDate').addEventListener('change', syncDeliveryDates);
+      renderPool();
+    };
+
+    // --- Helper Functions ---
+    // Universal toast function for showing messages to the user with different types (error, success, warning)
     function showToast(message, type = 'error') {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
@@ -514,6 +530,7 @@
       }, 3000);
     }
 
+    // Function to format the PI Number input to ensure it follows the required pattern of 4 digits followed by '/26'
     function formatPINumber(input) {
       let value = input.value.replace(/[^0-9]/g, ''); // Only allow digits
       if (value.length > 4) value = value.substring(0, 4); // Max 4 digits
@@ -521,6 +538,7 @@
       input.value = value + '/' + currentYear;
     }
 
+    // Function to synchronize the final delivery date across all batches and steps when the main delivery date is changed
     function syncDeliveryDates() {
       const finalDeliveryDate = document.getElementById('deliveryDate').value;
       if (!finalDeliveryDate) return;
@@ -531,15 +549,7 @@
       }
     }
 
-    const processList = ["Sheeting", "Printing", "Lamination", "Efluting", "Die-cut", "Convert", "Baseboard", "Hotstamping", "Packing", "Double-Side-Tape", "Emboss", "Blind Emboss", "Gluing", "Side Glue", "2 Point Glue", "Attach Handle", "Peeling", "Punch Hole", "Slitting LF", "FlexoSlitting", "Spot UV", "Texture", "Trimming", "Varnish", "Waterbase"];
-    let selectedSteps = [];
-
-    window.onload = () => {
-      document.getElementById('orderDate').value = new Date().toISOString().split('T')[0];
-      document.getElementById('deliveryDate').addEventListener('change', syncDeliveryDates);
-      renderPool();
-    };
-
+    // Function to render the available processes in the pool area, showing which ones are currently selected and allowing users to click to add them to the sequence
     function renderPool() {
       const pool = document.getElementById('processPool');
       pool.innerHTML = processList.map(p => {
@@ -549,6 +559,7 @@
       document.getElementById('counter').innerText = `${selectedSteps.length} / 11`;
     }
 
+    // Function to add a process step to the selected sequence when clicked in the pool, with a maximum limit of 11 steps and automatic UI refresh and quantity distribution
     function addStep(p) {
       if (selectedSteps.length >= 11) { showToast("Max 11 steps", "warning"); return; }
       if (!selectedSteps.includes(p)) {
@@ -559,6 +570,7 @@
       }
     }
 
+    // Function to remove a process step from the selected sequence when the remove button is clicked, with automatic UI refresh and quantity redistribution
     function removeStep(i) {
       selectedSteps.splice(i, 1);
       renderSeq();
@@ -566,6 +578,7 @@
       distributeQuantities();
     }
 
+    // Function to automatically distribute the total quantity evenly across the batches whenever the total quantity or batch count changes, ensuring that the sum of batch quantities always equals the total quantity
     function distributeQuantities() {
       const total = parseInt(document.getElementById('totalQuantity').value) || 0;
       const count = parseInt(document.getElementById('batchCount').value);
@@ -582,6 +595,7 @@
       }
     }
 
+    // Function to clear the entire selected process sequence with a single click, resetting the UI and showing a confirmation toast message
     function clearSequence() {
       if (selectedSteps.length === 0) return;
       selectedSteps = [];
@@ -590,6 +604,7 @@
       showToast("Sequence cleared.", "success");
     }
 
+    // Function to render the currently selected process sequence in the UI, showing each step with its order number and a remove button, or a placeholder message if no steps are selected
     function renderSeq() {
       const container = document.getElementById('selectedSequence');
       renderPool();
@@ -602,6 +617,7 @@
     `).join('');
     }
 
+    // Function to handle changes in batch quantity inputs, ensuring that the total quantity is not exceeded and automatically redistributing remaining quantities across subsequent batches if needed
     function handleQtyChange(changedIdx) {
       const total = parseInt(document.getElementById('totalQuantity').value) || 0;
       const count = parseInt(document.getElementById('batchCount').value);
@@ -621,6 +637,7 @@
       }
     }
 
+    // Function to validate the date input for each step, ensuring that it is not in the past and that it follows the correct sequence order relative to previous steps, with visual feedback for errors
     function validateDate(batch, step, input) {
       input.classList.remove('input-error');
       const selectedDate = new Date(input.value);
@@ -634,20 +651,23 @@
       }
     }
 
-    // --- DRAG AND DROP LOGIC ---
-    let draggedElement = null;
 
+
+    // --- DRAG AND DROP LOGIC ---
+    // Function to handle the start of dragging a step row, storing the reference to the dragged element and applying visual feedback
     function handleDragStart(e) {
       draggedElement = e.currentTarget;
       e.dataTransfer.effectAllowed = 'move';
       draggedElement.classList.add('dragging');
     }
 
+    // Function to allow dropping by preventing the default behavior when dragging over another step row
     function handleDragOver(e) {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
     }
 
+    // Function to handle dropping a dragged step row onto another, swapping their process names and dates while ensuring that delivery rows cannot be dragged or dropped onto, and providing visual feedback for the swap action
     function handleDrop(e) {
       e.preventDefault();
       const targetElement = e.currentTarget;
@@ -673,6 +693,7 @@
       }
     }
 
+    // Function to refresh the batch UI whenever there are changes in the selected steps or batch count, dynamically generating the HTML for each batch and step while ensuring that the delivery date is synchronized across all batches
     function refreshUI() {
       const count = parseInt(document.getElementById('batchCount').value);
       const area = document.getElementById('batchArea');
@@ -722,20 +743,30 @@
     }
 
 
-
+    // Function to handle the form submission when the user clicks the "Create Entry & Save" button, performing validation on all inputs, gathering the data into a structured format, and sending it to the server via a POST request while providing feedback on the submission status and handling redirection upon success
     async function submitForm() {
       console.log("Hi I am Here");
-      const psn = document.getElementById('psn').value;
-      const piNumber = document.getElementById('piNumber').value;
+      const psn = document.getElementById('psn').value.trim();
+      const piNumber = document.getElementById('piNumber').value.trim();
       const totalQty = parseInt(document.getElementById('totalQuantity').value);
       const orderDate = document.getElementById('orderDate').value;
       const deliveryDate = document.getElementById('deliveryDate').value;
-      const jobName = document.getElementById('jobName').value;
-      const item = document.getElementById('item').value;
+      const jobName = document.getElementById('jobName').value.trim();
+      const item = document.getElementById('item').value.trim();
+      const salesCode = document.getElementById('salesCode').value;
+      const jobType = document.getElementById('jobType').value;
 
-      if (!psn || !jobName || !piNumber || !totalQty || selectedSteps.length === 0 || !orderDate || !deliveryDate) {
-        showToast("Check PSN, Job Name, Qty, Dates and Steps."); return;
-      }
+      if (!psn) { showToast('PSN is required', 'error'); return; }
+      if (!piNumber) { showToast('PI Number is required', 'error'); return; }
+      if (!/^\d{4}\/26$/.test(piNumber)) { showToast('PI Number must be in format XXXX/26', 'error'); return; }
+      if (!totalQty || totalQty <= 0) { showToast('Total Quantity must be greater than 0', 'error'); return; }
+      if (!jobName) { showToast('Job Name is required', 'error'); return; }
+      if (!orderDate) { showToast('Order Date is required', 'error'); return; }
+      if (!deliveryDate) { showToast('Final Delivery Date is required', 'error'); return; }
+      if (!item) { showToast('Item Name is required', 'error'); return; }
+      if (!salesCode) { showToast('Please Choose the Sales Code', 'error'); return; }
+      if (!jobType) { showToast('Please Choose the Job Type', 'error'); return; }
+      if (selectedSteps.length === 0) { showToast('Please add at least one production step', 'error'); return; }
 
       let allData = [];
       const bCount = parseInt(document.getElementById('batchCount').value);
@@ -785,8 +816,9 @@
         const result = await response.json();
 
         if (response.ok) {
-          showToast('✅ Entry Saved Successfully!', 'success');
-          executeRedirect(dashboard_url);
+          // Keep success toast visible, then redirect after a small delay
+          sessionStorage.setItem('toastMessage', '✅ Entry Saved Successfully!');
+          setTimeout(() => executeRedirect(dashboard_url), 1500);
         } else {
           showToast(result.error || 'Failed to save entry', 'error');
           document.getElementById('submitBtn').disabled = false;
@@ -800,7 +832,7 @@
       }
     }
 
-
+    // Function to handle redirection to the dashboard after successful form submission, with a fallback mechanism in case of cross-origin restrictions when trying to access the top-level window
     function executeRedirect(dashboard_url) {
       // Use the global variable we stored earlier
       if (window.top && window.top.location) {
