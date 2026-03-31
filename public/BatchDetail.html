@@ -1096,10 +1096,15 @@
         const activeArea = document.getElementById("activeProcessArea");
 
         if (pendingSteps.length === 0) {
+          // HIDE BUTTONS AND UPDATE INPUT AREA
+          if (qtyBtn) qtyBtn.style.display = "none";
+          if (saveBtn) saveBtn.style.display = "none";
           activeArea.style.display = "none";
           multiList.innerHTML = `<div style="text-align:center; padding:20px; color:#10b981; font-weight:bold;">Batch Fully Completed</div>`;
         } else {
           activeArea.style.display = "block";
+          if (qtyBtn) qtyBtn.style.display = "inline-block";
+          if (saveBtn) saveBtn.style.display = "block";
           saveBtn.style.display = "block";
           multiList.innerHTML = "";
 
@@ -1236,6 +1241,19 @@
         // 1. GATHER DATA
         const job = MASTER_DATA.find((j) => j.row === currentEditingRow);
         if (!job) return;
+
+        const doneCheckboxes = document.querySelectorAll(
+          ".step-done-check:checked",
+        );
+
+        if (doneCheckboxes.length === 0) {
+          // Replace 'showToast' with your specific toast function name if different
+          showToast(
+            "Please choose at least one process to be completed before updating.",
+            "warning",
+          );
+          return; // Stop the function here
+        }
 
         const maxQtyString = job.maxQtyString || "";
         const stepRows = document.querySelectorAll(".multi-step-row");
@@ -1433,8 +1451,9 @@
           const result = await response.json();
           if (response.ok) {
             showToast(result.message || "Qty update saved");
-            await fetchData();
             closeModal();
+            await fetchData();
+            openUpdatePopup(rowIdx);
           } else {
             showToast(result.error || "Failed to update qty", "error");
           }
@@ -1478,6 +1497,7 @@
             showToast(result.message || "Batch updated successfully!");
             closeModal();
             await fetchData();
+            openUpdatePopup(row);
           } else {
             showToast(result.error || "Update failed", "error");
           }

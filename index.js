@@ -448,8 +448,7 @@ async function generateDashboardData() {
           if (formatted === "-") return "-";
           return formatted;
         };
-        
-       
+
         definedSteps.push({
           name: pName,
           expDate: parseDateValue(values[base + 1]) || "-",
@@ -1241,7 +1240,7 @@ async function saveMultiBatchUpdate(payload) {
   const START_COL = 6;
   const BLOCK_SIZE = 9;
 
-  const COL_COMPLETED_DATE =115;
+  const COL_COMPLETED_DATE = 115;
   const COL_COMPLETION_STATUS = 114;
   try {
     // 1. Fetch current row
@@ -1311,7 +1310,7 @@ async function saveMultiBatchUpdate(payload) {
           Math.ceil(
             (new Date(todayISO) -
               new Date(startDate.toISOString().split("T")[0])) /
-            86400000,
+              86400000,
           ),
         );
 
@@ -1356,6 +1355,10 @@ async function saveMultiBatchUpdate(payload) {
 
     const finalizeMap = (map) =>
       Object.keys(map)
+        .filter((k) => {
+          const base = parseInt(k);
+          return String(runningRowData[base] || "").trim() !== "";
+        })
         .sort((a, b) => a - b)
         .map((k) => `${k}:${map[k]}`)
         .join("|");
@@ -1388,10 +1391,15 @@ async function createSplitBatchFromWaterfall(
   const START_COL = 6;
   const BLOCK_SIZE = 9;
 
+  // 1. Only map processes that actually have a name defined in the parent row
   for (let i = 0; i < 12; i++) {
     let base = START_COL + i * BLOCK_SIZE;
-    // The child batch's max capacity is the split amount
-    childMaxMap[base] = diffQty;
+    let processName = String(parentData[base] || "").trim();
+
+    // Only add to the map if the process exists (is not empty)
+    if (processName !== "") {
+      childMaxMap[base] = diffQty;
+    }
   }
 
   const childMaxString = Object.keys(childMaxMap)
@@ -1402,30 +1410,37 @@ async function createSplitBatchFromWaterfall(
   // Clone the parent array
   let newRow = [...parentData];
   const newId = await generateNewBatchId(String(parentData[1]), localNewIds);
+
   // Update Identity & Qty
   newRow[1] = newId;
-  newRow[2] = new Date().toISOString().split("T")[0];
-  newRow[4] = diffQty;
-  newRow[118] = userRemark;
+  newRow[2] = new Date().toISOString().split("T")[0]; // Batch Date
+  newRow[4] = diffQty; // Current Total Qty
+  newRow[118] = userRemark; // New Batch Remark
 
-  newRow[119] = childMaxString;
-  newRow[120] = childMaxString;
+  // Set the filtered maps
+  newRow[119] = childMaxString; // Qty Map
+  newRow[120] = childMaxString; // Max Qty Map
 
   // RESET Forward Steps for the new split row
   for (let i = 0; i < 12; i++) {
     let base = START_COL + i * BLOCK_SIZE;
+
+    // Only reset if this step is the split point or further ahead
     if (base >= splitAtBase) {
       newRow[base + 2] = ""; // End Date
       newRow[base + 3] = ""; // Duration
       newRow[base + 5] = ""; // Status
-      newRow[base + 8] = false; // Tick
-      newRow[base + 4] = ""; // Detail
+      newRow[base + 8] = false; // Tick (Checkbox)
+      newRow[base + 4] = ""; // Detail (Machine)
       newRow[base + 6] = ""; // Remark
     }
   }
-  const response = await addTableRow("BatchListing", newRow);
 
-  // Return the response so saveMultiBatchUpdate can update the localNewIds list
+  // Final Safety: Ensure Completion Status is reset for the new split batch
+  newRow[114] = ""; // Completion Status
+  newRow[115] = ""; // Completed Date
+
+  const response = await addTableRow("BatchListing", newRow);
   return response;
 }
 
