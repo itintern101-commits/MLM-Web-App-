@@ -95,7 +95,7 @@ const formatDateForExcel = (value) => {
       date = new Date(
         utcDate.getUTCFullYear(),
         utcDate.getUTCMonth(),
-        utcDate.getUTCDate()
+        utcDate.getUTCDate(),
       );
     }
   }
@@ -159,7 +159,7 @@ const toExcelDateText = (value) => {
       date = new Date(
         utcDate.getUTCFullYear(),
         utcDate.getUTCMonth(),
-        utcDate.getUTCDate()
+        utcDate.getUTCDate(),
       );
     }
   }
@@ -171,11 +171,7 @@ const toExcelDateText = (value) => {
     raw.split("-")[0].length === 4
   ) {
     const temp = new Date(raw);
-    date = new Date(
-      temp.getFullYear(),
-      temp.getMonth(),
-      temp.getDate()
-    );
+    date = new Date(temp.getFullYear(), temp.getMonth(), temp.getDate());
   }
 
   // ✅ Case 3: dd/mm/yyyy
@@ -194,11 +190,7 @@ const toExcelDateText = (value) => {
   // ✅ Case 4: fallback
   else {
     const temp = new Date(raw);
-    date = new Date(
-      temp.getFullYear(),
-      temp.getMonth(),
-      temp.getDate()
-    );
+    date = new Date(temp.getFullYear(), temp.getMonth(), temp.getDate());
   }
 
   if (!date || isNaN(date.getTime())) return "";
@@ -369,7 +361,7 @@ async function generateDashboardData() {
   const jobListing = await getTableRowsAsObjects("JobListing");
 
   // console.log('[generateDashboardData] JobListing:', jobListing);
- 
+
   // Create jobInfoMap from JobListing for quick lookup
   const jobInfoMap = {};
   jobListing.forEach((job) => {
@@ -392,7 +384,7 @@ async function generateDashboardData() {
       };
     }
   });
- 
+
   // Process BatchListing to create batches with steps structure
   const batches = [];
 
@@ -715,7 +707,7 @@ async function generateDashboardData() {
       prevDurationTime,
     });
   });
- 
+
   const result = {
     jobs: batches,
     jobListing: batches, // For compatibility with both old and new frontend
@@ -877,7 +869,7 @@ app.post("/api/submitData", async (req, res) => {
       data.status || "ON SCHEDULE",
       formatDeliveryDate || "",
     ];
-    
+
     jobListingColumnCount = await getTableColumnCount("JobListing");
 
     if (jobRow.length < jobListingColumnCount) {
@@ -1241,6 +1233,8 @@ async function saveMultiBatchUpdate(payload) {
   const START_COL = 6;
   const BLOCK_SIZE = 9;
 
+  const COL_COMPLETED_DATE =115;
+  const COL_COMPLETION_STATUS = 114;
   try {
     // 1. Fetch current row
     let runningRowData = await getBatchListingRow(rowIdx);
@@ -1318,9 +1312,16 @@ async function saveMultiBatchUpdate(payload) {
         runningRowData[u.baseCol + 8] = true;
 
         // DELIVERY SYNC
-        const targetDate = payload.deliveryDate || payload.newDeliveryDate;
-        if (isDeliveryStep && targetDate && targetDate !== "KEEP_ORIGINAL") {
-          await updateJobListingDeliveryDateByPsn(psn, targetDate);
+        if (isDeliveryStep) {
+          // Mark the entire row as completed in the final status columns
+          runningRowData[COL_COMPLETION_STATUS] = true;
+          runningRowData[COL_COMPLETED_DATE] = todayISO;
+
+          // Delivery Sync to Job Listing
+          const targetDate = payload.deliveryDate || payload.newDeliveryDate;
+          if (targetDate && targetDate !== "KEEP_ORIGINAL") {
+            await updateJobListingDeliveryDateByPsn(psn, targetDate);
+          }
         }
 
         if (isSplitting) {
