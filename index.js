@@ -8,6 +8,8 @@ const app = express();
 app.use(express.json());
 const PORT = process.env.PORT || 3000;
 
+app.use("/public", express.static(path.join(__dirname, "public")));
+
 //Date format not string
 const toExcelDate = (date) => {
   if (!(date instanceof Date)) return null;
