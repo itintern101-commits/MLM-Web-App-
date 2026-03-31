@@ -897,9 +897,10 @@
           if (!matchesSearch) return false;
 
           const currentStep = job.steps?.find((s) => !s.isDone);
-          const statusText = getStatusText(job, todayTime); // e.g. "CNC: Running" or "Completed"
+          const statusText = getStatusText(job, todayTime);
+          const isJobDelayed = statusText.includes("Delayed");
 
-          // B. Status Type (On Track / Delayed / Done)
+          // B. Status Type Filter (On Track / Delayed / Done)
           if (activeFilters.statusTypes.size > 0) {
             let jobStatusType = "On Track";
             if (
@@ -907,25 +908,31 @@
               statusText === "Partially Delivered"
             )
               jobStatusType = "Done";
-            else if (statusText.includes("Delayed")) jobStatusType = "Delayed";
+            else if (isJobDelayed) jobStatusType = "Delayed";
 
             if (!activeFilters.statusTypes.has(jobStatusType)) return false;
           }
 
-          // C. Process Name Filter
-          if (activeFilters.processes.size > 0) {
-            if (!currentStep || !activeFilters.processes.has(currentStep.name))
-              return false;
-          }
+          // C. Combined Process & Delay Filter Logic
+          const hasProcessFilters = activeFilters.processes.size > 0;
+          const hasDelayFilters = activeFilters.delayedProcesses.size > 0;
 
-          // D. Delayed Process Specific Filter
-          if (activeFilters.delayedProcesses.size > 0) {
-            if (
-              !currentStep ||
-              !statusText.includes("Delayed") ||
-              !activeFilters.delayedProcesses.has(currentStep.name)
-            )
-              return false;
+          if (hasProcessFilters || hasDelayFilters) {
+            if (!currentStep) return false;
+
+            // Check if it matches the general process load selection
+            const matchesGeneralProcess = activeFilters.processes.has(
+              currentStep.name,
+            );
+
+            // Check if it matches the specific delayed process selection
+            const matchesDelayedProcess =
+              isJobDelayed &&
+              activeFilters.delayedProcesses.has(currentStep.name);
+
+            // If both types of filters are active, we want to show a batch if it
+            // matches EITHER the general process list OR the specific delay list
+            if (!matchesGeneralProcess && !matchesDelayedProcess) return false;
           }
 
           return true;
@@ -2258,24 +2265,32 @@
         });
       }
 
-      function toggleProcessFilter(name) {
-        if (activeFilters.processes.has(name))
-          activeFilters.processes.delete(name);
-        else activeFilters.processes.add(name);
-        renderAll(); // Re-render stats and table
-      }
-
       function toggleDelayedProcessFilter(name) {
         if (activeFilters.delayedProcesses.has(name)) {
           activeFilters.delayedProcesses.delete(name);
-          activeFilters.processes.delete(name); // Auto-deselect from main load too
+          // Note: We don't necessarily want to delete from .processes here
+          // unless you want the whole process to disappear from view.
         } else {
           activeFilters.delayedProcesses.add(name);
-          activeFilters.processes.add(name); // Auto-select in main load as requested
+          // Ensure the parent process is also active in the main list for visibility
+          activeFilters.processes.add(name);
         }
-        renderAll();
+        renderStats();
+        renderTable();
       }
 
+      function toggleProcessFilter(name) {
+        if (activeFilters.processes.has(name)) {
+          activeFilters.processes.delete(name);
+          // If we deselect the main process, we should deselect its delayed counterpart too
+          activeFilters.delayedProcesses.delete(name);
+        } else {
+          activeFilters.processes.add(name);
+        }
+        renderStats();
+        renderTable();
+      }
+      
       function toggleStatusFilter(status) {
         if (activeFilters.statusTypes.has(status))
           activeFilters.statusTypes.delete(status);
