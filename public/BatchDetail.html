@@ -444,19 +444,19 @@
 
           <button
             id="clearSortBtn"
-            onclick="resetSort()"
+            onclick="clearAllFilters()"
             style="
               padding: 8px 16px;
-              background: white;
-              color: #64748b;
-              border: 1px solid #e2e8f0;
+              background: #fff1f2;
+              color: #e11d48;
+              border: 1px solid #fda4af;
               border-radius: 4px;
               cursor: pointer;
-              margin-left: 8px;
-              display: none; /* Hidden by default */
+              display: none;
+              font-weight: 600;
             "
           >
-            Clear Sort
+            ✕ Clear All Filters
           </button>
         </div>
       </div>
@@ -871,12 +871,6 @@
 
         tbody.innerHTML = "";
 
-        if (currentSort.column) {
-          clearBtn.style.display = "inline-block";
-        } else {
-          clearBtn.style.display = "none";
-        }
-
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const todayTime = today.getTime();
@@ -884,14 +878,15 @@
         // 1. Update UI Arrows in Header
         updateHeaderUI();
 
-        // 1. Show/Hide Clear Filter Button
+        // 2. Check if ANY filter or sort is active to show the Clear button
         const hasFilters =
+          searchTerm.length > 0 ||
+          currentSort.column !== null ||
           activeFilters.processes.size > 0 ||
           activeFilters.statusTypes.size > 0 ||
           activeFilters.delayedProcesses.size > 0;
-        document.getElementById("clearSortBtn").style.display = hasFilters
-          ? "inline-block"
-          : "none";
+
+        clearBtn.style.display = hasFilters ? "inline-block" : "none";
 
         // 2. Multi-Layer Filter Logic
         let filteredData = MASTER_DATA.filter((job) => {
@@ -935,6 +930,20 @@
 
           return true;
         });
+
+        // 4. Handle "No Results" State
+        if (filteredData.length === 0) {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td colspan="7" style="text-align: center; padding: 40px; color: #64748b; background: #f8fafc;">
+              <div style="font-size: 1.5rem; margin-bottom: 8px;">🔍</div>
+              <div style="font-weight: 600;">No matching batches found</div>
+              <div style="font-size: 0.85rem;">Try adjusting your filters or search term</div>
+            </td>
+          `;
+          tbody.appendChild(tr);
+          return; // Stop here
+        }
 
         // 3. Sort data
         if (currentSort.column) {
@@ -2275,11 +2284,21 @@
       }
 
       function clearAllFilters() {
-        activeFilters.processes.clear();
-        activeFilters.delayedProcesses.clear();
-        activeFilters.statusTypes.clear();
+        // Reset Search
         document.getElementById("searchInput").value = "";
-        resetSort();
+
+        // Reset Sort
+        currentSort.column = null;
+        currentSort.direction = "asc";
+
+        // Reset Map/Set Filters
+        activeFilters.processes.clear();
+        activeFilters.statusTypes.clear();
+        activeFilters.delayedProcesses.clear();
+
+        // Re-render everything
+        renderStats();
+        renderTable();
       }
 
       function renderAll() {
