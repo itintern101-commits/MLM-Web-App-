@@ -427,12 +427,13 @@
           <div class="input-group">
             <label>Sales Code</label>
             <select id="salesCode">
+              <option value="">Please Choose Sales Code</option>
               <option value="AO">AO</option>
               <option value="SHU">SHU</option>
               <option value="NT">NT</option>
               <option value="AK">AK</option>
               <option value="NY">NY</option>
-              <option value="OC">OC</option>  
+              <option value="OC">OC</option>
               <option value="PAO">PAO</option>
               <option value="PNY">PNY</option>
               <option value="SO">SO</option>
@@ -442,6 +443,7 @@
           <div class="input-group">
             <label>Job Type</label>
             <select id="jobType">
+              <option value="">Please Choose Job Type</option>
               <option value="Offset">Offset</option>
               <option value="FSC">FSC</option>
               <option value="Flexo & MMB/SOS">Flexo & MMB/SOS</option>
@@ -725,17 +727,26 @@
 
     async function submitForm() {
       console.log("Hi I am Here");
-      const psn = document.getElementById('psn').value;
-      const piNumber = document.getElementById('piNumber').value;
+      const psn = document.getElementById('psn').value.trim();
+      const piNumber = document.getElementById('piNumber').value.trim();
       const totalQty = parseInt(document.getElementById('totalQuantity').value);
       const orderDate = document.getElementById('orderDate').value;
       const deliveryDate = document.getElementById('deliveryDate').value;
-      const jobName = document.getElementById('jobName').value;
-      const item = document.getElementById('item').value;
+      const jobName = document.getElementById('jobName').value.trim();
+      const item = document.getElementById('item').value.trim();
+      const salesCode = document.getElementById('salesCode').value;
+      const jobType = document.getElementById('jobType').value;
 
-      if (!psn || !jobName || !piNumber || !totalQty || selectedSteps.length === 0 || !orderDate || !deliveryDate) {
-        showToast("Check PSN, Job Name, Qty, Dates and Steps."); return;
-      }
+      if (!psn) { showToast('PSN is required', 'error'); return; }
+      if (!piNumber) { showToast('PI Number is required', 'error'); return; }
+      if (!totalQty || totalQty <= 0) { showToast('Total Quantity must be greater than 0', 'error'); return; }
+      if (!jobName) { showToast('Job Name is required', 'error'); return; }
+      if (!orderDate) { showToast('Order Date is required', 'error'); return; }
+      if (!deliveryDate) { showToast('Final Delivery Date is required', 'error'); return; }
+      if (!item) { showToast('Item Name is required', 'error'); return; }
+      if (!salesCode) { showToast('Please Choose the Sales Code', 'error'); return; }
+      if (!jobType) { showToast('Please Choose the Job Type', 'error'); return; }
+      if (selectedSteps.length === 0) { showToast('Please add at least one production step', 'error'); return; }
 
       let allData = [];
       const bCount = parseInt(document.getElementById('batchCount').value);
@@ -785,8 +796,9 @@
         const result = await response.json();
 
         if (response.ok) {
-          showToast('✅ Entry Saved Successfully!', 'success');
-          executeRedirect(dashboard_url);
+          // Keep success toast visible, then redirect after a small delay
+          sessionStorage.setItem('toastMessage', '✅ Entry Saved Successfully!');
+          setTimeout(() => executeRedirect(dashboard_url), 1500);
         } else {
           showToast(result.error || 'Failed to save entry', 'error');
           document.getElementById('submitBtn').disabled = false;

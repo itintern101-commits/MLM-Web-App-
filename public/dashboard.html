@@ -513,6 +513,7 @@
 
 <body>
   <div id="sidebar-container"></div>
+  <div id="toast-container" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: none;"></div>
   <script>
     fetch('/Sidebar.html')
       .then(r => r.text())
@@ -770,8 +771,39 @@
     let countAlmost = 0;
     let countOverdue = 0;
 
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      const color = type === 'success' ? '#28a745' : type === 'error' ? '#d93025' : '#1a73e8';
+      toast.className = 'toast';
+      toast.style.background = 'rgba(45, 55, 72, 0.95)';
+      toast.style.color = 'white';
+      toast.style.padding = '12px 20px';
+      toast.style.borderRadius = '10px';
+      toast.style.minWidth = '280px';
+      toast.style.textAlign = 'center';
+      toast.style.boxShadow = '0 10px 20px rgba(0,0,0,0.2)';
+      toast.style.fontWeight = '600';
+      toast.style.pointerEvents = 'auto';
+      toast.style.borderBottom = `4px solid ${color}`;
+      toast.innerText = message;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.transition = 'opacity 0.4s, transform 0.4s';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-20px)';
+        setTimeout(() => toast.remove(), 400);
+      }, 3000);
+    }
+
     window.onload = async () => {
       try {
+        const toastMessage = sessionStorage.getItem('toastMessage');
+        if (toastMessage) {
+          showToast(toastMessage, 'success');
+          sessionStorage.removeItem('toastMessage');
+        }
         console.log('Dashboard: Starting data fetch...');
         const resp = await fetch('/api/dashboard');
         const data = await resp.json();
