@@ -329,6 +329,55 @@
         border-color: #2563eb;
         box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
       }
+
+      /*FILTER CSS*/
+
+      /* Active State for Process Load */
+      .active-filter-pill {
+        background: var(--primary) !important;
+        color: white !important;
+      }
+
+      /* Active State for Delayed Breakdown */
+      .active-filter-delayed {
+        background: var(--danger) !important;
+        color: white !important;
+      }
+
+      /* Status Buttons in Overview */
+      .status-btn {
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 6px;
+        text-align: center;
+        flex: 1;
+        transition: 0.2s;
+      }
+      .status-btn:hover {
+        background: #f8fafc;
+      }
+      .active-track {
+        background: #0891b2 !important;
+        color: white !important;
+      }
+      .active-delayed {
+        background: var(--danger) !important;
+        color: white !important;
+      }
+      .active-done {
+        background: #10b981 !important;
+        color: white !important;
+      }
+
+      .status-btn .val {
+        font-size: 1rem;
+        font-weight: bold;
+      }
+      .status-btn .label {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        opacity: 0.8;
+      }
     </style>
   </head>
 
@@ -608,9 +657,12 @@
       let currentEditingRow = null;
       const autoOpenId = new URLSearchParams(window.location.search).get("id");
 
-      let currentSort = {
-        column: null,
-        direction: "asc",
+      // Global State
+      let currentSort = { column: null, direction: "asc" };
+      let activeFilters = {
+        processes: new Set(), // Stores process names like "CNC", "Assembly"
+        statusTypes: new Set(), // Stores "On Track", "Delayed", "Done"
+        delayedProcesses: new Set(), // Stores specific delayed processes
       };
 
       window.onload = fetchData;
@@ -733,48 +785,54 @@
 
         const container = document.getElementById("statsBar");
 
-        // Generate List HTML (Load & Delay)
+        // Helper to generate the HTML for Process Load
         let loadHtml = Object.entries(processCounts)
           .sort((a, b) => b[1] - a[1])
-          .map(
-            ([name, count]) => `
-        <div style="font-size: 0.85rem; display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding: 4px 0;">
+          .map(([name, count]) => {
+            const isActive = activeFilters.processes.has(name);
+            return `
+        <div onclick="toggleProcessFilter('${name}')" 
+             class="filter-item ${isActive ? "active-filter-pill" : ""}" 
+             style="cursor:pointer; font-size: 0.85rem; display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding: 6px 4px; border-radius: 4px; transition: 0.2s;">
             <span>${name}</span>
-            <span style="font-weight: bold; color: var(--primary);">${count}</span>
-        </div>`,
-          )
+            <span style="font-weight: bold; color: ${isActive ? "white" : "var(--primary)"};">${count}</span>
+        </div>`;
+          })
           .join("");
 
+        // Helper for Delay Breakdown
         let delayHtml =
           Object.entries(delayBreakdown)
             .sort((a, b) => b[1] - a[1])
-            .map(
-              ([name, count]) => `
-        <div style="font-size: 0.85rem; color: var(--danger); display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #fff1f1;">
-            <span>${name}</span>
-            <span style="font-weight: bold;">${count}</span>
-        </div>`,
-            )
+            .map(([name, count]) => {
+              const isActive = activeFilters.delayedProcesses.has(name);
+              return `
+              <div onclick="toggleDelayedProcessFilter('${name}')" 
+                  class="filter-item-delayed ${isActive ? "active-filter-delayed" : ""}" 
+                  style="cursor:pointer; font-size: 0.85rem; color: ${isActive ? "white" : "var(--danger)"}; display: flex; justify-content: space-between; padding: 6px 4px; border-bottom: 1px solid #fff1f1; border-radius: 4px;">
+                  <span>${name}</span>
+                  <span style="font-weight: bold;">${count}</span>
+              </div>`;
+            })
             .join("") ||
-          '<div style="font-size: 0.8rem; color: #94a3b8; margin-top: 10px; text-align: center;">No active delays</div>';
+          '<div style="text-align: center; color: #94a3b8;">No active delays</div>';
 
         container.innerHTML = `
         <div class="stat-card">
             <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 8px; font-weight: 600;">Production Overview</div>
-            <div class="stat-val" style="font-size: 1.8rem; margin-bottom: 4px;">${totalBatches} <span style="font-size: 0.8rem; font-weight: normal; color: #64748b;">Total</span></div>
-            
+            <div class="stat-val" style="font-size: 1.8rem; margin-bottom: 4px;">${totalBatches}</div>
             <div style="display: flex; justify-content: space-between; margin-top: 4px; border-top: 1px solid #f1f5f9; padding-top: 8px;">
-                <div>
-                    <div style="font-size: 0.65rem; color: #94a3b8; text-transform: uppercase;">On Track</div>
-                    <div style="font-size: 1rem; font-weight: bold; color: #0891b2;">${onTrackCount}</div>
+                <div onclick="toggleStatusFilter('On Track')" class="status-btn ${activeFilters.statusTypes.has("On Track") ? "active-track" : ""}">
+                    <div class="label">On Track</div>
+                    <div class="val">${onTrackCount}</div>
                 </div>
-                <div style="border-left: 1px solid #f1f5f9; padding-left: 8px;">
-                    <div style="font-size: 0.65rem; color: #94a3b8; text-transform: uppercase;">Delayed</div>
-                    <div style="font-size: 1rem; font-weight: bold; color: var(--danger);">${delayedBatchesCount}</div>
+                <div onclick="toggleStatusFilter('Delayed')" class="status-btn ${activeFilters.statusTypes.has("Delayed") ? "active-delayed" : ""}">
+                    <div class="label">Delayed</div>
+                    <div class="val">${delayedBatchesCount}</div>
                 </div>
-                <div style="border-left: 1px solid #f1f5f9; padding-left: 8px;">
-                    <div style="font-size: 0.65rem; color: #94a3b8; text-transform: uppercase;">Done</div>
-                    <div style="font-size: 1rem; font-weight: bold; color: #10b981;">${completedBatches}</div>
+                <div onclick="toggleStatusFilter('Done')" class="status-btn ${activeFilters.statusTypes.has("Done") ? "active-done" : ""}">
+                    <div class="label">Done</div>
+                    <div class="val">${completedBatches}</div>
                 </div>
             </div>
         </div>
@@ -826,13 +884,57 @@
         // 1. Update UI Arrows in Header
         updateHeaderUI();
 
-        // 2. Filter data
-        let filteredData = MASTER_DATA.filter(
-          (job) =>
+        // 1. Show/Hide Clear Filter Button
+        const hasFilters =
+          activeFilters.processes.size > 0 ||
+          activeFilters.statusTypes.size > 0 ||
+          activeFilters.delayedProcesses.size > 0;
+        document.getElementById("clearSortBtn").style.display = hasFilters
+          ? "inline-block"
+          : "none";
+
+        // 2. Multi-Layer Filter Logic
+        let filteredData = MASTER_DATA.filter((job) => {
+          // A. Search Input
+          const matchesSearch =
             job.psn.toLowerCase().includes(searchTerm) ||
-            job.batchId.toLowerCase().includes(searchTerm) ||
-            job.jobName.toLowerCase().includes(searchTerm),
-        );
+            job.batchId.toLowerCase().includes(searchTerm);
+          if (!matchesSearch) return false;
+
+          const currentStep = job.steps?.find((s) => !s.isDone);
+          const statusText = getStatusText(job, todayTime); // e.g. "CNC: Running" or "Completed"
+
+          // B. Status Type (On Track / Delayed / Done)
+          if (activeFilters.statusTypes.size > 0) {
+            let jobStatusType = "On Track";
+            if (
+              statusText === "Completed" ||
+              statusText === "Partially Delivered"
+            )
+              jobStatusType = "Done";
+            else if (statusText.includes("Delayed")) jobStatusType = "Delayed";
+
+            if (!activeFilters.statusTypes.has(jobStatusType)) return false;
+          }
+
+          // C. Process Name Filter
+          if (activeFilters.processes.size > 0) {
+            if (!currentStep || !activeFilters.processes.has(currentStep.name))
+              return false;
+          }
+
+          // D. Delayed Process Specific Filter
+          if (activeFilters.delayedProcesses.size > 0) {
+            if (
+              !currentStep ||
+              !statusText.includes("Delayed") ||
+              !activeFilters.delayedProcesses.has(currentStep.name)
+            )
+              return false;
+          }
+
+          return true;
+        });
 
         // 3. Sort data
         if (currentSort.column) {
@@ -2145,6 +2247,44 @@
             };
           }
         });
+      }
+
+      function toggleProcessFilter(name) {
+        if (activeFilters.processes.has(name))
+          activeFilters.processes.delete(name);
+        else activeFilters.processes.add(name);
+        renderAll(); // Re-render stats and table
+      }
+
+      function toggleDelayedProcessFilter(name) {
+        if (activeFilters.delayedProcesses.has(name)) {
+          activeFilters.delayedProcesses.delete(name);
+          activeFilters.processes.delete(name); // Auto-deselect from main load too
+        } else {
+          activeFilters.delayedProcesses.add(name);
+          activeFilters.processes.add(name); // Auto-select in main load as requested
+        }
+        renderAll();
+      }
+
+      function toggleStatusFilter(status) {
+        if (activeFilters.statusTypes.has(status))
+          activeFilters.statusTypes.delete(status);
+        else activeFilters.statusTypes.add(status);
+        renderAll();
+      }
+
+      function clearAllFilters() {
+        activeFilters.processes.clear();
+        activeFilters.delayedProcesses.clear();
+        activeFilters.statusTypes.clear();
+        document.getElementById("searchInput").value = "";
+        resetSort();
+      }
+
+      function renderAll() {
+        renderStats();
+        renderTable();
       }
     </script>
   </body>
