@@ -1228,7 +1228,7 @@
         setModalLoading(false);
       }
 
-      function processUpdate() {
+      async function processUpdate() {
         const saveBtn = document.getElementById("saveBtn");
         const btnText = document.getElementById("btnText");
         const btnSpinner = document.getElementById("btnSpinner");
@@ -1237,34 +1237,8 @@
         const job = MASTER_DATA.find((j) => j.row === currentEditingRow);
         if (!job) return;
 
-        // NEW: Grab the Max Qty String (Column 121)
         const maxQtyString = job.maxQtyString || "";
-
         const stepRows = document.querySelectorAll(".multi-step-row");
-
-        for (let row of stepRows) {
-          const input = row.querySelector(".step-qty-input");
-          const val = parseInt(input.value);
-          const maxVal = parseInt(
-            row.querySelector(".waterfall-max-label").innerText,
-          );
-          const stepName = row.getAttribute("data-name");
-          const errorSource = input.getAttribute("data-error-source");
-
-          if (val > maxVal) {
-            let errorMsg = `Invalid Qty for ${stepName}. `;
-            if (errorSource === "System Limit") {
-              errorMsg += `Exceeds the maximum allowed in the system (${maxVal}).`;
-            } else {
-              errorMsg += `Cannot exceed the quantity processed in "${errorSource}" (${maxVal}).`;
-            }
-
-            showToast(errorMsg, "error");
-            input.focus();
-            input.style.backgroundColor = "#fee2e2";
-            return; // STOP SAVE
-          }
-        }
 
         const updates = [];
         let validationError = false;
@@ -1274,76 +1248,88 @@
 
         for (let i = 0; i < stepRows.length; i++) {
           const row = stepRows[i];
-          const done = row.querySelector(".step-done-check").checked;
-          const delay = row.querySelector(".step-delay-check").checked;
+          const doneCheck = row.querySelector(".step-done-check");
+          const delayCheck = row.querySelector(".step-delay-check");
+          const done = doneCheck.checked;
+          const delay = delayCheck.checked;
           const stepName = row.getAttribute("data-name");
+          const qtyInput = row.querySelector(".step-qty-input");
 
+          // Track sequential progress
           if (!done) {
             firstIncompleteFound = true;
           }
 
-          if (done && stepName === "Delivery") {
-            isDeliveryDone = true;
-          }
-
-          // Sequential Check
-          if (done && firstIncompleteFound) {
-            alert(
-              `Sequential Error: You cannot complete "${stepName}" because a previous process is still pending.`,
-            );
-            validationError = true;
-            break;
-          }
-
+          // 2. VALIDATION (Only if user is interacting with this row)
           if (done || delay) {
-            const base = parseInt(
-              row.querySelector(".step-done-check").dataset.base,
-            );
-            const rInput = row.querySelector(".step-remark-input");
-            const remark = rInput.value;
-            const qtyInput = row.querySelector(".step-qty-input");
-
-            // NEW: Get current input and compare against MAX allowed for THIS step
-            const qty = qtyInput ? parseInt(qtyInput.value) : job.qty;
-            const maxAllowed = parseInt(
-              getMaxQtyForProcess(maxQtyString, base, job.qty),
-            );
-
-            if (done) {
-              if (isNaN(qty) || qty <= 0) {
-                alert(`Please enter a valid quantity for ${stepName}.`);
-                validationError = true;
-                break;
-              }
-
-              // VALIDATION: Check against the Max Qty Map (Col 121)
-              if (qty > maxAllowed) {
-                alert(
-                  `Validation Error: ${stepName} cannot exceed the maximum allowed limit of ${maxAllowed}.\n\n` +
-                    `Note: If you need to process more than this, please check if units were already moved to a separate batch ID.`,
-                );
-                validationError = true;
-                break;
-              }
-
-              // DETECT SPLIT: User is processing fewer than current job qty
-              if (qty < job.qty) {
-                needsSplitRemark = true;
-              }
+            // Sequential Check: Cannot skip a process
+            if (done && firstIncompleteFound) {
+              alert(
+                `Sequential Error: You cannot complete "${stepName}" because a previous process is still pending.`,
+              );
+              validationError = true;
+              break;
             }
 
-            // Die-cut Validation
+            const base = parseInt(doneCheck.dataset.base);
+            const rInput = row.querySelector(".step-remark-input");
+            const remark = rInput.value;
+            const qty = qtyInput ? parseInt(qtyInput.value) : job.qty;
+
+            // Get the Dynamic Max from the UI Label (which syncWaterfallUI handles)
+            const dynamicMaxAllowed = parseInt(
+              row.querySelector(".waterfall-max-label").innerText,
+            );
+            const errorSource = qtyInput.getAttribute("data-error-source");
+
+            if (done) {
+              // Quantity Check
+              if (isNaN(qty) || qty <= 0) {
+                showToast(
+                  `Please enter a valid quantity for ${stepName}.`,
+                  "error",
+                );
+                qtyInput.focus();
+                validationError = true;
+                break;
+              }
+
+              // WATERFALL VALIDATION: Only check qty if marking DONE
+              if (qty > dynamicMaxAllowed) {
+                let errorMsg = `Invalid Qty for ${stepName}. `;
+                if (errorSource === "System Limit") {
+                  errorMsg += `Exceeds the maximum allowed in the system (${dynamicMaxAllowed}).`;
+                } else {
+                  errorMsg += `Cannot exceed the quantity processed in "${errorSource}" (${dynamicMaxAllowed}).`;
+                }
+
+                showToast(errorMsg, "error");
+                qtyInput.focus();
+                qtyInput.style.backgroundColor = "#fee2e2";
+                validationError = true;
+                break;
+              }
+
+              // Check if this is the Delivery step
+              if (stepName === "Delivery") isDeliveryDone = true;
+
+              // Detect if we need a split batch (processing less than current total)
+              if (qty < job.qty) needsSplitRemark = true;
+            }
+
+            // Die-cut Machine Selection Validation
             let detail = "";
             if (stepName === "Die-cut" && done) {
               const select = row.querySelector(".step-detail-select");
-              if (select.value === "") {
+              if (!select || select.value === "") {
                 alert("Please choose a Die-Cut machine option.");
                 validationError = true;
-                return;
+                break;
               }
               detail = select.value;
             }
 
+            // Add to update payload
             updates.push({
               baseCol: base,
               isDone: done,
@@ -1351,7 +1337,7 @@
               remark: remark,
               qty: qty,
               detail: detail,
-              maxQty: maxAllowed, // Passing this to backend for reference
+              maxQty: dynamicMaxAllowed,
             });
           }
         }
@@ -1362,14 +1348,19 @@
           return;
         }
 
-        // HANDLE SPLIT REMARK
+        // 3. HANDLE SPLIT REMARK & SAVE
         let splitRemark = "";
         if (needsSplitRemark) {
-          splitRemark = prompt(
-            "A split batch will be created for the remaining units. Please enter a reason/remark for the NEW batch:",
-            "",
+          splitRemark = await customPrompt(
+            "Split Batch Required",
+            "A split batch will be created for the remaining units. Why is this batch being split?",
+            "Enter reason (e.g., Shortage, Partial Production)...",
           );
-          if (splitRemark === null) return; // User cancelled prompt
+          if (splitRemark === null) return; // Cancelled
+          if (splitRemark.trim() === "") {
+            showToast("A reason is required for split batches.", "error");
+            return;
+          }
         }
 
         if (isDeliveryDone) {
@@ -1418,11 +1409,12 @@
           const val = parseInt(input.value);
           const base = parseInt(input.dataset.base);
           const maxAllowed = parseInt(maxQtyMap[base] || job.qty);
-
           if (val > maxAllowed) {
-            alert(
-              `Error: Quantity for this step cannot exceed the Max Limit of ${maxAllowed}.`,
+            showToast(
+              `Step quantity cannot exceed Max Limit (${maxAllowed}).`,
+              "error",
             );
+            input.focus();
             return;
           }
           qtyMapArray.push({ baseCol: base, qty: val });
@@ -1487,10 +1479,10 @@
             closeModal();
             await fetchData();
           } else {
-            alert("Error: " + (result.error || "Update failed"));
+            showToast(result.error || "Update failed", "error");
           }
         } catch (err) {
-          alert("Error: " + err);
+          showToast("Network error occurred", "error");
         } finally {
           resetSaveButton();
         }
@@ -1514,13 +1506,17 @@
         const job = MASTER_DATA.find((j) => j.row === row);
         const step = job.steps.find((s) => s.baseCol === baseCol);
 
-        const confirmMsg = `Reverting "${step.name}" will also reset all completed steps after it. \n\nPLEASE ENTER REASON FOR REVERT:`;
-        const reason = prompt(confirmMsg);
+        const msg = `Reverting "${step.name}" will also reset all completed steps after it.`;
+        const reason = await customPrompt(
+          "Confirm Revert",
+          msg,
+          "Please enter reason for revert...",
+        );
 
-        if (reason === null) return;
+        if (reason === null) return; // User cancelled
 
         if (reason.trim() === "") {
-          alert("You must provide a reason to revert.");
+          showToast("You must provide a reason to revert.", "error");
           return;
         }
 
@@ -1545,11 +1541,11 @@
             document.getElementById("loader").style.display = "none";
             openUpdatePopup(row);
           } else {
-            alert("Error: " + (result.error || "Revert failed"));
+            showToast(result.error || "Revert failed", "error");
             setModalLoading(false);
           }
         } catch (err) {
-          alert("Error: " + err);
+          showToast("Network error: " + err, "error");
           setModalLoading(false);
         }
       }
@@ -1989,6 +1985,68 @@
             // naturally limits the steps below it.
             currentActiveCeiling = effectiveMax;
             limitingStepName = currentStepName;
+          }
+        });
+      }
+
+      /**
+       * Generic Modal Prompt
+       * @param {string} title - Title text
+       * @param {string} message - Description text
+       * @param {string} placeholder - Input placeholder (if null, input is hidden)
+       * @returns {Promise<string|null>} - Returns the string value or null if cancelled
+       */
+      function customPrompt(title, message, placeholder = "Enter reason...") {
+        return new Promise((resolve) => {
+          const overlay = document.createElement("div");
+          overlay.className = "custom-modal-overlay"; // Add CSS for centering/blur
+          overlay.style =
+            "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:20000; display:flex; align-items:center; justify-content:center; padding:20px; backdrop-filter: blur(2px);";
+
+          const box = document.createElement("div");
+          box.style =
+            "background:white; padding:24px; border-radius:12px; width:100%; max-width:400px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);";
+
+          const inputHtml =
+            placeholder !== null
+              ? `<input type="text" id="promptInput" placeholder="${placeholder}" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:20px; font-family:inherit; outline:none;">`
+              : "";
+
+          box.innerHTML = `
+            <h3 style="margin-top:0; font-size:1.2rem; color:#0f172a; margin-bottom:8px;">${title}</h3>
+            <p style="font-size:0.9rem; color:#475569; margin-bottom:20px; line-height:1.5;">${message}</p>
+            ${inputHtml}
+            <div style="display:flex; justify-content: flex-end; gap:12px;">
+              <button id="promptCancel" style="padding:8px 16px; border:1px solid #e2e8f0; background:white; border-radius:6px; cursor:pointer; color:#64748b; font-weight:500;">Cancel</button>
+              <button id="promptConfirm" style="padding:8px 20px; background:#2563eb; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:600;">Confirm</button>
+            </div>
+          `;
+
+          overlay.appendChild(box);
+          document.body.appendChild(overlay);
+
+          const input = document.getElementById("promptInput");
+          if (input) input.focus();
+
+          // Cleanup and Resolve
+          const close = (val) => {
+            document.body.removeChild(overlay);
+            resolve(val);
+          };
+
+          document.getElementById("promptConfirm").onclick = () => {
+            const val = input ? input.value : true; // return true if no input field
+            close(val);
+          };
+
+          document.getElementById("promptCancel").onclick = () => close(null);
+
+          // Allow Enter key to submit
+          if (input) {
+            input.onkeydown = (e) => {
+              if (e.key === "Enter")
+                document.getElementById("promptConfirm").click();
+            };
           }
         });
       }
