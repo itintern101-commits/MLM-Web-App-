@@ -60,7 +60,7 @@
   }
 </style>
 
-<div class= sidebar>
+<div class=sidebar>
   <div class=sidebar-header>MLM Packaging</div>
   <nav>
     <a href=/dashboard.html class=nav-link data-page=dashboard>📊 Dashboard</a>
@@ -70,12 +70,15 @@
 </div>
 
 <script>
+  // Highlight the active page in the sidebar  
   const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
+
+  // Add 'active' class to the corresponding nav link
   const links = document.querySelectorAll('.nav-link');
   links.forEach(link => {
     const page = link.dataset.page;
     if (page === currentPage) link.classList.add('active');
   });
 
-  
+
 </script>

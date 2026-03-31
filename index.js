@@ -12,6 +12,7 @@ const PORT = process.env.PORT || 3000;
 const toExcelDate = (date) => {
   if (!(date instanceof Date)) return null;
 
+  // Excel's date system starts on January 1, 1900, which is day 1. JavaScript's Date starts on January 1, 1970 (Unix epoch).
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
@@ -27,6 +28,7 @@ const displayDate = (value) => {
   let raw = value;
   if (typeof raw === "string") raw = raw.trim();
 
+  // ✅ 1. Handle Excel serial numbers (numeric values)
   if (typeof raw === "number" || (!isNaN(raw) && raw !== "")) {
     const num = Number(raw);
     if (num > 0) {
@@ -41,6 +43,7 @@ const displayDate = (value) => {
     }
   }
 
+  // ✅ 2. Handle DD/MM/YYYY or YYYY-MM-DD formats
   if (typeof raw === "string" && (raw.includes("/") || raw.includes("-"))) {
     const parts = raw.replace(/\s+/g, "").split(/[-\/]/);
     if (parts.length === 3) {
@@ -69,6 +72,7 @@ const displayDate = (value) => {
     }
   }
 
+  // ✅ 3. Fallback: try to parse with Date constructor (handles ISO and other formats)
   const parsed = new Date(raw);
   if (!isNaN(parsed.getTime())) {
     return parsed.toLocaleDateString("en-GB", {
@@ -81,6 +85,7 @@ const displayDate = (value) => {
   return "-";
 };
 
+// Convert various date formats to consistent yyyy-MM-dd for Excel input (handles Excel serial, dd/mm/yyyy, ISO)
 const formatDateForExcel = (value) => {
   if (!value || value === "-") return "";
 
@@ -208,6 +213,8 @@ const toExcelDateText = (value) => {
   return `'${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 };
 
+// ============ Microsoft Graph API Authentication Setup ============
+// Configure MSAL for authentication with Microsoft Graph API using Client Credentials flow
 const msalConfig = {
   auth: {
     clientId: process.env.CLIENT_ID,
@@ -369,7 +376,7 @@ async function generateDashboardData() {
   const jobListing = await getTableRowsAsObjects("JobListing");
 
   // console.log('[generateDashboardData] JobListing:', jobListing);
- 
+
   // Create jobInfoMap from JobListing for quick lookup
   const jobInfoMap = {};
   jobListing.forEach((job) => {
@@ -392,7 +399,7 @@ async function generateDashboardData() {
       };
     }
   });
- 
+
   // Process BatchListing to create batches with steps structure
   const batches = [];
 
@@ -449,7 +456,8 @@ async function generateDashboardData() {
           if (formatted === "-") return "-";
           return formatted;
         };
-
+        
+       
         definedSteps.push({
           name: pName,
           expDate: parseDateValue(values[base + 1]) || "-",
@@ -715,7 +723,7 @@ async function generateDashboardData() {
       prevDurationTime,
     });
   });
- 
+
   const result = {
     jobs: batches,
     jobListing: batches, // For compatibility with both old and new frontend
@@ -877,7 +885,7 @@ app.post("/api/submitData", async (req, res) => {
       data.status || "ON SCHEDULE",
       formatDeliveryDate || "",
     ];
-    
+
     jobListingColumnCount = await getTableColumnCount("JobListing");
 
     if (jobRow.length < jobListingColumnCount) {
@@ -1309,7 +1317,7 @@ async function saveMultiBatchUpdate(payload) {
           Math.ceil(
             (new Date(todayISO) -
               new Date(startDate.toISOString().split("T")[0])) /
-              86400000,
+            86400000,
           ),
         );
 
