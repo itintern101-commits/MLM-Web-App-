@@ -671,38 +671,45 @@
       }
 
       function renderStats(data) {
-        const total = MASTER_DATA.length;
+        const totalBatches = MASTER_DATA.length;
+
+        // 1. Filter Batches by Status
+        const completedBatches = MASTER_DATA.filter(
+          (job) => job.steps && job.steps.every((s) => s.isDone),
+        ).length;
+
+        const todayTime = new Date().setHours(0, 0, 0, 0);
+
+        // Identify Delayed Batches (Active batches with an overdue or delayed step)
+        const delayedBatchesCount = MASTER_DATA.filter((job) => {
+          const activeStep = job.steps?.find((s) => !s.isDone);
+          if (!activeStep) return false;
+
+          const isManuallyDelayed = String(activeStep.status)
+            .toLowerCase()
+            .includes("delayed");
+          const expTime = parseDateStringToTime(activeStep.expDate);
+          const isOverdue = expTime && expTime < todayTime;
+
+          return isManuallyDelayed || isOverdue;
+        }).length;
+
+        const activeTotal = totalBatches - completedBatches;
+        // On Track = Total Active minus those that are Delayed
+        const onTrackCount = activeTotal - delayedBatchesCount;
+
+        // 2. Process & Delay Breakdown for the lists
         const processCounts = {};
         const delayBreakdown = {};
-        let totalDelayed = 0;
+        let totalDelayedSteps = 0;
 
-        // Get Today at Midnight for accurate comparison
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const todayTime = today.getTime();
-
-        console.log("renderStats: Processing", total, "items");
-
-        MASTER_DATA.forEach((job, idx) => {
-          console.log("renderStats: Processing job", idx, ":", job);
-
-          // Defensive check: only process if steps exists
-          if (!job.steps || !Array.isArray(job.steps)) {
-            console.log(
-              "renderStats: Job",
-              idx,
-              "has no steps array, skipping",
-            );
-            return;
-          }
-
+        MASTER_DATA.forEach((job) => {
+          if (!job.steps || !Array.isArray(job.steps)) return;
           const activeStep = job.steps.find((s) => !s.isDone);
           if (activeStep) {
-            // 1. Count Process Load
             processCounts[activeStep.name] =
               (processCounts[activeStep.name] || 0) + 1;
 
-            // 2. Logic Check: Is it manually delayed OR system overdue?
             const isManuallyDelayed = String(activeStep.status)
               .toLowerCase()
               .includes("delayed");
@@ -712,71 +719,89 @@
             if (isManuallyDelayed || isOverdue) {
               delayBreakdown[activeStep.name] =
                 (delayBreakdown[activeStep.name] || 0) + 1;
-              totalDelayed++;
+              totalDelayedSteps++;
             }
           }
         });
 
-        console.log("renderStats: processCounts:", processCounts);
-        console.log("renderStats: delayBreakdown:", delayBreakdown);
-        console.log("renderStats: totalDelayed:", totalDelayed);
+        // Fix Sync Date
+        const now = new Date();
+        const lastSyncStr =
+          now.toLocaleDateString() +
+          " " +
+          now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
         const container = document.getElementById("statsBar");
 
-        // Generate Process Load HTML
+        // Generate List HTML (Load & Delay)
         let loadHtml = Object.entries(processCounts)
-          .sort((a, b) => b[1] - a[1]) // Optional: sort by highest load
+          .sort((a, b) => b[1] - a[1])
           .map(
             ([name, count]) => `
-              <div style="font-size: 0.85rem; display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding: 4px 0;">
-                  <span>${name}</span>
-                  <span style="font-weight: bold; color: var(--primary);">${count}</span>
-              </div>
-            `,
+        <div style="font-size: 0.85rem; display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding: 4px 0;">
+            <span>${name}</span>
+            <span style="font-weight: bold; color: var(--primary);">${count}</span>
+        </div>`,
           )
           .join("");
 
-        // Generate Delay Breakdown HTML
         let delayHtml =
           Object.entries(delayBreakdown)
             .sort((a, b) => b[1] - a[1])
             .map(
               ([name, count]) => `
-                <div style="font-size: 0.85rem; color: var(--danger); display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #fff1f1;">
-                    <span>${name}</span>
-                    <span style="font-weight: bold;">${count}</span>
-                </div>
-              `,
+        <div style="font-size: 0.85rem; color: var(--danger); display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #fff1f1;">
+            <span>${name}</span>
+            <span style="font-weight: bold;">${count}</span>
+        </div>`,
             )
             .join("") ||
           '<div style="font-size: 0.8rem; color: #94a3b8; margin-top: 10px; text-align: center;">No active delays</div>';
 
         container.innerHTML = `
-            <div class="stat-card">
-                <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 8px;">Overall Production Load</div>
-                <div class="stat-val" style="font-size: 2rem;">${total} <span style="font-size: 1rem; font-weight: normal; color: #64748b;">Active Batches</span></div>
-            </div>
-
-            <div class="stat-card">
-                <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 8px;">System Status</div>
-                <div class="stat-val" style="color: var(--success); font-size: 1.5rem;">Online</div>
-                <div style="font-size: 0.8rem; color: #94a3b8; margin-top: auto;">Last Sync: ${data.today}</div>
-            </div>
-
-            <div class="stat-card">
-                <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 12px; font-weight: 600;">Active Process Load</div>
-                <div style="overflow-y: auto; flex-grow: 1; padding-right: 8px;">
-                    ${loadHtml}
+        <div class="stat-card">
+            <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 8px; font-weight: 600;">Production Overview</div>
+            <div class="stat-val" style="font-size: 1.8rem; margin-bottom: 4px;">${totalBatches} <span style="font-size: 0.8rem; font-weight: normal; color: #64748b;">Total</span></div>
+            
+            <div style="display: flex; justify-content: space-between; margin-top: 4px; border-top: 1px solid #f1f5f9; padding-top: 8px;">
+                <div>
+                    <div style="font-size: 0.65rem; color: #94a3b8; text-transform: uppercase;">On Track</div>
+                    <div style="font-size: 1rem; font-weight: bold; color: #0891b2;">${onTrackCount}</div>
+                </div>
+                <div style="border-left: 1px solid #f1f5f9; padding-left: 8px;">
+                    <div style="font-size: 0.65rem; color: #94a3b8; text-transform: uppercase;">Delayed</div>
+                    <div style="font-size: 1rem; font-weight: bold; color: var(--danger);">${delayedBatchesCount}</div>
+                </div>
+                <div style="border-left: 1px solid #f1f5f9; padding-left: 8px;">
+                    <div style="font-size: 0.65rem; color: #94a3b8; text-transform: uppercase;">Done</div>
+                    <div style="font-size: 1rem; font-weight: bold; color: #10b981;">${completedBatches}</div>
                 </div>
             </div>
+        </div>
 
-            <div class="stat-card" style="border-left: 5px solid var(--danger);">
-                <div style="font-size: 0.9rem; color: var(--danger); font-weight: bold; margin-bottom: 12px;">Active Delay Breakdown (${totalDelayed})</div>
-                <div style="overflow-y: auto; flex-grow: 1; padding-right: 8px;">
-                    ${delayHtml}
-                </div>
+        <div class="stat-card">
+            <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 8px;">System Status</div>
+            <div class="stat-val" style="color: #10b981; font-size: 1.5rem; display: flex; align-items: center; gap: 6px;">
+                <span style="height: 8px; width: 8px; background-color: #10b981; border-radius: 50%; display: inline-block; box-shadow: 0 0 5px #10b981;"></span>
+                Online
             </div>
-          `;
+            <div style="font-size: 0.8rem; color: #94a3b8; margin-top: auto;">Last Sync: ${lastSyncStr}</div>
+        </div>
+
+        <div class="stat-card">
+            <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 12px; font-weight: 600;">Active Process Load</div>
+            <div style="overflow-y: auto; flex-grow: 1; padding-right: 8px;">
+                ${loadHtml}
+            </div>
+        </div>
+
+        <div class="stat-card" style="border-left: 5px solid var(--danger);">
+            <div style="font-size: 0.9rem; color: var(--danger); font-weight: bold; margin-bottom: 12px;">Active Delay Breakdown (${totalDelayedSteps})</div>
+            <div style="overflow-y: auto; flex-grow: 1; padding-right: 8px;">
+                ${delayHtml}
+            </div>
+        </div>
+    `;
       }
 
       function renderTable() {
