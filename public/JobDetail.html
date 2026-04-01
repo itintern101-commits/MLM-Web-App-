@@ -47,6 +47,18 @@
         text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
       }
 
+      .dashboard-header .header-right {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .dashboard-header .header-right .filter-select,
+      .dashboard-header .header-right .search-input {
+        background: white;
+        color: #1f2937;
+      }
+
       /* Sticky Filters Bar */
       .filters {
         display: flex;
@@ -87,12 +99,14 @@
       }
 
       .stat-card {
+        width: 150px;
+        min-width: 150px;
+        height: 100px;
         background: white;
         padding: 0.8rem 1.2rem;
         border-radius: 8px;
-        border: 2px solid #e2e8f0;
+        border: 2px solid #e0e7f0;
         box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-        min-height: 70px;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -111,6 +125,11 @@
         color: white;
         transform: scale(1.02);
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      }
+
+      .stat-card.active .stat-val,
+      .stat-card.active .stat-label {
+        color: white !important;
       }
 
       .stat-val {
@@ -173,11 +192,11 @@
       }
 
       th {
-        background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+        background: #e2e8f0;
         padding: 15px 12px;
         text-align: left;
         font-weight: 600;
-        border-bottom: 2px solid var(--primary);
+        border-bottom: none;
         cursor: pointer;
         user-select: none;
         position: relative;
@@ -186,7 +205,23 @@
       }
 
       th:hover {
-        background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+        background: #d1d5db;
+      }
+
+      .row-urgent {
+        background-color: #fee2e2;
+      }
+
+      .row-critical {
+        background-color: #f8d7da;
+      }
+
+      .row-warning {
+        background-color: #fef9c3;
+      }
+
+      .row-safe {
+        background-color: white;
       }
 
       .sort-icon {
@@ -332,10 +367,25 @@
   <body>
     <div id="sidebar-container"></div>
     <script>
-      fetch("/Sidebar.html")
-        .then((r) => r.text())
-        .then((html) => {
-          document.getElementById("sidebar-container").innerHTML = html;
+      fetch('/Sidebar.html')
+        .then(r => r.text())
+        .then(html => {
+          document.getElementById('sidebar-container').innerHTML = html;
+
+          // ✅ RUN AFTER sidebar is inserted
+          const currentPage = window.location.pathname
+            .split('/')
+            .pop()
+            .replace('.html', '')
+            .toLowerCase();
+
+          document.querySelectorAll('.nav-link').forEach(link => {
+            const page = link.dataset.page.toLowerCase();
+
+            if (page === currentPage) {
+              link.classList.add('active');
+            }
+          });
         })
         .catch(console.error);
     </script>
@@ -347,13 +397,25 @@
     <div class="main-wrapper">
       <div class="dashboard-header">
         <h1>Job Dashboard</h1>
+        <div class="header-right">
+          <input type="text" id="searchInput" class="search-input" placeholder="Search PSN or Job Name..." onkeyup="filterTable()">
+          <select id="priorityFilter" class="filter-select" onchange="filterTable()">
+            <option value="">All Priorities</option>
+            <option value="Urgent">Urgent</option>
+            <option value="Cut Queue">Cut Queue</option>
+            <option value="Normal">Normal</option>
+          </select>
+          <select id="statusFilter" class="filter-select" onchange="filterTable()">
+            <option value="">All Statuses</option>
+            <option value="OVERDUE">OVERDUE</option>
+            <option value="ALMOST DUE">ALMOST DUE</option>
+            <option value="ON SCHEDULE">ON SCHEDULE</option>
+          </select>
+          <button class="action-btn" id="clearFiltersBtn" onclick="clearFilters()">Clear Filters</button>
+        </div>
       </div>
 
       <div class="stats-bar" id="statsBar"></div>
-
-      <div class="filters">
-        <input type="text" id="searchInput" class="search-input" placeholder="Search PSN or Job Name..." onkeyup="filterTable()">
-      </div>
 
       <div class="table-container">
         <table id="jobTable">
@@ -438,12 +500,30 @@
       }
 
       function parseDate(dateStr) {
-        if (!dateStr || dateStr === '-' || typeof dateStr !== 'string') return null;
-        const parts = dateStr.split('/');
-        if (parts.length === 3) {
-          return new Date(parts[2], parts[1] - 1, parts[0]);
+        if (dateStr === undefined || dateStr === null || dateStr === '' || dateStr === '-') return null;
+
+        // Excel serial date handling (numeric value or numeric string)
+        const serialNum = Number(dateStr);
+        if (!isNaN(serialNum) && serialNum > 0) {
+          // Excel serial number: 1 => 1900-01-01 (using 1899-12-30 base)
+          const excelEpoch = new Date(1899, 11, 30);
+          return new Date(excelEpoch.getTime() + serialNum * 86400000);
         }
-        return new Date(dateStr);
+
+        const rawStr = String(dateStr).trim();
+
+        // dd/mm/yyyy or d/m/yyyy
+        const slashParts = rawStr.split('/');
+        if (slashParts.length === 3) {
+          const [d, m, y] = slashParts.map(Number);
+          if (!isNaN(d) && !isNaN(m) && !isNaN(y)) {
+            return new Date(y, m - 1, d);
+          }
+        }
+
+        // yyyy-mm-dd or other parseable format
+        const parsed = new Date(rawStr);
+        return isNaN(parsed.getTime()) ? null : parsed;
       }
 
       function renderStats() {
@@ -547,7 +627,15 @@
       }
 
       function filterTable() {
-        activeFilters.search = document.getElementById('searchInput').value.toLowerCase();
+        activeFilters.search = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+
+        const prioritySelected = document.getElementById('priorityFilter').value;
+        const statusSelected = document.getElementById('statusFilter').value;
+
+        activeFilters.priorities = prioritySelected ? new Set([prioritySelected]) : new Set();
+        activeFilters.statuses = statusSelected ? new Set([statusSelected]) : new Set();
+
+        renderStats();
         renderTable();
       }
 
@@ -564,6 +652,66 @@
         if (isOverdue || isUrgent) return 'row-urgent';
         if (isAlmost || isCutQueue) return 'row-warning';
         return 'row-safe';
+      }
+
+      function clearFilters() {
+        currentSort = { column: null, direction: 'asc' };
+        activeFilters = {
+          salesCodes: new Set(),
+          priorities: new Set(),
+          statuses: new Set(),
+          search: ''
+        };
+
+        document.getElementById('searchInput').value = '';
+        document.getElementById('priorityFilter').value = '';
+        document.getElementById('statusFilter').value = '';
+
+        renderStats();
+        updateSortIcons();
+        renderTable();
+      }
+
+      function getPriorityOrder(job) {
+        const priority = (job.Priority || 'Normal').toLowerCase();
+        const status = (job.Status || 'ON SCHEDULE').toUpperCase();
+
+        const isUrgent = priority === 'urgent';
+        const isCutQueue = priority === 'cut queue';
+        const isOverdue = status === 'OVERDUE';
+        const isAlmost = status === 'ALMOST DUE';
+
+        if (isUrgent && isOverdue) return 0;
+        if (isUrgent) return 1;
+        if (isOverdue) return 2;
+        if (isAlmost) return 3;
+        if (isCutQueue) return 4;
+        return 5;
+      }
+
+      function compareByCurrentSort(a, b) {
+        if (!currentSort.column) return 0;
+
+        const map = {
+          'PSN': (x) => (x['Product Serial Number'] || x.PSN || '').toString().toLowerCase(),
+          'PI Number': (x) => (x['PI Number'] || x.PI_Number || x.pi || x.PI_No || '').toString().toLowerCase(),
+          'salesCode': (x) => (x.salesCode || x.Sales_Code || x.code || '').toString().toLowerCase(),
+          'Job Name': (x) => (x['Job Name'] || x.Job_Name || x.client || '').toString().toLowerCase(),
+          'Job Type': (x) => (x['Job Type'] || '').toString().toLowerCase(),
+          'Quantity': (x) => parseInt(x.Quantity) || 0,
+          'Order Date': (x) => parseDate(x['Order Date'] || x.Order_Date || x.orderDate) || new Date(0),
+          'Delivery Date': (x) => parseDate(x['Delivery Date'] || x.Delivery_Date || x.deliveryDate) || new Date(0),
+          'Item': (x) => (x.Item || '').toString().toLowerCase(),
+          'Priority': (x) => (x.Priority || 'Normal').toString().toLowerCase(),
+          'Status': (x) => (x.Status || 'ON SCHEDULE').toString().toLowerCase(),
+        };
+
+        const aVal = map[currentSort.column] ? map[currentSort.column](a) : (a[currentSort.column] || '').toString().toLowerCase();
+        const bVal = map[currentSort.column] ? map[currentSort.column](b) : (b[currentSort.column] || '').toString().toLowerCase();
+
+        if (aVal < bVal) return currentSort.direction === 'asc' ? -1 : 1;
+        if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
+        return 0;
       }
 
       function renderTable() {
@@ -586,66 +734,12 @@
           return matchesSearch && matchesSalesCode && matchesPriority && matchesStatus;
         });
 
-        // Apply sorting
-        if (currentSort.column) {
-          filteredData.sort((a, b) => {
-            let aVal, bVal;
-
-            switch (currentSort.column) {
-              case 'PSN':
-                aVal = (a["Product Serial Number"] || a.PSN || '').toString();
-                bVal = (b["Product Serial Number"] || b.PSN || '').toString();
-                break;
-              case 'PI Number':
-                aVal = (a["PI Number"] || a.PI_Number || a.pi || a.PI_No || '').toString();
-                bVal = (b["PI Number"] || b.PI_Number || b.pi || b.PI_No || '').toString();
-                break;
-              case 'salesCode':
-                aVal = (a.salesCode || a.Sales_Code || a.code || '').toString();
-                bVal = (b.salesCode || b.Sales_Code || b.code || '').toString();
-                break;
-              case 'Job Name':
-                aVal = (a["Job Name"] || a.Job_Name || a.client || '').toString();
-                bVal = (b["Job Name"] || b.Job_Name || b.client || '').toString();
-                break;
-              case 'Job Type':
-                aVal = (a["Job Type"] || '').toString();
-                bVal = (b["Job Type"] || '').toString();
-                break;
-              case 'Quantity':
-                aVal = parseInt(a.Quantity) || 0;
-                bVal = parseInt(b.Quantity) || 0;
-                break;
-              case 'Order Date':
-                aVal = parseDate(a["Order Date"] || a.Order_Date || a.orderDate) || new Date(0);
-                bVal = parseDate(b["Order Date"] || b.Order_Date || b.orderDate) || new Date(0);
-                break;
-              case 'Delivery Date':
-                aVal = parseDate(a["Delivery Date"] || a.Delivery_Date || a.deliveryDate) || new Date(0);
-                bVal = parseDate(b["Delivery Date"] || b.Delivery_Date || b.deliveryDate) || new Date(0);
-                break;
-              case 'Item':
-                aVal = (a.Item || '').toString();
-                bVal = (b.Item || '').toString();
-                break;
-              case 'Priority':
-                aVal = (a.Priority || 'Normal').toString();
-                bVal = (b.Priority || 'Normal').toString();
-                break;
-              case 'Status':
-                aVal = (a.Status || 'ON SCHEDULE').toString();
-                bVal = (b.Status || 'ON SCHEDULE').toString();
-                break;
-              default:
-                aVal = (a[currentSort.column] || '').toString();
-                bVal = (b[currentSort.column] || '').toString();
-            }
-
-            if (aVal < bVal) return currentSort.direction === 'asc' ? -1 : 1;
-            if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
-            return 0;
-          });
-        }
+        // Apply business priority + overdue ordering first; then optional column sort
+        filteredData.sort((a, b) => {
+          const priorityDiff = getPriorityOrder(a) - getPriorityOrder(b);
+          if (priorityDiff !== 0) return priorityDiff;
+          return compareByCurrentSort(a, b);
+        });
 
         tbody.innerHTML = '';
 
