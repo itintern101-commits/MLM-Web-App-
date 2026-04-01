@@ -626,7 +626,7 @@
               <tr>
                 <th>PSN</th>
                 <th>Batch ID</th>
-                <th>Job Name</th>
+                <th>Client Name</th>
                 <th>Quantity</th>
                 <th>Priority(Expected Date)</th>
                 <th>Expected Date</th>
@@ -700,7 +700,7 @@
         <span class="section-title" style="margin-bottom: 0;">REQUIREMENT UPDATE LISTING</span>
         <div style="display: flex; gap: 10px; flex-grow: 1; justify-content: flex-end;">
           <input type="text" id="reqSearchInput" onkeyup="filterRequirementUpdates()"
-            placeholder="Search PSN or Job Name..." class="filter-select" style="width: 250px;">
+            placeholder="Search PSN or Client Name..." class="filter-select" style="width: 250px;">
           <select class="filter-select" id="reqStatusFilter" onchange="filterRequirementUpdates()">
             <option value="ALL">All Status</option>
             <option value="OVERDUE">Overdue</option>
@@ -714,7 +714,7 @@
             <tr>
               <th>PSN</th>
               <th>Batch ID</th>
-              <th>Job Name</th>
+              <th>Client Name</th>
               <th>Quantity</th>
               <th>Current Process</th>
               <th>In Progress(Days)</th>
@@ -736,7 +736,7 @@
       <span class="section-title" style="margin-bottom: 0;">JOB FULFILLMENT LIST</span>
 
       <div style="display: flex; gap: 10px; flex-grow: 1; justify-content: flex-end;">
-        <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search PSN or Client..."
+        <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search PSN or Client Name..."
           class="filter-select" style="width: 250px;">
 
         <select class="filter-select" id="salesCodeFilter" onchange="filterTable()">
@@ -783,7 +783,7 @@
         <thead>
           <tr>
             <th>PSN</th>
-            <th>Client</th>
+            <th>Client Name</th>
             <th>Sales Code</th>
             <th>PI No.</th>
             <th>Qty</th>
