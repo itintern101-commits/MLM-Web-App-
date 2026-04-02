@@ -1862,80 +1862,52 @@
       }
 
       async function processUpdate() {
-        const saveBtn = document.getElementById("saveBtn");
-        const btnText = document.getElementById("btnText");
-        const btnSpinner = document.getElementById("btnSpinner");
-
-        // 1. GATHER DATA
         const job = MASTER_DATA.find((j) => j.row === currentEditingRow);
         if (!job) return;
-
-        const doneCheckboxes = document.querySelectorAll(
-          ".step-done-check:checked",
-        );
-
-        if (doneCheckboxes.length === 0) {
-          showToast(
-            "Please choose at least one process to be completed before updating.",
-            "warning",
-          );
-          return;
-        }
 
         const stepRows = document.querySelectorAll(".multi-step-row");
         const updates = [];
         let validationError = false;
         let firstIncompleteFound = false;
-        let isDeliveryDone = false;
         let needsSplitRemark = false;
 
         for (let i = 0; i < stepRows.length; i++) {
           const row = stepRows[i];
           const doneCheck = row.querySelector(".step-done-check");
           const delayCheck = row.querySelector(".step-delay-check");
-          const done = doneCheck.checked;
-          const delay = delayCheck.checked;
-          const stepName = row.getAttribute("data-name");
           const qtyInput = row.querySelector(".step-qty-input");
+          const stepName = row.getAttribute("data-name");
 
-          if (!done) {
-            firstIncompleteFound = true;
-          }
+          const done = doneCheck.checked;
+          const delay = delayCheck ? delayCheck.checked : false;
 
-          // 2. VALIDATION & DATA PROCESSING
+          if (!done) firstIncompleteFound = true;
+
           if (done || delay) {
             // Sequential Check
             if (done && firstIncompleteFound) {
               alert(
-                `Sequential Error: You cannot complete "${stepName}" because a previous process is still pending.`,
+                `Sequential Error: Cannot complete "${stepName}" while a previous process is pending.`,
               );
               validationError = true;
               break;
             }
 
-            const base = parseInt(doneCheck.dataset.base);
-            const rInput = row.querySelector(".step-remark-input");
-            const remark = rInput.value;
-
-            // --- LOGIC CHANGE START: Summing current + input ---
-            const currentProcessQty =
+            // --- LOGIC: SUMMING CURRENT + INPUT ---
+            const currentQty =
               parseInt(qtyInput.getAttribute("data-current-qty")) || 0;
-            const addedQty = qtyInput ? parseInt(qtyInput.value) : 0;
+            const addedQty = parseInt(qtyInput.value) || 0;
+            const totalQtyForProcess = currentQty + addedQty;
 
-            // The total quantity for this process is the existing sum + what the user just added
-            const totalQtyForProcess = currentProcessQty + addedQty;
-            // --- LOGIC CHANGE END ---
-
-            const dynamicMaxAllowed = parseInt(
+            const dynamicMax = parseInt(
               row.querySelector(".waterfall-max-label").innerText,
             );
-            const errorSource = qtyInput.getAttribute("data-error-source");
 
             if (done) {
-              // Quantity Check: Must have a total qty > 0 to complete
+              // VALIDATION FIX: Check totalQty, not just addedQty
               if (isNaN(totalQtyForProcess) || totalQtyForProcess <= 0) {
                 showToast(
-                  `Please enter a valid quantity to add for ${stepName}.`,
+                  `Process ${stepName} has 0 total quantity. Please add quantity.`,
                   "error",
                 );
                 qtyInput.focus();
@@ -1943,80 +1915,46 @@
                 break;
               }
 
-              // Waterfall Validation: Check against the total sum
-              if (totalQtyForProcess > dynamicMaxAllowed) {
-                let errorMsg = `Invalid Total Qty for ${stepName}. `;
-                if (errorSource === "System Limit") {
-                  errorMsg += `The sum (${totalQtyForProcess}) exceeds the system max (${dynamicMaxAllowed}).`;
-                } else {
-                  errorMsg += `The sum (${totalQtyForProcess}) exceeds the quantity from "${errorSource}" (${dynamicMaxAllowed}).`;
-                }
-
-                showToast(errorMsg, "error");
-                qtyInput.focus();
-                qtyInput.style.backgroundColor = "#fee2e2";
+              if (totalQtyForProcess > dynamicMax) {
+                showToast(
+                  `${stepName} total (${totalQtyForProcess}) exceeds allowed max (${dynamicMax}).`,
+                  "error",
+                );
                 validationError = true;
                 break;
               }
 
-              if (stepName === "Delivery") isDeliveryDone = true;
-
-              // Compare total summed qty against the job's current main quantity to see if a split is needed
+              // Split detection: If total finished < current Batch Qty
               if (totalQtyForProcess < job.qty) needsSplitRemark = true;
             }
 
-            // Die-cut Machine Selection Validation
-            let detail = "";
-            if (stepName === "Die-cut" && done) {
-              const select = row.querySelector(".step-detail-select");
-              if (!select || select.value === "") {
-                alert("Please choose a Die-Cut machine option.");
-                validationError = true;
-                break;
-              }
-              detail = select.value;
-            }
-
             updates.push({
-              baseCol: base,
+              baseCol: parseInt(doneCheck.dataset.base),
               isDone: done,
               isDelayed: delay,
-              remark: remark,
-              qty: totalQtyForProcess, // Send the SUM to the backend
-              detail: detail,
-              maxQty: dynamicMaxAllowed,
+              remark: row.querySelector(".step-remark-input").value,
+              qty: totalQtyForProcess, // Send the SUM
+              detail:
+                stepName === "Die-cut" && done
+                  ? row.querySelector(".step-detail-select").value
+                  : "",
             });
           }
         }
 
         if (validationError) return;
-        if (updates.length === 0) {
-          alert("Please select at least one process to update.");
-          return;
-        }
 
-        // 3. HANDLE SPLIT REMARK & SAVE
         let splitRemark = "";
         if (needsSplitRemark) {
           splitRemark = await customPrompt(
             "Split Batch Required",
-            "A split batch will be created for the remaining units. Why is this batch being split?",
-            "Enter reason (e.g., Shortage, Partial Production)...",
+            "Reason for splitting units:",
+            "e.g., Shortage...",
           );
-          if (splitRemark === null) return;
-          if (splitRemark.trim() === "") {
-            showToast("A reason is required for split batches.", "error");
-            return;
-          }
+          if (!splitRemark) return;
         }
 
-        if (isDeliveryDone) {
-          showDatePickModal((selectedDate) => {
-            executeSave(job.row, updates, selectedDate, splitRemark);
-          });
-        } else {
-          executeSave(job.row, updates, null, splitRemark);
-        }
+        executeSave(job.row, updates, null, splitRemark);
       }
 
       async function processQtyOnlyUpdate() {

@@ -1249,7 +1249,9 @@ async function saveMultiBatchUpdate(payload) {
     let runningRowData = await getBatchListingRow(rowIdx);
     const psn = String(runningRowData[0] || "").trim();
     const todayISO = new Date().toISOString().split("T")[0];
-    let trackingQty = Number(runningRowData[4] || 0);
+
+    let currentBatchTotalQty = Number(runningRowData[4] || 0);
+    let currentBatchQty = Number(runningRowData[4] || 0);
 
     // Parse Maps
     let qtyMap = {};
@@ -1271,15 +1273,19 @@ async function saveMultiBatchUpdate(payload) {
     );
 
     for (const u of updates) {
-      const currentProcessName = String(runningRowData[u.baseCol] || "").trim();
-      const currentStepMax = Number(maxQtyMap[u.baseCol] || trackingQty);
+      const base = u.baseCol;
+      const stepMax = Number(maxQtyMap[base] || currentBatchQty);
+      const currentProcessName = String(runningRowData[base] || "").trim();
+      const currentStepMax = Number(
+        maxQtyMap[base] || currentBatchTotalQty,
+      );
       const isDeliveryStep = currentProcessName
         .toLowerCase()
         .includes("delivery");
       const isSplitting = u.isDone && Number(u.qty) < currentStepMax;
 
       // Update memory array instead of API
-      runningRowData[u.baseCol + 5] = u.isDone
+      runningRowData[base + 5] = u.isDone
         ? isDeliveryStep && isSplitting
           ? "Partially Delivered"
           : u.isDelayed
@@ -1288,14 +1294,14 @@ async function saveMultiBatchUpdate(payload) {
         : u.isDelayed
           ? "Delayed"
           : "";
-      runningRowData[u.baseCol + 6] = u.isDelayed ? u.remark || "" : "";
-      if (u.detail) runningRowData[u.baseCol + 4] = u.detail;
+      runningRowData[base + 6] = u.isDelayed ? u.remark || "" : "";
+      if (u.detail) runningRowData[base + 4] = u.detail;
 
       if (u.isDone) {
         // Duration Logic
         let prevDateRaw = null;
         for (
-          let pb = u.baseCol - BLOCK_SIZE;
+          let pb = base - BLOCK_SIZE;
           pb >= START_COL;
           pb -= BLOCK_SIZE
         ) {
@@ -1304,6 +1310,7 @@ async function saveMultiBatchUpdate(payload) {
             break;
           }
         }
+
         if (!prevDateRaw) prevDateRaw = runningRowData[2];
 
         const startDate = excelToJSDate(prevDateRaw) || new Date();
@@ -1316,9 +1323,10 @@ async function saveMultiBatchUpdate(payload) {
           ),
         );
 
-        runningRowData[u.baseCol + 2] = todayISO;
-        runningRowData[u.baseCol + 3] = diffDays;
-        runningRowData[u.baseCol + 8] = true;
+        runningRowData[base + 2] = todayISO;
+        runningRowData[base+ 3] = diffDays;
+        runningRowData[base+ 8] = true;
+        qtyMap[base] = u.qty;
 
         // DELIVERY SYNC
         if (isDeliveryStep) {
@@ -1334,40 +1342,43 @@ async function saveMultiBatchUpdate(payload) {
         }
 
         if (isSplitting) {
-          const diff = currentStepMax - Number(u.qty);
-          trackingQty = Number(u.qty);
+          const remainder = stepMax - u.qty;
+
+          // Update future Max limits for Parent
+          maxQtyMap[base] = u.qty;
           for (let i = 0; i < 12; i++) {
-            let base = START_COL + i * BLOCK_SIZE;
-            qtyMap[base] = trackingQty;
-            maxQtyMap[base] = trackingQty;
+            let b = 6 + i * 9;
+            if (b > base) {
+              maxQtyMap[b] = u.qty;
+              if (Number(qtyMap[b] || 0) > u.qty) qtyMap[b] = u.qty;
+            }
           }
-          // Important: Handle the creation of the new split batch row here
+
+          // Trigger Split with exact remainder
           await createSplitBatchFromWaterfall(
             runningRowData,
-            diff,
-            u.baseCol,
-            payload.splitRemark || "Split Batch",
-            [],
+            remainder,
+            base,
+            payload.splitRemark,
           );
-        } else {
-          qtyMap[u.baseCol] = u.qty;
+
+          // Update Parent's Main Qty to the finished amount
+          currentBatchQty = u.qty;
         }
+      } else if (u.isDelayed) {
+        qtyMap[base] = u.qty;
       }
     }
 
-    const finalizeMap = (map) =>
-      Object.keys(map)
-        .filter((k) => {
-          const base = parseInt(k);
-          return String(runningRowData[base] || "").trim() !== "";
-        })
+    // Finalize maps and save
+    const fmt = (m) =>
+      Object.keys(m)
         .sort((a, b) => a - b)
-        .map((k) => `${k}:${map[k]}`)
+        .map((k) => `${k}:${m[k]}`)
         .join("|");
-    // Update the final tracking columns in the memory array
-    runningRowData[4] = trackingQty;
-    runningRowData[119] = finalizeMap(qtyMap);
-    runningRowData[120] = finalizeMap(maxQtyMap);
+    runningRowData[4] = currentBatchQty;
+    runningRowData[119] = fmt(qtyMap);
+    runningRowData[120] = fmt(maxQtyMap);
 
     // 2. ONE SINGLE API CALL TO SAVE EVERYTHING
     await updateBatchListingRow(rowIdx, runningRowData);
@@ -1387,63 +1398,54 @@ async function createSplitBatchFromWaterfall(
   diffQty,
   splitAtBase,
   userRemark,
-  localNewIds,
 ) {
-  const childMaxMap = {};
   const START_COL = 6;
   const BLOCK_SIZE = 9;
 
-  // 1. Only map processes that actually have a name defined in the parent row
-  for (let i = 0; i < 12; i++) {
-    let base = START_COL + i * BLOCK_SIZE;
-    let processName = String(parentData[base] || "").trim();
-
-    // Only add to the map if the process exists (is not empty)
-    if (processName !== "") {
-      childMaxMap[base] = diffQty;
-    }
-  }
-
-  const childMaxString = Object.keys(childMaxMap)
-    .sort((a, b) => Number(a) - Number(b))
-    .map((k) => `${k}:${childMaxMap[k]}`)
-    .join("|");
-
-  // Clone the parent array
   let newRow = [...parentData];
-  const newId = await generateNewBatchId(String(parentData[1]), localNewIds);
+  const newId = await generateNewBatchId(String(parentData[1]), []);
 
-  // Update Identity & Qty
   newRow[1] = newId;
-  newRow[2] = new Date().toISOString().split("T")[0]; // Batch Date
-  newRow[4] = diffQty; // Current Total Qty
-  newRow[118] = userRemark; // New Batch Remark
+  newRow[2] = new Date().toISOString().split("T")[0];
+  newRow[4] = diffQty; // Child Batch starts with the remaining total
+  newRow[118] = userRemark;
 
-  // Set the filtered maps
-  newRow[119] = childMaxString; // Qty Map
-  newRow[120] = childMaxString; // Max Qty Map
+  let childQtyMap = {};
+  let childMaxMap = {};
 
-  // RESET Forward Steps for the new split row
   for (let i = 0; i < 12; i++) {
     let base = START_COL + i * BLOCK_SIZE;
+    if (String(parentData[base] || "").trim() !== "") {
+      // Logic: Future processes (from split point onwards) start at 0
+      // but are allowed to go up to diffQty.
+      if (base >= splitAtBase) {
+        childQtyMap[base] = 0;
+        childMaxMap[base] = diffQty;
 
-    // Only reset if this step is the split point or further ahead
-    if (base >= splitAtBase) {
-      newRow[base + 2] = ""; // End Date
-      newRow[base + 3] = ""; // Duration
-      newRow[base + 5] = ""; // Status
-      newRow[base + 8] = false; // Tick (Checkbox)
-      newRow[base + 4] = ""; // Detail (Machine)
-      newRow[base + 6] = ""; // Remark
+        // Reset process markers for the child
+        newRow[base + 2] = ""; // End Date
+        newRow[base + 3] = ""; // Duration
+        newRow[base + 8] = false; // Checkbox
+        if (newRow[base + 5] === "Completed") newRow[base + 5] = "";
+      } else {
+        // Processes already finished by parent carry over their full qty to the child
+        childQtyMap[base] = diffQty;
+        childMaxMap[base] = diffQty;
+      }
     }
   }
 
-  // Final Safety: Ensure Completion Status is reset for the new split batch
-  newRow[114] = ""; // Completion Status
-  newRow[115] = ""; // Completed Date
+  const fmt = (m) =>
+    Object.keys(m)
+      .sort((a, b) => a - b)
+      .map((k) => `${k}:${m[k]}`)
+      .join("|");
+  newRow[119] = fmt(childQtyMap);
+  newRow[120] = fmt(childMaxMap);
+  newRow[114] = "";
+  newRow[115] = "";
 
-  const response = await addTableRow("BatchListing", newRow);
-  return response;
+  return await addTableRow("BatchListing", newRow);
 }
 
 /**
