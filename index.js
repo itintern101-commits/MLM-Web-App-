@@ -1276,9 +1276,7 @@ async function saveMultiBatchUpdate(payload) {
       const base = u.baseCol;
       const stepMax = Number(maxQtyMap[base] || currentBatchQty);
       const currentProcessName = String(runningRowData[base] || "").trim();
-      const currentStepMax = Number(
-        maxQtyMap[base] || currentBatchTotalQty,
-      );
+      const currentStepMax = Number(maxQtyMap[base] || currentBatchTotalQty);
       const isDeliveryStep = currentProcessName
         .toLowerCase()
         .includes("delivery");
@@ -1300,11 +1298,7 @@ async function saveMultiBatchUpdate(payload) {
       if (u.isDone) {
         // Duration Logic
         let prevDateRaw = null;
-        for (
-          let pb = base - BLOCK_SIZE;
-          pb >= START_COL;
-          pb -= BLOCK_SIZE
-        ) {
+        for (let pb = base - BLOCK_SIZE; pb >= START_COL; pb -= BLOCK_SIZE) {
           if (runningRowData[pb + 2]) {
             prevDateRaw = runningRowData[pb + 2];
             break;
@@ -1324,8 +1318,8 @@ async function saveMultiBatchUpdate(payload) {
         );
 
         runningRowData[base + 2] = todayISO;
-        runningRowData[base+ 3] = diffDays;
-        runningRowData[base+ 8] = true;
+        runningRowData[base + 3] = diffDays;
+        runningRowData[base + 8] = true;
         qtyMap[base] = u.qty;
 
         // DELIVERY SYNC
@@ -1343,14 +1337,22 @@ async function saveMultiBatchUpdate(payload) {
 
         if (isSplitting) {
           const remainder = stepMax - u.qty;
+          const newCappedQty = u.qty;
 
-          // Update future Max limits for Parent
-          maxQtyMap[base] = u.qty;
           for (let i = 0; i < 12; i++) {
-            let b = 6 + i * 9;
-            if (b > base) {
-              maxQtyMap[b] = u.qty;
-              if (Number(qtyMap[b] || 0) > u.qty) qtyMap[b] = u.qty;
+            let b = START_COL + i * BLOCK_SIZE;
+            if (String(runningRowData[b] || "").trim() !== "") {
+              // 1. Always cap the MAX allowed for every process to the new batch total
+              maxQtyMap[b] = Math.min(
+                Number(maxQtyMap[b] || newCappedQty),
+                newCappedQty,
+              );
+
+              // 2. Adjust CURRENT qty for ALL processes (Past, Present, and Future)
+              // If any process claims to have done more than the new total, force it down.
+              if (Number(qtyMap[b] || 0) > newCappedQty) {
+                qtyMap[b] = newCappedQty;
+              }
             }
           }
 
