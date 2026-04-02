@@ -2535,7 +2535,7 @@
       function syncWaterfallUI() {
         const rows = document.querySelectorAll(".multi-step-row");
         let currentActiveCeiling = Infinity;
-        let limitingStepName = ""; // Track who is causing the limit
+        let limitingStepName = "";
 
         rows.forEach((row) => {
           const input = row.querySelector(".step-qty-input");
@@ -2543,11 +2543,19 @@
           const currentStepName = row.getAttribute("data-name");
           if (!input || !label) return;
 
+          // 1. GATHER DATA
+          const backendQty =
+            parseInt(input.getAttribute("data-current-qty")) || 0;
           const systemMax =
             parseInt(input.getAttribute("data-system-max")) || 0;
-          const userValue = parseInt(input.value);
+          const userTypedQty = parseInt(input.value) || 0;
 
-          // 1. Logic: Is the System Max lower, or is an Upper Process lower?
+          // 2. CALCULATE THE TOTAL FOR THIS STEP
+          // This is what the user is actually proposing to "finish" at this stage
+          const proposedTotalForStep = backendQty + userTypedQty;
+
+          // 3. DETERMINE THE EFFECTIVE MAX ALLOWED
+          // A step is limited by either its own systemMax or the ceiling set by steps above it
           let effectiveMax;
           let isLimitedByUpper = false;
 
@@ -2558,37 +2566,32 @@
             isLimitedByUpper = true;
           }
 
-          // 2. Update Label UI
+          // 4. UPDATE UI
           label.innerText = effectiveMax;
 
-          // 3. Visual Feedback
-          if (userValue > effectiveMax) {
+          // 5. VALIDATION VISUALS
+          // We compare the SUM (backend + typed) against the effective max
+          if (proposedTotalForStep > effectiveMax) {
             input.style.border = "2px solid #ef4444";
+            input.style.backgroundColor = "#fef2f2";
             label.style.color = "#ef4444";
-            // Set a custom attribute so processUpdate knows who caused the error
+
             input.setAttribute(
               "data-error-source",
               isLimitedByUpper ? limitingStepName : "System Limit",
             );
           } else {
             input.style.border = "1px solid #cbd5e1";
-            label.style.color = isLimitedByUpper ? "#f59e0b" : "#475569"; // Orange if limited by upper
+            input.style.backgroundColor = "white";
+            label.style.color = isLimitedByUpper ? "#f59e0b" : "#475569";
             input.removeAttribute("data-error-source");
           }
 
-          // 4. Update the Ceiling for the NEXT rows
-          // If this step's input is lower than the current ceiling, it becomes the new ceiling
-          if (
-            !isNaN(userValue) &&
-            userValue > 0 &&
-            userValue < currentActiveCeiling
-          ) {
-            currentActiveCeiling = userValue;
-            limitingStepName = currentStepName;
-          } else if (effectiveMax < currentActiveCeiling) {
-            // Even if user hasn't typed, the effective max (System Max) of this step
-            // naturally limits the steps below it.
-            currentActiveCeiling = effectiveMax;
+          // 6. UPDATE CEILING FOR NEXT ROWS
+          // The ceiling for the NEXT process is the current process's total progress.
+          // If the proposed total is valid and lower than current ceiling, it restricts steps below.
+          if (proposedTotalForStep < currentActiveCeiling) {
+            currentActiveCeiling = proposedTotalForStep;
             limitingStepName = currentStepName;
           }
         });
