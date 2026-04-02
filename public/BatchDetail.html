@@ -1875,17 +1875,14 @@
         );
 
         if (doneCheckboxes.length === 0) {
-          // Replace 'showToast' with your specific toast function name if different
           showToast(
             "Please choose at least one process to be completed before updating.",
             "warning",
           );
-          return; // Stop the function here
+          return;
         }
 
-        const maxQtyString = job.maxQtyString || "";
         const stepRows = document.querySelectorAll(".multi-step-row");
-
         const updates = [];
         let validationError = false;
         let firstIncompleteFound = false;
@@ -1901,14 +1898,13 @@
           const stepName = row.getAttribute("data-name");
           const qtyInput = row.querySelector(".step-qty-input");
 
-          // Track sequential progress
           if (!done) {
             firstIncompleteFound = true;
           }
 
-          // 2. VALIDATION (Only if user is interacting with this row)
+          // 2. VALIDATION & DATA PROCESSING
           if (done || delay) {
-            // Sequential Check: Cannot skip a process
+            // Sequential Check
             if (done && firstIncompleteFound) {
               alert(
                 `Sequential Error: You cannot complete "${stepName}" because a previous process is still pending.`,
@@ -1920,19 +1916,26 @@
             const base = parseInt(doneCheck.dataset.base);
             const rInput = row.querySelector(".step-remark-input");
             const remark = rInput.value;
-            const qty = qtyInput ? parseInt(qtyInput.value) : job.qty;
 
-            // Get the Dynamic Max from the UI Label (which syncWaterfallUI handles)
+            // --- LOGIC CHANGE START: Summing current + input ---
+            const currentProcessQty =
+              parseInt(qtyInput.getAttribute("data-current-qty")) || 0;
+            const addedQty = qtyInput ? parseInt(qtyInput.value) : 0;
+
+            // The total quantity for this process is the existing sum + what the user just added
+            const totalQtyForProcess = currentProcessQty + addedQty;
+            // --- LOGIC CHANGE END ---
+
             const dynamicMaxAllowed = parseInt(
               row.querySelector(".waterfall-max-label").innerText,
             );
             const errorSource = qtyInput.getAttribute("data-error-source");
 
             if (done) {
-              // Quantity Check
-              if (isNaN(qty) || qty <= 0) {
+              // Quantity Check: Must have a total qty > 0 to complete
+              if (isNaN(totalQtyForProcess) || totalQtyForProcess <= 0) {
                 showToast(
-                  `Please enter a valid quantity for ${stepName}.`,
+                  `Please enter a valid quantity to add for ${stepName}.`,
                   "error",
                 );
                 qtyInput.focus();
@@ -1940,13 +1943,13 @@
                 break;
               }
 
-              // WATERFALL VALIDATION: Only check qty if marking DONE
-              if (qty > dynamicMaxAllowed) {
-                let errorMsg = `Invalid Qty for ${stepName}. `;
+              // Waterfall Validation: Check against the total sum
+              if (totalQtyForProcess > dynamicMaxAllowed) {
+                let errorMsg = `Invalid Total Qty for ${stepName}. `;
                 if (errorSource === "System Limit") {
-                  errorMsg += `Exceeds the maximum allowed in the system (${dynamicMaxAllowed}).`;
+                  errorMsg += `The sum (${totalQtyForProcess}) exceeds the system max (${dynamicMaxAllowed}).`;
                 } else {
-                  errorMsg += `Cannot exceed the quantity processed in "${errorSource}" (${dynamicMaxAllowed}).`;
+                  errorMsg += `The sum (${totalQtyForProcess}) exceeds the quantity from "${errorSource}" (${dynamicMaxAllowed}).`;
                 }
 
                 showToast(errorMsg, "error");
@@ -1956,11 +1959,10 @@
                 break;
               }
 
-              // Check if this is the Delivery step
               if (stepName === "Delivery") isDeliveryDone = true;
 
-              // Detect if we need a split batch (processing less than current total)
-              if (qty < job.qty) needsSplitRemark = true;
+              // Compare total summed qty against the job's current main quantity to see if a split is needed
+              if (totalQtyForProcess < job.qty) needsSplitRemark = true;
             }
 
             // Die-cut Machine Selection Validation
@@ -1975,13 +1977,12 @@
               detail = select.value;
             }
 
-            // Add to update payload
             updates.push({
               baseCol: base,
               isDone: done,
               isDelayed: delay,
               remark: remark,
-              qty: qty,
+              qty: totalQtyForProcess, // Send the SUM to the backend
               detail: detail,
               maxQty: dynamicMaxAllowed,
             });
@@ -2002,7 +2003,7 @@
             "A split batch will be created for the remaining units. Why is this batch being split?",
             "Enter reason (e.g., Shortage, Partial Production)...",
           );
-          if (splitRemark === null) return; // Cancelled
+          if (splitRemark === null) return;
           if (splitRemark.trim() === "") {
             showToast("A reason is required for split batches.", "error");
             return;
