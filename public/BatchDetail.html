@@ -378,6 +378,514 @@
         text-transform: uppercase;
         opacity: 0.8;
       }
+
+      /*NEW UPDATE POPUP CSS*/
+      @keyframes um-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Toggle chips */
+      .um-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+        background: white;
+        font-size: 12px;
+        color: #64748b;
+        cursor: pointer;
+        user-select: none;
+        font-family: inherit;
+        transition:
+          background 0.12s,
+          border-color 0.12s,
+          color 0.12s;
+      }
+      .um-chip input[type="checkbox"] {
+        display: none;
+      }
+      .um-chip:hover {
+        background: #f8fafc;
+      }
+      .um-chip.is-done {
+        background: #f0fdf4;
+        border-color: #86efac;
+        color: #166534;
+        font-weight: 600;
+      }
+      .um-chip.is-delay {
+        background: #fef2f2;
+        border-color: #fca5a5;
+        color: #991b1b;
+        font-weight: 600;
+      }
+      .um-chip.is-locked {
+        pointer-events: none;
+        opacity: 0.85;
+      }
+
+      /* Step number badges */
+      .um-badge {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 600;
+        flex-shrink: 0;
+      }
+      .um-badge-done {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .um-badge-delayed {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .um-badge-pending {
+        background: #f1f5f9;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+      }
+
+      /* Qty inputs */
+      .um-qty-input {
+        width: 100%;
+        padding: 6px 8px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        font-size: 14px;
+        font-family: inherit;
+        background: white;
+        color: #0f172a;
+        box-sizing: border-box;
+      }
+      .um-qty-input:focus {
+        outline: none;
+        border-color: #94a3b8;
+      }
+
+      /* Delay reason input */
+      .um-delay-input {
+        width: 100%;
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 1px solid #fca5a5;
+        background: #fef2f2;
+        color: #991b1b;
+        font-size: 13px;
+        font-family: inherit;
+        box-sizing: border-box;
+      }
+      .um-delay-input::placeholder {
+        color: #fca5a5;
+      }
+      .um-delay-input[readonly] {
+        opacity: 0.75;
+        cursor: default;
+      }
+
+      /* Machine select */
+      .um-machine-select {
+        width: 100%;
+        padding: 7px 10px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        background: white;
+        color: #0f172a;
+        font-size: 13px;
+        font-family: inherit;
+        box-sizing: border-box;
+      }
+
+      @keyframes um-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      #updateModal * {
+        box-sizing: border-box;
+      }
+
+      .um-modal-inner {
+        background: white;
+        border-radius: 14px;
+        width: 92%;
+        max-width: 860px;
+        max-height: 92vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+        overflow: hidden;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      /* ── Header ── */
+      .um-header {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #f1f5f9;
+        flex-shrink: 0;
+      }
+      .um-batch-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 3px 10px;
+        font-size: 12px;
+        color: #64748b;
+        margin-bottom: 6px;
+      }
+      .um-batch-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #22c55e;
+        display: inline-block;
+      }
+      .um-split-notice {
+        margin-top: 8px;
+        padding: 7px 10px;
+        background: #eff6ff;
+        border-left: 3px solid #93c5fd;
+        font-size: 12px;
+        color: #1e40af;
+      }
+
+      /* ── Two-column body ── */
+      .um-columns {
+        display: flex;
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+      }
+      .um-left {
+        width: 42%;
+        border-right: 1px solid #f1f5f9;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }
+      .um-right {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }
+      .um-col-header {
+        padding: 9px 14px;
+        border-bottom: 1px solid #f1f5f9;
+        background: #f8fafc;
+        flex-shrink: 0;
+        font-size: 11px;
+        font-weight: 600;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      .um-col-body {
+        overflow-y: auto;
+        flex: 1;
+        padding: 10px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+      }
+
+      /* ── History rows ── */
+      .um-hist-row {
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+        padding: 9px 10px;
+        background: #f8fafc;
+        border-radius: 10px;
+        position: relative;
+      }
+      .um-badge {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 600;
+        flex-shrink: 0;
+        margin-top: 1px;
+      }
+      .um-badge-done {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .um-badge-delayed {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .um-badge-pending {
+        background: #f1f5f9;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+      }
+      .um-step-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: #0f172a;
+        margin: 0 0 2px;
+      }
+      .um-step-meta {
+        font-size: 11px;
+        color: #64748b;
+        margin: 0;
+        line-height: 1.5;
+      }
+      .um-remark-tag {
+        display: inline-block;
+        margin-top: 4px;
+        font-size: 11px;
+        padding: 2px 7px;
+        background: #fee2e2;
+        color: #991b1b;
+        border-radius: 6px;
+      }
+      .um-machine-tag {
+        font-size: 11px;
+        color: #2563eb;
+        font-weight: 600;
+        margin: 2px 0 0;
+      }
+      .um-revert-btn {
+        font-size: 11px;
+        padding: 3px 8px;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        cursor: pointer;
+        background: white;
+        color: #64748b;
+        flex-shrink: 0;
+      }
+      .um-revert-btn:hover {
+        background: #f8fafc;
+      }
+
+      /* ── Active step cards ── */
+      .um-active-card {
+        border: 1px solid #969696;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .um-active-card-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        background: #f8fafc;
+      }
+      .um-active-card-body {
+        padding: 10px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .um-overdue-badge {
+        font-size: 11px;
+        padding: 2px 7px;
+        background: #fee2e2;
+        color: #b91c1c;
+        border-radius: 6px;
+        font-weight: 600;
+        margin-left: 5px;
+      }
+      .um-reverted-notice {
+        font-size: 11px;
+        padding: 6px 10px;
+        background: #fffbeb;
+        border-left: 3px solid #fbbf24;
+        color: #92400e;
+      }
+
+      /* ── Toggle chips ── */
+      .um-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 11px;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+        background: white;
+        font-size: 12px;
+        color: #64748b;
+        cursor: pointer;
+        user-select: none;
+        font-family: inherit;
+        transition:
+          background 0.1s,
+          border-color 0.1s,
+          color 0.1s;
+      }
+      .um-chip input[type="checkbox"] {
+        display: none;
+      }
+      .um-chip:hover {
+        background: #f8fafc;
+      }
+      .um-chip.is-done {
+        background: #f0fdf4;
+        border-color: #86efac;
+        color: #166534;
+        font-weight: 600;
+      }
+      .um-chip.is-delay {
+        background: #fef2f2;
+        border-color: #fca5a5;
+        color: #991b1b;
+        font-weight: 600;
+      }
+      .um-chip.is-locked {
+        pointer-events: none;
+        opacity: 0.9;
+      }
+
+      /* ── Inputs ── */
+      .um-delay-input {
+        width: 100%;
+        padding: 7px 9px;
+        border-radius: 8px;
+        border: 1px solid #fca5a5;
+        background: #fef2f2;
+        color: #991b1b;
+        font-size: 12px;
+        font-family: inherit;
+      }
+      .um-delay-input::placeholder {
+        color: #fca5a5;
+      }
+      .um-delay-input[readonly] {
+        opacity: 0.72;
+        cursor: default;
+      }
+      .um-qty-input {
+        width: 100%;
+        padding: 5px 8px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        font-size: 13px;
+        font-family: inherit;
+        background: white;
+        color: #0f172a;
+      }
+      .um-qty-input:focus {
+        outline: none;
+        border-color: #94a3b8;
+      }
+      .um-machine-select {
+        width: 100%;
+        padding: 6px 8px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        background: white;
+        color: #0f172a;
+        font-size: 12px;
+        font-family: inherit;
+      }
+
+      /* ── Qty row ── */
+      .um-qty-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .um-qty-block {
+        flex: 1;
+      }
+      .um-qty-block label {
+        font-size: 11px;
+        color: #64748b;
+        display: block;
+        margin-bottom: 3px;
+      }
+      .um-max-block {
+        text-align: center;
+        padding-left: 10px;
+        border-left: 1px dashed #e2e8f0;
+      }
+      .um-max-block .um-max-lbl {
+        font-size: 11px;
+        color: #94a3b8;
+        display: block;
+        margin-bottom: 1px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .um-max-block .um-max-val {
+        font-size: 15px;
+        font-weight: 600;
+        color: #475569;
+      }
+
+      /* ── Footer ── */
+      .um-footer {
+        padding: 10px 1.5rem;
+        border-top: 1px solid #f1f5f9;
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        background: white;
+        flex-shrink: 0;
+      }
+      .um-btn {
+        padding: 7px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        cursor: pointer;
+        font-weight: 500;
+        font-family: inherit;
+        border: 1px solid #e2e8f0;
+        background: white;
+        color: #475569;
+      }
+      .um-btn:hover {
+        background: #f8fafc;
+      }
+      .um-btn-ghost {
+        background: #f8fafc;
+        color: #64748b;
+      }
+      .um-btn-primary {
+        background: #0f172a;
+        color: white;
+        border-color: transparent;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .um-btn-primary:hover {
+        opacity: 0.88;
+      }
+
+      /* ── Completed empty / full state ── */
+      .um-empty-state {
+        text-align: center;
+        padding: 24px 16px;
+        color: #94a3b8;
+        font-size: 13px;
+      }
+      .um-completed-state {
+        text-align: center;
+        padding: 20px;
+        color: #22c55e;
+        font-weight: 600;
+        font-size: 14px;
+      }
     </style>
   </head>
 
@@ -517,134 +1025,67 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.5);
+        background: rgba(0, 0, 0, 0.45);
         z-index: 1001;
         justify-content: center;
         align-items: center;
       "
     >
-      <div
-        style="
-          background: white;
-          padding: 2rem;
-          border-radius: 12px;
-          width: 90%;
-          max-width: 550px;
-          max-height: 90vh;
-          display: flex;
-          flex-direction: column;
-        "
-      >
-        <div
-          style="
-            border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 10px;
-            margin-bottom: 15px;
-          "
-        >
-          <h2 id="modalPsn" style="margin: 0; color: var(--primary)">
-            Update Progress
-          </h2>
-          <p
-            id="modalBatchId"
-            style="margin: 5px 0 0 0; color: #64748b; font-size: 0.9rem"
-          ></p>
+      <div class="um-modal-inner">
+        <!-- HEADER -->
+        <div class="um-header">
+          <div id="modalBatchId"></div>
+          <div id="modalPsn"></div>
         </div>
 
-        <div
-          id="processHistoryArea"
-          style="
-            overflow-y: auto;
-            flex-grow: 1;
-            margin-bottom: 15px;
-            border: 1px solid #f1f5f9;
-            border-radius: 8px;
-            background: #fafafa;
-            padding: 10px;
-          "
-        ></div>
-
-        <div id="activeProcessArea">
-          <div
-            style="
-              font-weight: bold;
-              margin-bottom: 10px;
-              color: #1e293b;
-              font-size: 0.9rem;
-            "
-          >
-            Select Processes to Update:
+        <!-- TWO-COLUMN BODY -->
+        <div class="um-columns">
+          <!-- LEFT: completed history -->
+          <div class="um-left">
+            <div class="um-col-header">Completed steps</div>
+            <div id="processHistoryArea" class="um-col-body"></div>
           </div>
-          <div
-            id="multiProcessList"
-            style="
-              max-height: 300px;
-              overflow-y: auto;
-              border: 1px solid #e2e8f0;
-              border-radius: 8px;
-              padding: 5px;
-              background: #f8fafc;
-            "
-          ></div>
+
+          <!-- RIGHT: pending / active steps -->
+          <div class="um-right">
+            <div class="um-col-header">Pending steps — mark progress</div>
+            <div id="activeProcessArea" class="um-col-body">
+              <div
+                id="multiProcessList"
+                style="display: flex; flex-direction: column; gap: 10px"
+              ></div>
+            </div>
+          </div>
         </div>
 
-        <div
-          style="
-            margin-top: 20px;
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-          "
-        >
-          <button
-            onclick="closeModal()"
-            style="
-              padding: 10px 20px;
-              border-radius: 6px;
-              border: 1px solid #ccc;
-              cursor: pointer;
-              background: white;
-            "
-          >
-            Cancel
-          </button>
+        <!-- FOOTER -->
+        <div class="um-footer">
+          <button class="um-btn" onclick="closeModal()">Cancel</button>
 
           <button
             id="updateQtyBtn"
-            class="btn-secondary"
+            class="um-btn um-btn-ghost"
             onclick="processQtyOnlyUpdate()"
           >
-            Update Qty Only
+            Update qty only
           </button>
 
           <button
-            onclick="processUpdate()"
             id="saveBtn"
-            style="
-              padding: 10px 20px;
-              border-radius: 6px;
-              background: var(--primary);
-              color: white;
-              border: none;
-              cursor: pointer;
-              font-weight: 600;
-              display: flex;
-              align-items: center;
-              gap: 8px;
-              transition: all 0.2s;
-            "
+            class="um-btn um-btn-primary"
+            onclick="processUpdate()"
           >
-            <span id="btnText">Confirm Update</span>
+            <span id="btnText">Save progress</span>
             <div
               id="btnSpinner"
               style="
                 display: none;
-                width: 14px;
-                height: 14px;
-                border: 2px solid #ffffff66;
-                border-top: 2px solid white;
+                width: 13px;
+                height: 13px;
+                border: 2px solid rgba(255, 255, 255, 0.35);
+                border-top-color: white;
                 border-radius: 50%;
-                animation: spin 0.8s linear infinite;
+                animation: um-spin 0.7s linear infinite;
               "
             ></div>
           </button>
@@ -1108,89 +1549,63 @@
 
       function openUpdatePopup(batchIdOrRow) {
         console.log("openUpdatePopup called with:", batchIdOrRow);
-        const numericRow = Number(batchIdOrRow);
-        let job;
-        job = MASTER_DATA.find((j) => String(j.row) === String(batchIdOrRow));
-        if (!isNaN(numericRow) && numericRow > 0) {
-          job = MASTER_DATA.find((j) => Number(j.row) === numericRow);
-        }
 
-        if (!job) {
+        // ── Find the job ──────────────────────────────────────────────────────────
+        const numericRow = Number(batchIdOrRow);
+        let job = MASTER_DATA.find(
+          (j) => String(j.row) === String(batchIdOrRow),
+        );
+        if (!isNaN(numericRow) && numericRow > 0)
+          job = MASTER_DATA.find((j) => Number(j.row) === numericRow);
+        if (!job)
           job = MASTER_DATA.find(
             (j) => String(j.batchId) === String(batchIdOrRow),
           );
-        }
-
         if (!job) {
           console.warn("openUpdatePopup: job not found for", batchIdOrRow);
           return;
         }
 
+        currentEditingRow = job.row;
+
+        // ── Reset footer buttons ──────────────────────────────────────────────────
         const qtyBtn = document.getElementById("updateQtyBtn");
         const saveBtn = document.getElementById("saveBtn");
         const btnText = document.getElementById("btnText");
+        if (qtyBtn) qtyBtn.style.display = "inline-flex";
+        if (saveBtn) saveBtn.style.display = "flex";
+        btnText.innerText = "Save progress";
+        saveBtn.onclick = () => processUpdate();
 
-        // RESET MODAL TO "UPDATE" MODE
-        if (qtyBtn) qtyBtn.style.display = "inline-block"; // Show the Split/Qty button again
-        btnText.innerText = "Update Progress"; // Reset text from "Confirm Update"
-        saveBtn.onclick = () => processUpdate(); // Point back to the original update function
-
-        currentEditingRow = job.row;
-
-        const historyContainer = document.getElementById("processHistoryArea");
-        const multiList = document.getElementById("multiProcessList");
-        multiList.innerHTML = "";
-
+        // ── Header ────────────────────────────────────────────────────────────────
         const splitRemarkHtml = job.splitRemark
-          ? `<div style="font-size:0.75rem; color:#1e40af; background:#eff6ff; padding:6px; border-radius:4px; margin-top:8px; border:1px solid #bfdbfe;">
-              <strong>Batch Origin Remark:</strong> ${job.splitRemark}
-            </div>`
+          ? `<div class="um-split-notice"><strong>Batch origin:</strong> ${job.splitRemark}</div>`
           : "";
-        // Headers
-        document.getElementById("modalPsn").innerHTML =
-          `<div style="font-size: 0.9rem; color: #64748b;">${job.psn}</div><div style="margin-top: 4px;">${job.jobName}</div>
-          ${splitRemarkHtml}`;
+
         document.getElementById("modalBatchId").innerHTML =
-          `<div style="background: #f1f5f9; padding: 8px; border-radius: 6px; margin-top: 10px;"><span>Batch ID: ${job.batchId}</span> | <span>Current Qty: ${job.qty}</span></div>`;
+          `<div class="um-batch-pill">
+       <span class="um-batch-dot"></span>
+       Batch ID: ${job.batchId} &nbsp;|&nbsp; Qty: ${job.qty}
+     </div>`;
 
-        // 3. Render History
+        document.getElementById("modalPsn").innerHTML =
+          `<div style="font-size:12px; color:#64748b; margin-bottom:1px;">${job.psn}</div>
+     <div style="font-size:15px; font-weight:600; color:#0f172a;">${job.jobName}</div>
+     ${splitRemarkHtml}`;
+
+        // ── LEFT: Completed History ───────────────────────────────────────────────
+        const historyContainer = document.getElementById("processHistoryArea");
         const completedSteps = job.steps.filter((s) => s.isDone);
-        historyContainer.innerHTML =
-          `<div style="font-weight:bold; font-size:0.8rem; margin-bottom:8px; color:#64748b;">COMPLETED HISTORY</div>` +
-          (completedSteps
+
+        if (completedSteps.length === 0) {
+          historyContainer.innerHTML = `<div class="um-empty-state">No completed steps yet.</div>`;
+        } else {
+          historyContainer.innerHTML = completedSteps
             .map((s, index) => {
-              let startTimeLabel;
               const globalIndex =
-                job.steps.findIndex((step) => step.baseCol === s.baseCol) + 1;
-              const idxInCompleted = completedSteps.indexOf(s);
+                job.steps.findIndex((st) => st.baseCol === s.baseCol) + 1;
 
-              if (idxInCompleted === 0) {
-                try {
-                  const parts = s.endDate.split("/");
-                  const endD = new Date(20 + parts[2], parts[1] - 1, parts[0]);
-                  const startD = new Date(endD);
-                  startD.setDate(
-                    startD.getDate() - (parseInt(s.duration) || 0),
-                  );
-                  startTimeLabel = Utilities_formatDate(startD);
-                } catch (e) {
-                  startTimeLabel = job.batchDate;
-                }
-              } else {
-                startTimeLabel = completedSteps[idxInCompleted - 1].endDate;
-              }
-
-              const histQty = getQtyForProcess(
-                job.qtyString,
-                s.baseCol,
-                job.qty,
-              );
-              const maxQty = getMaxQtyForProcess(
-                job.maxQtyString,
-                s.baseCol,
-                job.qty,
-              );
-
+              let startTimeLabel;
               if (index === 0) {
                 try {
                   const parts = s.endDate.split("/");
@@ -1207,49 +1622,52 @@
                 startTimeLabel = completedSteps[index - 1].endDate;
               }
 
-              let detailHtml = s.detail
-                ? `<div style="font-size:0.7rem; color:var(--primary); font-weight:bold;">Machine: ${s.detail}</div>`
-                : "";
+              const histQty = getQtyForProcess(
+                job.qtyString,
+                s.baseCol,
+                job.qty,
+              );
+              const maxQty = getMaxQtyForProcess(
+                job.maxQtyString,
+                s.baseCol,
+                job.qty,
+              );
+              const isDelayed = s.status && s.status.includes("Delayed");
+              const badgeClass = isDelayed
+                ? "um-badge-delayed"
+                : "um-badge-done";
 
               return `
-                <div style="padding:10px; border-bottom:1px solid #e2e8f0; background:white; margin-bottom:8px; border-radius:6px; border-left:4px solid ${s.status.includes("Delayed") ? "#ef4444" : "#10b981"}; position:relative;">
-                    <div style="display:flex; justify-content:space-between; margin-right:70px;">
-                        <div style="background: #f1f5f9; color: #64748b; border-radius: 4px; padding: 2px 6px; font-size: 0.7rem; font-weight: bold; min-width: 20px; text-align: center; border: 1px solid #e2e8f0;">
-                            ${globalIndex}
-                        </div>
-                        <span style="font-weight:bold; font-size:0.85rem;">${s.name} (Qty: ${histQty} / Max: ${maxQty})</span>
-                        <span style="font-size:0.7rem; color:#64748b;">Expected Date: ${s.expDate}</span>
-                    </div>
-                        ${s.detail ? `<div style="font-size:0.7rem; color:var(--primary); font-weight:bold;">Machine: ${s.detail}</div>` : ""}                    <div style="font-size:0.75rem; color:#64748b; margin:4px 0;">
-                        ${startTimeLabel} → ${s.endDate} <b>(${s.duration} Days)</b>
-                    </div>
-                    <button onclick="revertStep(${job.row}, ${s.baseCol})"
-                        style="position:absolute; right:10px; top:10px; font-size:0.65rem; padding:4px 8px; border:1px solid #cbd5e1; border-radius:4px; cursor:pointer; background:#f8fafc;">
-                        Revert
-                    </button>
-                    ${s.remark ? `<div style="font-size:0.7rem; color:#991b1b; background:#fff1f1; padding:4px; border-radius:4px; margin-top:4px;">Remark: ${s.remark}</div>` : ""}
-                </div>`;
+        <div class="um-hist-row">
+          <div class="um-badge ${badgeClass}">${globalIndex}</div>
+          <div style="flex:1; min-width:0;">
+            <p class="um-step-name">${s.name}</p>
+            <p class="um-step-meta">${startTimeLabel} → ${s.endDate} · ${s.duration} days</p>
+            <p class="um-step-meta">Qty: ${histQty} / Max: ${maxQty}</p>
+            ${s.detail ? `<p class="um-machine-tag">Machine: ${s.detail}</p>` : ""}
+            ${s.remark ? `<span class="um-remark-tag">Delayed: ${s.remark}</span>` : ""}
+          </div>
+          <button class="um-revert-btn" onclick="revertStep(${job.row}, ${s.baseCol})">Revert</button>
+        </div>`;
             })
-            .join("") ||
-            '<p style="text-align:center; color:#94a3b8; font-size:0.8rem;">No history yet.</p>');
+            .join("");
+        }
 
-        // 4. Render Active Processes (Including Revert Remark visibility)
+        // ── RIGHT: Pending / Active Steps ────────────────────────────────────────
+        const multiList = document.getElementById("multiProcessList");
+        const activeArea = document.getElementById("activeProcessArea");
         const pendingSteps = job.steps.filter((s) => !s.isDone);
         const todayTime = new Date().setHours(0, 0, 0, 0);
-        const activeArea = document.getElementById("activeProcessArea");
+
+        multiList.innerHTML = "";
 
         if (pendingSteps.length === 0) {
-          // HIDE BUTTONS AND UPDATE INPUT AREA
           if (qtyBtn) qtyBtn.style.display = "none";
           if (saveBtn) saveBtn.style.display = "none";
-          activeArea.style.display = "none";
-          multiList.innerHTML = `<div style="text-align:center; padding:20px; color:#10b981; font-weight:bold;">Batch Fully Completed</div>`;
+          multiList.innerHTML = `<div class="um-completed-state">Batch fully completed</div>`;
         } else {
-          activeArea.style.display = "block";
-          if (qtyBtn) qtyBtn.style.display = "inline-block";
-          if (saveBtn) saveBtn.style.display = "block";
-          saveBtn.style.display = "block";
-          multiList.innerHTML = "";
+          if (qtyBtn) qtyBtn.style.display = "inline-flex";
+          if (saveBtn) saveBtn.style.display = "flex";
 
           pendingSteps.forEach((step) => {
             const globalIndex =
@@ -1269,101 +1687,166 @@
             const isOverdue = expTime && expTime < todayTime;
             const hasExistingDelay = step.status === "Delayed";
 
-            // Checkbox is locked if already delayed or if overdue
-            const shouldLockCheckbox = hasExistingDelay || isOverdue;
-            // Remark is ONLY Read-Only if it already exists in the Sheet (hasExistingDelay)
+            const shouldLockDelay = hasExistingDelay || isOverdue; // delay chip locked on
             const isRemarkReadOnly = hasExistingDelay;
 
             let currentRemark = step.remark || "";
-            if (isOverdue && !currentRemark) {
+            if (isOverdue && !currentRemark)
               currentRemark = "OVERDUE: Enter reason here";
+
+            // ── Build the card ──
+            const card = document.createElement("div");
+            card.className = "um-active-card multi-step-row"; // multi-step-row keeps processUpdate() happy
+            card.setAttribute("data-name", step.name);
+
+            const headerBg = isOverdue ? "#fef2f2" : "#f8fafc";
+
+            card.innerHTML = `
+        <!-- Card header -->
+        <div class="um-active-card-header" style="background:${headerBg};">
+          <div class="um-badge um-badge-pending">${globalIndex}</div>
+          <div style="flex:1;">
+            <p class="um-step-name" style="margin:0;">${step.name}</p>
+            <p class="um-step-meta" style="margin:0; ${isOverdue ? "color:#ef4444;" : ""}">
+              Expected by ${step.expDate}
+              ${isOverdue ? `<span class="um-overdue-badge">Overdue</span>` : ""}
+            </p>
+          </div>
+        </div>
+ 
+        <!-- Card body -->
+        <div class="um-active-card-body">
+ 
+          ${
+            step.revertRemark
+              ? `<div class="um-reverted-notice"><strong>Previously reverted:</strong> ${step.revertRemark}</div>`
+              : ""
+          }
+ 
+          <!-- ── Toggle chips row ──
+               "Mark as done" is ALWAYS shown.
+               "Flag delay" is shown; if shouldLockDelay it renders pre-checked and locked.
+          -->
+          <div style="display:flex; gap:7px; flex-wrap:wrap;">
+ 
+            <!-- Mark as done — always present, never locked -->
+            <label class="um-chip" id="chip-done-${step.baseCol}">
+              <input
+                type="checkbox"
+                class="step-done-check"
+                data-base="${step.baseCol}"
+              > Mark as done
+            </label>
+ 
+            <!-- Flag delay -->
+            ${
+              shouldLockDelay
+                ? `<label class="um-chip is-delay is-locked">
+                   <input
+                     type="checkbox"
+                     class="step-delay-check"
+                     data-base="${step.baseCol}"
+                     checked
+                     disabled
+                   > Flagged as delayed
+                 </label>`
+                : `<label class="um-chip" id="chip-delay-${step.baseCol}">
+                   <input
+                     type="checkbox"
+                     class="step-delay-check"
+                     data-base="${step.baseCol}"
+                   > Flag delay
+                 </label>`
+            }
+ 
+          </div>
+ 
+          <!-- Delay reason input -->
+          <input
+            type="text"
+            class="um-delay-input step-remark-input"
+            placeholder="Describe the reason for delay..."
+            value="${currentRemark}"
+            ${isRemarkReadOnly ? "readonly" : ""}
+            style="display:${shouldLockDelay || currentRemark ? "block" : "none"};"
+          >
+ 
+          <!-- Die-cut machine selector (revealed when marked done) -->
+          ${
+            isDieCut
+              ? `<div class="diecut-area" style="display:none;">
+                 <label style="font-size:11px; color:#64748b; display:block; margin-bottom:3px;">Machine selection</label>
+                 <select class="um-machine-select step-detail-select">
+                   <option value="">— Select machine —</option>
+                   <option value="Ijima"       ${step.detail === "Ijima" ? "selected" : ""}>Ijima</option>
+                   <option value="Hand switch" ${step.detail === "Hand switch" ? "selected" : ""}>Hand switch</option>
+                   <option value="Outsource"   ${step.detail === "Outsource" ? "selected" : ""}>Outsource</option>
+                 </select>
+               </div>`
+              : ""
+          }
+ 
+          <!-- Current qty read-only display -->
+          <div class="um-current-qty-row">
+            <span class="um-current-qty-label">Current qty: </span>
+            <span class="um-current-qty-value">${processQty}</span>
+          </div>
+ 
+          <!-- Editable qty + max allowed -->
+          <div class="um-qty-row">
+            <div class="um-qty-block">
+              <label>New qty</label>
+              <input
+                type="number"
+                class="um-qty-input step-qty-input"
+                data-base="${step.baseCol}"
+                data-system-max="${maxQty}"
+                value="${processQty}"
+                min="0"
+              >
+            </div>
+            <div class="um-max-block">
+              <span class="um-max-lbl">Max allowed</span>
+              <span class="um-max-val waterfall-max-label" id="label-${step.baseCol}">${maxQty}</span>
+            </div>
+          </div>
+ 
+        </div>
+      `;
+
+            // ── Wire chip interactions ────────────────────────────────────────────
+
+            const doneCheck = card.querySelector(".step-done-check");
+            const delayCheck = card.querySelector(".step-delay-check");
+            const remarkInput = card.querySelector(".step-remark-input");
+            const dieCutArea = card.querySelector(".diecut-area");
+            const chipDone = card.querySelector(`#chip-done-${step.baseCol}`);
+            const chipDelay = card.querySelector(`#chip-delay-${step.baseCol}`);
+
+            // Done chip — toggle green state; show die-cut selector if applicable
+            doneCheck.onchange = () => {
+              chipDone.classList.toggle("is-done", doneCheck.checked);
+              if (dieCutArea) {
+                dieCutArea.style.display = doneCheck.checked ? "block" : "none";
+              }
+            };
+
+            // Delay chip — only wire if not locked
+            if (delayCheck && !shouldLockDelay && chipDelay) {
+              delayCheck.onchange = () => {
+                chipDelay.classList.toggle("is-delay", delayCheck.checked);
+                if (remarkInput) {
+                  remarkInput.style.display = delayCheck.checked
+                    ? "block"
+                    : "none";
+                }
+              };
             }
 
-            const div = document.createElement("div");
-            div.className = "multi-step-row";
-            div.setAttribute("data-name", step.name);
-            div.style =
-              "padding: 12px; background: white; border-bottom: 2px solid #f1f5f9; display: flex; flex-direction: column; gap: 8px;";
-
-            div.innerHTML = `
-                ${step.revertRemark ? `<div style="font-size:0.7rem; color:#b45309; background:#fffbeb; padding:6px; border-radius:4px; border-left:3px solid #f59e0b; margin-bottom:4px;"><strong>Reverted:</strong> ${step.revertRemark}</div>` : ""}
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <div style="background: #e2e8f0; color: #475569; border-radius: 4px; padding: 2px 6px; font-size: 0.75rem; font-weight: bold; min-width: 20px; text-align: center;">
-                            ${globalIndex}
-                        </div>
-                        <div>
-                            <div style="font-weight: bold; font-size: 0.85rem;">${step.name}</div>
-                            <div style="font-size: 0.65rem; color: ${isOverdue ? "#ef4444" : "#64748b"};">Expected Date: ${step.expDate} ${isOverdue ? "⚠️" : ""}</div>
-                        </div>
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <label style="font-size: 0.75rem;"><input type="checkbox" class="step-done-check" data-base="${step.baseCol}"> Done</label>
-                        <label style="font-size: 0.75rem;">
-                            <input type="checkbox" class="step-delay-check" data-base="${step.baseCol}" 
-                                  ${shouldLockCheckbox ? "checked" : ""} 
-                                  ${shouldLockCheckbox ? "disabled" : ""}> Delay
-                        </label>
-                    </div>
-                </div>
-
-                <input type="text" class="step-remark-input" placeholder="Enter reason for delay..."
-                      value="${currentRemark}"
-                      ${isRemarkReadOnly ? "readonly" : ""}
-                      style="display: ${shouldLockCheckbox || currentRemark ? "block" : "none"}; 
-                             width:100%; font-size:0.75rem; padding:6px; border:1px solid #cbd5e1; border-radius:4px; 
-                             background: ${isRemarkReadOnly ? "#f1f5f9" : "#fff"}; 
-                             color: ${isRemarkReadOnly ? "#64748b" : "#000"};">
-
-                ${
-                  isDieCut
-                    ? `
-                  <div class="diecut-area" style="margin-top:8px; display: none;">
-                    <span style="font-size:0.75rem; color:#64748b; display:block; margin-bottom:4px;">Machine Selection:</span>
-                    <select class="step-detail-select" style="width:100%; font-size:0.75rem; padding:6px; border:1px solid #cbd5e1; border-radius:4px; background: #fff;">
-                      <option value="">-- Select Machine --</option>
-                      <option value="Ijima" ${step.detail === "Ijima" ? "selected" : ""}>Ijima</option>
-                      <option value="Hand switch" ${step.detail === "Hand switch" ? "selected" : ""}>Hand switch</option>
-                      <option value="Outsource" ${step.detail === "Outsource" ? "selected" : ""}>Outsource</option>
-                    </select>
-                  </div>`
-                    : ""
-                }
-                  <div class="qty-area" style="display:flex; align-items:center; gap:10px; background:#f8fafc; padding:8px; border-radius:4px; border: 1px solid #e2e8f0;">
-                      <div style="flex: 1;">
-                          <span style="font-size:0.7rem; color:#64748b; display:block;">Process Qty:</span>
-                          <input type="number" 
-                                class="step-qty-input" 
-                                data-base="${step.baseCol}" 
-                                data-system-max="${maxQty}" 
-                                value="${processQty}" 
-                                style="width:100%; padding:4px; border:1px solid #cbd5e1; border-radius:4px; font-size:0.8rem;">
-                      </div>
-                      <div style="text-align: right; padding-left: 10px; border-left: 1px dashed #cbd5e1;">
-                          <span style="font-size:0.65rem; color:#94a3b8; display:block; text-transform: uppercase;">Max Allowed</span>
-                          <span class="waterfall-max-label" 
-                                id="label-${step.baseCol}" 
-                                style="font-size:0.85rem; color:#475569; font-weight:bold;">${maxQty}</span>
-                      </div>
-                  </div>
-              `;
-
-            const dCheck = div.querySelector(".step-delay-check");
-            const doneCheck = div.querySelector(".step-done-check");
-            const rInput = div.querySelector(".step-remark-input");
-            const dieCutArea = div.querySelector(".diecut-area");
-
-            dCheck.onchange = () => {
-              rInput.style.display = dCheck.checked ? "block" : "none";
-            };
-            doneCheck.onchange = () => {
-              if (dieCutArea)
-                dieCutArea.style.display = doneCheck.checked ? "block" : "none";
-            };
-
-            multiList.appendChild(div);
+            multiList.appendChild(card);
           });
 
+          // Waterfall qty sync hook — unchanged
           multiList.addEventListener("input", (e) => {
             if (e.target.classList.contains("step-qty-input")) {
               syncWaterfallUI();
@@ -1371,7 +1854,7 @@
           });
         }
 
-        syncWaterfallUI(); // Initial run to set the limits
+        syncWaterfallUI();
         document.getElementById("updateModal").style.display = "flex";
         setModalLoading(false);
       }
@@ -2290,7 +2773,7 @@
         renderStats();
         renderTable();
       }
-      
+
       function toggleStatusFilter(status) {
         if (activeFilters.statusTypes.has(status))
           activeFilters.statusTypes.delete(status);
