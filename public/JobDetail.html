@@ -189,11 +189,12 @@
         overflow: hidden;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         font-size: 0.85rem;
+        table-layout: fixed;
       }
 
       th {
         background: #e2e8f0;
-        padding: 15px 12px;
+        padding: 10px 4px;
         text-align: left;
         font-weight: 600;
         border-bottom: none;
@@ -202,7 +203,23 @@
         position: relative;
         transition: background 0.3s;
         color: #374151;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
+
+      th:nth-child(1) { width: 60px; } /* PSN */
+      th:nth-child(2) { width: 75px; } /* PI Number */
+      th:nth-child(3) { width: 60px; } /* Sales Code */
+      th:nth-child(4) { width: 200px; white-space: normal; } /* Job Name */
+      th:nth-child(5) { width: 150px; white-space: normal; } /* Job Type */
+      th:nth-child(6) { width: 80px; } /* Quantity */
+      th:nth-child(7) { width: 80px; } /* Order Date */
+      th:nth-child(8) { width: 80px; } /* Delivery Date */
+      th:nth-child(9) { width: 100px; } /* Item */
+      th:nth-child(10) { width: 75px; } /* Priority */
+      th:nth-child(11) { width: 100px; } /* Status */
+      th:nth-child(12) { width: 80px; } /* Action */
 
       th:hover {
         background: #d1d5db;
@@ -236,9 +253,17 @@
       }
 
       td {
-        padding: 12px;
+        padding: 8px 4px;
         border-bottom: 1px solid #f3f4f6;
         transition: background 0.2s;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      td:nth-child(4), td:nth-child(5) {
+        white-space: normal;
+        word-wrap: break-word;
       }
 
       tr:hover {
@@ -390,10 +415,6 @@
         .catch(console.error);
     </script>
 
-    <!-- <div id="loader" class="loading-overlay">
-      <h2>Initializing Job Dashboard...</h2>
-    </div> -->
-
     <div class="main-wrapper">
       <div class="dashboard-header">
         <h1>Job Dashboard</h1>
@@ -421,17 +442,17 @@
         <table id="jobTable">
           <thead>
             <tr>
-              <th onclick="sortTable('PSN')">PSN <span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('PI Number')">PI Number <span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('salesCode')">Sales Code <span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('Job Name')">Job Name <span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('Job Type')">Job Type <span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('Quantity')">Quantity <span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('Order Date')">Order Date <span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('Delivery Date')">Delivery Date <span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('Item')">Item <span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('Priority')">Priority <span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('Status')">Status <span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('PSN')">PSN<span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('PI Number')">PI Num<span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('salesCode')">S-Code<span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('Job Name')">Job Name<span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('Job Type')">Job Type<span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('Quantity')">Quantity<span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('Order Date')">Ord-Date<span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('Delivery Date')">Del-Date <span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('Item')">Item<span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('Priority')">Priority<span class="sort-icon">↕</span></th>
+              <th onclick="sortTable('Status')">Status<span class="sort-icon">↕</span></th>
               <th>Action</th>
             </tr>
           </thead>
@@ -480,25 +501,15 @@
           const resp = await fetch('/api/jobListing');
           const data = await resp.json();
           MASTER_DATA = data || [];
-          populateSalesCodes();
           renderStats();
           renderTable();
-          document.getElementById('loader').style.display = 'none';
+          
         } catch (error) {
           console.error('Error fetching data:', error);
-          document.getElementById('loader').style.display = 'none';
+          
           showToast('Failed to load data');
         }
       }
-
-      function populateSalesCodes() {
-        // No longer needed - we use stat cards instead
-      }
-
-      function setFilter(type, value) {
-        // This is handled by toggleFilter for multi-select
-      }
-
       function parseDate(dateStr) {
         if (dateStr === undefined || dateStr === null || dateStr === '' || dateStr === '-') return null;
 
@@ -538,7 +549,7 @@
           stats.salesCodes[salesCode] = (stats.salesCodes[salesCode] || 0) + 1;
           const priority = job.Priority || 'Normal';
           if (stats.priorities[priority] !== undefined) stats.priorities[priority]++;
-          const status = job.Status || 'ON SCHEDULE';
+          const status = calculateStatus(job['Delivery Date'] || job.Delivery_Date || job.deliveryDate);
           stats.statuses[status] = (stats.statuses[status] || 0) + 1;
         });
 
@@ -641,7 +652,7 @@
 
       function getRowColorClass(job) {
         const priority = job.Priority || 'Normal';
-        const status = job.Status || 'ON SCHEDULE';
+        const status = calculateStatus(job['Delivery Date'] || job.Delivery_Date || job.deliveryDate);
         
         const isUrgent = priority === 'Urgent';
         const isCutQueue = priority === 'Cut Queue';
@@ -674,7 +685,7 @@
 
       function getPriorityOrder(job) {
         const priority = (job.Priority || 'Normal').toLowerCase();
-        const status = (job.Status || 'ON SCHEDULE').toUpperCase();
+        const status = calculateStatus(job['Delivery Date'] || job.Delivery_Date || job.deliveryDate).toUpperCase();
 
         const isUrgent = priority === 'urgent';
         const isCutQueue = priority === 'cut queue';
@@ -728,7 +739,7 @@
           const priority = job.Priority || 'Normal';
           const matchesPriority = activeFilters.priorities.size === 0 || activeFilters.priorities.has(priority);
           
-          const status = job.Status || 'ON SCHEDULE';
+          const status = calculateStatus(job['Delivery Date'] || job.Delivery_Date || job.deliveryDate);
           const matchesStatus = activeFilters.statuses.size === 0 || activeFilters.statuses.has(status);
 
           return matchesSearch && matchesSalesCode && matchesPriority && matchesStatus;
@@ -749,7 +760,7 @@
         }
 
         filteredData.forEach(job => {
-          const status = job.Status || 'ON SCHEDULE';
+          const status = calculateStatus(job['Delivery Date'] || job.Delivery_Date || job.deliveryDate);
           const statusClass = status === 'OVERDUE' ? 'pill-overdue' : status === 'ALMOST DUE' ? 'pill-almost' : 'pill-normal';
           const priority = job.Priority || 'Normal';
           const priorityClass = priority === 'Urgent' ? 'pill-urgent' : priority === 'Cut Queue' ? 'pill-cut-queue' : 'pill-normal-priority';
