@@ -969,7 +969,11 @@ app.post("/api/submitData", async (req, res) => {
         }
       }
 
-      const qtyString = activeProcessCols
+      const qtyStringZero = activeProcessCols
+        .map((colIdx) => `${colIdx}:${0}`)
+        .join("|");
+      
+        const qtyString = activeProcessCols
         .map((colIdx) => `${colIdx}:${batchQty}`)
         .join("|");
 
@@ -983,7 +987,7 @@ app.post("/api/submitData", async (req, res) => {
 
       // Set Column DP & DQ
       finalRow[114] = "FALSE";
-      finalRow[119] = qtyString;
+      finalRow[119] = qtyStringZero;
       finalRow[120] = qtyString;
 
       // Pad/trim to match table
