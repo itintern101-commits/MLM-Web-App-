@@ -1788,21 +1788,23 @@
  
           <!-- Current qty read-only display -->
           <div class="um-current-qty-row">
-            <span class="um-current-qty-label">Current qty: </span>
+            <span class="um-current-qty-label">Current qty:</span>
             <span class="um-current-qty-value">${processQty}</span>
           </div>
  
-          <!-- Editable qty + max allowed -->
+          <!-- Additive qty input + max allowed -->
           <div class="um-qty-row">
             <div class="um-qty-block">
-              <label>New qty</label>
+              <label>Add qty</label>
               <input
                 type="number"
                 class="um-qty-input step-qty-input"
                 data-base="${step.baseCol}"
                 data-system-max="${maxQty}"
-                value="${processQty}"
+                data-current-qty="${processQty}"
+                value="0"
                 min="0"
+                placeholder="Amount to add..."
               >
             </div>
             <div class="um-max-block">
@@ -2020,13 +2022,13 @@
         const rowIdx = currentEditingRow;
         const job = MASTER_DATA.find((j) => j.row === rowIdx);
         if (!job) return;
-        const maxQtyMap = parseMapString(job.maxQtyString, job.qty); // From Col 121
 
+        const maxQtyMap = parseMapString(job.maxQtyString, job.qty);
         const qtyMapArray = [];
         let validationError = false;
 
-        // 1. GATHER FROM HISTORY (Completed Steps)
-        // We grab these from the MASTER_DATA since they aren't inputs in the UI
+        // ── Completed steps (behaviour unchanged) ────────────────────────────────
+        // These are already finalised — send their clamped historical value as-is.
         job.steps
           .filter((s) => s.isDone)
           .forEach((s) => {
@@ -2034,39 +2036,50 @@
               getQtyForProcess(job.qtyString, s.baseCol, job.qty),
             );
             const maxAllowed = parseInt(maxQtyMap[s.baseCol] || job.qty);
-
-            // FIX: Clamp the historical value to the current Max.
-            // This prevents sending "30000" if the batch has since been split to 10000.
             const safeQty = Math.min(histQty, maxAllowed);
-
-            qtyMapArray.push({
-              baseCol: s.baseCol,
-              qty: safeQty,
-            });
+            qtyMapArray.push({ baseCol: s.baseCol, qty: safeQty });
           });
 
-        // 2. GATHER FROM UI (Active/Pending Steps)
+        // ── Pending steps (additive) ──────────────────────────────────────────────
+        // data-current-qty = value already stored in column 119 for this process.
+        // The user types how much to ADD on top of that.
+        // We send the summed total so the backend does a simple replace-write.
         const qtyInputs = document.querySelectorAll(
           ".multi-step-row .step-qty-input",
         );
+
         for (let input of qtyInputs) {
-          const val = parseInt(input.value);
+          const addAmount = parseInt(input.value) || 0;
+          const currentQty = parseInt(input.dataset.currentQty) || 0;
           const base = parseInt(input.dataset.base);
           const maxAllowed = parseInt(maxQtyMap[base] || job.qty);
-          if (val > maxAllowed) {
+
+          // User left the field at 0 — push the unchanged current so the
+          // serialised map stays complete without overwriting anything.
+          if (addAmount === 0) {
+            qtyMapArray.push({ baseCol: base, qty: currentQty });
+            continue;
+          }
+
+          const newTotal = currentQty + addAmount;
+
+          if (newTotal > maxAllowed) {
             showToast(
-              `Step quantity cannot exceed Max Limit (${maxAllowed}).`,
+              `Adding ${addAmount} to the current ${currentQty} would exceed the max of ${maxAllowed}. ` +
+                `You can still add up to ${maxAllowed - currentQty}.`,
               "error",
             );
             input.focus();
-            return;
+            validationError = true;
+            break;
           }
-          qtyMapArray.push({ baseCol: base, qty: val });
+
+          qtyMapArray.push({ baseCol: base, qty: newTotal });
         }
 
         if (validationError) return;
 
-        // UI Feedback & Execution
+        // ── Save ──────────────────────────────────────────────────────────────────
         setModalLoading(true);
         try {
           const response = await fetch("/api/updateProcessQtysOnly", {
@@ -2076,7 +2089,7 @@
           });
           const result = await response.json();
           if (response.ok) {
-            showToast(result.message || "Qty update saved");
+            showToast(result.message || "Qty updated successfully");
             closeModal();
             await fetchData();
             openUpdatePopup(rowIdx);

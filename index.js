@@ -1475,26 +1475,20 @@ async function updateProcessQtysOnly(rowIdx, qtyMapArray) {
     }
 
     // VALIDATION & MERGE
+    // Frontend already computed the additive total before sending,
+    // so this is a straight max-check and replace.
     for (const item of qtyMapArray) {
       const base = String(item.baseCol);
       const newQty = Number(item.qty);
       const maxAllowed =
         maxQtyMap[base] !== undefined ? maxQtyMap[base] : overallQty;
-      const existingQty = currentQtyMap[base];
 
-      if (newQty !== existingQty && newQty > maxAllowed) {
-        throw new Error(
-          `Validation Failed: Column ${base} requested ${newQty}, but Max is ${maxAllowed}.`,
-        );
-      }
-
-      // Only validate the items being UPDATED right now
       if (newQty > maxAllowed) {
         throw new Error(
           `Validation Failed: Column ${base} requested ${newQty}, but Max is ${maxAllowed}.`,
         );
       }
-      // Update the map in memory
+
       currentQtyMap[base] = newQty;
     }
 
