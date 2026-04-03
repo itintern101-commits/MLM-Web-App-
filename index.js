@@ -1538,12 +1538,15 @@ async function createSplitBatchFromWaterfall(
   const BLOCK_SIZE = 9;
 
   let newRow = [...parentData];
+  const parentBatchId = String(parentData[1] || "Unknown");
   const newId = await generateNewBatchId(String(parentData[1]), []);
 
   newRow[1] = newId;
   newRow[2] = new Date().toISOString().split("T")[0];
   newRow[4] = diffQty; // Child Batch starts with the remaining total
-  newRow[118] = userRemark;
+  // Appends the original batch ID to the end of the user's remark
+  const originTag = ` (From: ${parentBatchId})`;
+  newRow[118] = userRemark ? `${userRemark}${originTag}` : `Split${originTag}`;
 
   let childQtyMap = {};
   let childMaxMap = {};
