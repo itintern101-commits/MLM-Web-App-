@@ -56,6 +56,15 @@
         display: flex;
         flex-direction: column;
         justify-content: center;
+        overflow: visible !important;
+        position: relative;
+        z-index: 1;
+        font-size: 1.2rem;
+      }
+
+      /* 2. Elevate the specific card you are hovering over */
+      .stat-card:hover {
+        z-index: 10; /* Boosts the whole card above its neighbors when interacting */
       }
 
       .stat-val {
@@ -885,22 +894,21 @@
         transition: all 0.2s ease;
       }
 
-      /* Hover effects for clickable items */
+      /* Hover effects for the buttons/pills */
       .status-btn:hover,
       .filter-item:hover,
       .filter-item-delayed:hover {
-        filter: brightness(0.95);
-        transform: translateY(-1px);
-        background-color: #f8fafc;
+        background-color: #f1f5f9 !important; /* Light gray-blue hover */
+        filter: brightness(0.98);
+        transform: translateY(1px); /* Slight 'press' effect instead of lift */
       }
 
-      
       .tooltip-trigger:hover::after {
         content: attr(
           data-tooltip
         ); /* Changed from 'title' to 'data-tooltip' */
         position: absolute;
-        bottom: 125%;
+        top: 125%;
         left: 50%;
         transform: translateX(-50%);
         background-color: #1e293b;
@@ -910,7 +918,7 @@
         font-size: 0.7rem;
         font-weight: normal;
         white-space: nowrap;
-        z-index: 9999;
+        z-index: 10000;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
         pointer-events: none;
       }
@@ -919,18 +927,68 @@
       .tooltip-trigger:hover::before {
         content: "";
         position: absolute;
-        bottom: 115%;
+        top: 110%;
         left: 50%;
         transform: translateX(-50%);
         border: 6px solid transparent;
         border-top-color: #1e293b;
-        z-index: 9999;
+        z-index: 10000;
         pointer-events: none;
       }
 
-      /* Ensure tooltips aren't cut off by cards */
-      .stat-card {
-        overflow: visible !important;
+      /* 3. The actual trigger MUST be even higher on hover */
+      .tooltip-trigger:hover {
+        z-index: 9999;
+        position: relative; /* This is required for z-index to work */
+      }
+
+      .stat-card > div[style*="overflow-y: auto"] {
+        overflow-y: auto;
+        overflow-x: visible !important; /* Crucial: allow tooltip to poke out sides */
+        position: relative;
+        padding-bottom: 20px; /* Buffer so the bottom items have room for tooltips */
+      }
+
+      /* 3. Smooth Hover State */
+      .filter-item:hover,
+      .filter-item-delayed:hover {
+        background-color: #f8fafc !important;
+        transition: background 0.2s ease;
+      }
+
+      /* If the JS marks it as 'show-above', flip it back to the top */
+      .tooltip-trigger.show-above:hover::after {
+        top: auto;
+        bottom: 125%;
+      }
+      .tooltip-trigger.show-above:hover::before {
+        top: auto;
+        bottom: 110%;
+        border-bottom-color: transparent;
+        border-top-color: #1e293b;
+      }
+
+      /* Align items in Process Load and Delay Breakdown */
+      .filter-item,
+      .filter-item-delayed {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center;
+        padding: 6px 8px;
+        margin-bottom: 4px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        width: 100%; /* Ensure it fills the card width */
+        box-sizing: border-box;
+      }
+
+      /* Optional: Add a light border to the bottom for better separation */
+      .filter-item {
+        border-bottom: 1px solid #f1f5f9;
+      }
+
+      .filter-item-delayed {
+        border-bottom: 1px solid #fff1f1;
       }
     </style>
   </head>
@@ -1219,7 +1277,7 @@
 
         const todayTime = new Date().setHours(0, 0, 0, 0);
 
-        // Identify Delayed Batches (Active batches with an overdue or delayed step)
+        // Identify Delayed Batches
         const delayedBatchesCount = MASTER_DATA.filter((job) => {
           const activeStep = job.steps?.find((s) => !s.isDone);
           if (!activeStep) return false;
@@ -1234,10 +1292,9 @@
         }).length;
 
         const activeTotal = totalBatches - completedBatches;
-        // On Track = Total Active minus those that are Delayed
         const onTrackCount = activeTotal - delayedBatchesCount;
 
-        // 2. Process & Delay Breakdown for the lists
+        // 2. Process & Delay Breakdown
         const processCounts = {};
         const delayBreakdown = {};
         let totalDelayedSteps = 0;
@@ -1263,24 +1320,24 @@
           }
         });
 
-        // Fix Sync Date
         const now = new Date();
         const lastSyncStr =
           now.toLocaleDateString() +
           " " +
           now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
         const container = document.getElementById("statsBar");
         const tooltipMsg = "Click to filter table below";
 
-        // Helper to generate the HTML for Process Load
+        // Helper for Process Load HTML
         let loadHtml = Object.entries(processCounts)
           .sort((a, b) => b[1] - a[1])
-          .map(([name, count]) => {
+          .map(([name, count], index, array) => {
             const isActive = activeFilters.processes.has(name);
+            const positionClass =
+              index > array.length - 3 ? "show-above" : "show-below";
             return `
               <div onclick="toggleProcessFilter('${name}')" 
-                  class="filter-item tooltip-trigger ${isActive ? "active-filter-pill" : ""}" 
+                  class="filter-item tooltip-trigger ${positionClass} ${isActive ? "active-filter-pill" : ""}" 
                   data-tooltip="${tooltipMsg}">
                   <span>${name}</span>
                   <span style="font-weight: bold; color: ${isActive ? "white" : "var(--primary)"};">${count}</span>
@@ -1288,15 +1345,17 @@
           })
           .join("");
 
-        // Helper for Delay Breakdown
+        // Helper for Delay Breakdown HTML
         let delayHtml =
           Object.entries(delayBreakdown)
             .sort((a, b) => b[1] - a[1])
-            .map(([name, count]) => {
+            .map(([name, count], index, array) => {
               const isActive = activeFilters.delayedProcesses.has(name);
+              const positionClass =
+                index > array.length - 3 ? "show-above" : "show-below";
               return `
                 <div onclick="toggleDelayedProcessFilter('${name}')" 
-                    class="filter-item-delayed tooltip-trigger ${isActive ? "active-filter-delayed" : ""}" 
+                    class="filter-item-delayed tooltip-trigger ${positionClass} ${isActive ? "active-filter-delayed" : ""}" 
                     data-tooltip="${tooltipMsg}">
                     <span>${name}</span>
                     <span style="font-weight: bold;">${count}</span>
@@ -1310,43 +1369,43 @@
               <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 8px; font-weight: 600;">Production Overview</div>
               <div class="stat-val" style="font-size: 1.8rem; margin-bottom: 4px;">${totalBatches}</div>
               <div style="display: flex; justify-content: space-between; margin-top: 4px; border-top: 1px solid #f1f5f9; padding-top: 8px;">
-                  <div onclick="toggleStatusFilter('On Track')" data-tooltip="${tooltipMsg}" class="status-btn tooltip-trigger ${activeFilters.statusTypes.has("On Track") ? "active-track" : ""}">
+                  <div onclick="toggleStatusFilter('On Track')" data-tooltip="${tooltipMsg}" class="status-btn tooltip-trigger show-below ${activeFilters.statusTypes.has("On Track") ? "active-track" : ""}">
                       <div class="label">On Track</div>
                       <div class="val">${onTrackCount}</div>
                   </div>
-                  <div onclick="toggleStatusFilter('Delayed')" data-tooltip="${tooltipMsg}" class="status-btn tooltip-trigger ${activeFilters.statusTypes.has("Delayed") ? "active-delayed" : ""}">
+                  <div onclick="toggleStatusFilter('Delayed')" data-tooltip="${tooltipMsg}" class="status-btn tooltip-trigger show-below ${activeFilters.statusTypes.has("Delayed") ? "active-delayed" : ""}">
                       <div class="label">Delayed</div>
                       <div class="val">${delayedBatchesCount}</div>
                   </div>
-                  <div onclick="toggleStatusFilter('Done')" data-tooltip="${tooltipMsg}" class="status-btn tooltip-trigger ${activeFilters.statusTypes.has("Done") ? "active-done" : ""}">
+                  <div onclick="toggleStatusFilter('Done')" data-tooltip="${tooltipMsg}" class="status-btn tooltip-trigger show-below ${activeFilters.statusTypes.has("Done") ? "active-done" : ""}">
                       <div class="label">Done</div>
                       <div class="val">${completedBatches}</div>
                   </div>
               </div>
           </div>
 
-        <div class="stat-card">
-            <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 8px;">System Status</div>
+          <div class="stat-card">
+              <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 8px;">System Status</div>
               <div class="stat-val" style="color: #10b981; font-size: 1.5rem; display: flex; align-items: center; gap: 6px;">
                   <span style="height: 8px; width: 8px; background-color: #10b981; border-radius: 50%; display: inline-block; box-shadow: 0 0 5px #10b981;"></span>
                   Online
               </div>
-            <div style="font-size: 0.8rem; color: #94a3b8; margin-top: auto;">Last Sync: ${lastSyncStr}</div>
-        </div>
+              <div style="font-size: 0.8rem; color: #94a3b8; margin-top: auto;">Last Sync: ${lastSyncStr}</div>
+          </div>
 
-        <div class="stat-card">
-            <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 12px; font-weight: 600;">Active Process Load</div>
-            <div style="overflow-y: auto; flex-grow: 1; padding-right: 8px;">
-                ${loadHtml}
-            </div>
-        </div>
+          <div class="stat-card">
+              <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 12px; font-weight: 600;">Active Process Load</div>
+              <div style="overflow-y: auto; flex-grow: 1; padding-right: 8px;">
+                  ${loadHtml}
+              </div>
+          </div>
 
-        <div class="stat-card" style="border-left: 5px solid var(--danger);">
-            <div style="font-size: 0.9rem; color: var(--danger); font-weight: bold; margin-bottom: 12px;">Active Delay Breakdown (${totalDelayedSteps})</div>
-            <div style="overflow-y: auto; flex-grow: 1; padding-right: 8px;">
-                ${delayHtml}
-            </div>
-        </div>
+          <div class="stat-card" style="border-left: 5px solid var(--danger);">
+              <div style="font-size: 0.9rem; color: var(--danger); font-weight: bold; margin-bottom: 12px;">Active Delay Breakdown (${totalDelayedSteps})</div>
+              <div style="overflow-y: auto; flex-grow: 1; padding-right: 8px;">
+                  ${delayHtml}
+              </div>
+          </div>
       `;
       }
 
