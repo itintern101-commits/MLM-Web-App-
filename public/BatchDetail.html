@@ -28,7 +28,7 @@
 
       /* Header & Stats */
       .dashboard-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         padding: 1rem 2rem;
         display: flex;
         justify-content: space-between;
@@ -1194,6 +1194,67 @@
       .um-result-val.is-error {
         color: #991b1b;
       }
+
+      /*EDIT POPUP UI*/
+      .um-mode-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 9px;
+        border-radius: 20px;
+        margin-bottom: 6px;
+      }
+      .um-mode-badge.edit {
+        background: #fffbeb;
+        border: 1px solid #fde68a;
+        color: #92400e;
+      }
+      .um-mode-badge.update {
+        display: none;
+      }
+      .um-date-edit-card {
+        border: 0.5px solid #f1f5f9;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .um-date-edit-card.is-done {
+        opacity: 0.6;
+      }
+      .um-date-edit-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        background: #f8fafc;
+      }
+      .um-date-edit-body {
+        padding: 10px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .um-date-input {
+        width: 100%;
+        padding: 7px 10px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        font-size: 13px;
+        font-family: inherit;
+        color: #0f172a;
+        background: white;
+        box-sizing: border-box;
+      }
+      .um-date-input:disabled {
+        background: #f8fafc;
+        color: #94a3b8;
+        cursor: not-allowed;
+      }
+      .um-date-current {
+        font-size: 11px;
+        color: #94a3b8;
+      }
     </style>
   </head>
 
@@ -1229,7 +1290,7 @@
 
     <div class="main-wrapper">
       <div class="dashboard-header">
-        <h1 style="font-weight: bold;color:#ffffff;">Batch Dashboard</h1>
+        <h1 style="font-weight: bold; color: #ffffff">Batch Dashboard</h1>
         <div>
           <input
             type="text"
@@ -1888,102 +1949,103 @@
         btnText.innerText = "Save progress";
         saveBtn.onclick = () => processUpdate();
 
-        // ── Header: batch pill + job name ────────────────────────────────────────
-        const splitRemarkHtml = job.splitRemark
-          ? `<div class="um-split-notice"><strong>Batch origin:</strong> ${job.splitRemark}</div>`
-          : "";
+        //     // ── Header: batch pill + job name ────────────────────────────────────────
+        //     const splitRemarkHtml = job.splitRemark
+        //       ? `<div class="um-split-notice"><strong>Batch origin:</strong> ${job.splitRemark}</div>`
+        //       : "";
 
-        document.getElementById("modalBatchId").innerHTML =
-          `<div class="um-batch-pill">
-       <span class="um-batch-dot"></span>
-       Batch ID: ${job.batchId} &nbsp;|&nbsp; Qty: ${job.qty}
-     </div>`;
+        //     document.getElementById("modalBatchId").innerHTML =
+        //       `<div class="um-batch-pill">
+        //    <span class="um-batch-dot"></span>
+        //    Batch ID: ${job.batchId} &nbsp;|&nbsp; Qty: ${job.qty}
+        //  </div>`;
 
-        document.getElementById("modalPsn").innerHTML =
-          `<div style="font-size:20px; color:#ffffff; margin-bottom:1px;font-weight:bold;">${job.psn}</div>
-     <div style="font-size:20px; font-weight:bold; color:#ffffff;">${job.jobName}</div>
-     ${splitRemarkHtml}`;
+        //     document.getElementById("modalPsn").innerHTML =
+        //       `<div style="font-size:20px; color:#ffffff; margin-bottom:1px;font-weight:bold;">${job.psn}</div>
+        //  <div style="font-size:20px; font-weight:bold; color:#ffffff;">${job.jobName}</div>
+        //  ${splitRemarkHtml}`;
 
-        // ── Header: batch switcher row ───────────────────────────────────────────
-        const siblingBatches = MASTER_DATA.filter(
-          (b) => String(b.psn).trim() === String(job.psn).trim(),
-        ).sort((a, b) =>
-          String(a.batchId).localeCompare(String(b.batchId), undefined, {
-            numeric: true,
-          }),
-        );
+        //     // ── Header: batch switcher row ───────────────────────────────────────────
+        //     const siblingBatches = MASTER_DATA.filter(
+        //       (b) => String(b.psn).trim() === String(job.psn).trim(),
+        //     ).sort((a, b) =>
+        //       String(a.batchId).localeCompare(String(b.batchId), undefined, {
+        //         numeric: true,
+        //       }),
+        //     );
 
-        const switcherEl = document.getElementById("batchSwitcher");
-        if (switcherEl) {
-          if (siblingBatches.length <= 1) {
-            switcherEl.style.display = "none";
-          } else {
-            switcherEl.style.display = "block";
-            switcherEl.innerHTML = siblingBatches
-              .map((b) => {
-                const isCurrent = b.row === job.row;
-                const totalSteps = b.steps ? b.steps.length : 0;
-                const doneSteps = b.steps
-                  ? b.steps.filter((s) => s.isDone).length
-                  : 0;
-                const isFullyDone = totalSteps > 0 && doneSteps === totalSteps;
-                const hasOverdue = b.steps
-                  ? b.steps.some((s) => {
-                      if (s.isDone) return false;
-                      const t = parseDateStringToTime(s.expDate);
-                      return t && t < new Date().setHours(0, 0, 0, 0);
-                    })
-                  : false;
+        //     const switcherEl = document.getElementById("batchSwitcher");
+        //     if (switcherEl) {
+        //       if (siblingBatches.length <= 1) {
+        //         switcherEl.style.display = "none";
+        //       } else {
+        //         switcherEl.style.display = "block";
+        //         switcherEl.innerHTML = siblingBatches
+        //           .map((b) => {
+        //             const isCurrent = b.row === job.row;
+        //             const totalSteps = b.steps ? b.steps.length : 0;
+        //             const doneSteps = b.steps
+        //               ? b.steps.filter((s) => s.isDone).length
+        //               : 0;
+        //             const isFullyDone = totalSteps > 0 && doneSteps === totalSteps;
+        //             const hasOverdue = b.steps
+        //               ? b.steps.some((s) => {
+        //                   if (s.isDone) return false;
+        //                   const t = parseDateStringToTime(s.expDate);
+        //                   return t && t < new Date().setHours(0, 0, 0, 0);
+        //                 })
+        //               : false;
 
-                let dotColor;
-                if (isFullyDone) dotColor = "#22c55e";
-                else if (hasOverdue) dotColor = "#ef4444";
-                else dotColor = "#f59e0b";
+        //             let dotColor;
+        //             if (isFullyDone) dotColor = "#22c55e";
+        //             else if (hasOverdue) dotColor = "#ef4444";
+        //             else dotColor = "#f59e0b";
 
-                const chipStyle = isCurrent
-                  ? `background:#0f172a; color:#ffffff; border-color:#0f172a; font-weight:600; cursor:default;`
-                  : `background:white; color:#475569; border-color:#e2e8f0; cursor:pointer;`;
+        //             const chipStyle = isCurrent
+        //               ? `background:#0f172a; color:#ffffff; border-color:#0f172a; font-weight:600; cursor:default;`
+        //               : `background:white; color:#475569; border-color:#e2e8f0; cursor:pointer;`;
 
-                const dotHtml = `<span style="width:6px;height:6px;border-radius:50%;background:${dotColor};display:inline-block;flex-shrink:0;"></span>`;
-                const progressHtml =
-                  totalSteps > 0
-                    ? `<span style="font-size:10px; opacity:${isCurrent ? "0.65" : "0.5"};">${doneSteps}/${totalSteps}</span>`
-                    : "";
-                const currentLabel = isCurrent
-                  ? `<div style="font-size:10px; text-align:center; color:#ffffff; margin-top:2px; font-style:italic;">Current</div>`
-                  : "";
+        //             const dotHtml = `<span style="width:6px;height:6px;border-radius:50%;background:${dotColor};display:inline-block;flex-shrink:0;"></span>`;
+        //             const progressHtml =
+        //               totalSteps > 0
+        //                 ? `<span style="font-size:10px; opacity:${isCurrent ? "0.65" : "0.5"};">${doneSteps}/${totalSteps}</span>`
+        //                 : "";
+        //             const currentLabel = isCurrent
+        //               ? `<div style="font-size:10px; text-align:center; color:#ffffff; margin-top:2px; font-style:italic;">Current</div>`
+        //               : "";
 
-                return `
-          <div style="display:inline-flex; flex-direction:column; flex-shrink:0;">
-            <div
-              onclick="${isCurrent ? "" : `openUpdatePopup(${b.row})`}"
-              title="Batch ${b.batchId} — Qty: ${b.qty}"
-              style="display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:20px; border:1px solid; font-size:12px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; white-space:nowrap; transition:box-shadow 0.1s; ${chipStyle}"
-              onmouseenter="if(${!isCurrent}) this.style.boxShadow='0 0 0 3px #e2e8f0';"
-              onmouseleave="this.style.boxShadow='';"
-            >
-              ${dotHtml}
-              ${b.batchId}
-              ${progressHtml}
-            </div>
-            ${currentLabel}
-          </div>`;
-              })
-              .join("");
+        //             return `
+        //       <div style="display:inline-flex; flex-direction:column; flex-shrink:0;">
+        //         <div
+        //           onclick="${isCurrent ? "" : `openUpdatePopup(${b.row})`}"
+        //           title="Batch ${b.batchId} — Qty: ${b.qty}"
+        //           style="display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:20px; border:1px solid; font-size:12px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; white-space:nowrap; transition:box-shadow 0.1s; ${chipStyle}"
+        //           onmouseenter="if(${!isCurrent}) this.style.boxShadow='0 0 0 3px #e2e8f0';"
+        //           onmouseleave="this.style.boxShadow='';"
+        //         >
+        //           ${dotHtml}
+        //           ${b.batchId}
+        //           ${progressHtml}
+        //         </div>
+        //         ${currentLabel}
+        //       </div>`;
+        //           })
+        //           .join("");
 
-            requestAnimationFrame(() => {
-              const currentChip = switcherEl.querySelector(
-                '[style*="cursor:default"]',
-              );
-              if (currentChip)
-                currentChip.scrollIntoView({
-                  behavior: "smooth",
-                  inline: "center",
-                  block: "nearest",
-                });
-            });
-          }
-        }
+        //         requestAnimationFrame(() => {
+        //           const currentChip = switcherEl.querySelector(
+        //             '[style*="cursor:default"]',
+        //           );
+        //           if (currentChip)
+        //             currentChip.scrollIntoView({
+        //               behavior: "smooth",
+        //               inline: "center",
+        //               block: "nearest",
+        //             });
+        //         });
+        //       }
+        //     }
+        renderModalHeader(job, "update");
 
         // ── LEFT: Completed History ──────────────────────────────────────────────
         const historyContainer = document.getElementById("processHistoryArea");
@@ -2667,61 +2729,77 @@
       }
 
       function openEditPopup(batchIdOrRow) {
-        const job = MASTER_DATA.find(
+        const numericRow = Number(batchIdOrRow);
+        let job = MASTER_DATA.find(
           (j) => String(j.row) === String(batchIdOrRow),
         );
-        if (!job) return;
+        if (!isNaN(numericRow) && numericRow > 0)
+          job = MASTER_DATA.find((j) => Number(j.row) === numericRow);
+        if (!job)
+          job = MASTER_DATA.find(
+            (j) => String(j.batchId) === String(batchIdOrRow),
+          );
+        if (!job) {
+          console.warn("openEditPopup: job not found for", batchIdOrRow);
+          return;
+        }
 
         currentEditingRow = job.row;
 
-        // 1. Setup Headers (Reuse your existing modal IDs)
-        document.getElementById("modalPsn").innerHTML =
-          `<div style="font-size: 0.8rem; color: #ef4444; font-weight:bold;">EDIT MODE</div>${job.jobName}`;
-        document.getElementById("modalBatchId").innerHTML =
-          `Batch: ${job.batchId} | <span style="color: #64748b;">Adjusting Expected Dates</span>`;
-
-        // 2. Button Visibility Logic
+        // ── Footer buttons ────────────────────────────────────────────────────
         const qtyBtn = document.getElementById("updateQtyBtn");
         const saveBtn = document.getElementById("saveBtn");
         const btnText = document.getElementById("btnText");
-        const activeArea = document.getElementById("activeProcessArea");
-
-        if (qtyBtn) qtyBtn.style.display = "none"; // Hide Qty button in Edit mode
-        btnText.innerText = "Confirm Update";
-        activeArea.style.display = "block"; // Ensure the main area is visible
-
-        // 3. Set the Click Handler to our new Date-only function
+        if (qtyBtn) qtyBtn.style.display = "none"; // no qty update in edit mode
+        if (saveBtn) saveBtn.style.display = "flex";
+        btnText.innerText = "Confirm date update";
         saveBtn.onclick = () => processDateEditUpdate();
 
+        // ── Shared header (mode badge + pill + job name + switcher) ──────────
+        renderModalHeader(job, "edit");
+
+        // ── LEFT: Completed history ───────────────────────────────────────────
         const historyContainer = document.getElementById("processHistoryArea");
         const completedSteps = job.steps.filter((s) => s.isDone);
 
-        historyContainer.innerHTML =
-          `<div style="font-weight:bold; font-size:0.8rem; margin-bottom:8px; color:#64748b;">COMPLETED HISTORY</div>` +
-          (completedSteps
-            .map((s) => {
+        if (completedSteps.length === 0) {
+          historyContainer.innerHTML = `<div class="um-empty-state">No completed steps yet.</div>`;
+        } else {
+          historyContainer.innerHTML = completedSteps
+            .map((s, index) => {
               const globalIndex =
-                job.steps.findIndex((step) => step.baseCol === s.baseCol) + 1;
+                job.steps.findIndex((st) => st.baseCol === s.baseCol) + 1;
+              const isDelayed = s.status && s.status.includes("Delayed");
+              const badgeClass = isDelayed
+                ? "um-badge-delayed"
+                : "um-badge-done";
+
               return `
-                <div style="padding:10px; border-bottom:1px solid #e2e8f0; background:white; margin-bottom:8px; border-radius:6px; border-left:4px solid #10b981;">
-                  <div style="display:flex; align-items:center; gap:10px;">
-                    <div style="background: #f1f5f9; color: #64748b; border-radius: 4px; padding: 2px 6px; font-size: 0.7rem; font-weight: bold;">
-                      ${globalIndex}
-                    </div>
-                    <span style="font-weight:bold; font-size:0.85rem;">${s.name}</span>
-                  </div>
-                  <div style="font-size:0.75rem; color:#64748b; margin-top:4px;">
-                    Finished: ${s.endDate}
-                  </div>
-                </div>`;
+        <div class="um-hist-row">
+          <div class="um-badge ${badgeClass}">${globalIndex}</div>
+          <div style="flex:1; min-width:0;">
+            <p class="um-step-name">${s.name}</p>
+            <p class="um-step-meta">Finished: ${s.endDate}</p>
+            ${s.remark ? `<span class="um-remark-tag">Delayed: ${s.remark}</span>` : ""}
+          </div>
+        </div>`;
             })
-            .join("") ||
-            '<p style="text-align:center; color:#94a3b8; font-size:0.8rem;">No history yet.</p>');
-        // 4. Render the special Date rows
+            .join("");
+        }
+
+        // ── RIGHT: Date edit rows ─────────────────────────────────────────────
+        // Ensure the right column header label is appropriate for edit mode
+        const pendingColHeader = document.getElementById("pendingColHeader");
+        if (pendingColHeader)
+          pendingColHeader.textContent = "Expected dates — edit";
+
+        const activeArea = document.getElementById("activeProcessArea");
+        if (activeArea) activeArea.style.display = "block";
+
         renderDateEditRows(job);
 
-        // 5. Show Modal
         document.getElementById("updateModal").style.display = "flex";
+        setModalLoading(false);
       }
 
       function renderDateEditRows(job) {
@@ -2730,50 +2808,68 @@
 
         job.steps.forEach((step, index) => {
           const isDone = step.isDone;
-          const div = document.createElement("div");
-          div.className = "date-edit-row";
-          div.setAttribute("data-base", step.baseCol);
-          div.style = `padding: 12px; background: ${isDone ? "#f8fafc" : "white"}; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; gap: 15px; opacity: ${isDone ? "0.7" : "1"};`;
 
+          // Parse expDate (DD/MM/YY or DD/MM/YYYY) → YYYY-MM-DD for <input type="date">
           let dateValue = "";
           if (step.expDate && step.expDate.includes("/")) {
-            const parts = step.expDate.split("/"); // [DD, MM, YYYY]
+            const parts = step.expDate.split("/");
             let year = parts[2];
             if (year.length === 2) year = "20" + year;
-
-            // Format specifically for <input type="date"> which needs YYYY-MM-DD
             dateValue = `${year}-${parts[1].padStart(2, "0")}-${parts[0].padStart(2, "0")}`;
           }
 
-          div.innerHTML = `
-            <div style="flex: 2; display: flex; align-items: center; gap: 10px;">
-                <div style="background: ${isDone ? "#e2e8f0" : "#fee2e2"}; color: ${isDone ? "#64748b" : "#b91c1c"}; border-radius: 4px; padding: 2px 6px; font-size: 0.75rem; font-weight: bold; min-width: 20px; text-align: center;">
-                    ${index + 1}
-                </div>
-                <div>
-                    <div style="font-weight: bold; font-size: 0.85rem; color: #1e293b;">${step.name} ${isDone ? "✓" : ""}</div>
-                    <div style="font-size: 0.7rem; color: #64748b;">${isDone ? "Finished" : "Current: " + (step.expDate || "None")}</div>
-                </div>
-            </div>
-            <div style="flex: 3;">
-                <input type="date" 
-                      class="edit-exp-date-input" 
-                      data-index="${index}" 
-                      value="${dateValue}"
-                      ${isDone ? "disabled" : ""}
-                      style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; color: #334155; background: ${isDone ? "#f1f5f9" : "white"}; cursor: ${isDone ? "not-allowed" : "pointer"};">
-            </div>
-        `;
+          const globalIndex =
+            job.steps.findIndex((s) => s.baseCol === step.baseCol) + 1;
+          const badgeClass = isDone ? "um-badge-done" : "um-badge-pending";
 
+          const card = document.createElement("div");
+          card.className = `um-date-edit-card date-edit-row${isDone ? " is-done" : ""}`;
+          card.setAttribute("data-base", step.baseCol);
+
+          card.innerHTML = `
+      <div class="um-date-edit-header">
+        <div class="um-badge ${badgeClass}">${globalIndex}</div>
+        <div style="flex:1; min-width:0;">
+          <p class="um-step-name" style="margin:0;">
+            ${step.name}
+            ${isDone ? `<span style="font-size:11px; color:#166534; font-weight:500; margin-left:4px;">Done</span>` : ""}
+          </p>
+          <p class="um-step-meta" style="margin:0;">
+            ${isDone ? `Finished: ${step.endDate}` : `Current: ${step.expDate || "—"}`}
+          </p>
+        </div>
+      </div>
+      <div class="um-date-edit-body">
+        <label style="font-size:11px; color:#64748b; margin-bottom:2px; display:block;">
+          ${isDone ? "Expected date (locked)" : "New expected date"}
+        </label>
+        <input
+          type="date"
+          class="um-date-input edit-exp-date-input"
+          data-index="${index}"
+          data-original="${dateValue}"
+          data-last-val="${dateValue}"
+          value="${dateValue}"
+          ${isDone ? "disabled" : ""}
+        >
+      </div>
+    `;
+
+          // Wire up the date waterfall change handler (logic unchanged)
           if (!isDone) {
-            const input = div.querySelector(".edit-exp-date-input");
+            const input = card.querySelector(".edit-exp-date-input");
             input.addEventListener("change", (e) =>
               handleDateWaterfall(e.target, index),
             );
           }
 
-          multiList.appendChild(div);
+          multiList.appendChild(card);
         });
+
+        // After render, also reset the column header back if it was changed
+        const pendingColHeader = document.getElementById("pendingColHeader");
+        if (pendingColHeader)
+          pendingColHeader.textContent = "Expected dates — edit";
       }
 
       async function processDateEditUpdate() {
@@ -3239,6 +3335,119 @@
       function renderAll() {
         renderStats();
         renderTable();
+      }
+
+      function renderModalHeader(job, mode) {
+        // ── Mode badge (only visible in edit mode) ────────────────────────────
+        const modeBadgeHtml =
+          mode === "edit"
+            ? `<div class="um-mode-badge edit">
+         <span style="width:6px;height:6px;border-radius:50%;background:#f59e0b;display:inline-block;"></span>
+         Edit mode — adjusting expected dates
+       </div>`
+            : "";
+
+        // ── Batch pill ────────────────────────────────────────────────────────
+        document.getElementById("modalBatchId").innerHTML = `${modeBadgeHtml}
+     <div class="um-batch-pill">
+       <span class="um-batch-dot"></span>
+       Batch ID: ${job.batchId} &nbsp;|&nbsp; Qty: ${job.qty}
+     </div>`;
+
+        // ── Job name + split notice ───────────────────────────────────────────
+        const splitRemarkHtml = job.splitRemark
+          ? `<div class="um-split-notice"><strong>Batch origin:</strong> ${job.splitRemark}</div>`
+          : "";
+
+        document.getElementById("modalPsn").innerHTML =
+          `<div style="font-size:20px; color:#ffffff; margin-bottom:1px;font-weight;bold;">${job.psn}</div>
+     <div style="font-size:20px; font-weight:bold; color:#ffffff;">${job.jobName}</div>
+     ${splitRemarkHtml}`;
+
+        // ── Batch switcher ────────────────────────────────────────────────────
+        // Chips call the correct opener depending on which mode is active.
+        const openerFn = mode === "edit" ? "openEditPopup" : "openUpdatePopup";
+
+        const siblingBatches = MASTER_DATA.filter(
+          (b) => String(b.psn).trim() === String(job.psn).trim(),
+        ).sort((a, b) =>
+          String(a.batchId).localeCompare(String(b.batchId), undefined, {
+            numeric: true,
+          }),
+        );
+
+        const switcherEl = document.getElementById("batchSwitcher");
+        if (!switcherEl) return;
+
+        if (siblingBatches.length <= 1) {
+          switcherEl.style.display = "none";
+          return;
+        }
+
+        switcherEl.style.display = "block";
+        switcherEl.innerHTML = siblingBatches
+          .map((b) => {
+            const isCurrent = b.row === job.row;
+            const totalSteps = b.steps ? b.steps.length : 0;
+            const doneSteps = b.steps
+              ? b.steps.filter((s) => s.isDone).length
+              : 0;
+            const isFullyDone = totalSteps > 0 && doneSteps === totalSteps;
+            const hasOverdue = b.steps
+              ? b.steps.some((s) => {
+                  if (s.isDone) return false;
+                  const t = parseDateStringToTime(s.expDate);
+                  return t && t < new Date().setHours(0, 0, 0, 0);
+                })
+              : false;
+
+            let dotColor;
+            if (isFullyDone) dotColor = "#22c55e";
+            else if (hasOverdue) dotColor = "#ef4444";
+            else dotColor = "#f59e0b";
+
+            const chipStyle = isCurrent
+              ? `background:#0f172a; color:#ffffff; border-color:#0f172a; font-weight:600; cursor:default;`
+              : `background:white; color:#475569; border-color:#e2e8f0; cursor:pointer;`;
+
+            const dotHtml = `<span style="width:6px;height:6px;border-radius:50%;background:${dotColor};display:inline-block;flex-shrink:0;"></span>`;
+            const progressHtml =
+              totalSteps > 0
+                ? `<span style="font-size:10px; opacity:${isCurrent ? "0.65" : "0.5"};">${doneSteps}/${totalSteps}</span>`
+                : "";
+            const currentLabel = isCurrent
+              ? `<div style="font-size:10px; text-align:center; color:#ffffff; margin-top:2px; font-style:italic;font-weight:bold;">Current</div>`
+              : "";
+
+            return `
+      <div style="display:inline-flex; flex-direction:column; flex-shrink:0;">
+        <div
+          onclick="${isCurrent ? "" : `${openerFn}(${b.row})`}"
+          title="Batch ${b.batchId} — Qty: ${b.qty}"
+          style="display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:20px; border:1px solid; font-size:12px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; white-space:nowrap; transition:box-shadow 0.1s; ${chipStyle}"
+          onmouseenter="if(${!isCurrent}) this.style.boxShadow='0 0 0 3px #e2e8f0';"
+          onmouseleave="this.style.boxShadow='';"
+        >
+          ${dotHtml}
+          ${b.batchId}
+          ${progressHtml}
+        </div>
+        ${currentLabel}
+      </div>`;
+          })
+          .join("");
+
+        requestAnimationFrame(() => {
+          const currentChip = switcherEl.querySelector(
+            '[style*="cursor:default"]',
+          );
+          if (currentChip)
+            currentChip.scrollIntoView({
+              behavior: "smooth",
+              inline: "center",
+              block: "nearest",
+            });
+        });
       }
     </script>
   </body>
