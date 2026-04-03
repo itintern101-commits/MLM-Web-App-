@@ -64,7 +64,8 @@
 
       /* 2. Elevate the specific card you are hovering over */
       .stat-card:hover {
-        z-index: 10; /* Boosts the whole card above its neighbors when interacting */
+        z-index: 10;
+        /* Boosts the whole card above its neighbors when interacting */
       }
 
       .stat-val {
@@ -350,7 +351,7 @@
       /* Active State for Delayed Breakdown */
       .active-filter-delayed {
         background: var(--danger) !important;
-        color:black ;
+        color: black;
       }
 
       /* Status Buttons in Overview */
@@ -362,17 +363,21 @@
         flex: 1;
         transition: 0.2s;
       }
+
       .status-btn:hover {
         background: #f8fafc;
       }
+
       .active-track {
         background: #0891b2 !important;
         color: white !important;
       }
+
       .active-delayed {
         background: var(--danger) !important;
         color: white !important;
       }
+
       .active-done {
         background: #10b981 !important;
         color: white !important;
@@ -382,6 +387,7 @@
         font-size: 1rem;
         font-weight: bold;
       }
+
       .status-btn .label {
         font-size: 0.65rem;
         text-transform: uppercase;
@@ -414,9 +420,11 @@
           border-color 0.12s,
           color 0.12s;
       }
+
       .um-chip input[type="checkbox"] {
         display: none;
       }
+
       .um-chip:hover {
         background: #f8fafc;
       }
@@ -427,12 +435,14 @@
         color: #166534;
         font-weight: 600;
       }
+
       .um-chip.is-delay {
         background: #fef2f2;
         border-color: #fca5a5;
         color: #991b1b;
         font-weight: 600;
       }
+
       .um-chip.is-locked {
         pointer-events: none;
         opacity: 0.5;
@@ -450,14 +460,17 @@
         font-weight: 600;
         flex-shrink: 0;
       }
+
       .um-badge-done {
         background: #dcfce7;
         color: #166534;
       }
+
       .um-badge-delayed {
         background: #fee2e2;
         color: #991b1b;
       }
+
       .um-badge-pending {
         background: #f1f5f9;
         color: #64748b;
@@ -476,6 +489,7 @@
         color: #0f172a;
         box-sizing: border-box;
       }
+
       .um-qty-input:focus {
         outline: none;
         border-color: #94a3b8;
@@ -493,6 +507,7 @@
         font-family: inherit;
         box-sizing: border-box;
       }
+
       .um-delay-input::placeholder {
         color: #fca5a5;
       }
@@ -539,6 +554,7 @@
         border-bottom: 1px solid #f1f5f9;
         flex-shrink: 0;
       }
+
       .um-batch-pill {
         display: inline-flex;
         align-items: center;
@@ -551,6 +567,7 @@
         color: #64748b;
         margin-bottom: 6px;
       }
+
       .um-batch-dot {
         width: 6px;
         height: 6px;
@@ -558,6 +575,7 @@
         background: #22c55e;
         display: inline-block;
       }
+
       .um-split-notice {
         margin-top: 8px;
         padding: 7px 10px;
@@ -574,6 +592,7 @@
         min-height: 0;
         overflow: hidden;
       }
+
       .um-left {
         width: 42%;
         border-right: 1px solid #f1f5f9;
@@ -581,12 +600,14 @@
         flex-direction: column;
         min-height: 0;
       }
+
       .um-right {
         flex: 1;
         display: flex;
         flex-direction: column;
         min-height: 0;
       }
+
       .um-col-header {
         padding: 9px 14px;
         border-bottom: 1px solid #f1f5f9;
@@ -598,6 +619,7 @@
         text-transform: uppercase;
         letter-spacing: 0.06em;
       }
+
       .um-col-body {
         overflow-y: auto;
         flex: 1;
@@ -617,6 +639,7 @@
         border-radius: 10px;
         position: relative;
       }
+
       .um-badge {
         width: 22px;
         height: 22px;
@@ -629,31 +652,37 @@
         flex-shrink: 0;
         margin-top: 1px;
       }
+
       .um-badge-done {
         background: #dcfce7;
         color: #166534;
       }
+
       .um-badge-delayed {
         background: #fee2e2;
         color: #991b1b;
       }
+
       .um-badge-pending {
         background: #f1f5f9;
         color: #64748b;
         border: 1px solid #e2e8f0;
       }
+
       .um-step-name {
         font-size: 13px;
         font-weight: 600;
         color: #0f172a;
         margin: 0 0 2px;
       }
+
       .um-step-meta {
         font-size: 11px;
         color: #64748b;
         margin: 0;
         line-height: 1.5;
       }
+
       .um-remark-tag {
         display: inline-block;
         margin-top: 4px;
@@ -663,12 +692,14 @@
         color: #991b1b;
         border-radius: 6px;
       }
+
       .um-machine-tag {
         font-size: 11px;
         color: #2563eb;
         font-weight: 600;
         margin: 2px 0 0;
       }
+
       .um-revert-btn {
         font-size: 11px;
         padding: 3px 8px;
@@ -679,6 +710,7 @@
         color: #64748b;
         flex-shrink: 0;
       }
+
       .um-revert-btn:hover {
         background: #f8fafc;
       }
@@ -689,6 +721,7 @@
         border-radius: 12px;
         overflow: hidden;
       }
+
       .um-active-card-header {
         display: flex;
         align-items: center;
@@ -696,12 +729,14 @@
         padding: 10px 12px;
         background: #f8fafc;
       }
+
       .um-active-card-body {
         padding: 10px 12px;
         display: flex;
         flex-direction: column;
         gap: 8px;
       }
+
       .um-overdue-badge {
         font-size: 11px;
         padding: 2px 7px;
@@ -711,6 +746,7 @@
         font-weight: 600;
         margin-left: 5px;
       }
+
       .um-reverted-notice {
         font-size: 11px;
         padding: 6px 10px;
@@ -738,9 +774,11 @@
           border-color 0.1s,
           color 0.1s;
       }
+
       .um-chip input[type="checkbox"] {
         display: none;
       }
+
       .um-chip:hover {
         background: #f8fafc;
       }
@@ -763,6 +801,7 @@
         font-size: 12px;
         font-family: inherit;
       }
+
       .um-delay-input::placeholder {
         color: #fca5a5;
       }
@@ -771,6 +810,7 @@
         opacity: 0.5;
         cursor: default;
       }
+
       .um-qty-input {
         width: 100%;
         padding: 5px 8px;
@@ -781,10 +821,12 @@
         background: white;
         color: #0f172a;
       }
+
       .um-qty-input:focus {
         outline: none;
         border-color: #94a3b8;
       }
+
       .um-machine-select {
         width: 100%;
         padding: 6px 8px;
@@ -802,20 +844,24 @@
         align-items: center;
         gap: 10px;
       }
+
       .um-qty-block {
         flex: 1;
       }
+
       .um-qty-block label {
         font-size: 11px;
         color: #64748b;
         display: block;
         margin-bottom: 3px;
       }
+
       .um-max-block {
         text-align: center;
         padding-left: 10px;
         border-left: 1px dashed #e2e8f0;
       }
+
       .um-max-block .um-max-lbl {
         font-size: 11px;
         color: #94a3b8;
@@ -824,6 +870,7 @@
         text-transform: uppercase;
         letter-spacing: 0.04em;
       }
+
       .um-max-block .um-max-val {
         font-size: 15px;
         font-weight: 600;
@@ -840,6 +887,7 @@
         background: white;
         flex-shrink: 0;
       }
+
       .um-btn {
         padding: 7px 16px;
         border-radius: 8px;
@@ -851,14 +899,17 @@
         background: white;
         color: #475569;
       }
+
       .um-btn:hover {
         background: #f8fafc;
         color: black;
       }
+
       .um-btn-ghost {
         background: #f8fafc;
         color: #64748b;
       }
+
       .um-btn-primary {
         background: #0f172a;
         color: white;
@@ -867,6 +918,7 @@
         align-items: center;
         gap: 8px;
       }
+
       .um-btn-primary:hover {
         opacity: 0.88;
       }
@@ -878,6 +930,7 @@
         color: #94a3b8;
         font-size: 13px;
       }
+
       .um-completed-state {
         text-align: center;
         padding: 20px;
@@ -898,15 +951,16 @@
       .status-btn:hover,
       .filter-item:hover,
       .filter-item-delayed:hover {
-        background-color: #f1f5f9 !important; /* Light gray-blue hover */
+        background-color: #f1f5f9 !important;
+        /* Light gray-blue hover */
         filter: brightness(0.98);
-        transform: translateY(1px); /* Slight 'press' effect instead of lift */
+        transform: translateY(1px);
+        /* Slight 'press' effect instead of lift */
       }
 
       .tooltip-trigger:hover::after {
-        content: attr(
-          data-tooltip
-        ); /* Changed from 'title' to 'data-tooltip' */
+        content: attr(data-tooltip);
+        /* Changed from 'title' to 'data-tooltip' */
         position: absolute;
         top: 125%;
         left: 50%;
@@ -939,14 +993,17 @@
       /* 3. The actual trigger MUST be even higher on hover */
       .tooltip-trigger:hover {
         z-index: 9999;
-        position: relative; /* This is required for z-index to work */
+        position: relative;
+        /* This is required for z-index to work */
       }
 
       .stat-card > div[style*="overflow-y: auto"] {
         overflow-y: auto;
-        overflow-x: visible !important; /* Crucial: allow tooltip to poke out sides */
+        overflow-x: visible !important;
+        /* Crucial: allow tooltip to poke out sides */
         position: relative;
-        padding-bottom: 20px; /* Buffer so the bottom items have room for tooltips */
+        padding-bottom: 20px;
+        /* Buffer so the bottom items have room for tooltips */
       }
 
       /* 3. Smooth Hover State */
@@ -961,6 +1018,7 @@
         top: auto;
         bottom: 125%;
       }
+
       .tooltip-trigger.show-above:hover::before {
         top: auto;
         bottom: 110%;
@@ -978,7 +1036,8 @@
         margin-bottom: 4px;
         border-radius: 4px;
         font-size: 0.85rem;
-        width: 100%; /* Ensure it fills the card width */
+        width: 100%;
+        /* Ensure it fills the card width */
         box-sizing: border-box;
       }
 
@@ -992,17 +1051,147 @@
       }
 
       .filter-item.active-filter-pill:hover {
-        background-color: #3b82f6 !important; /* blue */
+        background-color: #3b82f6 !important;
+        /* blue */
         color: black;
         transform: scale(1.01);
         transition: all 0.2s ease;
       }
 
       .filter-item-delayed.active-filter-delayed:hover {
-        background-color: #ef4444 !important; /* red */
+        background-color: #ef4444 !important;
+        /* red */
         color: black;
         transform: scale(1.01);
         transition: all 0.2s ease;
+      }
+
+      /*BATCH OPEN OTHERS POPUP CSS*/
+      .um-batch-switcher {
+        display: none;
+        /* shown/hidden by JS */
+        overflow-x: auto;
+        overflow-y: visible;
+        white-space: nowrap;
+        padding: 10px 0 4px;
+        margin-top: 10px;
+        border-top: 1px solid #f1f5f9;
+        /* hide scrollbar on webkit but keep scroll behaviour */
+        scrollbar-width: thin;
+        scrollbar-color: #e2e8f0 transparent;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .um-batch-switcher::-webkit-scrollbar {
+        height: 4px;
+      }
+
+      .um-batch-switcher::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .um-batch-switcher::-webkit-scrollbar-thumb {
+        background: #e2e8f0;
+        border-radius: 4px;
+      }
+
+      /* Switcher label sits just above the chips */
+      .um-switcher-label {
+        font-size: 10px;
+        font-weight: 600;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        display: block;
+        margin-bottom: 7px;
+      }
+
+      .um-formula-row {
+        display: flex;
+        align-items: center;
+        background: var(--color-background-secondary, #f8fafc);
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .um-formula-cell {
+        flex: 1;
+        padding: 7px 8px;
+        text-align: center;
+      }
+      .um-formula-cell + .um-formula-cell {
+        border-left: 1px solid #e2e8f0;
+      }
+      .um-formula-cell-label {
+        font-size: 10px;
+        color: #94a3b8;
+        display: block;
+        margin-bottom: 2px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .um-formula-cell-value {
+        font-size: 13px;
+        font-weight: 600;
+        color: #0f172a;
+      }
+      .um-formula-op {
+        font-size: 13px;
+        color: #94a3b8;
+        padding: 0 4px;
+        flex-shrink: 0;
+        align-self: center;
+      }
+      .um-result-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        transition:
+          background 0.15s,
+          border-color 0.15s;
+      }
+      .um-result-row.is-full {
+        background: #f0fdf4;
+        border-color: #86efac;
+      }
+      .um-result-row.is-error {
+        background: #fef2f2;
+        border-color: #fca5a5;
+      }
+      .um-result-label {
+        font-size: 12px;
+        color: #64748b;
+        display: block;
+        margin-bottom: 1px;
+      }
+      .um-result-label.is-full {
+        color: #166534;
+      }
+      .um-result-label.is-error {
+        color: #991b1b;
+      }
+      .um-result-eq {
+        font-size: 11px;
+        color: #94a3b8;
+      }
+      .um-result-val {
+        font-size: 16px;
+        font-weight: 600;
+        color: #475569;
+        white-space: nowrap;
+      }
+      .um-result-val.is-full {
+        color: #166534;
+      }
+      .um-result-val.is-error {
+        color: #991b1b;
       }
     </style>
   </head>
@@ -1154,6 +1343,7 @@
         <div class="um-header">
           <div id="modalBatchId"></div>
           <div id="modalPsn"></div>
+          <div class="um-batch-switcher" id="batchSwitcher"></div>
         </div>
 
         <!-- TWO-COLUMN BODY -->
@@ -1670,7 +1860,7 @@
       function openUpdatePopup(batchIdOrRow) {
         console.log("openUpdatePopup called with:", batchIdOrRow);
 
-        // ── Find the job ──────────────────────────────────────────────────────────
+        // ── Find the job ────────────────────────────────────────────────────────
         const numericRow = Number(batchIdOrRow);
         let job = MASTER_DATA.find(
           (j) => String(j.row) === String(batchIdOrRow),
@@ -1688,7 +1878,7 @@
 
         currentEditingRow = job.row;
 
-        // ── Reset footer buttons ──────────────────────────────────────────────────
+        // ── Reset footer buttons ─────────────────────────────────────────────────
         const qtyBtn = document.getElementById("updateQtyBtn");
         const saveBtn = document.getElementById("saveBtn");
         const btnText = document.getElementById("btnText");
@@ -1697,7 +1887,7 @@
         btnText.innerText = "Save progress";
         saveBtn.onclick = () => processUpdate();
 
-        // ── Header ────────────────────────────────────────────────────────────────
+        // ── Header: batch pill + job name ────────────────────────────────────────
         const splitRemarkHtml = job.splitRemark
           ? `<div class="um-split-notice"><strong>Batch origin:</strong> ${job.splitRemark}</div>`
           : "";
@@ -1713,7 +1903,88 @@
      <div style="font-size:15px; font-weight:600; color:#0f172a;">${job.jobName}</div>
      ${splitRemarkHtml}`;
 
-        // ── LEFT: Completed History ───────────────────────────────────────────────
+        // ── Header: batch switcher row ───────────────────────────────────────────
+        const siblingBatches = MASTER_DATA.filter(
+          (b) => String(b.psn).trim() === String(job.psn).trim(),
+        ).sort((a, b) =>
+          String(a.batchId).localeCompare(String(b.batchId), undefined, {
+            numeric: true,
+          }),
+        );
+
+        const switcherEl = document.getElementById("batchSwitcher");
+        if (switcherEl) {
+          if (siblingBatches.length <= 1) {
+            switcherEl.style.display = "none";
+          } else {
+            switcherEl.style.display = "block";
+            switcherEl.innerHTML = siblingBatches
+              .map((b) => {
+                const isCurrent = b.row === job.row;
+                const totalSteps = b.steps ? b.steps.length : 0;
+                const doneSteps = b.steps
+                  ? b.steps.filter((s) => s.isDone).length
+                  : 0;
+                const isFullyDone = totalSteps > 0 && doneSteps === totalSteps;
+                const hasOverdue = b.steps
+                  ? b.steps.some((s) => {
+                      if (s.isDone) return false;
+                      const t = parseDateStringToTime(s.expDate);
+                      return t && t < new Date().setHours(0, 0, 0, 0);
+                    })
+                  : false;
+
+                let dotColor;
+                if (isFullyDone) dotColor = "#22c55e";
+                else if (hasOverdue) dotColor = "#ef4444";
+                else dotColor = "#f59e0b";
+
+                const chipStyle = isCurrent
+                  ? `background:#0f172a; color:#ffffff; border-color:#0f172a; font-weight:600; cursor:default;`
+                  : `background:white; color:#475569; border-color:#e2e8f0; cursor:pointer;`;
+
+                const dotHtml = `<span style="width:6px;height:6px;border-radius:50%;background:${dotColor};display:inline-block;flex-shrink:0;"></span>`;
+                const progressHtml =
+                  totalSteps > 0
+                    ? `<span style="font-size:10px; opacity:${isCurrent ? "0.65" : "0.5"};">${doneSteps}/${totalSteps}</span>`
+                    : "";
+                const currentLabel = isCurrent
+                  ? `<div style="font-size:10px; text-align:center; color:#64748b; margin-top:2px; font-style:italic;">Current</div>`
+                  : "";
+
+                return `
+          <div style="display:inline-flex; flex-direction:column; flex-shrink:0;">
+            <div
+              onclick="${isCurrent ? "" : `openUpdatePopup(${b.row})`}"
+              title="Batch ${b.batchId} — Qty: ${b.qty}"
+              style="display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:20px; border:1px solid; font-size:12px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; white-space:nowrap; transition:box-shadow 0.1s; ${chipStyle}"
+              onmouseenter="if(${!isCurrent}) this.style.boxShadow='0 0 0 3px #e2e8f0';"
+              onmouseleave="this.style.boxShadow='';"
+            >
+              ${dotHtml}
+              ${b.batchId}
+              ${progressHtml}
+            </div>
+            ${currentLabel}
+          </div>`;
+              })
+              .join("");
+
+            requestAnimationFrame(() => {
+              const currentChip = switcherEl.querySelector(
+                '[style*="cursor:default"]',
+              );
+              if (currentChip)
+                currentChip.scrollIntoView({
+                  behavior: "smooth",
+                  inline: "center",
+                  block: "nearest",
+                });
+            });
+          }
+        }
+
+        // ── LEFT: Completed History ──────────────────────────────────────────────
         const historyContainer = document.getElementById("processHistoryArea");
         const completedSteps = job.steps.filter((s) => s.isDone);
 
@@ -1773,7 +2044,7 @@
             .join("");
         }
 
-        // ── RIGHT: Pending / Active Steps ────────────────────────────────────────
+        // ── RIGHT: Pending / Active Steps ───────────────────────────────────────
         const multiList = document.getElementById("multiProcessList");
         const activeArea = document.getElementById("activeProcessArea");
         const pendingSteps = job.steps.filter((s) => !s.isDone);
@@ -1803,26 +2074,28 @@
               step.baseCol,
               job.qty,
             );
+            const initialRemaining = Math.max(0, maxQty - processQty);
             const expTime = parseDateStringToTime(step.expDate);
             const isOverdue = expTime && expTime < todayTime;
             const hasExistingDelay = step.status === "Delayed";
 
-            const shouldLockDelay = hasExistingDelay || isOverdue; // delay chip locked on
+            const shouldLockDelay = hasExistingDelay || isOverdue;
             const isRemarkReadOnly = hasExistingDelay;
 
             let currentRemark = step.remark || "";
             if (isOverdue && !currentRemark)
               currentRemark = "OVERDUE: Enter reason here";
 
-            // ── Build the card ──
             const card = document.createElement("div");
-            card.className = "um-active-card multi-step-row"; // multi-step-row keeps processUpdate() happy
+            card.className = "um-active-card multi-step-row";
             card.setAttribute("data-name", step.name);
 
             const headerBg = isOverdue ? "#fef2f2" : "#f8fafc";
 
+            // Initial equation string shown on first render (no user input yet)
+            const initEq = `${maxQty.toLocaleString()} − ${processQty.toLocaleString()} − 0 = ${initialRemaining.toLocaleString()}`;
+
             card.innerHTML = `
-        <!-- Card header -->
         <div class="um-active-card-header" style="background:${headerBg};">
           <div class="um-badge um-badge-pending">${globalIndex}</div>
           <div style="flex:1;">
@@ -1834,7 +2107,6 @@
           </div>
         </div>
  
-        <!-- Card body -->
         <div class="um-active-card-body">
  
           ${
@@ -1843,45 +2115,24 @@
               : ""
           }
  
-          <!-- ── Toggle chips row ──
-               "Mark as done" is ALWAYS shown.
-               "Flag delay" is shown; if shouldLockDelay it renders pre-checked and locked.
-          -->
           <div style="display:flex; gap:7px; flex-wrap:wrap;">
  
-            <!-- Mark as done — always present, never locked -->
             <label class="um-chip" id="chip-done-${step.baseCol}">
-              <input
-                type="checkbox"
-                class="step-done-check"
-                data-base="${step.baseCol}"
-              > Mark as done
+              <input type="checkbox" class="step-done-check" data-base="${step.baseCol}"> Mark as done
             </label>
  
-            <!-- Flag delay -->
             ${
               shouldLockDelay
                 ? `<label class="um-chip is-delay is-locked">
-                   <input
-                     type="checkbox"
-                     class="step-delay-check"
-                     data-base="${step.baseCol}"
-                     checked
-                     disabled
-                   > Flagged as delayed
+                   <input type="checkbox" class="step-delay-check" data-base="${step.baseCol}" checked disabled> Flagged as delayed
                  </label>`
                 : `<label class="um-chip" id="chip-delay-${step.baseCol}">
-                   <input
-                     type="checkbox"
-                     class="step-delay-check"
-                     data-base="${step.baseCol}"
-                   > Flag delay
+                   <input type="checkbox" class="step-delay-check" data-base="${step.baseCol}"> Flag delay
                  </label>`
             }
  
           </div>
  
-          <!-- Delay reason input -->
           <input
             type="text"
             class="um-delay-input step-remark-input"
@@ -1891,7 +2142,6 @@
             style="display:${shouldLockDelay || currentRemark ? "block" : "none"};"
           >
  
-          <!-- Die-cut machine selector (revealed when marked done) -->
           ${
             isDieCut
               ? `<div class="diecut-area" style="display:none;">
@@ -1906,13 +2156,30 @@
               : ""
           }
  
-          <!-- Current qty read-only display -->
           <div class="um-current-qty-row">
             <span class="um-current-qty-label">Current qty:</span>
-            <span class="um-current-qty-value">${processQty}</span>
+            <span class="um-current-qty-value">${processQty.toLocaleString()}</span>
           </div>
  
-          <!-- Additive qty input + max allowed -->
+          <!-- formula breakdown row: [ceiling] − [backend] − [adding] -->
+          <div class="um-formula-row">
+            <div class="um-formula-cell">
+              <span class="um-formula-cell-label" data-formula-ceiling-label="${step.baseCol}">Max allowed</span>
+              <span class="um-formula-cell-value" data-formula-ceiling="${step.baseCol}">${maxQty.toLocaleString()}</span>
+            </div>
+            <span class="um-formula-op">−</span>
+            <div class="um-formula-cell">
+              <span class="um-formula-cell-label">Already done</span>
+              <span class="um-formula-cell-value">${processQty.toLocaleString()}</span>
+            </div>
+            <span class="um-formula-op">−</span>
+            <div class="um-formula-cell">
+              <span class="um-formula-cell-label">Adding now</span>
+              <span class="um-formula-cell-value" data-formula-adding="${step.baseCol}">0</span>
+            </div>
+          </div>
+ 
+          <!-- qty input -->
           <div class="um-qty-row">
             <div class="um-qty-block">
               <label>Add qty</label>
@@ -1927,17 +2194,21 @@
                 placeholder="Amount to add..."
               >
             </div>
-            <div class="um-max-block">
-              <span class="um-max-lbl">Remaining Quantity</span>
-              <span class="um-max-val waterfall-max-label" id="label-${step.baseCol}">${maxQty}</span>
+          </div>
+ 
+          <!-- result row: equation + remaining value -->
+          <div class="um-result-row" data-formula-row="${step.baseCol}">
+            <div>
+              <span class="um-result-label" data-formula-result-label="${step.baseCol}">Remaining for this process</span>
+              <span class="um-result-eq"    data-formula-eq="${step.baseCol}">${initEq}</span>
             </div>
+            <span class="um-result-val waterfall-max-label" data-formula-result="${step.baseCol}" id="label-${step.baseCol}">${initialRemaining.toLocaleString()}</span>
           </div>
  
         </div>
       `;
 
-            // ── Wire chip interactions ────────────────────────────────────────────
-
+            // ── Wire chip interactions (unchanged) ──────────────────────────────
             const doneCheck = card.querySelector(".step-done-check");
             const delayCheck = card.querySelector(".step-delay-check");
             const remarkInput = card.querySelector(".step-remark-input");
@@ -1945,34 +2216,28 @@
             const chipDone = card.querySelector(`#chip-done-${step.baseCol}`);
             const chipDelay = card.querySelector(`#chip-delay-${step.baseCol}`);
 
-            // Done chip — toggle green state; show die-cut selector if applicable
             doneCheck.onchange = () => {
               chipDone.classList.toggle("is-done", doneCheck.checked);
-              if (dieCutArea) {
+              if (dieCutArea)
                 dieCutArea.style.display = doneCheck.checked ? "block" : "none";
-              }
             };
 
-            // Delay chip — only wire if not locked
             if (delayCheck && !shouldLockDelay && chipDelay) {
               delayCheck.onchange = () => {
                 chipDelay.classList.toggle("is-delay", delayCheck.checked);
-                if (remarkInput) {
+                if (remarkInput)
                   remarkInput.style.display = delayCheck.checked
                     ? "block"
                     : "none";
-                }
               };
             }
 
             multiList.appendChild(card);
           });
 
-          // Waterfall qty sync hook — unchanged
           multiList.addEventListener("input", (e) => {
-            if (e.target.classList.contains("step-qty-input")) {
+            if (e.target.classList.contains("step-qty-input"))
               syncWaterfallUI();
-            }
           });
         }
 
@@ -1990,6 +2255,7 @@
         let validationError = false;
         let firstIncompleteFound = false;
         let needsSplitRemark = false;
+        let isDeliveryDone = false;
 
         for (let i = 0; i < stepRows.length; i++) {
           const row = stepRows[i];
@@ -1998,79 +2264,130 @@
           const qtyInput = row.querySelector(".step-qty-input");
           const stepName = row.getAttribute("data-name");
 
-          const done = doneCheck.checked;
+          const done = doneCheck ? doneCheck.checked : false;
           const delay = delayCheck ? delayCheck.checked : false;
 
-          // Track the first non-completed step for sequential validation
+          // Track sequential progress (for the sequential-done guard below)
           if (!done) firstIncompleteFound = true;
 
-          // We only process rows that have at least one action (Done or Delay)
-          if (done || delay) {
-            // Sequential Check: Only blocks "Done" actions if previous are incomplete.
-            // Delay actions are allowed even if previous steps are incomplete.
-            if (done && firstIncompleteFound) {
-              alert(
-                `Sequential Error: Cannot complete "${stepName}" while a previous process is pending.`,
+          if (!done && !delay) continue; // row untouched — skip entirely
+
+          // ── Sequential check ─────────────────────────────────────────────────────
+          // Only "Done" must be sequential. A delay flag on a later step is allowed.
+          if (done && firstIncompleteFound) {
+            alert(
+              `Sequential Error: Cannot complete "${stepName}" while a previous process is still pending.`,
+            );
+            validationError = true;
+            break;
+          }
+
+          // ── Qty calculation ───────────────────────────────────────────────────────
+          const backendQty =
+            parseInt(qtyInput.getAttribute("data-current-qty")) || 0;
+          const userTyped = parseInt(qtyInput.value) || 0;
+          const proposedTotal = backendQty + userTyped;
+
+          // ── Waterfall ceiling for this row (read from the live label) ─────────────
+          // The label is kept current by syncWaterfallUI so we trust it as the source
+          // of truth for the ceiling at submission time.
+          const remainingShown =
+            parseInt(row.querySelector(".waterfall-max-label").innerText) || 0;
+          const systemMax =
+            parseInt(qtyInput.getAttribute("data-system-max")) || 0;
+          // Reconstruct the ceiling: ceiling = remaining + proposedTotal
+          const dynamicCeiling = remainingShown + proposedTotal;
+
+          if (done) {
+            // ── Zero qty guard ──────────────────────────────────────────────────────
+            if (proposedTotal <= 0) {
+              showToast(
+                `"${stepName}" has no quantity. Enter an amount to add before marking done.`,
+                "error",
               );
+              qtyInput.focus();
               validationError = true;
               break;
             }
 
-            const currentQty =
-              parseInt(qtyInput.getAttribute("data-current-qty")) || 0;
-            const addedQty = parseInt(qtyInput.value) || 0;
-            const totalQtyForProcess = currentQty + addedQty;
-
-            const dynamicMax = parseInt(
-              row.querySelector(".waterfall-max-label").innerText,
-            );
-
-            if (done) {
-              if (isNaN(totalQtyForProcess) || totalQtyForProcess <= 0) {
-                showToast(`Process ${stepName} has 0 total quantity.`, "error");
-                qtyInput.focus();
-                validationError = true;
-                break;
-              }
-              if (totalQtyForProcess > dynamicMax) {
-                showToast(
-                  `${stepName} total (${totalQtyForProcess}) exceeds max (${dynamicMax}).`,
-                  "error",
-                );
-                validationError = true;
-                break;
-              }
-              if (totalQtyForProcess < job.qty) needsSplitRemark = true;
+            // ── Waterfall overflow guard ────────────────────────────────────────────
+            if (proposedTotal > dynamicCeiling) {
+              const errorSource =
+                qtyInput.getAttribute("data-error-source") || "System Limit";
+              showToast(
+                `"${stepName}" total (${proposedTotal}) exceeds the limit set by "${errorSource}" (${dynamicCeiling}).`,
+                "error",
+              );
+              qtyInput.focus();
+              validationError = true;
+              break;
             }
 
-            // PUSH UPDATE DATA
-            updates.push({
-              baseCol: parseInt(doneCheck.dataset.base),
-              isDone: done, // Tells backend if it should mark as Completed
-              isDelayed: delay, // Tells backend if it should mark as Delayed
-              remark: row.querySelector(".step-remark-input").value,
-              qty: totalQtyForProcess,
-              detail:
-                stepName === "Die-cut" && done
-                  ? row.querySelector(".step-detail-select").value
-                  : "",
-            });
+            // ── Split remark trigger ────────────────────────────────────────────────
+            // FIX: compare against dynamicCeiling (the waterfall limit for this row),
+            // NOT job.qty (the batch total). Using job.qty caused false split prompts
+            // whenever a batch had been partially processed via Qty-Only previously.
+            if (proposedTotal < dynamicCeiling) needsSplitRemark = true;
+
+            // ── Delivery step detection ─────────────────────────────────────────────
+            if (stepName === "Delivery") isDeliveryDone = true;
           }
+
+          // ── Die-cut machine validation ────────────────────────────────────────────
+          let detail = "";
+          if (stepName === "Die-cut" && done) {
+            const select = row.querySelector(".step-detail-select");
+            if (!select || select.value === "") {
+              alert("Please choose a Die-Cut machine option.");
+              validationError = true;
+              break;
+            }
+            detail = select.value;
+          }
+
+          updates.push({
+            baseCol: parseInt(doneCheck.dataset.base),
+            isDone: done,
+            isDelayed: delay,
+            remark: row.querySelector(".step-remark-input")?.value || "",
+            qty: proposedTotal,
+            detail: detail,
+            maxQty: dynamicCeiling,
+          });
         }
 
         if (validationError) return;
+        if (updates.length === 0) {
+          showToast(
+            "Please mark at least one process as done or delayed.",
+            "warning",
+          );
+          return;
+        }
 
+        // ── Split remark prompt ───────────────────────────────────────────────────
         let splitRemark = "";
         if (needsSplitRemark) {
           splitRemark = await customPrompt(
             "Split Batch Required",
-            "Reason for splitting:",
-            "e.g., Shortage...",
+            "A split batch will be created for the remaining units. Why is this batch being split?",
+            "e.g., Shortage, Partial Production...",
           );
-          if (!splitRemark) return;
+          if (splitRemark === null) return; // user cancelled
+          if (splitRemark.trim() === "") {
+            showToast("A reason is required for split batches.", "error");
+            return;
+          }
         }
 
-        executeSave(job.row, updates, null, splitRemark);
+        // ── Save ──────────────────────────────────────────────────────────────────
+        if (isDeliveryDone) {
+          showDatePickModal((selectedDate) => {
+            executeSave(job.row, updates, selectedDate, splitRemark);
+          });
+        } else {
+          executeSave(job.row, updates, null, splitRemark);
+        }
       }
 
       async function processQtyOnlyUpdate() {
@@ -2650,65 +2967,114 @@
 
       function syncWaterfallUI() {
         const rows = document.querySelectorAll(".multi-step-row");
+        const fmt = (n) => Math.max(0, Math.round(n)).toLocaleString();
 
-        // We start the ceiling with the absolute limit of the batch
-        // or the limit set by the last COMPLETED step in history.
-        let currentActiveCeiling = Infinity;
-        let limitingStepName = "";
+        let ceilingIn = null; // effective ceiling passed into this row
+        let prevStepName = ""; // name of the row that set the ceiling
 
         rows.forEach((row, index) => {
           const input = row.querySelector(".step-qty-input");
-          const label = row.querySelector(".waterfall-max-label");
-          const currentStepName = row.getAttribute("data-name");
-          if (!input || !label) return;
+          if (!input) return;
 
-          // 1. GATHER DATA
-          const backendQty =
-            parseInt(input.getAttribute("data-current-qty")) || 0;
+          const base = input.getAttribute("data-base");
           const systemMax =
             parseInt(input.getAttribute("data-system-max")) || 0;
-          const userTypedQty = parseInt(input.value) || 0;
+          const backendQty =
+            parseInt(input.getAttribute("data-current-qty")) || 0;
+          const userTyped = parseInt(input.value) || 0;
+          const stepName = row.getAttribute("data-name");
 
-          // 2. CALCULATE PROPOSED TOTAL
-          // This is the total progress for THIS specific process step
-          const proposedTotalForStep = backendQty + userTypedQty;
+          // ── Ceiling for this row ──────────────────────────────────────────────
+          if (index === 0 || ceilingIn === null) {
+            ceilingIn = systemMax;
+          } else {
+            ceilingIn = Math.min(ceilingIn, systemMax);
+          }
 
-          // 3. CALCULATE EFFECTIVE MAX FOR THIS ROW
-          // This row is limited by the ceiling passed down from the row ABOVE
-          const rowLimit = Math.min(systemMax, currentActiveCeiling);
+          const proposedTotal = backendQty + userTyped;
+          const remaining = ceilingIn - proposedTotal; // can go negative
+          const isError = proposedTotal > ceilingIn;
+          const isFull = remaining === 0 && !isError;
 
-          // 4. LOGIC CHANGE: DISPLAY "REMAINING" FOR THE CURRENT ROW
-          // Instead of showing the ceiling, we show how many units are left to be processed
-          // for this specific step based on the row's limit.
-          const remainingForThisStep = rowLimit - proposedTotalForStep;
+          // ── Update formula ceiling cell ───────────────────────────────────────
+          const ceilingValEl = row.querySelector(
+            `[data-formula-ceiling="${base}"]`,
+          );
+          const ceilingLabelEl = row.querySelector(
+            `[data-formula-ceiling-label="${base}"]`,
+          );
+          if (ceilingValEl) ceilingValEl.textContent = fmt(ceilingIn);
+          if (ceilingLabelEl) {
+            ceilingLabelEl.textContent =
+              index > 0 && prevStepName
+                ? `Limit from ${prevStepName}`
+                : "Max allowed";
+          }
 
-          // Update the label text
-          label.innerText =
-            remainingForThisStep >= 0 ? remainingForThisStep : 0;
+          // ── Update "Adding now" cell ──────────────────────────────────────────
+          const addingEl = row.querySelector(`[data-formula-adding="${base}"]`);
+          if (addingEl) addingEl.textContent = fmt(userTyped);
 
-          // 5. VALIDATION VISUALS
-          if (proposedTotalForStep > rowLimit) {
+          // ── Update equation string ────────────────────────────────────────────
+          const eqEl = row.querySelector(`[data-formula-eq="${base}"]`);
+          if (eqEl) {
+            eqEl.textContent = `${fmt(ceilingIn)} − ${fmt(backendQty)} − ${fmt(userTyped)} = ${fmt(remaining)}`;
+          }
+
+          // ── Update result value (waterfall-max-label still read by processUpdate) ──
+          const resultEl = row.querySelector(`[data-formula-result="${base}"]`);
+          if (resultEl) resultEl.textContent = fmt(remaining);
+
+          // ── Update result row colour + label ─────────────────────────────────
+          const resultRow = row.querySelector(`[data-formula-row="${base}"]`);
+          const resultLabelEl = row.querySelector(
+            `[data-formula-result-label="${base}"]`,
+          );
+
+          if (resultRow) {
+            resultRow.classList.remove("is-error", "is-full");
+            if (isError) resultRow.classList.add("is-error");
+            else if (isFull) resultRow.classList.add("is-full");
+          }
+          if (resultLabelEl) {
+            resultLabelEl.classList.remove("is-error", "is-full");
+            if (isError) {
+              resultLabelEl.classList.add("is-error");
+              resultLabelEl.textContent = "Exceeds limit — reduce qty";
+            } else if (isFull) {
+              resultLabelEl.classList.add("is-full");
+              resultLabelEl.textContent = "Fully processed";
+            } else {
+              resultLabelEl.textContent = "Remaining for this process";
+            }
+          }
+          if (resultEl) {
+            resultEl.classList.remove("is-error", "is-full");
+            if (isError) resultEl.classList.add("is-error");
+            else if (isFull) resultEl.classList.add("is-full");
+          }
+
+          // ── Input border validation ───────────────────────────────────────────
+          if (isError) {
             input.style.border = "2px solid #ef4444";
             input.style.backgroundColor = "#fef2f2";
-            label.style.color = "#ef4444";
             input.setAttribute(
               "data-error-source",
-              limitingStepName || "System Limit",
+              prevStepName || "System Limit",
             );
           } else {
             input.style.border = "1px solid #cbd5e1";
             input.style.backgroundColor = "white";
-            // If remaining is 0, it's "Full", otherwise standard slate color
-            label.style.color =
-              remainingForThisStep === 0 ? "#10b981" : "#475569";
             input.removeAttribute("data-error-source");
           }
 
-          // 6. UPDATE CEILING FOR THE ROW BELOW
-          // The NEXT row cannot process more than what THIS row has finished (Proposed Total).
-          // This is the core of the Waterfall: Flow goes from top to bottom.
-          currentActiveCeiling = proposedTotalForStep;
-          limitingStepName = currentStepName;
+          // ── Pass ceiling to next row ──────────────────────────────────────────
+          if (userTyped > 0) {
+            // User typed something — next row is limited to this row's output
+            ceilingIn = proposedTotal;
+            prevStepName = stepName;
+          }
+          // else: ceilingIn stays, so untouched rows don't collapse the chain
         });
       }
 
