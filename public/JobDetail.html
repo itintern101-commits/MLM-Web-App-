@@ -1,877 +1,1304 @@
 <!doctype html>
 <html>
-  <head>
-    <base target="_top" />
-    <style>
-      :root {
-        --primary: #2563eb;
-        --warning: #f59e0b;
-        --danger: #ef4444;
-        --success: #10b981;
-        --sidebar-width: 280px;
-        /* Defined for easy adjustment */
-      }
 
-      body {
-        font-family: "Segoe UI", sans-serif;
-        margin: 0;
-        background: #f8fafc;
-        color: #1e293b;
-      }
+<head>
+  <base target="_top" />
+  <style>
+    :root {
+      --primary: #2563eb;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --success: #10b981;
+      --sidebar-width: 280px;
+      /* Defined for easy adjustment */
+    }
 
-      /* Sidebar Integration Wrapper */
+    body {
+      font-family: "Segoe UI", sans-serif;
+      margin: 0;
+      background: #f8fafc;
+      color: #1e293b;
+    }
+
+    /* Sidebar Integration Wrapper */
+    .main-wrapper {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      transition: margin-left 0.3s ease;
+    }
+
+    .dashboard-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 2rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid rgba(102, 126, 234, 0.3);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    }
+
+    .dashboard-header h1 {
+      margin: 0;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .dashboard-header .header-right {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .dashboard-header .header-right .filter-select,
+    .dashboard-header .header-right .search-input {
+      background: rgba(255, 255, 255, 0.95);
+      color: #1f2937;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .dashboard-header .header-right .filter-select:focus,
+    .dashboard-header .header-right .search-input:focus {
+      background: white;
+      border-color: #667eea;
+    }
+
+    /* Sticky Filters Bar */
+    .filters {
+      display: flex;
+      gap: 12px;
+      padding: 1rem 2rem;
+      flex-wrap: wrap;
+      background: white;
+      position: sticky;
+      top: 67px;
+      z-index: 99;
+      border-bottom: 1px solid #e2e8f0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .stats-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1.5rem 2rem;
+    }
+
+    .stats-section {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      align-items: center;
+    }
+
+    .stats-section-title {
+      font-weight: 700;
+      margin-right: 0.8rem;
+      min-width: 130px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+    }
+
+    .stat-card {
+      width: 100px;
+      min-width: 100px;
+      height: 70px;
+      background: white;
+      padding: 0.5rem 0.8rem;
+      border-radius: 6px;
+      border: 2px solid #e0e7f0;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    .stat-card.active {
+      color: white;
+      transform: scale(1.02);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-card.active .stat-val,
+    .stat-card.active .stat-label {
+      color: white !important;
+    }
+
+    .stat-val {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 0.2rem;
+    }
+
+    .stat-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      opacity: 0.85;
+      font-weight: 600;
+    }
+
+    /* Color schemes for different stat categories */
+    .stat-card.sales-normal {
+      border-color: #e0e7ff;
+    }
+
+    .stat-card.sales-normal .stat-val {
+      color: #667eea;
+    }
+
+    .stat-card.sales-active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-color: #667eea;
+      color: white;
+    }
+
+    .stat-card.sales-active .stat-val {
+      color: white;
+    }
+
+    .stat-card.priority-urgent {
+      border-color: #fee2e2;
+    }
+
+    .stat-card.priority-urgent .stat-val {
+      color: #dc2626;
+    }
+
+    .stat-card.priority-urgent.active {
+      background: #dc2626;
+      border-color: #dc2626;
+    }
+
+    .stat-card.priority-cut-queue {
+      border-color: #fed7aa;
+    }
+
+    .stat-card.priority-cut-queue .stat-val {
+      color: #ea580c;
+    }
+
+    .stat-card.priority-cut-queue.active {
+      background: #ea580c;
+      border-color: #ea580c;
+    }
+
+    .stat-card.priority-normal {
+      border-color: #dcfce7;
+    }
+
+    .stat-card.priority-normal .stat-val {
+      color: #16a34a;
+    }
+
+    .stat-card.priority-normal.active {
+      background: #16a34a;
+      border-color: #16a34a;
+    }
+
+    .stat-card.status-overdue {
+      border-color: #fee2e2;
+    }
+
+    .stat-card.status-overdue .stat-val {
+      color: #dc2626;
+    }
+
+    .stat-card.status-overdue.active {
+      background: #dc2626;
+      border-color: #dc2626;
+    }
+
+    .stat-card.status-almost {
+      border-color: #fef3c7;
+    }
+
+    .stat-card.status-almost .stat-val {
+      color: #b45309;
+    }
+
+    .stat-card.status-almost.active {
+      background: #b45309;
+      border-color: #b45309;
+    }
+
+    .stat-card.status-schedule {
+      border-color: #dcfce7;
+    }
+
+    .stat-card.status-schedule .stat-val {
+      color: #16a34a;
+    }
+
+    .stat-card.status-schedule.active {
+      background: #16a34a;
+      border-color: #16a34a;
+    }
+
+    /* Table Design */
+    .table-container {
+      padding: 0 25px 25px 25px;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      font-size: 0.85rem;
+      table-layout: fixed;
+    }
+
+    th {
+      background: #e2e8f0;
+      padding: 10px 4px;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: none;
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      transition: background 0.3s;
+      color: #374151;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    th:nth-child(1) {
+      width: 60px;
+    }
+
+    /* PSN */
+    th:nth-child(2) {
+      width: 75px;
+    }
+
+    /* PI Number */
+    th:nth-child(3) {
+      width: 60px;
+    }
+
+    /* Sales Code */
+    th:nth-child(4) {
+      width: 200px;
+      white-space: normal;
+    }
+
+    /* Job Name */
+    th:nth-child(5) {
+      width: 150px;
+      white-space: normal;
+    }
+
+    /* Job Type */
+    th:nth-child(6) {
+      width: 80px;
+    }
+
+    /* Quantity */
+    th:nth-child(7) {
+      width: 80px;
+    }
+
+    /* Order Date */
+    th:nth-child(8) {
+      width: 80px;
+    }
+
+    /* Delivery Date */
+    th:nth-child(9) {
+      width: 100px;
+    }
+
+    /* Item */
+    th:nth-child(10) {
+      width: 75px;
+    }
+
+    /* Priority */
+    th:nth-child(11) {
+      width: 100px;
+    }
+
+    /* Status */
+    th:nth-child(12) {
+      width: 80px;
+    }
+
+    /* Action */
+
+    th:hover {
+      background: #d1d5db;
+    }
+
+    .row-urgent {
+      background-color: #fee2e2;
+    }
+
+    .row-critical {
+      background-color: #f8d7da;
+    }
+
+    .row-warning {
+      background-color: #fef9c3;
+    }
+
+    .row-safe {
+      background-color: white;
+    }
+
+    .sort-icon {
+      display: inline-block;
+      margin-left: 8px;
+      font-size: 0.8rem;
+      color: #cbd5e1;
+    }
+
+    th.active-sort .sort-icon {
+      color: #1e40af;
+    }
+
+    td {
+      padding: 8px 4px;
+      border-bottom: 1px solid #f3f4f6;
+      transition: background 0.2s;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    td:nth-child(4),
+    td:nth-child(5) {
+      white-space: normal;
+      word-wrap: break-word;
+    }
+
+    tr:hover {
+      background: linear-gradient(90deg, #f9fafb, #f3f4f6);
+    }
+
+    /* Status Pills */
+    .pill {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: 500;
+      font-size: 0.75rem;
+    }
+
+    .pill-overdue {
+      background: #fee2e2;
+      color: var(--danger);
+    }
+
+    .pill-almost {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .pill-normal {
+      background: #dcfce7;
+      color: var(--success);
+    }
+
+    .pill-urgent {
+      background: #fee2e2;
+      color: var(--danger);
+    }
+
+    .pill-cut-queue {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .pill-normal-priority {
+      background: #dcfce7;
+      color: var(--success);
+    }
+
+    /* Action Button */
+    .action-btn {
+      background: #475569;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: 0.2s;
+    }
+
+    .action-btn:hover {
+      background: linear-gradient(135deg, #5568d3 0%, #653a91 100%);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    /* Filters */
+    .filters {
+      display: flex;
+      gap: 10px;
+      padding: 1rem 2rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-select {
+      padding: 8px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+
+    .search-input {
+      padding: 8px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      width: 250px;
+    }
+
+    /* Loading */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.8);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 1024px) {
       .main-wrapper {
-        margin-left: var(--sidebar-width);
-        min-height: 100vh;
-        transition: margin-left 0.3s ease;
-      }
-
-      .dashboard-header {
-        background: white;
-        color: black;
-        padding: 2rem 2rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid #e2e8f0;
-        position: sticky;
-        top: 0;
-        z-index: 100;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      }
-
-      .dashboard-header h1 {
-        margin: 0;
-        font-size: 2.5rem;
-        font-weight: 700;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-      }
-
-      .dashboard-header .header-right {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-      }
-
-      .dashboard-header .header-right .filter-select,
-      .dashboard-header .header-right .search-input {
-        background: white;
-        color: #1f2937;
-      }
-
-      /* Sticky Filters Bar */
-      .filters {
-        display: flex;
-        gap: 12px;
-        padding: 1rem 2rem;
-        flex-wrap: wrap;
-        background: white;
-        position: sticky;
-        top: 67px;
-        z-index: 99;
-        border-bottom: 1px solid #e2e8f0;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        margin-left: 0;
       }
 
       .stats-bar {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        padding: 1.5rem 2rem;
+        grid-template-columns: repeat(2, 1fr);
       }
+    }
 
-      .stats-section {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.8rem;
-        align-items: center;
+    /* Toast */
+    #toast {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #333;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      z-index: 2000;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(2px);
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 16px;
+      padding: 0;
+      max-width: 550px;
+      width: 90%;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      animation: modalSlideIn 0.3s ease-out;
+    }
+
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
       }
-
-      .stats-section-title {
-        font-weight: 700;
-        margin-right: 0.8rem;
-        min-width: 130px;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.95rem;
-        text-transform: uppercase;
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
       }
-
-      .stat-card {
-        width: 100px;
-        min-width: 100px;
-        height: 70px;
-        background: white;
-        padding: 0.5rem 0.8rem;
-        border-radius: 6px;
-        border: 2px solid #e0e7f0;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.25s ease;
-        position: relative;
-        overflow: hidden;
-      }
-
-      .stat-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
-      }
-
-      .stat-card.active {
-        color: white;
-        transform: scale(1.02);
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-      }
-
-      .stat-card.active .stat-val,
-      .stat-card.active .stat-label {
-        color: white !important;
-      }
-
-      .stat-val {
-        font-size: 1.2rem;
-        font-weight: bold;
-        margin-bottom: 0.2rem;
-      }
-
-      .stat-label {
-        font-size: 0.65rem;
-        text-transform: uppercase;
-        opacity: 0.85;
-        font-weight: 600;
-      }
-
-      /* Color schemes for different stat categories */
-      .stat-card.sales-normal { border-color: #e0e7ff; }
-      .stat-card.sales-normal .stat-val { color: #4f46e5; }
-      .stat-card.sales-active { background: #4f46e5; border-color: #4f46e5; color: white; }
-      .stat-card.sales-active .stat-val { color: white; }
-
-      .stat-card.priority-urgent { border-color: #fee2e2; }
-      .stat-card.priority-urgent .stat-val { color: #dc2626; }
-      .stat-card.priority-urgent.active { background: #dc2626; border-color: #dc2626; }
-
-      .stat-card.priority-cut-queue { border-color: #fed7aa; }
-      .stat-card.priority-cut-queue .stat-val { color: #ea580c; }
-      .stat-card.priority-cut-queue.active { background: #ea580c; border-color: #ea580c; }
-
-      .stat-card.priority-normal { border-color: #dcfce7; }
-      .stat-card.priority-normal .stat-val { color: #16a34a; }
-      .stat-card.priority-normal.active { background: #16a34a; border-color: #16a34a; }
-
-      .stat-card.status-overdue { border-color: #fee2e2; }
-      .stat-card.status-overdue .stat-val { color: #dc2626; }
-      .stat-card.status-overdue.active { background: #dc2626; border-color: #dc2626; }
-
-      .stat-card.status-almost { border-color: #fef3c7; }
-      .stat-card.status-almost .stat-val { color: #b45309; }
-      .stat-card.status-almost.active { background: #b45309; border-color: #b45309; }
-
-      .stat-card.status-schedule { border-color: #dcfce7; }
-      .stat-card.status-schedule .stat-val { color: #16a34a; }
-      .stat-card.status-schedule.active { background: #16a34a; border-color: #16a34a; }
-
-      /* Table Design */
-      .table-container {
-        padding: 0 25px 25px 25px;
-        overflow-x: auto;
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        background: white;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        font-size: 0.85rem;
-        table-layout: fixed;
-      }
-
-      th {
-        background: #e2e8f0;
-        padding: 10px 4px;
-        text-align: left;
-        font-weight: 600;
-        border-bottom: none;
-        cursor: pointer;
-        user-select: none;
-        position: relative;
-        transition: background 0.3s;
-        color: #374151;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      th:nth-child(1) { width: 60px; } /* PSN */
-      th:nth-child(2) { width: 75px; } /* PI Number */
-      th:nth-child(3) { width: 60px; } /* Sales Code */
-      th:nth-child(4) { width: 200px; white-space: normal; } /* Job Name */
-      th:nth-child(5) { width: 150px; white-space: normal; } /* Job Type */
-      th:nth-child(6) { width: 80px; } /* Quantity */
-      th:nth-child(7) { width: 80px; } /* Order Date */
-      th:nth-child(8) { width: 80px; } /* Delivery Date */
-      th:nth-child(9) { width: 100px; } /* Item */
-      th:nth-child(10) { width: 75px; } /* Priority */
-      th:nth-child(11) { width: 100px; } /* Status */
-      th:nth-child(12) { width: 80px; } /* Action */
-
-      th:hover {
-        background: #d1d5db;
-      }
-
-      .row-urgent {
-        background-color: #fee2e2;
-      }
-
-      .row-critical {
-        background-color: #f8d7da;
-      }
-
-      .row-warning {
-        background-color: #fef9c3;
-      }
-
-      .row-safe {
-        background-color: white;
-      }
-
-      .sort-icon {
-        display: inline-block;
-        margin-left: 8px;
-        font-size: 0.8rem;
-        color: #cbd5e1;
-      }
-
-      th.active-sort .sort-icon {
-        color: #1e40af;
-      }
-
-      td {
-        padding: 8px 4px;
-        border-bottom: 1px solid #f3f4f6;
-        transition: background 0.2s;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      td:nth-child(4), td:nth-child(5) {
-        white-space: normal;
-        word-wrap: break-word;
-      }
-
-      tr:hover {
-        background: linear-gradient(90deg, #f9fafb, #f3f4f6);
-      }
-
-      /* Status Pills */
-      .pill {
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-weight: 500;
-        font-size: 0.75rem;
-      }
-
-      .pill-overdue {
-        background: #fee2e2;
-        color: var(--danger);
-      }
-
-      .pill-almost {
-        background: #fef3c7;
-        color: #92400e;
-      }
-
-      .pill-normal {
-        background: #dcfce7;
-        color: var(--success);
-      }
-
-      .pill-urgent {
-        background: #fee2e2;
-        color: var(--danger);
-      }
-
-      .pill-cut-queue {
-        background: #fef3c7;
-        color: #92400e;
-      }
-
-      .pill-normal-priority {
-        background: #dcfce7;
-        color: var(--success);
-      }
-
-      /* Action Button */
-      .action-btn {
-        background: var(--primary);
-        color: white;
-        border: none;
-        padding: 6px 12px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 0.8rem;
-        transition: 0.2s;
-      }
-
-      .action-btn:hover {
-        background: #1d4ed8;
-      }
-
-      /* Filters */
-      .filters {
-        display: flex;
-        gap: 10px;
-        padding: 1rem 2rem;
-        flex-wrap: wrap;
-      }
-
-      .filter-select {
-        padding: 8px 12px;
-        border: 1px solid #cbd5e1;
-        border-radius: 4px;
-        font-size: 0.9rem;
-      }
-
-      .search-input {
-        padding: 8px 12px;
-        border: 1px solid #cbd5e1;
-        border-radius: 4px;
-        font-size: 0.9rem;
-        width: 250px;
-      }
-
-      /* Loading */
-      .loading-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(255, 255, 255, 0.8);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-      }
-
-      /* Mobile Responsiveness */
-      @media (max-width: 1024px) {
-        .main-wrapper {
-          margin-left: 0;
-        }
-
-        .stats-bar {
-          grid-template-columns: repeat(2, 1fr);
-        }
-      }
-
-      /* Toast */
-      #toast {
-        display: none;
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        background: #333;
-        color: white;
-        padding: 12px 24px;
-        border-radius: 8px;
-        z-index: 2000;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      }
-
-      /* Modal Styles */
-      .modal-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 1000;
-        justify-content: center;
-        align-items: center;
-      }
-
-      .modal-overlay.show {
-        display: flex;
-      }
-
-      .modal-content {
-        background: white;
-        border-radius: 12px;
-        padding: 0;
-        max-width: 400px;
-        width: 90%;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-      }
-
-      .modal-header {
-        background: #f8fafc;
-        padding: 1.5rem;
-        border-bottom: 1px solid #e2e8f0;
-        font-size: 1.2rem;
-        font-weight: 600;
-        color: #1e293b;
-        border-radius: 12px 12px 0 0;
-      }
-
-      .priority-options {
-        display: flex;
-        gap: 0.5rem;
-        padding: 1.5rem;
-        justify-content: center;
-      }
-
-      .priority-btn {
-        padding: 0.75rem 1rem;
-        border: none;
-        border-radius: 8px;
-        font-size: 0.9rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s;
-        flex: 1;
-      }
-
-      .priority-btn.urgent {
-        background: #fee2e2;
-        color: #dc2626;
-      }
-
-      .priority-btn.urgent:hover {
-        background: #fecaca;
-      }
-
-      .priority-btn.cut-queue {
-        background: #fed7aa;
-        color: #ea580c;
-      }
-
-      .priority-btn.cut-queue:hover {
-        background: #fdba74;
-      }
-
-      .priority-btn.normal {
-        background: #dcfce7;
-        color: #16a34a;
-      }
-
-      .priority-btn.normal:hover {
-        background: #bbf7d0;
-      }
-
-      .modal-actions {
-        padding: 1rem 1.5rem 1.5rem;
-        text-align: right;
-      }
-
-      .btn-cancel {
-        background: #e2e8f0;
-        color: #64748b;
-        border: none;
-        padding: 0.5rem 1rem;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 0.9rem;
-      }
-
-      .btn-cancel:hover {
-        background: #cbd5e1;
-      }
-    </style>
-  </head>
-
-  <body>
-    <div id="sidebar-container"></div>
-    <script>
-      fetch('/Sidebar.html')
-        .then(r => r.text())
-        .then(html => {
-          document.getElementById('sidebar-container').innerHTML = html;
-
-          // ✅ RUN AFTER sidebar is inserted
-          const currentPage = window.location.pathname
-            .split('/')
-            .pop()
-            .replace('.html', '')
-            .toLowerCase();
-
-          document.querySelectorAll('.nav-link').forEach(link => {
-            const page = link.dataset.page.toLowerCase();
-
-            if (page === currentPage) {
-              link.classList.add('active');
-            }
-          });
-        })
-        .catch(console.error);
-    </script>
-
-    <div class="main-wrapper">
-      <div class="dashboard-header">
-        <h1>Job Dashboard</h1>
-        <div class="header-right">
-          <input type="text" id="searchInput" class="search-input" placeholder="Search PSN or Job Name..." onkeyup="filterTable()">
-          <select id="priorityFilter" class="filter-select" onchange="filterTable()">
-            <option value="">All Priorities</option>
-            <option value="Urgent">Urgent</option>
-            <option value="Cut Queue">Cut Queue</option>
-            <option value="Normal">Normal</option>
-          </select>
-          <select id="statusFilter" class="filter-select" onchange="filterTable()">
-            <option value="">All Statuses</option>
-            <option value="OVERDUE">OVERDUE</option>
-            <option value="ALMOST DUE">ALMOST DUE</option>
-            <option value="ON SCHEDULE">ON SCHEDULE</option>
-          </select>
-          <button class="action-btn" id="clearFiltersBtn" onclick="clearFilters()">Clear Filters</button>
-        </div>
-      </div>
-
-      <div class="stats-bar" id="statsBar"></div>
-
-      <div class="table-container">
-        <table id="jobTable">
-          <thead>
-            <tr>
-              <th onclick="sortTable('PSN')">PSN<span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('PI Number')">PI Num<span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('salesCode')">S-Code<span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('Job Name')">Job Name<span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('Job Type')">Job Type<span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('Quantity')">Quantity<span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('Order Date')">Ord-Date<span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('Delivery Date')">Del-Date <span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('Item')">Item<span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('Priority')">Priority<span class="sort-icon">↕</span></th>
-              <th onclick="sortTable('Status')">Status<span class="sort-icon">↕</span></th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="jobTableBody">
-            <tr>
-              <td colspan="12" style="text-align:center; padding: 40px;">Loading data...</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div id="toast"></div>
-
-    <!-- Priority Edit Modal -->
-    <div id="priorityModal" class="modal-overlay">
-      <div class="modal-content">
-        <div class="modal-header">📋 Edit Job Priority</div>
-        <div id="priorityInfo" style="background: #f1f5f9; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem;"></div>
-        <div class="priority-options">
-          <button class="priority-btn urgent" onclick="savePriority('Urgent')">🔴 Urgent</button>
-          <button class="priority-btn cut-queue" onclick="savePriority('Cut Queue')">🟠 Cut Queue</button>
-          <button class="priority-btn normal" onclick="savePriority('Normal')">🟢 Normal</button> 
-        </div>
-        <div class="modal-actions">
-          <button class="btn-cancel" onclick="closePriorityModal()">Cancel</button>
-        </div>
-      </div>
-    </div>
-
-    <script>
-      let MASTER_DATA = [];
-      let currentSort = { column: null, direction: 'asc' };
-      let activeFilters = { 
-        salesCodes: new Set(), 
-        priorities: new Set(), 
-        statuses: new Set(), 
-        search: '' 
-      };
-      let currentEditingPsn = null;
-
-      window.onload = fetchData;
-
-      async function fetchData() {
-        try {
-          const resp = await fetch('/api/jobListing');
-          const data = await resp.json();
-          MASTER_DATA = data || [];
-          renderStats();
-          renderTable();
-          
-        } catch (error) {
-          console.error('Error fetching data:', error);
-          
-          showToast('Failed to load data');
-        }
-      }
-      function parseDate(dateStr) {
-        if (dateStr === undefined || dateStr === null || dateStr === '' || dateStr === '-') return null;
-
-        // Excel serial date handling (numeric value or numeric string)
-        const serialNum = Number(dateStr);
-        if (!isNaN(serialNum) && serialNum > 0) {
-          // Excel serial number: 1 => 1900-01-01 (using 1899-12-30 base)
-          const excelEpoch = new Date(1899, 11, 30);
-          return new Date(excelEpoch.getTime() + serialNum * 86400000);
-        }
-
-        const rawStr = String(dateStr).trim();
-
-        // dd/mm/yyyy or d/m/yyyy
-        const slashParts = rawStr.split('/');
-        if (slashParts.length === 3) {
-          const [d, m, y] = slashParts.map(Number);
-          if (!isNaN(d) && !isNaN(m) && !isNaN(y)) {
-            return new Date(y, m - 1, d);
+    }
+
+    .large-modal {
+      max-width: 550px;
+    }
+
+    /* Confirmation Dialog Styles */
+    .confirm-dialog {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1100;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .confirm-dialog.show {
+      display: flex;
+    }
+
+    .confirm-dialog-content {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      text-align: center;
+    }
+
+    .confirm-dialog-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .confirm-dialog-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 0.5rem;
+    }
+
+    .confirm-dialog-message {
+      font-size: 0.95rem;
+      color: #64748b;
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+
+    .confirm-dialog-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .confirm-btn-cancel {
+      background: #e2e8f0;
+      color: #64748b;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    .confirm-btn-cancel:hover {
+      background: #cbd5e1;
+    }
+
+    .confirm-btn-ok {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    .confirm-btn-ok:hover {
+      background: #dc2626;
+    }
+
+    .modal-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 16px 16px 0 0;
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .job-summary {
+      background: #f8fafc;
+      padding: 1.5rem;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .job-summary-item {
+      text-align: left;
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+    }
+
+    .job-summary-label {
+      font-size: 0.9rem;
+      color: #64748b;
+      font-weight: 600;
+      min-width: max-content;
+    }
+
+    .job-summary-value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: rgb(0, 0, 0);
+      word-wrap: break-word;
+      flex: 1;
+    }
+
+    .edit-form {
+      padding: 1.5rem;
+    }
+
+    .form-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #374151;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .button-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .option-btn {
+      padding: 0.65rem 0.75rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      background: white;
+      color: #374151;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+      word-wrap: break-word;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .option-btn:hover {
+      border-color: #667eea;
+      background: #f0f4ff;
+      color: #667eea;
+    }
+
+    .option-btn.selected {
+      background: #667eea;
+      border-color: #667eea;
+      color: white;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+      color: #374151;
+      font-size: 1rem;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 0.75rem 0.875rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      transition: border-color 0.2s;
+      box-sizing: border-box;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .sales-code-locked {
+      width: 100%;
+      padding: 0.75rem 0.875rem;
+      border: 2px solid #d1d5db;
+      border-radius: 8px;
+      background: #f9fafb;
+      color: #6b7280;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      box-sizing: border-box;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .sales-code-locked:hover {
+      background: #f3f4f6;
+      border-color: #9ca3af;
+    }
+
+    .sales-code-select {
+      width: 100%;
+      padding: 0.75rem 0.875rem;
+      border: 2px solid #667eea;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      background: white;
+      box-sizing: border-box;
+    }
+
+    .modal-actions {
+      padding: 1.5rem 2rem 2rem;
+      text-align: right;
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      border-top: 1px solid #e2e8f0;
+      background: #f8fafc;
+    }
+
+    .btn-unlock {
+      background: #f59e0b;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    .btn-unlock:hover {
+      background: #d97706;
+    }
+
+    .btn-save {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn-save:hover {
+      background: linear-gradient(135deg, #5568d3 0%, #653a91 100%);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-cancel {
+      background: #e2e8f0;
+      color: #64748b;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    .btn-cancel:hover {
+      background: #cbd5e1;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="sidebar-container"></div>
+  <script>
+    fetch('/Sidebar.html')
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById('sidebar-container').innerHTML = html;
+
+        // ✅ RUN AFTER sidebar is inserted
+        const currentPage = window.location.pathname
+          .split('/')
+          .pop()
+          .replace('.html', '')
+          .toLowerCase();
+
+        document.querySelectorAll('.nav-link').forEach(link => {
+          const page = link.dataset.page.toLowerCase();
+
+          if (page === currentPage) {
+            link.classList.add('active');
           }
-        }
+        });
+      })
+      .catch(console.error);
+  </script>
 
-        // yyyy-mm-dd or other parseable format
-        const parsed = new Date(rawStr);
-        return isNaN(parsed.getTime()) ? null : parsed;
+  <div class="main-wrapper">
+    <div class="dashboard-header">
+      <h1>Job Dashboard</h1>
+      <div class="header-right">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search PSN or Job Name..."
+          onkeyup="filterTable()">
+        <select id="priorityFilter" class="filter-select" onchange="filterTable()">
+          <option value="">All Priorities</option>
+          <option value="Urgent">Urgent</option>
+          <option value="Cut Queue">Cut Queue</option>
+          <option value="Normal">Normal</option>
+        </select>
+        <select id="statusFilter" class="filter-select" onchange="filterTable()">
+          <option value="">All Statuses</option>
+          <option value="OVERDUE">OVERDUE</option>
+          <option value="ALMOST DUE">ALMOST DUE</option>
+          <option value="ON SCHEDULE">ON SCHEDULE</option>
+        </select>
+        <button class="action-btn" id="clearFiltersBtn" onclick="clearFilters()">Clear Filters</button>
+      </div>
+    </div>
+
+    <div class="stats-bar" id="statsBar"></div>
+
+    <div class="table-container">
+      <table id="jobTable">
+        <thead>
+          <tr>
+            <th onclick="sortTable('PSN')">PSN<span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('PI Number')">PI Num<span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('salesCode')">S-Code<span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('Job Name')">Job Name<span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('Job Type')">Job Type<span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('Quantity')">Quantity<span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('Order Date')">Ord-Date<span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('Delivery Date')">Del-Date <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('Item')">Item<span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('Priority')">Priority<span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('Status')">Status<span class="sort-icon">↕</span></th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="jobTableBody">
+          <tr>
+            <td colspan="12" style="text-align:center; padding: 40px;">Loading data...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <!-- Confirmation Dialog -->
+  <div id="confirmDialog" class="confirm-dialog">
+    <div class="confirm-dialog-content">
+      <div class="confirm-dialog-icon" id="confirmIcon">⚠️</div>
+      <div class="confirm-dialog-title" id="confirmTitle">Confirm Action</div>
+      <div class="confirm-dialog-message" id="confirmMessage">Are you sure?</div>
+      <div class="confirm-dialog-buttons">
+        <button class="confirm-btn-cancel" onclick="cancelConfirmDialog()">Cancel</button>
+        <button class="confirm-btn-ok" id="confirmOkBtn" onclick="confirmDialogAction()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Priority Edit Modal -->
+  <div id="priorityModal" class="modal-overlay">
+    <div class="modal-content large-modal">
+      <div class="modal-header">✏️ Edit Job Details</div>
+      
+      <div class="job-summary">
+        <div class="job-summary-item">
+          <div class="job-summary-label">PSN :</div>
+          <div class="job-summary-value" id="summaryPsn">-</div>
+        </div>
+        <div class="job-summary-item">
+          <div class="job-summary-label">Job Name :</div>
+          <div class="job-summary-value" id="summaryJobName">-</div>
+        </div>
+      </div>
+
+      <div class="edit-form">
+        <div class="form-section">
+          <div class="form-section-title">🏭 Job Type</div>
+          <div class="button-grid" id="jobTypeButtons">
+            <!-- Buttons will be generated here -->
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">📦 Item</div>
+          <div class="form-group">
+            <input type="text" id="editItem" placeholder="Enter item name">
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">⚡ Priority</div>
+          <div class="button-grid" id="priorityButtons">
+            <!-- Buttons will be generated here -->
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">🏢 Sales Code</div>
+          <div class="form-group">
+            <div id="salesCodeContainer">
+              <div class="sales-code-locked" onclick="unlockSalesCode()">🔒 Click to Unlock Sales Code</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closePriorityModal()">Cancel</button>
+        <button id="saveBtn" class="btn-save" onclick="saveJobDetails()">💾 Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let MASTER_DATA = [];
+    let currentSort = { column: null, direction: 'asc' };
+    let activeFilters = {
+      salesCodes: new Set(),
+      priorities: new Set(),
+      statuses: new Set(),
+      search: ''
+    };
+    let currentEditingPsn = null;
+    let currentJobData = {};
+    let pendingConfirmAction = null;
+
+    window.onload = fetchData;
+
+    async function fetchData() {
+      try {
+        const resp = await fetch('/api/jobListing');
+        const data = await resp.json();
+        MASTER_DATA = data || [];
+        renderStats();
+        renderTable();
+
+      } catch (error) {
+        console.error('Error fetching data:', error);
+
+        showToast('Failed to load data');
+      }
+    }
+    function parseDate(dateStr) {
+      if (dateStr === undefined || dateStr === null || dateStr === '' || dateStr === '-') return null;
+
+      // Excel serial date handling (numeric value or numeric string)
+      const serialNum = Number(dateStr);
+      if (!isNaN(serialNum) && serialNum > 0) {
+        // Excel serial number: 1 => 1900-01-01 (using 1899-12-30 base)
+        const excelEpoch = new Date(1899, 11, 30);
+        return new Date(excelEpoch.getTime() + serialNum * 86400000);
       }
 
-      function renderStats() {
-        const stats = {
-          salesCodes: {},
-          priorities: { Urgent: 0, 'Cut Queue': 0, Normal: 0 },
-          statuses: { OVERDUE: 0, 'ALMOST DUE': 0, 'ON SCHEDULE': 0 }
-        };
+      const rawStr = String(dateStr).trim();
 
-        MASTER_DATA.forEach(job => {
-          const salesCode = job.salesCode || job.Sales_Code || job.code || 'Unknown';
-          stats.salesCodes[salesCode] = (stats.salesCodes[salesCode] || 0) + 1;
-          const priority = job.Priority || 'Normal';
-          if (stats.priorities[priority] !== undefined) stats.priorities[priority]++;
-          const status = calculateStatus(job['Delivery Date'] || job.Delivery_Date || job.deliveryDate);
-          stats.statuses[status] = (stats.statuses[status] || 0) + 1;
-        });
+      // dd/mm/yyyy or d/m/yyyy
+      const slashParts = rawStr.split('/');
+      if (slashParts.length === 3) {
+        const [d, m, y] = slashParts.map(Number);
+        if (!isNaN(d) && !isNaN(m) && !isNaN(y)) {
+          return new Date(y, m - 1, d);
+        }
+      }
 
-        const statsBar = document.getElementById('statsBar');
-        statsBar.innerHTML = '';
+      // yyyy-mm-dd or other parseable format
+      const parsed = new Date(rawStr);
+      return isNaN(parsed.getTime()) ? null : parsed;
+    }
 
-        // Sales codes section
-        const salesSection = document.createElement('div');
-        salesSection.className = 'stats-section';
-        salesSection.innerHTML = '<div class="stats-section-title" style="color: #4f46e5;">Sales Codes</div>';
-        const allCodes = ['AO', 'SHU', 'NT', 'AK', 'NY', 'OC', 'PAO', 'PNY', 'SO', 'SC'];
-        allCodes.forEach(code => {
-          const count = stats.salesCodes[code] || 0;
-          const isActive = activeFilters.salesCodes.has(code);
-          const card = document.createElement('div');
-          card.className = `stat-card sales-normal ${isActive ? 'sales-active active' : ''}`;
-          card.onclick = () => toggleFilter('salesCodes', code);
-          card.innerHTML = `
+    function renderStats() {
+      const stats = {
+        salesCodes: {},
+        priorities: { Urgent: 0, 'Cut Queue': 0, Normal: 0 },
+        statuses: { OVERDUE: 0, 'ALMOST DUE': 0, 'ON SCHEDULE': 0 }
+      };
+
+      MASTER_DATA.forEach(job => {
+        const salesCode = job.salesCode || job.Sales_Code || job.code || 'Unknown';
+        stats.salesCodes[salesCode] = (stats.salesCodes[salesCode] || 0) + 1;
+        const priority = job.Priority || 'Normal';
+        if (stats.priorities[priority] !== undefined) stats.priorities[priority]++;
+        const status = calculateStatus(job['Delivery Date'] || job.Delivery_Date || job.deliveryDate);
+        stats.statuses[status] = (stats.statuses[status] || 0) + 1;
+      });
+
+      const statsBar = document.getElementById('statsBar');
+      statsBar.innerHTML = '';
+
+      // Sales codes section
+      const salesSection = document.createElement('div');
+      salesSection.className = 'stats-section';
+      salesSection.innerHTML = '<div class="stats-section-title" style="color: #4f46e5;">Sales Codes</div>';
+      const allCodes = ['AO', 'SHU', 'NT', 'AK', 'NY', 'OC', 'PAO', 'PNY', 'SO', 'SC'];
+      allCodes.forEach(code => {
+        const count = stats.salesCodes[code] || 0;
+        const isActive = activeFilters.salesCodes.has(code);
+        const card = document.createElement('div');
+        card.className = `stat-card sales-normal ${isActive ? 'sales-active active' : ''}`;
+        card.onclick = () => toggleFilter('salesCodes', code);
+        card.innerHTML = `
             <div class="stat-val">${count}</div>
             <div class="stat-label">${code}</div>
           `;
-          salesSection.appendChild(card);
-        });
-        statsBar.appendChild(salesSection);
+        salesSection.appendChild(card);
+      });
+      statsBar.appendChild(salesSection);
 
-        // Priorities section
-        const prioritySection = document.createElement('div');
-        prioritySection.className = 'stats-section';
-        prioritySection.innerHTML = '<div class="stats-section-title" style="color: #dc2626;">Priorities</div>';
-        const priorityColors = { 'Urgent': 'priority-urgent', 'Cut Queue': 'priority-cut-queue', 'Normal': 'priority-normal' };
-        Object.entries(stats.priorities).forEach(([priority, count]) => {
-          const isActive = activeFilters.priorities.has(priority);
-          const card = document.createElement('div');
-          card.className = `stat-card ${priorityColors[priority]} ${isActive ? 'active' : ''}`;
-          card.onclick = () => toggleFilter('priorities', priority);
-          card.innerHTML = `
+      // Priorities section
+      const prioritySection = document.createElement('div');
+      prioritySection.className = 'stats-section';
+      prioritySection.innerHTML = '<div class="stats-section-title" style="color: #dc2626;">Priorities</div>';
+      const priorityColors = { 'Urgent': 'priority-urgent', 'Cut Queue': 'priority-cut-queue', 'Normal': 'priority-normal' };
+      Object.entries(stats.priorities).forEach(([priority, count]) => {
+        const isActive = activeFilters.priorities.has(priority);
+        const card = document.createElement('div');
+        card.className = `stat-card ${priorityColors[priority]} ${isActive ? 'active' : ''}`;
+        card.onclick = () => toggleFilter('priorities', priority);
+        card.innerHTML = `
             <div class="stat-val">${count}</div>
             <div class="stat-label">${priority}</div>
           `;
-          prioritySection.appendChild(card);
-        });
-        statsBar.appendChild(prioritySection);
+        prioritySection.appendChild(card);
+      });
+      statsBar.appendChild(prioritySection);
 
-        // Statuses section
-        const statusSection = document.createElement('div');
-        statusSection.className = 'stats-section';
-        statusSection.innerHTML = '<div class="stats-section-title" style="color: #b45309;">Statuses</div>';
-        const statusColors = { 'OVERDUE': 'status-overdue', 'ALMOST DUE': 'status-almost', 'ON SCHEDULE': 'status-schedule' };
-        Object.entries(stats.statuses).forEach(([status, count]) => {
-          const isActive = activeFilters.statuses.has(status);
-          const card = document.createElement('div');
-          card.className = `stat-card ${statusColors[status]} ${isActive ? 'active' : ''}`;
-          card.onclick = () => toggleFilter('statuses', status);
-          card.innerHTML = `
+      // Statuses section
+      const statusSection = document.createElement('div');
+      statusSection.className = 'stats-section';
+      statusSection.innerHTML = '<div class="stats-section-title" style="color: #b45309;">Statuses</div>';
+      const statusColors = { 'OVERDUE': 'status-overdue', 'ALMOST DUE': 'status-almost', 'ON SCHEDULE': 'status-schedule' };
+      Object.entries(stats.statuses).forEach(([status, count]) => {
+        const isActive = activeFilters.statuses.has(status);
+        const card = document.createElement('div');
+        card.className = `stat-card ${statusColors[status]} ${isActive ? 'active' : ''}`;
+        card.onclick = () => toggleFilter('statuses', status);
+        card.innerHTML = `
             <div class="stat-val">${count}</div>
             <div class="stat-label">${status}</div>
           `;
-          statusSection.appendChild(card);
-        });
-        statsBar.appendChild(statusSection);
+        statusSection.appendChild(card);
+      });
+      statsBar.appendChild(statusSection);
+    }
+
+    function toggleFilter(filterType, value) {
+      if (activeFilters[filterType].has(value)) {
+        activeFilters[filterType].delete(value);
+      } else {
+        activeFilters[filterType].add(value);
       }
+      renderStats();
+      filterTable();
+    }
 
-      function toggleFilter(filterType, value) {
-        if (activeFilters[filterType].has(value)) {
-          activeFilters[filterType].delete(value);
-        } else {
-          activeFilters[filterType].add(value);
-        }
-        renderStats();
-        filterTable();
-      }
+    function setFilter(type, value) {
+      activeFilters[type] = value;
+      renderStats();
+      filterTable();
+    }
 
-      function setFilter(type, value) {
-        activeFilters[type] = value;
-        renderStats();
-        filterTable();
-      }
+    function calculateStatus(deliveryDate) {
+      if (!deliveryDate || deliveryDate === '-') return 'ON SCHEDULE';
+      const today = new Date();
+      const dueDate = parseDate(deliveryDate);
+      if (!dueDate) return 'ON SCHEDULE';
+      const daysDiff = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+      if (daysDiff < 0) return 'OVERDUE';
+      if (daysDiff <= 2) return 'ALMOST DUE';
+      return 'ON SCHEDULE';
+    }
 
-      function calculateStatus(deliveryDate) {
-        if (!deliveryDate || deliveryDate === '-') return 'ON SCHEDULE';
-        const today = new Date();
-        const dueDate = parseDate(deliveryDate);
-        if (!dueDate) return 'ON SCHEDULE';
-        const daysDiff = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
-        if (daysDiff < 0) return 'OVERDUE';
-        if (daysDiff <= 2) return 'ALMOST DUE';
-        return 'ON SCHEDULE';
-      }
+    function filterTable() {
+      activeFilters.search = (document.getElementById('searchInput').value || '').trim().toLowerCase();
 
-      function filterTable() {
-        activeFilters.search = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+      const prioritySelected = document.getElementById('priorityFilter').value;
+      const statusSelected = document.getElementById('statusFilter').value;
 
-        const prioritySelected = document.getElementById('priorityFilter').value;
-        const statusSelected = document.getElementById('statusFilter').value;
+      activeFilters.priorities = prioritySelected ? new Set([prioritySelected]) : new Set();
+      activeFilters.statuses = statusSelected ? new Set([statusSelected]) : new Set();
 
-        activeFilters.priorities = prioritySelected ? new Set([prioritySelected]) : new Set();
-        activeFilters.statuses = statusSelected ? new Set([statusSelected]) : new Set();
+      renderStats();
+      renderTable();
+    }
 
-        renderStats();
-        renderTable();
-      }
+    function getRowColorClass(job) {
+      const priority = job.Priority || 'Normal';
+      const status = calculateStatus(job['Delivery Date'] || job.Delivery_Date || job.deliveryDate);
 
-      function getRowColorClass(job) {
+      const isUrgent = priority === 'Urgent';
+      const isCutQueue = priority === 'Cut Queue';
+      const isOverdue = status === 'OVERDUE';
+      const isAlmost = status === 'ALMOST DUE';
+
+      if (isOverdue && isUrgent) return 'row-critical';
+      if (isOverdue || isUrgent) return 'row-urgent';
+      if (isAlmost || isCutQueue) return 'row-warning';
+      return 'row-safe';
+    }
+
+    function clearFilters() {
+      currentSort = { column: null, direction: 'asc' };
+      activeFilters = {
+        salesCodes: new Set(),
+        priorities: new Set(),
+        statuses: new Set(),
+        search: ''
+      };
+
+      document.getElementById('searchInput').value = '';
+      document.getElementById('priorityFilter').value = '';
+      document.getElementById('statusFilter').value = '';
+
+      renderStats();
+      updateSortIcons();
+      renderTable();
+    }
+
+    function getPriorityOrder(job) {
+      const priority = (job.Priority || 'Normal').toLowerCase();
+      const status = calculateStatus(job['Delivery Date'] || job.Delivery_Date || job.deliveryDate).toUpperCase();
+
+      const isUrgent = priority === 'urgent';
+      const isCutQueue = priority === 'cut queue';
+      const isOverdue = status === 'OVERDUE';
+      const isAlmost = status === 'ALMOST DUE';
+
+      if (isUrgent && isOverdue) return 0;
+      if (isUrgent) return 1;
+      if (isOverdue) return 2;
+      if (isAlmost) return 3;
+      if (isCutQueue) return 4;
+      return 5;
+    }
+
+    function compareByCurrentSort(a, b) {
+      if (!currentSort.column) return 0;
+
+      const map = {
+        'PSN': (x) => (x['Product Serial Number'] || x.PSN || '').toString().toLowerCase(),
+        'PI Number': (x) => (x['PI Number'] || x.PI_Number || x.pi || x.PI_No || '').toString().toLowerCase(),
+        'salesCode': (x) => (x.salesCode || x.Sales_Code || x.code || '').toString().toLowerCase(),
+        'Job Name': (x) => (x['Job Name'] || x.Job_Name || x.client || '').toString().toLowerCase(),
+        'Job Type': (x) => (x['Job Type'] || '').toString().toLowerCase(),
+        'Quantity': (x) => parseInt(x.Quantity) || 0,
+        'Order Date': (x) => parseDate(x['Order Date'] || x.Order_Date || x.orderDate) || new Date(0),
+        'Delivery Date': (x) => parseDate(x['Delivery Date'] || x.Delivery_Date || x.deliveryDate) || new Date(0),
+        'Item': (x) => (x.Item || '').toString().toLowerCase(),
+        'Priority': (x) => (x.Priority || 'Normal').toString().toLowerCase(),
+        'Status': (x) => (x.Status || 'ON SCHEDULE').toString().toLowerCase(),
+      };
+
+      const aVal = map[currentSort.column] ? map[currentSort.column](a) : (a[currentSort.column] || '').toString().toLowerCase();
+      const bVal = map[currentSort.column] ? map[currentSort.column](b) : (b[currentSort.column] || '').toString().toLowerCase();
+
+      if (aVal < bVal) return currentSort.direction === 'asc' ? -1 : 1;
+      if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
+      return 0;
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('jobTableBody');
+      let filteredData = MASTER_DATA.filter(job => {
+        const search = activeFilters.search || '';
+        const matchesSearch = !search ||
+          (job["Product Serial Number"] || job.PSN || '').toLowerCase().includes(search) ||
+          (job["Job Name"] || job.Job_Name || job.client || '').toLowerCase().includes(search);
+
+        const salesCode = job.salesCode || job.Sales_Code || job.code;
+        const matchesSalesCode = activeFilters.salesCodes.size === 0 || activeFilters.salesCodes.has(salesCode);
+
         const priority = job.Priority || 'Normal';
+        const matchesPriority = activeFilters.priorities.size === 0 || activeFilters.priorities.has(priority);
+
         const status = calculateStatus(job['Delivery Date'] || job.Delivery_Date || job.deliveryDate);
-        
-        const isUrgent = priority === 'Urgent';
-        const isCutQueue = priority === 'Cut Queue';
-        const isOverdue = status === 'OVERDUE';
-        const isAlmost = status === 'ALMOST DUE';
+        const matchesStatus = activeFilters.statuses.size === 0 || activeFilters.statuses.has(status);
 
-        if (isOverdue && isUrgent) return 'row-critical';
-        if (isOverdue || isUrgent) return 'row-urgent';
-        if (isAlmost || isCutQueue) return 'row-warning';
-        return 'row-safe';
+        return matchesSearch && matchesSalesCode && matchesPriority && matchesStatus;
+      });
+
+      // Apply business priority + overdue ordering first; then optional column sort
+      filteredData.sort((a, b) => {
+        const priorityDiff = getPriorityOrder(a) - getPriorityOrder(b);
+        if (priorityDiff !== 0) return priorityDiff;
+        return compareByCurrentSort(a, b);
+      });
+
+      tbody.innerHTML = '';
+
+      if (filteredData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="12" style="text-align:center; padding: 40px;">No matching jobs found.</td></tr>';
+        return;
       }
 
-      function clearFilters() {
-        currentSort = { column: null, direction: 'asc' };
-        activeFilters = {
-          salesCodes: new Set(),
-          priorities: new Set(),
-          statuses: new Set(),
-          search: ''
-        };
+      filteredData.forEach(job => {
+        const status = calculateStatus(job['Delivery Date'] || job.Delivery_Date || job.deliveryDate);
+        const statusClass = status === 'OVERDUE' ? 'pill-overdue' : status === 'ALMOST DUE' ? 'pill-almost' : 'pill-normal';
+        const priority = job.Priority || 'Normal';
+        const priorityClass = priority === 'Urgent' ? 'pill-urgent' : priority === 'Cut Queue' ? 'pill-cut-queue' : 'pill-normal-priority';
+        const rowClass = getRowColorClass(job);
 
-        document.getElementById('searchInput').value = '';
-        document.getElementById('priorityFilter').value = '';
-        document.getElementById('statusFilter').value = '';
-
-        renderStats();
-        updateSortIcons();
-        renderTable();
-      }
-
-      function getPriorityOrder(job) {
-        const priority = (job.Priority || 'Normal').toLowerCase();
-        const status = calculateStatus(job['Delivery Date'] || job.Delivery_Date || job.deliveryDate).toUpperCase();
-
-        const isUrgent = priority === 'urgent';
-        const isCutQueue = priority === 'cut queue';
-        const isOverdue = status === 'OVERDUE';
-        const isAlmost = status === 'ALMOST DUE';
-
-        if (isUrgent && isOverdue) return 0;
-        if (isUrgent) return 1;
-        if (isOverdue) return 2;
-        if (isAlmost) return 3;
-        if (isCutQueue) return 4;
-        return 5;
-      }
-
-      function compareByCurrentSort(a, b) {
-        if (!currentSort.column) return 0;
-
-        const map = {
-          'PSN': (x) => (x['Product Serial Number'] || x.PSN || '').toString().toLowerCase(),
-          'PI Number': (x) => (x['PI Number'] || x.PI_Number || x.pi || x.PI_No || '').toString().toLowerCase(),
-          'salesCode': (x) => (x.salesCode || x.Sales_Code || x.code || '').toString().toLowerCase(),
-          'Job Name': (x) => (x['Job Name'] || x.Job_Name || x.client || '').toString().toLowerCase(),
-          'Job Type': (x) => (x['Job Type'] || '').toString().toLowerCase(),
-          'Quantity': (x) => parseInt(x.Quantity) || 0,
-          'Order Date': (x) => parseDate(x['Order Date'] || x.Order_Date || x.orderDate) || new Date(0),
-          'Delivery Date': (x) => parseDate(x['Delivery Date'] || x.Delivery_Date || x.deliveryDate) || new Date(0),
-          'Item': (x) => (x.Item || '').toString().toLowerCase(),
-          'Priority': (x) => (x.Priority || 'Normal').toString().toLowerCase(),
-          'Status': (x) => (x.Status || 'ON SCHEDULE').toString().toLowerCase(),
-        };
-
-        const aVal = map[currentSort.column] ? map[currentSort.column](a) : (a[currentSort.column] || '').toString().toLowerCase();
-        const bVal = map[currentSort.column] ? map[currentSort.column](b) : (b[currentSort.column] || '').toString().toLowerCase();
-
-        if (aVal < bVal) return currentSort.direction === 'asc' ? -1 : 1;
-        if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
-        return 0;
-      }
-
-      function renderTable() {
-        const tbody = document.getElementById('jobTableBody');
-        let filteredData = MASTER_DATA.filter(job => {
-          const search = activeFilters.search || '';
-          const matchesSearch = !search ||
-            (job["Product Serial Number"] || job.PSN || '').toLowerCase().includes(search) ||
-            (job["Job Name"] || job.Job_Name || job.client || '').toLowerCase().includes(search);
-
-          const salesCode = job.salesCode || job.Sales_Code || job.code;
-          const matchesSalesCode = activeFilters.salesCodes.size === 0 || activeFilters.salesCodes.has(salesCode);
-          
-          const priority = job.Priority || 'Normal';
-          const matchesPriority = activeFilters.priorities.size === 0 || activeFilters.priorities.has(priority);
-          
-          const status = calculateStatus(job['Delivery Date'] || job.Delivery_Date || job.deliveryDate);
-          const matchesStatus = activeFilters.statuses.size === 0 || activeFilters.statuses.has(status);
-
-          return matchesSearch && matchesSalesCode && matchesPriority && matchesStatus;
-        });
-
-        // Apply business priority + overdue ordering first; then optional column sort
-        filteredData.sort((a, b) => {
-          const priorityDiff = getPriorityOrder(a) - getPriorityOrder(b);
-          if (priorityDiff !== 0) return priorityDiff;
-          return compareByCurrentSort(a, b);
-        });
-
-        tbody.innerHTML = '';
-
-        if (filteredData.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="12" style="text-align:center; padding: 40px;">No matching jobs found.</td></tr>';
-          return;
-        }
-
-        filteredData.forEach(job => {
-          const status = calculateStatus(job['Delivery Date'] || job.Delivery_Date || job.deliveryDate);
-          const statusClass = status === 'OVERDUE' ? 'pill-overdue' : status === 'ALMOST DUE' ? 'pill-almost' : 'pill-normal';
-          const priority = job.Priority || 'Normal';
-          const priorityClass = priority === 'Urgent' ? 'pill-urgent' : priority === 'Cut Queue' ? 'pill-cut-queue' : 'pill-normal-priority';
-          const rowClass = getRowColorClass(job);
-
-          const row = document.createElement('tr');
-          row.className = rowClass;
-          row.innerHTML = `
+        const row = document.createElement('tr');
+        row.className = rowClass;
+        row.innerHTML = `
             <td>${job["Product Serial Number"] || job.PSN || '-'}</td>
             <td>${job["PI Number"] || job.PI_Number || job.pi || job.PI_No || '-'}</td>
             <td>${job.salesCode || job.Sales_Code || job.code || '-'}</td>
@@ -885,85 +1312,201 @@
             <td><span class="pill ${statusClass}">${status}</span></td>
             <td><button class="action-btn" onclick="openPriorityModal('${job["Product Serial Number"] || job.PSN}')">Edit</button></td>
           `;
-          tbody.appendChild(row);
-        });
-      }
+        tbody.appendChild(row);
+      });
+    }
 
-      function formatDate(dateStr) {
-        if (!dateStr || dateStr === '-' || (typeof dateStr !== 'string' && typeof dateStr !== 'number')) return '-';
-        const date = parseDate(dateStr);
-        if (!date) return typeof dateStr === 'number' ? dateStr.toString() : dateStr;
-        return date.toLocaleDateString('en-GB'); // DD/MM/YYYY
-      }
+    function formatDate(dateStr) {
+      if (!dateStr || dateStr === '-' || (typeof dateStr !== 'string' && typeof dateStr !== 'number')) return '-';
+      const date = parseDate(dateStr);
+      if (!date) return typeof dateStr === 'number' ? dateStr.toString() : dateStr;
+      return date.toLocaleDateString('en-GB'); // DD/MM/YYYY
+    }
 
-      function sortTable(column) {
-        if (currentSort.column === column) {
-          currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
-        } else {
-          currentSort.column = column;
-          currentSort.direction = 'asc';
-        }
-        updateSortIcons();
-        renderTable();
+    function sortTable(column) {
+      if (currentSort.column === column) {
+        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        currentSort.column = column;
+        currentSort.direction = 'asc';
       }
+      updateSortIcons();
+      renderTable();
+    }
 
-      function updateSortIcons() {
-        document.querySelectorAll('th').forEach(th => {
-          th.classList.remove('active-sort');
+    function updateSortIcons() {
+      document.querySelectorAll('th').forEach(th => {
+        th.classList.remove('active-sort');
+        const icon = th.querySelector('.sort-icon');
+        if (icon) icon.textContent = '↕';
+      });
+
+      if (currentSort.column) {
+        const th = [...document.querySelectorAll('th')].find(th => th.textContent.includes(currentSort.column));
+        if (th) {
+          th.classList.add('active-sort');
           const icon = th.querySelector('.sort-icon');
-          if (icon) icon.textContent = '↕';
-        });
-
-        if (currentSort.column) {
-          const th = [...document.querySelectorAll('th')].find(th => th.textContent.includes(currentSort.column));
-          if (th) {
-            th.classList.add('active-sort');
-            const icon = th.querySelector('.sort-icon');
-            if (icon) icon.textContent = currentSort.direction === 'asc' ? '↑' : '↓';
-          }
+          if (icon) icon.textContent = currentSort.direction === 'asc' ? '↑' : '↓';
         }
       }
+    }
 
-      function openPriorityModal(psn) {
+    function openPriorityModal(psn) {
+      currentEditingPsn = psn;
+      const job = MASTER_DATA.find(j => {
+        const masterValue = String(j["Product Serial Number"] || j.PSN || "");
+        return masterValue === String(psn);
+      });
+      if (job) {
+        const jobName = job["Job Name"] || job.Job_Name || job.client || 'Unknown';
         
-        const job = MASTER_DATA.find(j => {
-          const masterValue = String(j["Product Serial Number"] || j.PSN || "");
-          return masterValue === String(psn);
+        // Update summary
+        document.getElementById('summaryPsn').textContent = psn;
+        document.getElementById('summaryJobName').textContent = jobName;
+        
+        // Generate Job Type buttons
+        const jobTypes = ['Offset', 'FSC', 'Flexo & MMB/SOS', 'Fully Outsourced', 'FSC Fully Outsourced', 'Drawdown'];
+        const jobTypeButtons = document.getElementById('jobTypeButtons');
+        jobTypeButtons.innerHTML = jobTypes.map(type => 
+          `<button class="option-btn ${job["Job Type"] === type ? 'selected' : ''}" onclick="selectJobType(this, '${type}')">${type}</button>`
+        ).join('');
+        
+        // Set Item input
+        document.getElementById('editItem').value = job.Item || '';
+        
+        // Generate Priority buttons
+        const priorities = ['Urgent', 'Cut Queue', 'Normal'];
+        const priorityButtons = document.getElementById('priorityButtons');
+        priorityButtons.innerHTML = priorities.map(priority => 
+          `<button class="option-btn ${job.Priority === priority ? 'selected' : ''}" onclick="selectPriority(this, '${priority}')">${priority}</button>`
+        ).join('');
+        
+        // Sales Code starts locked
+        document.getElementById('salesCodeContainer').innerHTML = '<div class="sales-code-locked" onclick="unlockSalesCode()">🔒 Click to Unlock Sales Code</div>';
+        
+        // Store current values
+        currentJobData = {
+          jobType: job["Job Type"] || '',
+          item: job.Item || '',
+          priority: job.Priority || 'Normal',
+          salesCode: job.salesCode || job.Sales_Code || ''
+        };
+        
+        document.getElementById('priorityModal').classList.add('show');
+      }
+    }
+
+    function selectJobType(button, type) {
+      // Remove selected class from all buttons
+      document.querySelectorAll('#jobTypeButtons .option-btn').forEach(btn => btn.classList.remove('selected'));
+      // Add selected to clicked button
+      button.classList.add('selected');
+      currentJobData.jobType = type;
+    }
+
+    function selectPriority(button, priority) {
+      // Remove selected class from all buttons
+      document.querySelectorAll('#priorityButtons .option-btn').forEach(btn => btn.classList.remove('selected'));
+      // Add selected to clicked button
+      button.classList.add('selected');
+      currentJobData.priority = priority;
+    }
+
+    function unlockSalesCode() {
+      showConfirmDialog(
+        '🔓 Unlock Sales Code',
+        'Are you sure you want to edit the Sales Code? This will modify the database.',
+        () => performUnlockSalesCode()
+      );
+    }
+
+    function performUnlockSalesCode() {
+      const container = document.getElementById('salesCodeContainer');
+      container.innerHTML = `
+        <select class="sales-code-select" id="editSalesCode">
+          <option value="AO">AO</option>
+          <option value="SHU">SHU</option>
+          <option value="NT">NT</option>
+          <option value="AK">AK</option>
+          <option value="NY">NY</option>
+          <option value="OC">OC</option>
+          <option value="PAO">PAO</option>
+          <option value="PNY">PNY</option>
+          <option value="SO">SO</option>
+          <option value="SC">SC</option>
+        </select>
+      `;
+      document.getElementById('editSalesCode').value = currentJobData.salesCode;
+    }
+
+    function showConfirmDialog(title, message, onConfirm) {
+      document.getElementById('confirmIcon').textContent = '⚠️';
+      document.getElementById('confirmTitle').textContent = title;
+      document.getElementById('confirmMessage').textContent = message;
+      pendingConfirmAction = onConfirm;
+      document.getElementById('confirmDialog').classList.add('show');
+    }
+
+    function confirmDialogAction() {
+      if (pendingConfirmAction) {
+        pendingConfirmAction();
+      }
+      cancelConfirmDialog();
+    }
+
+    function cancelConfirmDialog() {
+      document.getElementById('confirmDialog').classList.remove('show');
+      pendingConfirmAction = null;
+    }
+
+    function closePriorityModal() {
+      document.getElementById('priorityModal').classList.remove('show');
+      currentEditingPsn = null;
+      currentJobData = {};
+    }
+
+    function saveJobDetails() {
+      const salesCodeSelect = document.getElementById('editSalesCode');
+      const updatedData = {
+        psn: currentEditingPsn,
+        jobType: currentJobData.jobType,
+        item: document.getElementById('editItem').value,
+        priority: currentJobData.priority,
+        salesCode: salesCodeSelect ? salesCodeSelect.value : currentJobData.salesCode
+      };
+
+      // Send to API
+      fetch('/api/updateJobListing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedData)
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            showToast('✅ Job details updated successfully');
+            closePriorityModal();
+            fetchData(); // Refresh the data
+          } else {
+            showToast('❌ Failed to update: ' + (data.error || 'Unknown error'));
+          }
+        })
+        .catch(error => {
+          console.error('Error updating job:', error);
+          showToast('❌ Network error while updating');
         });
-     
-        if (job) {
-          const jobName = job["Job Name"] || job.Job_Name || job.client || 'Unknown';
-          const currentPriority = job.Priority || 'Normal';
-          document.getElementById('priorityInfo').innerHTML = `
-            <strong>PSN:</strong> ${psn}<br>
-            <strong>Job:</strong> ${jobName}<br>
-            <strong>Current Priority:</strong> ${currentPriority}
-          `;
-          document.getElementById('priorityModal').classList.add('show');
-        }
-      }
+    }
 
-      function closePriorityModal() {
-        document.getElementById('priorityModal').classList.remove('show');
-        currentEditingPsn = null;
-      }
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 3000);
+    }
+  </script>
+</body>
 
-      function savePriority(newPriority) {
-        if (!currentEditingPsn) return;
-        showToast(`✅ Priority updated to: ${newPriority}`);
-        closePriorityModal();
-        // TODO: Add API call to update JobListing with new priority
-      }
-
-      function showToast(message) {
-        const toast = document.getElementById('toast');
-        toast.textContent = message;
-        toast.style.display = 'block';
-        setTimeout(() => {
-          toast.style.display = 'none';
-        }, 3000);
-      }
-    </script>
-  </body>
-</html></content>
-
+</html>
+</content>

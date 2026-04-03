@@ -1025,6 +1025,130 @@ app.post("/api/submitData", async (req, res) => {
   }
 });
 
+// API route to update JobListing details by PSN
+app.post("/api/updateJobListing", async (req, res) => {
+  try {
+    console.log("[API] POST /api/updateJobListing - request received");
+    const { psn, jobType, item, priority, salesCode } = req.body;
+
+    // Validate required fields
+    if (!psn) {
+      return res.status(400).json({ success: false, error: "PSN is required" });
+    }
+
+    console.log(`[API] Updating JobListing for PSN: ${psn}`);
+
+    // Get SharePoint context
+    const ctx = await getSharePointFileContext();
+
+    // Normalize PSN for comparison
+    const normalizedSearchPsn = normalizePsn(psn);
+
+    // Fetch all JobListing rows to find the matching PSN
+    const rows = await getTableRowsAsObjects("JobListing");
+
+    // Find the row index that matches the PSN
+    let targetRowIndex = -1;
+    for (let i = 0; i < rows.length; i++) {
+      const rowPsn = normalizePsn(rows[i]["Product Serial Number"] || rows[i].PSN || "");
+      if (rowPsn === normalizedSearchPsn) {
+        targetRowIndex = i;
+        break;
+      }
+    }
+
+    if (targetRowIndex === -1) {
+      return res.status(404).json({ success: false, error: "Job not found with the given PSN" });
+    }
+
+    console.log(`[API] Found job at row index: ${targetRowIndex}`);
+
+    // Get header row to map column names to indices
+    const headerRes = await axios.get(
+      `https://graph.microsoft.com/v1.0/drives/${ctx.driveId}/items/${ctx.fileId}/workbook/tables('JobListing')/headerRowRange`,
+      { headers: ctx.headers }
+    );
+    const headers = headerRes.data.values?.[0] || [];
+
+    console.log(`[API] Headers:`, headers);
+    console.log(`[API] Row data before update:`, rows[targetRowIndex]);
+
+    // Verify the row exists and is valid
+    if (!rows[targetRowIndex]) {
+      return res.status(404).json({ success: false, error: "Row data is invalid" });
+    }
+
+    // Convert the object back to array format using headers
+    const updatedRow = headers.map((header) => {
+      return rows[targetRowIndex][header] !== undefined ? rows[targetRowIndex][header] : null;
+    });
+
+    console.log(`[API] Headers length: ${headers.length}, Row length: ${updatedRow.length}`);
+
+    // Find column indices for updates
+    const findColumnIndex = (possibleNames) => {
+      for (let name of possibleNames) {
+        const idx = headers.indexOf(name);
+        if (idx >= 0) return idx;
+      }
+      return -1;
+    };
+
+    // Update fields by index
+    const salesCodeIdx = findColumnIndex(['salesCode', 'Sales Code', 'Sales_Code', 'SalesCode']);
+    const jobTypeIdx = findColumnIndex(['Job Type', 'Job_Type', 'JobType', 'jobType']);
+    const itemIdx = findColumnIndex(['Item']);
+    const priorityIdx = findColumnIndex(['Priority']);
+
+    console.log(`[API] Column indices - salesCode: ${salesCodeIdx}, jobType: ${jobTypeIdx}, item: ${itemIdx}, priority: ${priorityIdx}`);
+
+    if (salesCode !== undefined && salesCodeIdx >= 0) {
+      updatedRow[salesCodeIdx] = salesCode;
+      console.log(`[API] Updated Sales Code at index ${salesCodeIdx}: ${salesCode}`);
+    }
+    if (jobType !== undefined && jobTypeIdx >= 0) {
+      updatedRow[jobTypeIdx] = jobType;
+      console.log(`[API] Updated Job Type at index ${jobTypeIdx}: ${jobType}`);
+    }
+    if (item !== undefined && itemIdx >= 0) {
+      updatedRow[itemIdx] = item;
+      console.log(`[API] Updated Item at index ${itemIdx}: ${item}`);
+    }
+    if (priority !== undefined && priorityIdx >= 0) {
+      updatedRow[priorityIdx] = priority;
+      console.log(`[API] Updated Priority at index ${priorityIdx}: ${priority}`);
+    }
+
+    console.log(`[API] Updated row data:`, updatedRow);
+
+    // Update the row in Excel using the worksheet range API
+    const physicalRow = targetRowIndex + 2; // Excel rows start at 1, plus header row
+    const colCount = await getTableColumnCount("JobListing");
+    const lastColLetter = indexToColumnLetter(colCount - 1);
+    const rangeAddress = `A${physicalRow}:${lastColLetter}${physicalRow}`;
+
+    console.log(`[API] Physical row: ${physicalRow}, Range: ${rangeAddress}`);
+
+    const url = `https://graph.microsoft.com/v1.0/drives/${ctx.driveId}/items/${ctx.fileId}/workbook/worksheets('JobListing')/range(address='${rangeAddress}')`;
+
+    // Format values for Excel
+    const formattedValues = updatedRow.map(val => {
+      if (val === true) return "TRUE";
+      if (val === false) return "FALSE";
+      return val === null || val === undefined ? "" : val;
+    });
+
+    await axios.patch(url, { values: [formattedValues] }, { headers: ctx.headers });
+
+    console.log(`[API] Successfully updated JobListing for PSN: ${psn}`);
+    res.json({ success: true, message: "Job details updated successfully" });
+
+  } catch (error) {
+    console.error("[API] POST /api/updateJobListing - error:", error);
+    res.status(500).json({ success: false, error: "Failed to update job details" });
+  }
+});
+
 // ============ HELPER FUNCTIONS FOR BATCH UPDATES ============
 /**
  * Normalize PSN: trim, lowercase, remove trailing '.0'
@@ -1317,7 +1441,7 @@ async function saveMultiBatchUpdate(payload) {
           Math.ceil(
             (new Date(todayISO) -
               new Date(startDate.toISOString().split("T")[0])) /
-              86400000,
+            86400000,
           ),
         );
 
