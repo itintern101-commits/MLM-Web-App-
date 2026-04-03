@@ -83,46 +83,26 @@
     }
 
     .stats-bar {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      padding: 1.5rem 2rem;
-    }
-
-    .stats-section {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.8rem;
-      align-items: center;
-    }
-
-    .stats-section-title {
-      font-weight: 700;
-      margin-right: 0.8rem;
-      min-width: 130px;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.95rem;
-      text-transform: uppercase;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      padding: 1rem 2rem;
     }
 
     .stat-card {
-      width: 100px;
-      min-width: 100px;
-      height: 70px;
       background: white;
-      padding: 0.5rem 0.8rem;
-      border-radius: 6px;
-      border: 2px solid #e0e7f0;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+      padding: 1.2rem;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      min-height: 140px;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.25s ease;
+      justify-content: flex-start;
+      overflow: visible !important;
       position: relative;
-      overflow: hidden;
+      z-index: 1;
+      font-size: 1.2rem;
     }
 
     .stat-card:hover {
@@ -130,125 +110,35 @@
       box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
     }
 
-    .stat-card.active {
-      color: white;
-      transform: scale(1.02);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    .filter-item {
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center;
+      padding: 6px 8px;
+      margin-bottom: 4px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      width: 100%;
+      box-sizing: border-box;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      border-bottom: 1px solid #f1f5f9;
     }
 
-    .stat-card.active .stat-val,
-    .stat-card.active .stat-label {
+    .filter-item:hover {
+      background-color: #f1f5f9 !important;
+    }
+
+    .filter-item.active {
+      background: var(--primary) !important;
       color: white !important;
     }
 
-    .stat-val {
-      font-size: 1.2rem;
-      font-weight: bold;
-      margin-bottom: 0.2rem;
-    }
-
-    .stat-label {
-      font-size: 0.65rem;
-      text-transform: uppercase;
-      opacity: 0.85;
-      font-weight: 600;
-    }
-
-    /* Color schemes for different stat categories */
-    .stat-card.sales-normal {
-      border-color: #e0e7ff;
-    }
-
-    .stat-card.sales-normal .stat-val {
-      color: #667eea;
-    }
-
-    .stat-card.sales-active {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-color: #667eea;
-      color: white;
-    }
-
-    .stat-card.sales-active .stat-val {
-      color: white;
-    }
-
-    .stat-card.priority-urgent {
-      border-color: #fee2e2;
-    }
-
-    .stat-card.priority-urgent .stat-val {
-      color: #dc2626;
-    }
-
-    .stat-card.priority-urgent.active {
-      background: #dc2626;
-      border-color: #dc2626;
-    }
-
-    .stat-card.priority-cut-queue {
-      border-color: #fed7aa;
-    }
-
-    .stat-card.priority-cut-queue .stat-val {
-      color: #ea580c;
-    }
-
-    .stat-card.priority-cut-queue.active {
-      background: #ea580c;
-      border-color: #ea580c;
-    }
-
-    .stat-card.priority-normal {
-      border-color: #dcfce7;
-    }
-
-    .stat-card.priority-normal .stat-val {
-      color: #16a34a;
-    }
-
-    .stat-card.priority-normal.active {
-      background: #16a34a;
-      border-color: #16a34a;
-    }
-
-    .stat-card.status-overdue {
-      border-color: #fee2e2;
-    }
-
-    .stat-card.status-overdue .stat-val {
-      color: #dc2626;
-    }
-
-    .stat-card.status-overdue.active {
-      background: #dc2626;
-      border-color: #dc2626;
-    }
-
-    .stat-card.status-almost {
-      border-color: #fef3c7;
-    }
-
-    .stat-card.status-almost .stat-val {
-      color: #b45309;
-    }
-
-    .stat-card.status-almost.active {
-      background: #b45309;
-      border-color: #b45309;
-    }
-
-    .stat-card.status-schedule {
-      border-color: #dcfce7;
-    }
-
-    .stat-card.status-schedule .stat-val {
-      color: #16a34a;
-    }
-
-    .stat-card.status-schedule.active {
-      background: #16a34a;
-      border-color: #16a34a;
+    .filter-item.active:hover {
+      background-color: #3b82f6 !important;
+      color: black;
+      transform: scale(1.01);
+      transition: all 0.2s ease;
     }
 
     /* Table Design */
@@ -532,13 +422,15 @@
 
     .modal-overlay.show {
       display: flex;
+      padding-top: 20px;
+      padding-bottom: 20px;
     }
 
     .modal-content {
       background: white;
       border-radius: 16px;
       padding: 0;
-      max-width: 550px;
+      max-width: 500px;
       width: 90%;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
       animation: modalSlideIn 0.3s ease-out;
@@ -557,6 +449,7 @@
 
     .large-modal {
       max-width: 550px;
+      max-height: 100vh;
     }
 
     /* Confirmation Dialog Styles */
@@ -661,7 +554,6 @@
       border-bottom: 1px solid #e2e8f0;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
     }
 
     .job-summary-item {
@@ -809,6 +701,8 @@
       justify-content: flex-end;
       border-top: 1px solid #e2e8f0;
       background: #f8fafc;
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 16px;
     }
 
     .btn-unlock {
@@ -1084,60 +978,62 @@
       const statsBar = document.getElementById('statsBar');
       statsBar.innerHTML = '';
 
-      // Sales codes section
-      const salesSection = document.createElement('div');
-      salesSection.className = 'stats-section';
-      salesSection.innerHTML = '<div class="stats-section-title" style="color: #4f46e5;">Sales Codes</div>';
+      // Sales codes card
+      const salesCard = document.createElement('div');
+      salesCard.className = 'stat-card';
+      salesCard.innerHTML = '<h3 style="margin: 0 0 10px 0; color: #4f46e5; font-size: 1rem;">Sales Codes</h3>';
       const allCodes = ['AO', 'SHU', 'NT', 'AK', 'NY', 'OC', 'PAO', 'PNY', 'SO', 'SC'];
       allCodes.forEach(code => {
         const count = stats.salesCodes[code] || 0;
         const isActive = activeFilters.salesCodes.has(code);
-        const card = document.createElement('div');
-        card.className = `stat-card sales-normal ${isActive ? 'sales-active active' : ''}`;
-        card.onclick = () => toggleFilter('salesCodes', code);
-        card.innerHTML = `
-            <div class="stat-val">${count}</div>
-            <div class="stat-label">${code}</div>
-          `;
-        salesSection.appendChild(card);
+        const item = document.createElement('div');
+        item.className = `filter-item ${isActive ? 'active' : ''}`;
+        item.onclick = () => toggleFilter('salesCodes', code);
+        item.innerHTML = `
+          <span>${code}</span>
+          <span>${count}</span>
+        `;
+        salesCard.appendChild(item);
       });
-      statsBar.appendChild(salesSection);
+      statsBar.appendChild(salesCard);
 
-      // Priorities section
-      const prioritySection = document.createElement('div');
-      prioritySection.className = 'stats-section';
-      prioritySection.innerHTML = '<div class="stats-section-title" style="color: #dc2626;">Priorities</div>';
-      const priorityColors = { 'Urgent': 'priority-urgent', 'Cut Queue': 'priority-cut-queue', 'Normal': 'priority-normal' };
+      // Priorities and Statuses card
+      const priorityStatusCard = document.createElement('div');
+      priorityStatusCard.className = 'stat-card';
+      priorityStatusCard.innerHTML = '<h3 style="margin: 0 0 10px 0; color: #dc2626; font-size: 1rem;">Priorities & Status</h3><h4 style="margin: 10px 0 5px 0; color: #dc2626; font-size: 0.9rem; font-weight: 600;">Priorities</h4>';
+      // Add priorities
       Object.entries(stats.priorities).forEach(([priority, count]) => {
         const isActive = activeFilters.priorities.has(priority);
-        const card = document.createElement('div');
-        card.className = `stat-card ${priorityColors[priority]} ${isActive ? 'active' : ''}`;
-        card.onclick = () => toggleFilter('priorities', priority);
-        card.innerHTML = `
-            <div class="stat-val">${count}</div>
-            <div class="stat-label">${priority}</div>
-          `;
-        prioritySection.appendChild(card);
+        const item = document.createElement('div');
+        item.className = `filter-item ${isActive ? 'active' : ''}`;
+        item.onclick = () => toggleFilter('priorities', priority);
+        item.innerHTML = `
+          <span>${priority}</span>
+          <span>${count}</span>
+        `;
+        priorityStatusCard.appendChild(item);
       });
-      statsBar.appendChild(prioritySection);
-
-      // Statuses section
-      const statusSection = document.createElement('div');
-      statusSection.className = 'stats-section';
-      statusSection.innerHTML = '<div class="stats-section-title" style="color: #b45309;">Statuses</div>';
-      const statusColors = { 'OVERDUE': 'status-overdue', 'ALMOST DUE': 'status-almost', 'ON SCHEDULE': 'status-schedule' };
+      // Add status subheading
+      const statusHeading = document.createElement('h4');
+      statusHeading.style.margin = '10px 0 5px 0';
+      statusHeading.style.color = '#b45309';
+      statusHeading.style.fontSize = '0.9rem';
+      statusHeading.style.fontWeight = '600';
+      statusHeading.textContent = 'Status';
+      priorityStatusCard.appendChild(statusHeading);
+      // Add statuses
       Object.entries(stats.statuses).forEach(([status, count]) => {
         const isActive = activeFilters.statuses.has(status);
-        const card = document.createElement('div');
-        card.className = `stat-card ${statusColors[status]} ${isActive ? 'active' : ''}`;
-        card.onclick = () => toggleFilter('statuses', status);
-        card.innerHTML = `
-            <div class="stat-val">${count}</div>
-            <div class="stat-label">${status}</div>
-          `;
-        statusSection.appendChild(card);
+        const item = document.createElement('div');
+        item.className = `filter-item ${isActive ? 'active' : ''}`;
+        item.onclick = () => toggleFilter('statuses', status);
+        item.innerHTML = `
+          <span>${status}</span>
+          <span>${count}</span>
+        `;
+        priorityStatusCard.appendChild(item);
       });
-      statsBar.appendChild(statusSection);
+      statsBar.appendChild(priorityStatusCard);
     }
 
     function toggleFilter(filterType, value) {
