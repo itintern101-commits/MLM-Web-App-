@@ -411,8 +411,9 @@
       .um-chip:hover {
         background: #f8fafc;
       }
+
       .um-chip.is-done {
-        background: #f0fdf4;
+        background: #5cff8d;
         border-color: #86efac;
         color: #166534;
         font-weight: 600;
@@ -425,7 +426,7 @@
       }
       .um-chip.is-locked {
         pointer-events: none;
-        opacity: 0.85;
+        opacity: 0.5;
       }
 
       /* Step number badges */
@@ -485,10 +486,6 @@
       }
       .um-delay-input::placeholder {
         color: #fca5a5;
-      }
-      .um-delay-input[readonly] {
-        opacity: 0.75;
-        cursor: default;
       }
 
       /* Machine select */
@@ -738,21 +735,12 @@
       .um-chip:hover {
         background: #f8fafc;
       }
-      .um-chip.is-done {
-        background: #f0fdf4;
-        border-color: #86efac;
-        color: #166534;
-        font-weight: 600;
-      }
+
       .um-chip.is-delay {
         background: #fef2f2;
         border-color: #fca5a5;
         color: #991b1b;
         font-weight: 600;
-      }
-      .um-chip.is-locked {
-        pointer-events: none;
-        opacity: 0.9;
       }
 
       /* ── Inputs ── */
@@ -769,8 +757,9 @@
       .um-delay-input::placeholder {
         color: #fca5a5;
       }
+
       .um-delay-input[readonly] {
-        opacity: 0.72;
+        opacity: 0.5;
         cursor: default;
       }
       .um-qty-input {
@@ -855,6 +844,7 @@
       }
       .um-btn:hover {
         background: #f8fafc;
+        color: black;
       }
       .um-btn-ghost {
         background: #f8fafc;
@@ -885,6 +875,61 @@
         color: #22c55e;
         font-weight: 600;
         font-size: 14px;
+      }
+
+      /*Status Filter */
+      /* Custom Tooltip Logic using data-tooltip to avoid double tooltips */
+      .tooltip-trigger {
+        position: relative;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      /* Hover effects for clickable items */
+      .status-btn:hover,
+      .filter-item:hover,
+      .filter-item-delayed:hover {
+        filter: brightness(0.95);
+        transform: translateY(-1px);
+        background-color: #f8fafc;
+      }
+
+      .tooltip-trigger:hover::after {
+        content: attr(
+          data-tooltip
+        ); /* Changed from 'title' to 'data-tooltip' */
+        position: absolute;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #1e293b;
+        color: #ffffff;
+        padding: 6px 10px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: normal;
+        white-space: nowrap;
+        z-index: 9999;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        pointer-events: none;
+      }
+
+      /* Tooltip Arrow */
+      .tooltip-trigger:hover::before {
+        content: "";
+        position: absolute;
+        bottom: 115%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 6px solid transparent;
+        border-top-color: #1e293b;
+        z-index: 9999;
+        pointer-events: none;
+      }
+
+      /* Ensure tooltips aren't cut off by cards */
+      .stat-card {
+        overflow: visible !important;
       }
     </style>
   </head>
@@ -1225,6 +1270,7 @@
           now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
         const container = document.getElementById("statsBar");
+        const tooltipMsg = "Click to filter table below";
 
         // Helper to generate the HTML for Process Load
         let loadHtml = Object.entries(processCounts)
@@ -1232,12 +1278,12 @@
           .map(([name, count]) => {
             const isActive = activeFilters.processes.has(name);
             return `
-        <div onclick="toggleProcessFilter('${name}')" 
-             class="filter-item ${isActive ? "active-filter-pill" : ""}" 
-             style="cursor:pointer; font-size: 0.85rem; display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding: 6px 4px; border-radius: 4px; transition: 0.2s;">
-            <span>${name}</span>
-            <span style="font-weight: bold; color: ${isActive ? "white" : "var(--primary)"};">${count}</span>
-        </div>`;
+              <div onclick="toggleProcessFilter('${name}')" 
+                  class="filter-item tooltip-trigger ${isActive ? "active-filter-pill" : ""}" 
+                  data-tooltip="${tooltipMsg}">
+                  <span>${name}</span>
+                  <span style="font-weight: bold; color: ${isActive ? "white" : "var(--primary)"};">${count}</span>
+              </div>`;
           })
           .join("");
 
@@ -1248,42 +1294,42 @@
             .map(([name, count]) => {
               const isActive = activeFilters.delayedProcesses.has(name);
               return `
-              <div onclick="toggleDelayedProcessFilter('${name}')" 
-                  class="filter-item-delayed ${isActive ? "active-filter-delayed" : ""}" 
-                  style="cursor:pointer; font-size: 0.85rem; color: ${isActive ? "white" : "var(--danger)"}; display: flex; justify-content: space-between; padding: 6px 4px; border-bottom: 1px solid #fff1f1; border-radius: 4px;">
-                  <span>${name}</span>
-                  <span style="font-weight: bold;">${count}</span>
-              </div>`;
+                <div onclick="toggleDelayedProcessFilter('${name}')" 
+                    class="filter-item-delayed tooltip-trigger ${isActive ? "active-filter-delayed" : ""}" 
+                    data-tooltip="${tooltipMsg}">
+                    <span>${name}</span>
+                    <span style="font-weight: bold;">${count}</span>
+                </div>`;
             })
             .join("") ||
           '<div style="text-align: center; color: #94a3b8;">No active delays</div>';
 
         container.innerHTML = `
-        <div class="stat-card">
-            <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 8px; font-weight: 600;">Production Overview</div>
-            <div class="stat-val" style="font-size: 1.8rem; margin-bottom: 4px;">${totalBatches}</div>
-            <div style="display: flex; justify-content: space-between; margin-top: 4px; border-top: 1px solid #f1f5f9; padding-top: 8px;">
-                <div onclick="toggleStatusFilter('On Track')" class="status-btn ${activeFilters.statusTypes.has("On Track") ? "active-track" : ""}">
-                    <div class="label">On Track</div>
-                    <div class="val">${onTrackCount}</div>
-                </div>
-                <div onclick="toggleStatusFilter('Delayed')" class="status-btn ${activeFilters.statusTypes.has("Delayed") ? "active-delayed" : ""}">
-                    <div class="label">Delayed</div>
-                    <div class="val">${delayedBatchesCount}</div>
-                </div>
-                <div onclick="toggleStatusFilter('Done')" class="status-btn ${activeFilters.statusTypes.has("Done") ? "active-done" : ""}">
-                    <div class="label">Done</div>
-                    <div class="val">${completedBatches}</div>
-                </div>
-            </div>
-        </div>
+          <div class="stat-card">
+              <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 8px; font-weight: 600;">Production Overview</div>
+              <div class="stat-val" style="font-size: 1.8rem; margin-bottom: 4px;">${totalBatches}</div>
+              <div style="display: flex; justify-content: space-between; margin-top: 4px; border-top: 1px solid #f1f5f9; padding-top: 8px;">
+                  <div onclick="toggleStatusFilter('On Track')" data-tooltip="${tooltipMsg}" class="status-btn tooltip-trigger ${activeFilters.statusTypes.has("On Track") ? "active-track" : ""}">
+                      <div class="label">On Track</div>
+                      <div class="val">${onTrackCount}</div>
+                  </div>
+                  <div onclick="toggleStatusFilter('Delayed')" data-tooltip="${tooltipMsg}" class="status-btn tooltip-trigger ${activeFilters.statusTypes.has("Delayed") ? "active-delayed" : ""}">
+                      <div class="label">Delayed</div>
+                      <div class="val">${delayedBatchesCount}</div>
+                  </div>
+                  <div onclick="toggleStatusFilter('Done')" data-tooltip="${tooltipMsg}" class="status-btn tooltip-trigger ${activeFilters.statusTypes.has("Done") ? "active-done" : ""}">
+                      <div class="label">Done</div>
+                      <div class="val">${completedBatches}</div>
+                  </div>
+              </div>
+          </div>
 
         <div class="stat-card">
             <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 8px;">System Status</div>
-            <div class="stat-val" style="color: #10b981; font-size: 1.5rem; display: flex; align-items: center; gap: 6px;">
-                <span style="height: 8px; width: 8px; background-color: #10b981; border-radius: 50%; display: inline-block; box-shadow: 0 0 5px #10b981;"></span>
-                Online
-            </div>
+              <div class="stat-val" style="color: #10b981; font-size: 1.5rem; display: flex; align-items: center; gap: 6px;">
+                  <span style="height: 8px; width: 8px; background-color: #10b981; border-radius: 50%; display: inline-block; box-shadow: 0 0 5px #10b981;"></span>
+                  Online
+              </div>
             <div style="font-size: 0.8rem; color: #94a3b8; margin-top: auto;">Last Sync: ${lastSyncStr}</div>
         </div>
 
@@ -1300,7 +1346,7 @@
                 ${delayHtml}
             </div>
         </div>
-    `;
+      `;
       }
 
       function renderTable() {
@@ -1808,7 +1854,7 @@
               >
             </div>
             <div class="um-max-block">
-              <span class="um-max-lbl">Max allowed</span>
+              <span class="um-max-lbl">Remaining Quantity</span>
               <span class="um-max-val waterfall-max-label" id="label-${step.baseCol}">${maxQty}</span>
             </div>
           </div>
@@ -1881,10 +1927,13 @@
           const done = doneCheck.checked;
           const delay = delayCheck ? delayCheck.checked : false;
 
+          // Track the first non-completed step for sequential validation
           if (!done) firstIncompleteFound = true;
 
+          // We only process rows that have at least one action (Done or Delay)
           if (done || delay) {
-            // Sequential Check
+            // Sequential Check: Only blocks "Done" actions if previous are incomplete.
+            // Delay actions are allowed even if previous steps are incomplete.
             if (done && firstIncompleteFound) {
               alert(
                 `Sequential Error: Cannot complete "${stepName}" while a previous process is pending.`,
@@ -1893,7 +1942,6 @@
               break;
             }
 
-            // --- LOGIC: SUMMING CURRENT + INPUT ---
             const currentQty =
               parseInt(qtyInput.getAttribute("data-current-qty")) || 0;
             const addedQty = parseInt(qtyInput.value) || 0;
@@ -1904,36 +1952,30 @@
             );
 
             if (done) {
-              // VALIDATION FIX: Check totalQty, not just addedQty
               if (isNaN(totalQtyForProcess) || totalQtyForProcess <= 0) {
-                showToast(
-                  `Process ${stepName} has 0 total quantity. Please add quantity.`,
-                  "error",
-                );
+                showToast(`Process ${stepName} has 0 total quantity.`, "error");
                 qtyInput.focus();
                 validationError = true;
                 break;
               }
-
               if (totalQtyForProcess > dynamicMax) {
                 showToast(
-                  `${stepName} total (${totalQtyForProcess}) exceeds allowed max (${dynamicMax}).`,
+                  `${stepName} total (${totalQtyForProcess}) exceeds max (${dynamicMax}).`,
                   "error",
                 );
                 validationError = true;
                 break;
               }
-
-              // Split detection: If total finished < current Batch Qty
               if (totalQtyForProcess < job.qty) needsSplitRemark = true;
             }
 
+            // PUSH UPDATE DATA
             updates.push({
               baseCol: parseInt(doneCheck.dataset.base),
-              isDone: done,
-              isDelayed: delay,
+              isDone: done, // Tells backend if it should mark as Completed
+              isDelayed: delay, // Tells backend if it should mark as Delayed
               remark: row.querySelector(".step-remark-input").value,
-              qty: totalQtyForProcess, // Send the SUM
+              qty: totalQtyForProcess,
               detail:
                 stepName === "Die-cut" && done
                   ? row.querySelector(".step-detail-select").value
@@ -1948,7 +1990,7 @@
         if (needsSplitRemark) {
           splitRemark = await customPrompt(
             "Split Batch Required",
-            "Reason for splitting units:",
+            "Reason for splitting:",
             "e.g., Shortage...",
           );
           if (!splitRemark) return;
@@ -2534,10 +2576,13 @@
 
       function syncWaterfallUI() {
         const rows = document.querySelectorAll(".multi-step-row");
+
+        // We start the ceiling with the absolute limit of the batch
+        // or the limit set by the last COMPLETED step in history.
         let currentActiveCeiling = Infinity;
         let limitingStepName = "";
 
-        rows.forEach((row) => {
+        rows.forEach((row, index) => {
           const input = row.querySelector(".step-qty-input");
           const label = row.querySelector(".waterfall-max-label");
           const currentStepName = row.getAttribute("data-name");
@@ -2550,50 +2595,46 @@
             parseInt(input.getAttribute("data-system-max")) || 0;
           const userTypedQty = parseInt(input.value) || 0;
 
-          // 2. CALCULATE THE TOTAL FOR THIS STEP
-          // This is what the user is actually proposing to "finish" at this stage
+          // 2. CALCULATE PROPOSED TOTAL
+          // This is the total progress for THIS specific process step
           const proposedTotalForStep = backendQty + userTypedQty;
 
-          // 3. DETERMINE THE EFFECTIVE MAX ALLOWED
-          // A step is limited by either its own systemMax or the ceiling set by steps above it
-          let effectiveMax;
-          let isLimitedByUpper = false;
+          // 3. CALCULATE EFFECTIVE MAX FOR THIS ROW
+          // This row is limited by the ceiling passed down from the row ABOVE
+          const rowLimit = Math.min(systemMax, currentActiveCeiling);
 
-          if (systemMax <= currentActiveCeiling) {
-            effectiveMax = systemMax;
-          } else {
-            effectiveMax = currentActiveCeiling;
-            isLimitedByUpper = true;
-          }
+          // 4. LOGIC CHANGE: DISPLAY "REMAINING" FOR THE CURRENT ROW
+          // Instead of showing the ceiling, we show how many units are left to be processed
+          // for this specific step based on the row's limit.
+          const remainingForThisStep = rowLimit - proposedTotalForStep;
 
-          // 4. UPDATE UI
-          label.innerText = effectiveMax;
+          // Update the label text
+          label.innerText =
+            remainingForThisStep >= 0 ? remainingForThisStep : 0;
 
           // 5. VALIDATION VISUALS
-          // We compare the SUM (backend + typed) against the effective max
-          if (proposedTotalForStep > effectiveMax) {
+          if (proposedTotalForStep > rowLimit) {
             input.style.border = "2px solid #ef4444";
             input.style.backgroundColor = "#fef2f2";
             label.style.color = "#ef4444";
-
             input.setAttribute(
               "data-error-source",
-              isLimitedByUpper ? limitingStepName : "System Limit",
+              limitingStepName || "System Limit",
             );
           } else {
             input.style.border = "1px solid #cbd5e1";
             input.style.backgroundColor = "white";
-            label.style.color = isLimitedByUpper ? "#f59e0b" : "#475569";
+            // If remaining is 0, it's "Full", otherwise standard slate color
+            label.style.color =
+              remainingForThisStep === 0 ? "#10b981" : "#475569";
             input.removeAttribute("data-error-source");
           }
 
-          // 6. UPDATE CEILING FOR NEXT ROWS
-          // The ceiling for the NEXT process is the current process's total progress.
-          // If the proposed total is valid and lower than current ceiling, it restricts steps below.
-          if (proposedTotalForStep < currentActiveCeiling) {
-            currentActiveCeiling = proposedTotalForStep;
-            limitingStepName = currentStepName;
-          }
+          // 6. UPDATE CEILING FOR THE ROW BELOW
+          // The NEXT row cannot process more than what THIS row has finished (Proposed Total).
+          // This is the core of the Waterfall: Flow goes from top to bottom.
+          currentActiveCeiling = proposedTotalForStep;
+          limitingStepName = currentStepName;
         });
       }
 
