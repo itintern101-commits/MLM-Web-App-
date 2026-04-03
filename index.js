@@ -1372,8 +1372,13 @@ async function saveMultiBatchUpdate(payload) {
           currentBatchQty = u.qty;
         }
       } else if (u.isDelayed) {
-        qtyMap[base] = u.qty;
+        // --- DELAY-ONLY LOGIC ---
+        runningRowData[base + 5] = "Delayed";
+        runningRowData[base + 6] = u.remark || ""; // Save delay reason
+        runningRowData[base + 8] = false; // Ensure NOT marked done
+        qtyMap[base] = u.qty; // Update map with current progress qty
       }
+      if (u.detail) runningRowData[base + 4] = u.detail;
     }
 
     // Finalize maps and save
