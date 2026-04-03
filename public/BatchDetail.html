@@ -855,7 +855,7 @@
       }
       .um-btn:hover {
         background: #f8fafc;
-        color:black;
+        color: black;
       }
       .um-btn-ghost {
         background: #f8fafc;
@@ -1809,7 +1809,7 @@
               >
             </div>
             <div class="um-max-block">
-              <span class="um-max-lbl">Max allowed</span>
+              <span class="um-max-lbl">Remaining Quantity</span>
               <span class="um-max-val waterfall-max-label" id="label-${step.baseCol}">${maxQty}</span>
             </div>
           </div>
@@ -1882,10 +1882,13 @@
           const done = doneCheck.checked;
           const delay = delayCheck ? delayCheck.checked : false;
 
+          // Track the first non-completed step for sequential validation
           if (!done) firstIncompleteFound = true;
 
+          // We only process rows that have at least one action (Done or Delay)
           if (done || delay) {
-            // Sequential Check
+            // Sequential Check: Only blocks "Done" actions if previous are incomplete.
+            // Delay actions are allowed even if previous steps are incomplete.
             if (done && firstIncompleteFound) {
               alert(
                 `Sequential Error: Cannot complete "${stepName}" while a previous process is pending.`,
@@ -1894,7 +1897,6 @@
               break;
             }
 
-            // --- LOGIC: SUMMING CURRENT + INPUT ---
             const currentQty =
               parseInt(qtyInput.getAttribute("data-current-qty")) || 0;
             const addedQty = parseInt(qtyInput.value) || 0;
@@ -1905,36 +1907,30 @@
             );
 
             if (done) {
-              // VALIDATION FIX: Check totalQty, not just addedQty
               if (isNaN(totalQtyForProcess) || totalQtyForProcess <= 0) {
-                showToast(
-                  `Process ${stepName} has 0 total quantity. Please add quantity.`,
-                  "error",
-                );
+                showToast(`Process ${stepName} has 0 total quantity.`, "error");
                 qtyInput.focus();
                 validationError = true;
                 break;
               }
-
               if (totalQtyForProcess > dynamicMax) {
                 showToast(
-                  `${stepName} total (${totalQtyForProcess}) exceeds allowed max (${dynamicMax}).`,
+                  `${stepName} total (${totalQtyForProcess}) exceeds max (${dynamicMax}).`,
                   "error",
                 );
                 validationError = true;
                 break;
               }
-
-              // Split detection: If total finished < current Batch Qty
               if (totalQtyForProcess < job.qty) needsSplitRemark = true;
             }
 
+            // PUSH UPDATE DATA
             updates.push({
               baseCol: parseInt(doneCheck.dataset.base),
-              isDone: done,
-              isDelayed: delay,
+              isDone: done, // Tells backend if it should mark as Completed
+              isDelayed: delay, // Tells backend if it should mark as Delayed
               remark: row.querySelector(".step-remark-input").value,
-              qty: totalQtyForProcess, // Send the SUM
+              qty: totalQtyForProcess,
               detail:
                 stepName === "Die-cut" && done
                   ? row.querySelector(".step-detail-select").value
@@ -1949,7 +1945,7 @@
         if (needsSplitRemark) {
           splitRemark = await customPrompt(
             "Split Batch Required",
-            "Reason for splitting units:",
+            "Reason for splitting:",
             "e.g., Shortage...",
           );
           if (!splitRemark) return;
