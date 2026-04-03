@@ -2531,10 +2531,13 @@
 
       function syncWaterfallUI() {
         const rows = document.querySelectorAll(".multi-step-row");
+
+        // We start the ceiling with the absolute limit of the batch
+        // or the limit set by the last COMPLETED step in history.
         let currentActiveCeiling = Infinity;
         let limitingStepName = "";
 
-        rows.forEach((row) => {
+        rows.forEach((row, index) => {
           const input = row.querySelector(".step-qty-input");
           const label = row.querySelector(".waterfall-max-label");
           const currentStepName = row.getAttribute("data-name");
@@ -2547,50 +2550,46 @@
             parseInt(input.getAttribute("data-system-max")) || 0;
           const userTypedQty = parseInt(input.value) || 0;
 
-          // 2. CALCULATE THE TOTAL FOR THIS STEP
-          // This is what the user is actually proposing to "finish" at this stage
+          // 2. CALCULATE PROPOSED TOTAL
+          // This is the total progress for THIS specific process step
           const proposedTotalForStep = backendQty + userTypedQty;
 
-          // 3. DETERMINE THE EFFECTIVE MAX ALLOWED
-          // A step is limited by either its own systemMax or the ceiling set by steps above it
-          let effectiveMax;
-          let isLimitedByUpper = false;
+          // 3. CALCULATE EFFECTIVE MAX FOR THIS ROW
+          // This row is limited by the ceiling passed down from the row ABOVE
+          const rowLimit = Math.min(systemMax, currentActiveCeiling);
 
-          if (systemMax <= currentActiveCeiling) {
-            effectiveMax = systemMax;
-          } else {
-            effectiveMax = currentActiveCeiling;
-            isLimitedByUpper = true;
-          }
+          // 4. LOGIC CHANGE: DISPLAY "REMAINING" FOR THE CURRENT ROW
+          // Instead of showing the ceiling, we show how many units are left to be processed
+          // for this specific step based on the row's limit.
+          const remainingForThisStep = rowLimit - proposedTotalForStep;
 
-          // 4. UPDATE UI
-          label.innerText = effectiveMax;
+          // Update the label text
+          label.innerText =
+            remainingForThisStep >= 0 ? remainingForThisStep : 0;
 
           // 5. VALIDATION VISUALS
-          // We compare the SUM (backend + typed) against the effective max
-          if (proposedTotalForStep > effectiveMax) {
+          if (proposedTotalForStep > rowLimit) {
             input.style.border = "2px solid #ef4444";
             input.style.backgroundColor = "#fef2f2";
             label.style.color = "#ef4444";
-
             input.setAttribute(
               "data-error-source",
-              isLimitedByUpper ? limitingStepName : "System Limit",
+              limitingStepName || "System Limit",
             );
           } else {
             input.style.border = "1px solid #cbd5e1";
             input.style.backgroundColor = "white";
-            label.style.color = isLimitedByUpper ? "#f59e0b" : "#475569";
+            // If remaining is 0, it's "Full", otherwise standard slate color
+            label.style.color =
+              remainingForThisStep === 0 ? "#10b981" : "#475569";
             input.removeAttribute("data-error-source");
           }
 
-          // 6. UPDATE CEILING FOR NEXT ROWS
-          // The ceiling for the NEXT process is the current process's total progress.
-          // If the proposed total is valid and lower than current ceiling, it restricts steps below.
-          if (proposedTotalForStep < currentActiveCeiling) {
-            currentActiveCeiling = proposedTotalForStep;
-            limitingStepName = currentStepName;
-          }
+          // 6. UPDATE CEILING FOR THE ROW BELOW
+          // The NEXT row cannot process more than what THIS row has finished (Proposed Total).
+          // This is the core of the Waterfall: Flow goes from top to bottom.
+          currentActiveCeiling = proposedTotalForStep;
+          limitingStepName = currentStepName;
         });
       }
 
