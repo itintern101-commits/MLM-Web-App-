@@ -27,8 +27,8 @@
       }
 
       .dashboard-header {
-        background: linear-gradient(135deg, var(--primary), #1d4ed8);
-        color: white;
+        background: white;
+        color: black;
         padding: 2rem 2rem;
         display: flex;
         justify-content: space-between;
@@ -99,12 +99,12 @@
       }
 
       .stat-card {
-        width: 150px;
-        min-width: 150px;
-        height: 100px;
+        width: 100px;
+        min-width: 100px;
+        height: 70px;
         background: white;
-        padding: 0.8rem 1.2rem;
-        border-radius: 8px;
+        padding: 0.5rem 0.8rem;
+        border-radius: 6px;
         border: 2px solid #e0e7f0;
         box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
         display: flex;
@@ -133,13 +133,13 @@
       }
 
       .stat-val {
-        font-size: 1.6rem;
+        font-size: 1.2rem;
         font-weight: bold;
-        margin-bottom: 0.3rem;
+        margin-bottom: 0.2rem;
       }
 
       .stat-label {
-        font-size: 0.75rem;
+        font-size: 0.65rem;
         text-transform: uppercase;
         opacity: 0.85;
         font-weight: 600;
@@ -177,7 +177,7 @@
 
       /* Table Design */
       .table-container {
-        padding: 0 2rem 2rem 2rem;
+        padding: 0 25px 25px 25px;
         overflow-x: auto;
       }
 
@@ -386,6 +386,107 @@
         z-index: 2000;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
       }
+
+      /* Modal Styles */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .modal-overlay.show {
+        display: flex;
+      }
+
+      .modal-content {
+        background: white;
+        border-radius: 12px;
+        padding: 0;
+        max-width: 400px;
+        width: 90%;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      }
+
+      .modal-header {
+        background: #f8fafc;
+        padding: 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #1e293b;
+        border-radius: 12px 12px 0 0;
+      }
+
+      .priority-options {
+        display: flex;
+        gap: 0.5rem;
+        padding: 1.5rem;
+        justify-content: center;
+      }
+
+      .priority-btn {
+        padding: 0.75rem 1rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        flex: 1;
+      }
+
+      .priority-btn.urgent {
+        background: #fee2e2;
+        color: #dc2626;
+      }
+
+      .priority-btn.urgent:hover {
+        background: #fecaca;
+      }
+
+      .priority-btn.cut-queue {
+        background: #fed7aa;
+        color: #ea580c;
+      }
+
+      .priority-btn.cut-queue:hover {
+        background: #fdba74;
+      }
+
+      .priority-btn.normal {
+        background: #dcfce7;
+        color: #16a34a;
+      }
+
+      .priority-btn.normal:hover {
+        background: #bbf7d0;
+      }
+
+      .modal-actions {
+        padding: 1rem 1.5rem 1.5rem;
+        text-align: right;
+      }
+
+      .btn-cancel {
+        background: #e2e8f0;
+        color: #64748b;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+      }
+
+      .btn-cancel:hover {
+        background: #cbd5e1;
+      }
     </style>
   </head>
 
@@ -475,7 +576,7 @@
         <div class="priority-options">
           <button class="priority-btn urgent" onclick="savePriority('Urgent')">🔴 Urgent</button>
           <button class="priority-btn cut-queue" onclick="savePriority('Cut Queue')">🟠 Cut Queue</button>
-          <button class="priority-btn normal" onclick="savePriority('Normal')">🟢 Normal</button>
+          <button class="priority-btn normal" onclick="savePriority('Normal')">🟢 Normal</button> 
         </div>
         <div class="modal-actions">
           <button class="btn-cancel" onclick="closePriorityModal()">Cancel</button>
@@ -560,7 +661,9 @@
         const salesSection = document.createElement('div');
         salesSection.className = 'stats-section';
         salesSection.innerHTML = '<div class="stats-section-title" style="color: #4f46e5;">Sales Codes</div>';
-        Object.entries(stats.salesCodes).forEach(([code, count]) => {
+        const allCodes = ['AO', 'SHU', 'NT', 'AK', 'NY', 'OC', 'PAO', 'PNY', 'SO', 'SC'];
+        allCodes.forEach(code => {
+          const count = stats.salesCodes[code] || 0;
           const isActive = activeFilters.salesCodes.has(code);
           const card = document.createElement('div');
           card.className = `stat-card sales-normal ${isActive ? 'sales-active active' : ''}`;
@@ -822,8 +925,12 @@
       }
 
       function openPriorityModal(psn) {
-        currentEditingPsn = psn;
-        const job = MASTER_DATA.find(j => (j["Product Serial Number"] || j.PSN) === psn);
+        
+        const job = MASTER_DATA.find(j => {
+          const masterValue = String(j["Product Serial Number"] || j.PSN || "");
+          return masterValue === String(psn);
+        });
+     
         if (job) {
           const jobName = job["Job Name"] || job.Job_Name || job.client || 'Unknown';
           const currentPriority = job.Priority || 'Normal';

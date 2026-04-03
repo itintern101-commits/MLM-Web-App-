@@ -1033,17 +1033,16 @@
         return matchesSearch && matchesSalesCode && matchesPriority && matchesJobType && matchesStatus;
       });
 
-      // 3. APPLY SMART SORT (Keeping your existing logic)
+      // 3. APPLY SMART SORT
       filteredList.sort((a, b) => {
-        const getScore = (item) => {
-          let score = 0;
-          if (item.priority === "Urgent") score += 100;
-          if (item.priority === "Cut Queue") score += 50;
-          if (item.status === "OVERDUE") score += 200;
-          if (item.status === "ALMOST DUE") score += 10;
-          return score;
-        };
-        return getScore(b) - getScore(a);
+        const priorityOrder = { "Urgent": 1, "Cut Queue": 2, "Normal": 3 };
+        const statusOrder = { "OVERDUE": 1, "ALMOST DUE": 2, "ON SCHEDULE": 3 };
+        const aPri = priorityOrder[a.priority] || 4;
+        const bPri = priorityOrder[b.priority] || 4;
+        const aStat = statusOrder[a.status] || 4;
+        const bStat = statusOrder[b.status] || 4;
+        if (aPri !== bPri) return aPri - bPri;
+        return aStat - bStat;
       });
 
       // 4. DRAW THE TABLE

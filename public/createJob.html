@@ -526,6 +526,9 @@
         el.addEventListener('keydown', (evt) => {
           if (evt.key === 'Enter') {
             evt.preventDefault();
+            if (id === 'piNumber') {
+              formatPINumber(el);
+            }
             const next = document.getElementById(order[idx + 1]);
             if (next) {
               next.focus();
@@ -551,12 +554,18 @@
       }, 3000);
     }
 
-    // Function to format the PI Number input to ensure it follows the required pattern of 4 digits followed by '/26'
+    // Function to format the PI Number input to ensure it follows the required pattern of 4 digits followed by optional -digit and /26
     function formatPINumber(input) {
-      let value = input.value.replace(/[^0-9]/g, ''); // Only allow digits
-      if (value.length > 4) value = value.substring(0, 4); // Max 4 digits
-      const currentYear = new Date().getFullYear().toString().slice(-2); // Last 2 digits of year
-      input.value = value + '/' + currentYear;
+      let value = input.value.trim();
+      // If already ends with /26, do nothing
+      if (value.endsWith('/26')) return;
+      // Remove any trailing /26 if present
+      value = value.replace(/\/26$/, '');
+      // Check if it matches the pattern
+      if (/^\d{4}(-\d)?$/.test(value)) {
+        input.value = value + '/26';
+      }
+      // If not matching, leave as is (user can correct)
     }
 
     // Function to synchronize the final delivery date across all batches and steps when the main delivery date is changed
@@ -811,7 +820,7 @@
 
       if (!psn) { showToast('PSN is required', 'error'); return; }
       if (!piNumber) { showToast('PI Number is required', 'error'); return; }
-      if (!/^\d{4}\/26$/.test(piNumber)) { showToast('PI Number must be in format XXXX/26', 'error'); return; }
+      if (!/^\d{4}(-\d)?\/26$/.test(piNumber)) { showToast('PI Number must be in format XXXX/26 or XXXX-Y/26', 'error'); return; }
       if (!totalQty || totalQty <= 0) { showToast('Total Quantity must be greater than 0', 'error'); return; }
       if (!jobName) { showToast('Job Name is required', 'error'); return; }
       if (!orderDate) { showToast('Order Date is required', 'error'); return; }
