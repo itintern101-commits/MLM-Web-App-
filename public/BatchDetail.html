@@ -350,7 +350,7 @@
       /* Active State for Delayed Breakdown */
       .active-filter-delayed {
         background: var(--danger) !important;
-        color: white !important;
+        color:black ;
       }
 
       /* Status Buttons in Overview */
@@ -989,6 +989,20 @@
 
       .filter-item-delayed {
         border-bottom: 1px solid #fff1f1;
+      }
+
+      .filter-item.active-filter-pill:hover {
+        background-color: #3b82f6 !important; /* blue */
+        color: black;
+        transform: scale(1.01);
+        transition: all 0.2s ease;
+      }
+
+      .filter-item-delayed.active-filter-delayed:hover {
+        background-color: #ef4444 !important; /* red */
+        color: black;
+        transform: scale(1.01);
+        transition: all 0.2s ease;
       }
     </style>
   </head>
