@@ -28,7 +28,7 @@
 
       /* Header & Stats */
       .dashboard-header {
-        background: white;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);;
         padding: 1rem 2rem;
         display: flex;
         justify-content: space-between;
@@ -553,6 +553,7 @@
         padding: 1rem 1.5rem;
         border-bottom: 1px solid #f1f5f9;
         flex-shrink: 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       }
 
       .um-batch-pill {
@@ -1228,7 +1229,7 @@
 
     <div class="main-wrapper">
       <div class="dashboard-header">
-        <h1>Batch Dashboard</h1>
+        <h1 style="font-weight: bold;color:#ffffff;">Batch Dashboard</h1>
         <div>
           <input
             type="text"
@@ -1899,8 +1900,8 @@
      </div>`;
 
         document.getElementById("modalPsn").innerHTML =
-          `<div style="font-size:12px; color:#64748b; margin-bottom:1px;">${job.psn}</div>
-     <div style="font-size:15px; font-weight:600; color:#0f172a;">${job.jobName}</div>
+          `<div style="font-size:20px; color:#ffffff; margin-bottom:1px;font-weight:bold;">${job.psn}</div>
+     <div style="font-size:20px; font-weight:bold; color:#ffffff;">${job.jobName}</div>
      ${splitRemarkHtml}`;
 
         // ── Header: batch switcher row ───────────────────────────────────────────
@@ -1949,7 +1950,7 @@
                     ? `<span style="font-size:10px; opacity:${isCurrent ? "0.65" : "0.5"};">${doneSteps}/${totalSteps}</span>`
                     : "";
                 const currentLabel = isCurrent
-                  ? `<div style="font-size:10px; text-align:center; color:#64748b; margin-top:2px; font-style:italic;">Current</div>`
+                  ? `<div style="font-size:10px; text-align:center; color:#ffffff; margin-top:2px; font-style:italic;">Current</div>`
                   : "";
 
                 return `
