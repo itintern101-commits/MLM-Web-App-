@@ -743,7 +743,6 @@
         font-weight: 600;
       }
 
-
       /* ── Inputs ── */
       .um-delay-input {
         width: 100%;
@@ -876,6 +875,61 @@
         color: #22c55e;
         font-weight: 600;
         font-size: 14px;
+      }
+
+      /*Status Filter */
+      /* Custom Tooltip Logic using data-tooltip to avoid double tooltips */
+      .tooltip-trigger {
+        position: relative;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      /* Hover effects for clickable items */
+      .status-btn:hover,
+      .filter-item:hover,
+      .filter-item-delayed:hover {
+        filter: brightness(0.95);
+        transform: translateY(-1px);
+        background-color: #f8fafc;
+      }
+
+      .tooltip-trigger:hover::after {
+        content: attr(
+          data-tooltip
+        ); /* Changed from 'title' to 'data-tooltip' */
+        position: absolute;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #1e293b;
+        color: #ffffff;
+        padding: 6px 10px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: normal;
+        white-space: nowrap;
+        z-index: 9999;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        pointer-events: none;
+      }
+
+      /* Tooltip Arrow */
+      .tooltip-trigger:hover::before {
+        content: "";
+        position: absolute;
+        bottom: 115%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 6px solid transparent;
+        border-top-color: #1e293b;
+        z-index: 9999;
+        pointer-events: none;
+      }
+
+      /* Ensure tooltips aren't cut off by cards */
+      .stat-card {
+        overflow: visible !important;
       }
     </style>
   </head>
@@ -1216,6 +1270,7 @@
           now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
         const container = document.getElementById("statsBar");
+        const tooltipMsg = "Click to filter table below";
 
         // Helper to generate the HTML for Process Load
         let loadHtml = Object.entries(processCounts)
@@ -1223,12 +1278,12 @@
           .map(([name, count]) => {
             const isActive = activeFilters.processes.has(name);
             return `
-        <div onclick="toggleProcessFilter('${name}')" 
-             class="filter-item ${isActive ? "active-filter-pill" : ""}" 
-             style="cursor:pointer; font-size: 0.85rem; display: flex; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding: 6px 4px; border-radius: 4px; transition: 0.2s;">
-            <span>${name}</span>
-            <span style="font-weight: bold; color: ${isActive ? "white" : "var(--primary)"};">${count}</span>
-        </div>`;
+              <div onclick="toggleProcessFilter('${name}')" 
+                  class="filter-item tooltip-trigger ${isActive ? "active-filter-pill" : ""}" 
+                  data-tooltip="${tooltipMsg}">
+                  <span>${name}</span>
+                  <span style="font-weight: bold; color: ${isActive ? "white" : "var(--primary)"};">${count}</span>
+              </div>`;
           })
           .join("");
 
@@ -1239,42 +1294,42 @@
             .map(([name, count]) => {
               const isActive = activeFilters.delayedProcesses.has(name);
               return `
-              <div onclick="toggleDelayedProcessFilter('${name}')" 
-                  class="filter-item-delayed ${isActive ? "active-filter-delayed" : ""}" 
-                  style="cursor:pointer; font-size: 0.85rem; color: ${isActive ? "white" : "var(--danger)"}; display: flex; justify-content: space-between; padding: 6px 4px; border-bottom: 1px solid #fff1f1; border-radius: 4px;">
-                  <span>${name}</span>
-                  <span style="font-weight: bold;">${count}</span>
-              </div>`;
+                <div onclick="toggleDelayedProcessFilter('${name}')" 
+                    class="filter-item-delayed tooltip-trigger ${isActive ? "active-filter-delayed" : ""}" 
+                    data-tooltip="${tooltipMsg}">
+                    <span>${name}</span>
+                    <span style="font-weight: bold;">${count}</span>
+                </div>`;
             })
             .join("") ||
           '<div style="text-align: center; color: #94a3b8;">No active delays</div>';
 
         container.innerHTML = `
-        <div class="stat-card">
-            <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 8px; font-weight: 600;">Production Overview</div>
-            <div class="stat-val" style="font-size: 1.8rem; margin-bottom: 4px;">${totalBatches}</div>
-            <div style="display: flex; justify-content: space-between; margin-top: 4px; border-top: 1px solid #f1f5f9; padding-top: 8px;">
-                <div onclick="toggleStatusFilter('On Track')" class="status-btn ${activeFilters.statusTypes.has("On Track") ? "active-track" : ""}">
-                    <div class="label">On Track</div>
-                    <div class="val">${onTrackCount}</div>
-                </div>
-                <div onclick="toggleStatusFilter('Delayed')" class="status-btn ${activeFilters.statusTypes.has("Delayed") ? "active-delayed" : ""}">
-                    <div class="label">Delayed</div>
-                    <div class="val">${delayedBatchesCount}</div>
-                </div>
-                <div onclick="toggleStatusFilter('Done')" class="status-btn ${activeFilters.statusTypes.has("Done") ? "active-done" : ""}">
-                    <div class="label">Done</div>
-                    <div class="val">${completedBatches}</div>
-                </div>
-            </div>
-        </div>
+          <div class="stat-card">
+              <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 8px; font-weight: 600;">Production Overview</div>
+              <div class="stat-val" style="font-size: 1.8rem; margin-bottom: 4px;">${totalBatches}</div>
+              <div style="display: flex; justify-content: space-between; margin-top: 4px; border-top: 1px solid #f1f5f9; padding-top: 8px;">
+                  <div onclick="toggleStatusFilter('On Track')" data-tooltip="${tooltipMsg}" class="status-btn tooltip-trigger ${activeFilters.statusTypes.has("On Track") ? "active-track" : ""}">
+                      <div class="label">On Track</div>
+                      <div class="val">${onTrackCount}</div>
+                  </div>
+                  <div onclick="toggleStatusFilter('Delayed')" data-tooltip="${tooltipMsg}" class="status-btn tooltip-trigger ${activeFilters.statusTypes.has("Delayed") ? "active-delayed" : ""}">
+                      <div class="label">Delayed</div>
+                      <div class="val">${delayedBatchesCount}</div>
+                  </div>
+                  <div onclick="toggleStatusFilter('Done')" data-tooltip="${tooltipMsg}" class="status-btn tooltip-trigger ${activeFilters.statusTypes.has("Done") ? "active-done" : ""}">
+                      <div class="label">Done</div>
+                      <div class="val">${completedBatches}</div>
+                  </div>
+              </div>
+          </div>
 
         <div class="stat-card">
             <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 8px;">System Status</div>
-            <div class="stat-val" style="color: #10b981; font-size: 1.5rem; display: flex; align-items: center; gap: 6px;">
-                <span style="height: 8px; width: 8px; background-color: #10b981; border-radius: 50%; display: inline-block; box-shadow: 0 0 5px #10b981;"></span>
-                Online
-            </div>
+              <div class="stat-val" style="color: #10b981; font-size: 1.5rem; display: flex; align-items: center; gap: 6px;">
+                  <span style="height: 8px; width: 8px; background-color: #10b981; border-radius: 50%; display: inline-block; box-shadow: 0 0 5px #10b981;"></span>
+                  Online
+              </div>
             <div style="font-size: 0.8rem; color: #94a3b8; margin-top: auto;">Last Sync: ${lastSyncStr}</div>
         </div>
 
@@ -1291,7 +1346,7 @@
                 ${delayHtml}
             </div>
         </div>
-    `;
+      `;
       }
 
       function renderTable() {
