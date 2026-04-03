@@ -1519,16 +1519,16 @@ async function revertProcessStep(rowIdx, baseCol, revertRemark) {
     if (!revertRemark || revertRemark.trim() === "")
       throw new Error("Revert remark is mandatory.");
 
-    // 1. Fetch the entire row once
     let rowValues = await getBatchListingRow(rowIdx);
+    const batchQty = Number(rowValues[4] || 0);
 
-    let currentQtyMap = parseMapString(rowValues[119], rowValues[4]);
-    let maxQtyMap = parseMapString(rowValues[120], rowValues[4]);
+    let currentQtyMap = parseMapString(rowValues[119], batchQty);
+    // maxQtyMap remains untouched to preserve the ceiling
 
-    // 2. Modify the array in memory
     for (let i = 0; i < 12; i++) {
       let currentStepBase = 6 + i * 9;
 
+      // Only evaluate the target step and those physically after it in the sequence
       if (currentStepBase >= baseCol) {
         const pName = rowValues[currentStepBase];
         if (!pName || pName === "" || pName === "--") continue;
@@ -1537,33 +1537,41 @@ async function revertProcessStep(rowIdx, baseCol, revertRemark) {
           rowValues[currentStepBase + 8] === true ||
           String(rowValues[currentStepBase + 8]).toUpperCase() === "TRUE";
 
-        // Reset Qty to Max
-        currentQtyMap[currentStepBase] =
-          maxQtyMap[currentStepBase] || rowValues[4];
-
-        // Clear Step Data in memory array
-        rowValues[currentStepBase + 2] = ""; // End Date
-        rowValues[currentStepBase + 3] = ""; // Duration
-        rowValues[currentStepBase + 6] = ""; // Completion Remark
-        rowValues[currentStepBase + 8] = false; // IsDone
-
         if (currentStepBase === baseCol) {
+          // --- TARGET STEP ---
+          // Force to 0 so user can resubmit full amount
+          currentQtyMap[currentStepBase] = 0;
+
+          rowValues[currentStepBase + 2] = ""; // End Date
+          rowValues[currentStepBase + 3] = ""; // Duration
           rowValues[currentStepBase + 5] = "Reverted";
+          rowValues[currentStepBase + 6] = ""; // Completion Remark
           rowValues[currentStepBase + 7] = revertRemark;
+          rowValues[currentStepBase + 8] = false; // IsDone
         } else if (wasDone) {
-          rowValues[currentStepBase + 5] = "";
+          // --- SEQUENTIAL AUTO-REVERT ---
+          // Only reset to 0 if it was actually "Done"
+          currentQtyMap[currentStepBase] = 0;
+
+          rowValues[currentStepBase + 2] = "";
+          rowValues[currentStepBase + 3] = "";
+          rowValues[currentStepBase + 5] = ""; // Clear status
+          rowValues[currentStepBase + 6] = "";
           rowValues[currentStepBase + 7] = "Auto-reverted (Sequential)";
+          rowValues[currentStepBase + 8] = false;
         }
+        // ELSE: If it's a future step that was NOT "Done", we do nothing.
+        // This preserves any "Delayed" quantities or pending 0s already there.
       }
     }
 
-    // 3. Update the Map string in the array
     rowValues[119] = serializeMap(currentQtyMap);
-
-    // 4. SAVE THE WHOLE ROW AT ONCE
     await updateBatchListingRow(rowIdx, rowValues);
 
-    return { success: true, message: "Process step reverted" };
+    return {
+      success: true,
+      message: "Step reverted. Completed following steps reset.",
+    };
   } catch (error) {
     console.error("[revertProcessStep] Error:", error.message);
     throw error;
