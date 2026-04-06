@@ -147,6 +147,13 @@
       overflow-x: auto;
     }
 
+    .result-summary {
+      margin: 0 0 12px;
+      font-size: 0.95rem;
+      color: #374151;
+      font-weight: 600;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -869,6 +876,7 @@
     <div class="stats-bar" id="statsBar"></div>
 
     <div class="table-container">
+      <div class="result-summary" id="jobCountSummary">Showing 0 of 0 jobs</div>
       <table id="jobTable">
         <thead>
           <tr>
@@ -1253,6 +1261,10 @@
       });
 
       tbody.innerHTML = '';
+      const countSummary = document.getElementById('jobCountSummary');
+      if (countSummary) {
+        countSummary.textContent = `Showing ${filteredData.length} of ${MASTER_DATA.length} jobs`;
+      }
 
       if (filteredData.length === 0) {
         tbody.innerHTML = '<tr><td colspan="12" style="text-align:center; padding: 40px;">No matching jobs found.</td></tr>';
@@ -1270,10 +1282,14 @@
         let jobName = job["Job Name"] || job.Job_Name || job.client || '-';
         let item = job.Item || '-';
 
+        const psnText = job["Product Serial Number"] || job.PSN || '-';
+        const psnValue = psnText !== '-' ? (psnText.toString().endsWith('-1') ? psnText : `${psnText}-1`) : psnText;
+        const psnLink = psnText !== '-' ? `<a href="/BatchDetail.html?id=${encodeURIComponent(psnValue)}" target="_top" style="color: #2563eb; font-weight: 600; text-decoration: none;"><i class="fas fa-external-link-alt" style="font-size: 0.7rem; margin-right: 4px;"></i>${psnText}</a>` : psnText;
+
         const row = document.createElement('tr');
         row.className = rowClass;
         row.innerHTML = `
-            <td>${job["Product Serial Number"] || job.PSN || '-'}</td>
+            <td>${psnLink}</td>
             <td>${job["PI Number"] || job.PI_Number || job.pi || job.PI_No || '-'}</td>
             <td>${job.salesCode || job.Sales_Code || job.code || '-'}</td>
             <td>${jobName}</td>
