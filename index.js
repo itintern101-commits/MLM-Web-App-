@@ -972,8 +972,8 @@ app.post("/api/submitData", async (req, res) => {
       const qtyStringZero = activeProcessCols
         .map((colIdx) => `${colIdx}:${0}`)
         .join("|");
-      
-        const qtyString = activeProcessCols
+
+      const qtyString = activeProcessCols
         .map((colIdx) => `${colIdx}:${batchQty}`)
         .join("|");
 
@@ -1022,6 +1022,130 @@ app.post("/api/submitData", async (req, res) => {
       error: "Failed to submit data",
       message: error.message,
     });
+  }
+});
+
+// API route to update JobListing details by PSN
+app.post("/api/updateJobListing", async (req, res) => {
+  try {
+    console.log("[API] POST /api/updateJobListing - request received");
+    const { psn, jobType, item, priority, salesCode } = req.body;
+
+    // Validate required fields
+    if (!psn) {
+      return res.status(400).json({ success: false, error: "PSN is required" });
+    }
+
+    console.log(`[API] Updating JobListing for PSN: ${psn}`);
+
+    // Get SharePoint context
+    const ctx = await getSharePointFileContext();
+
+    // Normalize PSN for comparison
+    const normalizedSearchPsn = normalizePsn(psn);
+
+    // Fetch all JobListing rows to find the matching PSN
+    const rows = await getTableRowsAsObjects("JobListing");
+
+    // Find the row index that matches the PSN
+    let targetRowIndex = -1;
+    for (let i = 0; i < rows.length; i++) {
+      const rowPsn = normalizePsn(rows[i]["Product Serial Number"] || rows[i].PSN || "");
+      if (rowPsn === normalizedSearchPsn) {
+        targetRowIndex = i;
+        break;
+      }
+    }
+
+    if (targetRowIndex === -1) {
+      return res.status(404).json({ success: false, error: "Job not found with the given PSN" });
+    }
+
+    console.log(`[API] Found job at row index: ${targetRowIndex}`);
+
+    // Get header row to map column names to indices
+    const headerRes = await axios.get(
+      `https://graph.microsoft.com/v1.0/drives/${ctx.driveId}/items/${ctx.fileId}/workbook/tables('JobListing')/headerRowRange`,
+      { headers: ctx.headers }
+    );
+    const headers = headerRes.data.values?.[0] || [];
+
+    console.log(`[API] Headers:`, headers);
+    console.log(`[API] Row data before update:`, rows[targetRowIndex]);
+
+    // Verify the row exists and is valid
+    if (!rows[targetRowIndex]) {
+      return res.status(404).json({ success: false, error: "Row data is invalid" });
+    }
+
+    // Convert the object back to array format using headers
+    const updatedRow = headers.map((header) => {
+      return rows[targetRowIndex][header] !== undefined ? rows[targetRowIndex][header] : null;
+    });
+
+    console.log(`[API] Headers length: ${headers.length}, Row length: ${updatedRow.length}`);
+
+    // Find column indices for updates
+    const findColumnIndex = (possibleNames) => {
+      for (let name of possibleNames) {
+        const idx = headers.indexOf(name);
+        if (idx >= 0) return idx;
+      }
+      return -1;
+    };
+
+    // Update fields by index
+    const salesCodeIdx = findColumnIndex(['salesCode', 'Sales Code', 'Sales_Code', 'SalesCode']);
+    const jobTypeIdx = findColumnIndex(['Job Type', 'Job_Type', 'JobType', 'jobType']);
+    const itemIdx = findColumnIndex(['Item']);
+    const priorityIdx = findColumnIndex(['Priority']);
+
+    console.log(`[API] Column indices - salesCode: ${salesCodeIdx}, jobType: ${jobTypeIdx}, item: ${itemIdx}, priority: ${priorityIdx}`);
+
+    if (salesCode !== undefined && salesCodeIdx >= 0) {
+      updatedRow[salesCodeIdx] = salesCode;
+      console.log(`[API] Updated Sales Code at index ${salesCodeIdx}: ${salesCode}`);
+    }
+    if (jobType !== undefined && jobTypeIdx >= 0) {
+      updatedRow[jobTypeIdx] = jobType;
+      console.log(`[API] Updated Job Type at index ${jobTypeIdx}: ${jobType}`);
+    }
+    if (item !== undefined && itemIdx >= 0) {
+      updatedRow[itemIdx] = item;
+      console.log(`[API] Updated Item at index ${itemIdx}: ${item}`);
+    }
+    if (priority !== undefined && priorityIdx >= 0) {
+      updatedRow[priorityIdx] = priority;
+      console.log(`[API] Updated Priority at index ${priorityIdx}: ${priority}`);
+    }
+
+    console.log(`[API] Updated row data:`, updatedRow);
+
+    // Update the row in Excel using the worksheet range API
+    const physicalRow = targetRowIndex + 2; // Excel rows start at 1, plus header row
+    const colCount = await getTableColumnCount("JobListing");
+    const lastColLetter = indexToColumnLetter(colCount - 1);
+    const rangeAddress = `A${physicalRow}:${lastColLetter}${physicalRow}`;
+
+    console.log(`[API] Physical row: ${physicalRow}, Range: ${rangeAddress}`);
+
+    const url = `https://graph.microsoft.com/v1.0/drives/${ctx.driveId}/items/${ctx.fileId}/workbook/worksheets('JobListing')/range(address='${rangeAddress}')`;
+
+    // Format values for Excel
+    const formattedValues = updatedRow.map(val => {
+      if (val === true) return "TRUE";
+      if (val === false) return "FALSE";
+      return val === null || val === undefined ? "" : val;
+    });
+
+    await axios.patch(url, { values: [formattedValues] }, { headers: ctx.headers });
+
+    console.log(`[API] Successfully updated JobListing for PSN: ${psn}`);
+    res.json({ success: true, message: "Job details updated successfully" });
+
+  } catch (error) {
+    console.error("[API] POST /api/updateJobListing - error:", error);
+    res.status(500).json({ success: false, error: "Failed to update job details" });
   }
 });
 
@@ -1317,7 +1441,7 @@ async function saveMultiBatchUpdate(payload) {
           Math.ceil(
             (new Date(todayISO) -
               new Date(startDate.toISOString().split("T")[0])) /
-              86400000,
+            86400000,
           ),
         );
 
@@ -1372,8 +1496,13 @@ async function saveMultiBatchUpdate(payload) {
           currentBatchQty = u.qty;
         }
       } else if (u.isDelayed) {
-        qtyMap[base] = u.qty;
+        // --- DELAY-ONLY LOGIC ---
+        runningRowData[base + 5] = "Delayed";
+        runningRowData[base + 6] = u.remark || ""; // Save delay reason
+        runningRowData[base + 8] = false; // Ensure NOT marked done
+        qtyMap[base] = u.qty; // Update map with current progress qty
       }
+      if (u.detail) runningRowData[base + 4] = u.detail;
     }
 
     // Finalize maps and save
@@ -1409,12 +1538,15 @@ async function createSplitBatchFromWaterfall(
   const BLOCK_SIZE = 9;
 
   let newRow = [...parentData];
+  const parentBatchId = String(parentData[1] || "Unknown");
   const newId = await generateNewBatchId(String(parentData[1]), []);
 
   newRow[1] = newId;
   newRow[2] = new Date().toISOString().split("T")[0];
   newRow[4] = diffQty; // Child Batch starts with the remaining total
-  newRow[118] = userRemark;
+  // Appends the original batch ID to the end of the user's remark
+  const originTag = ` (From: ${parentBatchId})`;
+  newRow[118] = userRemark ? `${userRemark}${originTag}` : `Split${originTag}`;
 
   let childQtyMap = {};
   let childMaxMap = {};
@@ -1523,16 +1655,16 @@ async function revertProcessStep(rowIdx, baseCol, revertRemark) {
     if (!revertRemark || revertRemark.trim() === "")
       throw new Error("Revert remark is mandatory.");
 
-    // 1. Fetch the entire row once
     let rowValues = await getBatchListingRow(rowIdx);
+    const batchQty = Number(rowValues[4] || 0);
 
-    let currentQtyMap = parseMapString(rowValues[119], rowValues[4]);
-    let maxQtyMap = parseMapString(rowValues[120], rowValues[4]);
+    let currentQtyMap = parseMapString(rowValues[119], batchQty);
+    // maxQtyMap remains untouched to preserve the ceiling
 
-    // 2. Modify the array in memory
     for (let i = 0; i < 12; i++) {
       let currentStepBase = 6 + i * 9;
 
+      // Only evaluate the target step and those physically after it in the sequence
       if (currentStepBase >= baseCol) {
         const pName = rowValues[currentStepBase];
         if (!pName || pName === "" || pName === "--") continue;
@@ -1541,33 +1673,41 @@ async function revertProcessStep(rowIdx, baseCol, revertRemark) {
           rowValues[currentStepBase + 8] === true ||
           String(rowValues[currentStepBase + 8]).toUpperCase() === "TRUE";
 
-        // Reset Qty to Max
-        currentQtyMap[currentStepBase] =
-          maxQtyMap[currentStepBase] || rowValues[4];
-
-        // Clear Step Data in memory array
-        rowValues[currentStepBase + 2] = ""; // End Date
-        rowValues[currentStepBase + 3] = ""; // Duration
-        rowValues[currentStepBase + 6] = ""; // Completion Remark
-        rowValues[currentStepBase + 8] = false; // IsDone
-
         if (currentStepBase === baseCol) {
+          // --- TARGET STEP ---
+          // Force to 0 so user can resubmit full amount
+          currentQtyMap[currentStepBase] = 0;
+
+          rowValues[currentStepBase + 2] = ""; // End Date
+          rowValues[currentStepBase + 3] = ""; // Duration
           rowValues[currentStepBase + 5] = "Reverted";
+          rowValues[currentStepBase + 6] = ""; // Completion Remark
           rowValues[currentStepBase + 7] = revertRemark;
+          rowValues[currentStepBase + 8] = false; // IsDone
         } else if (wasDone) {
-          rowValues[currentStepBase + 5] = "";
+          // --- SEQUENTIAL AUTO-REVERT ---
+          // Only reset to 0 if it was actually "Done"
+          currentQtyMap[currentStepBase] = 0;
+
+          rowValues[currentStepBase + 2] = "";
+          rowValues[currentStepBase + 3] = "";
+          rowValues[currentStepBase + 5] = ""; // Clear status
+          rowValues[currentStepBase + 6] = "";
           rowValues[currentStepBase + 7] = "Auto-reverted (Sequential)";
+          rowValues[currentStepBase + 8] = false;
         }
+        // ELSE: If it's a future step that was NOT "Done", we do nothing.
+        // This preserves any "Delayed" quantities or pending 0s already there.
       }
     }
 
-    // 3. Update the Map string in the array
     rowValues[119] = serializeMap(currentQtyMap);
-
-    // 4. SAVE THE WHOLE ROW AT ONCE
     await updateBatchListingRow(rowIdx, rowValues);
 
-    return { success: true, message: "Process step reverted" };
+    return {
+      success: true,
+      message: "Step reverted. Completed following steps reset.",
+    };
   } catch (error) {
     console.error("[revertProcessStep] Error:", error.message);
     throw error;

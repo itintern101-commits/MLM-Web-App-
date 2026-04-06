@@ -203,6 +203,15 @@
       font-size: 0.9rem;
     }
 
+    /* Section Card */
+    .section-card {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      padding: 25px;
+      margin-bottom: 40px;
+    }
+
     /* Job List */
     .table-header-flex {
       display: flex;
@@ -397,7 +406,7 @@
 
     .progress-bar {
       height: 8px;
-      background: #9ca3af;
+      background: #e2e8f0;
       border-radius: 4px;
       width: 100px;
       margin-top: 5px;
@@ -581,7 +590,7 @@
         <div class="val" style="color: #0b8043;" id="stat-total-batches">0</div>
       </div>
     </div> -->
-    
+
     <div class="status-grid">
       <div class="status-card" data-status="ON SCHEDULE" style="border-top: 8px solid var(--success);">
         <h3>On Schedule</h3>
@@ -598,140 +607,147 @@
     </div>
 
 
-    <span class="section-title">PROCESS WORKLOAD & AVERAGE PERFORMANCE</span>
-    <div class="cap-card" style="margin-bottom: 40px; padding: 25px;">
-      <div class="process-container" id="processStatsContainer"
-        style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;">
-        <p style="color: #94a3b8; font-size: 12px;">Sorting and loading processes...</p>
-      </div>
-
-      <div id="processJobsTable" style="display: none; margin-top: 20px;">
-        <span class="section-title">Jobs in Process: <span class="process-step-badge" id="selectedProcessName"
-            style="font-size:25px;"></span></span>
-        <div class="table-header-flex"
-          style="margin: 10px 0 10px; gap: 10px; align-items: center; justify-content: flex-end;">
-          <input type="text" id="processSearchInput" onkeyup="filterProcessJobs()"
-            placeholder="Search PSN, BatchID, Job..." class="filter-select" style="width: 240px;">
-          <select id="processDueFilter" onchange="filterProcessJobs()" class="filter-select" style="width: 180px;">
-            <option value="ALL">All Due Status</option>
-            <option value="OVERDUE">Overdue</option>
-            <option value="DUE_TODAY">Due Today</option>
-            <option value="NEAR_DUE">Near Due (1-2d)</option>
-          </select>
+    <div class="section-card">
+      <span class="section-title">PROCESS WORKLOAD & AVERAGE PERFORMANCE</span>
+      <div class="cap-card" style="margin-bottom: 40px; padding: 25px;">
+        <div class="process-container" id="processStatsContainer"
+          style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;">
+          <p style="color: #94a3b8; font-size: 12px;">Sorting and loading processes...</p>
         </div>
-        <div
-          style="max-height: 600px; overflow-y: auto; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-          <table class="job-table" id="processJobsTableContent" style="max-height: none; overflow: visible;">
+
+        <div id="processJobsTable" style="display: none; margin-top: 20px;">
+          <span class="section-title">Jobs in Process: <span class="process-step-badge" id="selectedProcessName"
+              style="font-size:25px;"></span></span>
+          <div class="table-header-flex"
+            style="margin: 10px 0 10px; gap: 10px; align-items: center; justify-content: flex-end;">
+            <input type="text" id="processSearchInput" onkeyup="filterProcessJobs()"
+              placeholder="Search PSN, BatchID, Job..." class="filter-select" style="width: 240px;">
+            <select id="processDueFilter" onchange="filterProcessJobs()" class="filter-select" style="width: 180px;">
+              <option value="ALL">All Due Status</option>
+              <option value="OVERDUE">Overdue</option>
+              <option value="DUE_TODAY">Due Today</option>
+              <option value="NEAR_DUE">Near Due (1-2d)</option>
+            </select>
+          </div>
+          <div
+            style="max-height: 600px; overflow-y: auto; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+            <table class="job-table" id="processJobsTableContent" style="max-height: none; overflow: visible;">
+              <thead>
+                <tr>
+                  <th>PSN</th>
+                  <th>Batch ID</th>
+                  <th>Client Name</th>
+                  <th>Quantity</th>
+                  <th>Priority(Expected Date)</th>
+                  <th>Expected Date</th>
+                </tr>
+              </thead>
+              <tbody id="processJobsBody">
+                <tr>
+                  <td colspan="6" style="text-align:center; padding: 20px;">Click on a process above to view jobs in
+                    progress.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="capacity-container">
+        <div class="section-header-flex">
+          <div>
+            <span class="section-title">Machine Load Capacity</span>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <select id="monthPicker" onchange="calculateCapacity()" class="filter-select"
+              style="font-weight: bold; border: 1px solid var(--primary);">
+            </select>
+            <div class="week-label" style="display: flex; align-items: center; gap: 15px;">
+              <button onclick="changeWeek(-1)"
+                style="border: none; background: none; cursor: pointer; color: var(--primary);"><i
+                  class="fas fa-chevron-left"></i></button>
+              <div id="currentWeekRange">
+                <i class="far fa-calendar-alt"></i> Loading Week...
+              </div>
+              <button onclick="changeWeek(1)"
+                style="border: none; background: none; cursor: pointer; color: var(--primary);"><i
+                  class="fas fa-chevron-right"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="capacity-grid" id="machineCapacityContainer"></div>
+
+        <div id="chartSection" style="margin-top: 30px; margin-bottom: 0; display: none;">
+          <div class="section-header-flex">
+            <div>
+              <span class="section-title" id="chartTitle">Machine Load</span>
+              <div id="chartSubtitle" style="font-size: 0.85rem; color: #5f6368; margin-top: -15px; margin-left: 25px;">
+              </div>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <div
+                style="background: #f1f3f4; padding: 4px; border-radius: 8px; display: flex; gap: 4px; margin-right: 20px;">
+                <button id="btnViewMonth" onclick="setChartViewMode('MONTH')"
+                  style="border:none; padding: 6px 12px; border-radius: 6px; cursor:pointer; font-weight:600; font-size:0.8rem;">Monthly</button>
+                <button id="btnViewWeek" onclick="setChartViewMode('WEEK')"
+                  style="border:none; padding: 6px 12px; border-radius: 6px; cursor:pointer; font-weight:600; font-size:0.8rem;">Weekly</button>
+              </div>
+              <button onclick="document.getElementById('chartSection').style.display='none'"
+                style="border:none; background:none; cursor:pointer; color:#ea4335;"><i class="fas fa-times"></i>
+                Close</button>
+            </div>
+          </div>
+          <div style="height: 300px;">
+            <canvas id="capacityChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <!-- REQUIREMENT UPDATE LISTING -->
+      <div style="margin-bottom :30px">
+        <div class="table-header-flex" style="flex-wrap: wrap; gap: 15px;">
+          <span class="section-title" style="margin-bottom: 0;">REQUIREMENT UPDATE LISTING</span>
+          <div style="display: flex; gap: 10px; flex-grow: 1; justify-content: flex-end;">
+            <input type="text" id="reqSearchInput" onkeyup="filterRequirementUpdates()"
+              placeholder="Search PSN or Client Name..." class="filter-select" style="width: 250px;">
+            <select class="filter-select" id="reqStatusFilter" onchange="filterRequirementUpdates()">
+              <option value="ALL">All Status</option>
+              <option value="OVERDUE">Overdue</option>
+              <option value="ALMOST DUE">Almost Due</option>
+            </select>
+          </div>
+        </div>
+        <div style="max-height: 600px; overflow-y: auto; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+          <table class="job-table" id="requirementTable" style="max-height: none; overflow: visible;">
             <thead>
               <tr>
                 <th>PSN</th>
                 <th>Batch ID</th>
                 <th>Client Name</th>
                 <th>Quantity</th>
-                <th>Priority(Expected Date)</th>
-                <th>Expected Date</th>
-              </tr>
-            </thead>
-            <tbody id="processJobsBody">
-              <tr>
-                <td colspan="6" style="text-align:center; padding: 20px;">Click on a process above to view jobs in
-                  progress.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <div class="capacity-container">
-      <div class="section-header-flex">
-        <div>
-          <span class="section-title">Machine Load Capacity</span>
-        </div>
-        <div style="display: flex; gap: 10px; align-items: center;">
-          <select id="monthPicker" onchange="calculateCapacity()" class="filter-select"
-            style="font-weight: bold; border: 1px solid var(--primary);">
-          </select>
-          <div class="week-label" style="display: flex; align-items: center; gap: 15px;">
-            <button onclick="changeWeek(-1)"
-              style="border: none; background: none; cursor: pointer; color: var(--primary);"><i
-                class="fas fa-chevron-left"></i></button>
-            <div id="currentWeekRange">
-              <i class="far fa-calendar-alt"></i> Loading Week...
-            </div>
-            <button onclick="changeWeek(1)"
-              style="border: none; background: none; cursor: pointer; color: var(--primary);"><i
-                class="fas fa-chevron-right"></i></button>
-          </div>
-        </div>
-      </div>
-
-      <div class="capacity-grid" id="machineCapacityContainer"></div>
-    </div>
-
-    <div class="cap-card" id="chartSection" style="margin-bottom: 40px; display: none;">
-      <div class="section-header-flex">
-        <div>
-          <span class="section-title" id="chartTitle">Machine Load</span>
-          <div id="chartSubtitle" style="font-size: 0.85rem; color: #5f6368; margin-top: -15px; margin-left: 25px;">
-          </div>
-        </div>
-        <div style="display: flex; gap: 10px; align-items: center;">
-          <div
-            style="background: #f1f3f4; padding: 4px; border-radius: 8px; display: flex; gap: 4px; margin-right: 20px;">
-            <button id="btnViewMonth" onclick="setChartViewMode('MONTH')"
-              style="border:none; padding: 6px 12px; border-radius: 6px; cursor:pointer; font-weight:600; font-size:0.8rem;">Monthly</button>
-            <button id="btnViewWeek" onclick="setChartViewMode('WEEK')"
-              style="border:none; padding: 6px 12px; border-radius: 6px; cursor:pointer; font-weight:600; font-size:0.8rem;">Weekly</button>
-          </div>
-          <button onclick="document.getElementById('chartSection').style.display='none'"
-            style="border:none; background:none; cursor:pointer; color:#ea4335;"><i class="fas fa-times"></i>
-            Close</button>
-        </div>
-      </div>
-      <div style="height: 300px;">
-        <canvas id="capacityChart"></canvas>
-      </div>
-    </div>
-
-    <!-- REQUIREMENT UPDATE LISTING -->
-    <div style="margin-bottom :30px">
-      <div class="table-header-flex" style="flex-wrap: wrap; gap: 15px;">
-        <span class="section-title" style="margin-bottom: 0;">REQUIREMENT UPDATE LISTING</span>
-        <div style="display: flex; gap: 10px; flex-grow: 1; justify-content: flex-end;">
-          <input type="text" id="reqSearchInput" onkeyup="filterRequirementUpdates()"
-            placeholder="Search PSN or Client Name..." class="filter-select" style="width: 250px;">
-          <select class="filter-select" id="reqStatusFilter" onchange="filterRequirementUpdates()">
-            <option value="ALL">All Status</option>
-            <option value="OVERDUE">Overdue</option>
-            <option value="ALMOST DUE">Almost Due</option>
-          </select>
-        </div>
-      </div>
-      <div style="max-height: 600px; overflow-y: auto; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-        <table class="job-table" id="requirementTable" style="max-height: none; overflow: visible;">
-          <thead>
-            <tr>
-              <th>PSN</th>
-              <th>Batch ID</th>
-              <th>Client Name</th>
-              <th>Quantity</th>
-              <th>Current Process</th>
-              <th>In Progress(Days)</th>
+                <th>Current Process</th>
+                <th>In Progress</th>
               <th style="cursor:pointer;" onclick="setReqSort('dueDays')">Days to Due Date <span
                   id="reqSortIcon">▲</span>
               </th>
               <th>Previous Step & EndDate</th>
             </tr>
           </thead>
-          <tbody id="requirementBody">
-            <tr>
-              <td colspan="8" style="text-align:center; padding: 20px;">Loading requirement updates...</td>
-            </tr>
-          </tbody>
-        </table>
+            <tbody id="requirementBody">
+              <tr>
+                <td colspan="8" style="text-align:center; padding: 20px;">Loading requirement updates...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
+    <div class="section-card">
     <div class="table-header-flex" style="flex-wrap: wrap; gap: 15px;">
       <span class="section-title" style="margin-bottom: 0;">JOB FULFILLMENT LIST</span>
 
@@ -801,8 +817,7 @@
         </tbody>
       </table>
     </div>
-  </div>
-
+    </div>
   <script>
     let MASTER_DATA = [];
     let RAW_CAPACITY = [];
@@ -1033,17 +1048,16 @@
         return matchesSearch && matchesSalesCode && matchesPriority && matchesJobType && matchesStatus;
       });
 
-      // 3. APPLY SMART SORT (Keeping your existing logic)
+      // 3. APPLY SMART SORT
       filteredList.sort((a, b) => {
-        const getScore = (item) => {
-          let score = 0;
-          if (item.priority === "Urgent") score += 100;
-          if (item.priority === "Cut Queue") score += 50;
-          if (item.status === "OVERDUE") score += 200;
-          if (item.status === "ALMOST DUE") score += 10;
-          return score;
-        };
-        return getScore(b) - getScore(a);
+        const priorityOrder = { "Urgent": 1, "Cut Queue": 2, "Normal": 3 };
+        const statusOrder = { "OVERDUE": 1, "ALMOST DUE": 2, "ON SCHEDULE": 3 };
+        const aPri = priorityOrder[a.priority] || 4;
+        const bPri = priorityOrder[b.priority] || 4;
+        const aStat = statusOrder[a.status] || 4;
+        const bStat = statusOrder[b.status] || 4;
+        if (aPri !== bPri) return aPri - bPri;
+        return aStat - bStat;
       });
 
       // 4. DRAW THE TABLE
@@ -1393,7 +1407,7 @@
       activeViewMode = 'MONTH'; // Reset to Month view whenever a new machine is clicked
       document.getElementById('chartSection').style.display = 'block';
       updateChartData(mName);
-      document.getElementById('chartSection').scrollIntoView({ behavior: 'smooth' });
+      // Removed scrollIntoView to keep the entire Machine Load Capacity section in view
     }
 
     // Main function to update the chart data based on the selected machine and view mode
@@ -1728,7 +1742,7 @@
         const expDateLabel = currentStep && currentStep.expDate ? currentStep.expDate : '-';
 
         return `<tr class="${rowClass}">
-          <td>${job.psn}</td>
+          <td style="font-weight:bold;">${job.psn}</td>
           <td><a href="${getUpdateUrl(job.batchId)}" target="_top" style="color: var(--primary); font-weight: bold; text-decoration: none;"><i class="fas fa-external-link-alt" style="font-size: 0.7rem;"></i> ${job.batchId}</a></td>
           <td>${job.jobName || job.client || '-'}</td>
           <td>${Number(job.qty).toLocaleString()}</td>
