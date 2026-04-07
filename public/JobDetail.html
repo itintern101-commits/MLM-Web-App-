@@ -141,51 +141,142 @@
       transition: all 0.2s ease;
     }
 
-    /* Table Design */
+    /* ===== TABLE AREA ===== */
     .table-container {
       padding: 0 25px 25px 25px;
-      overflow-x: auto;
+      width: 95%;
+      max-width: 100%;
+      overflow: hidden;
+      /* keep */
+      position: relative;
     }
 
-    .result-summary {
-      margin: 0 0 12px;
-      font-size: 0.95rem;
-      color: #374151;
-      font-weight: 600;
-    }
-
-    table {
+    /* SCROLL AREA */
+    .table-scroll {
       width: 100%;
-      border-collapse: collapse;
+      overflow-x: auto;
+      overflow-y: hidden;
+      display: block;
+    }
+
+    /* ===== TABLE ===== */
+    table {
+      width: max-content;
+      /* 🔥 bigger */
+      min-width: 1600px;
+      max-width: none;
+      border-collapse: separate;
+      border-spacing: 0;
       background: white;
       border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      table-layout: fixed;
       font-size: 0.8rem;
-      table-layout: auto;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     }
 
+
+    /* ===== CELL ===== */
+    th,
+    td {
+      padding: 10px 6px;
+      border-bottom: 1px solid #f3f4f6;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* HEADER */
     th {
       background: #f8f9fa;
-      padding: 10px 6px;
-      text-align: left;
       font-weight: 600;
-      border-bottom: none;
-      cursor: pointer;
-      user-select: none;
-      position: relative;
-      transition: background 0.3s;
-      color: #374151;
-      white-space: normal;
-      overflow: visible;
-      text-overflow: unset;
-      word-wrap: break-word;
+      z-index: 10;
+      text-align: left;
     }
 
-    th:hover {
-      background: #d1d5db;
+    thead {
+      position: sticky;
+      top: 0px;
+      background: white;
+      z-index: 25;
     }
 
+    /* ===== HOVER ===== */
+    tbody tr:hover td {
+      background: #f9fafb;
+    }
+
+    /* ===== STICKY RIGHT ===== */
+    .sticky {
+      position: sticky;
+      background: white;
+      z-index: 20;
+      border-left: 1px solid #e2e8f0;
+    }
+
+    thead .sticky {
+      z-index: 30;
+      background: #f8f9fa;
+    }
+
+    /* keep row color */
+    tbody tr.row-urgent .sticky,
+    tbody tr.row-critical .sticky,
+    tbody tr.row-warning .sticky,
+    tbody tr.row-safe .sticky {
+      background: inherit;
+    }
+
+    /* keep hover */
+    tbody tr:hover .sticky {
+      background: #f9fafb;
+    }
+
+    /* ===== RIGHT FIXED COLUMNS ===== */
+    th:nth-last-child(4),
+    td:nth-last-child(4) {
+      right: 360px;
+      width: 100px;
+      min-width: 100px;
+    }
+
+    th:nth-last-child(3),
+    td:nth-last-child(3) {
+      right: 260px;
+      width: 110px;
+      min-width: 110px;
+    }
+
+    th:nth-last-child(2),
+    td:nth-last-child(2) {
+      right: 140px;
+      width: 120px;
+      min-width: 120px;
+    }
+
+    th:nth-last-child(1),
+    td:nth-last-child(1) {
+      right: 0;
+      width: 140px;
+      min-width: 140px;
+    }
+
+    /* ===== COLUMN WIDTH CONTROL ===== */
+    td:nth-child(4),
+    td:nth-child(9) {
+      max-width: 250px;
+    }
+
+    /* ===== SCROLLBAR ===== */
+    .table-scroll::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .table-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+
+    /* ===== ROW COLORS (KEEP SAME) ===== */
     .row-urgent {
       background-color: #fee2e2;
     }
@@ -200,36 +291,6 @@
 
     .row-safe {
       background-color: white;
-    }
-
-    .sort-icon {
-      display: inline-block;
-      margin-left: 8px;
-      font-size: 0.8rem;
-      color: #cbd5e1;
-    }
-
-    th.active-sort .sort-icon {
-      color: #1e40af;
-    }
-
-    td {
-      padding: 10px 6px;
-      border-bottom: 1px solid #f3f4f6;
-      transition: background 0.2s;
-      white-space: normal;
-      overflow: visible;
-      text-overflow: unset;
-      word-wrap: break-word;
-    }
-
-    td:nth-child(4),
-    td:nth-child(9) {
-      max-width: 250px;
-    }
-
-    tr:hover {
-      background: linear-gradient(90deg, #f9fafb, #f3f4f6);
     }
 
     /* Status Pills */
@@ -384,6 +445,7 @@
         transform: translateY(-50px);
         opacity: 0;
       }
+
       to {
         transform: translateY(0);
         opacity: 1;
@@ -395,6 +457,7 @@
         transform: translateY(0);
         opacity: 1;
       }
+
       to {
         transform: translateY(-20px);
         opacity: 0;
@@ -421,7 +484,7 @@
       font-size: 0.7rem;
       font-weight: normal;
       white-space: nowrap;
-      z-index: 10000;
+      z-index: 30;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
       pointer-events: none;
     }
@@ -444,7 +507,7 @@
       position: relative;
     }
 
-    .stat-card > div[style*="overflow-y: auto"] {
+    .stat-card>div[style*="overflow-y: auto"] {
       overflow-y: auto;
       overflow-x: visible !important;
       position: relative;
@@ -487,6 +550,7 @@
         opacity: 0;
         transform: translateY(-20px) scale(0.95);
       }
+
       to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -494,8 +558,16 @@
     }
 
     .large-modal {
-      max-width: 550px;
-      max-height: 100vh;
+      max-width: 750px;
+      max-height: 95vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-content.large-modal .edit-form {
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
     }
 
     /* Confirmation Dialog Styles */
@@ -718,6 +790,110 @@
       box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
     }
 
+    .batch-modal-body {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 1rem;
+      align-items: start;
+    }
+
+    .batch-panel {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      min-height: 280px;
+    }
+
+    .batch-panel-header {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 0.5rem;
+    }
+
+    .process-panel {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .process-scroll {
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      background: #f9fafb;
+      padding: 0.5rem;
+    }
+
+    .process-header {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 0.75rem;
+      font-weight: 600;
+      color: #374151;
+      padding: 1rem;
+      background: #f1f5f9;
+      border-bottom: 2px solid #e2e8f0;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      border-radius: 12px 12px 0 0;
+    }
+
+    .process-row {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 0.75rem;
+      align-items: center;
+      padding: 0.75rem;
+      border-bottom: 1px solid #e2e8f0;
+      background: white;
+      margin-bottom: 0.5rem;
+      border-radius: 8px;
+    }
+
+    .batch-summary-top {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .batch-summary-item {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .batch-summary-item .label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #64748b;
+    }
+
+    .batch-summary-item .value {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #111827;
+      word-wrap: break-word;
+    }
+
+    @media (max-width: 920px) {
+      .batch-modal-body {
+        grid-template-columns: 1fr;
+      }
+    }
+
     .sales-code-locked {
       width: 100%;
       padding: 0.6rem 0.75rem;
@@ -766,6 +942,10 @@
       background: #f8fafc;
       border-bottom-left-radius: 16px;
       border-bottom-right-radius: 16px;
+      flex-shrink: 0;
+      position: sticky;
+      bottom: 0;
+      z-index: 15;
     }
 
     .btn-unlock {
@@ -869,7 +1049,8 @@
           <option value="ALMOST DUE">ALMOST DUE</option>
           <option value="ON SCHEDULE">ON SCHEDULE</option>
         </select>
-        <button class="action-btn" id="clearFiltersBtn" style="font-size: 18px;" onclick="clearFilters()">Clear Filters</button>
+        <button class="action-btn" id="clearFiltersBtn" style="font-size: 18px;" onclick="clearFilters()">Clear
+          Filters</button>
       </div>
     </div>
 
@@ -877,29 +1058,35 @@
 
     <div class="table-container">
       <div class="result-summary" id="jobCountSummary">Showing 0 of 0 jobs</div>
-      <table id="jobTable">
-        <thead>
-          <tr>
-            <th onclick="sortTable('PSN')">PSN<span class="sort-icon">↕</span></th>
-            <th onclick="sortTable('PI Number')">PI Num<span class="sort-icon">↕</span></th>
-            <th onclick="sortTable('salesCode')">S-Code<span class="sort-icon">↕</span></th>
-            <th onclick="sortTable('Job Name')">Job Name<span class="sort-icon">↕</span></th>
-            <th onclick="sortTable('Job Type')">Job Type<span class="sort-icon">↕</span></th>
-            <th onclick="sortTable('Quantity')">Quantity<span class="sort-icon">↕</span></th>
-            <th onclick="sortTable('Order Date')">Ord-Date<span class="sort-icon">↕</span></th>
-            <th onclick="sortTable('Delivery Date')">Del-Date <span class="sort-icon">↕</span></th>
-            <th onclick="sortTable('Item')">Item<span class="sort-icon">↕</span></th>
-            <th onclick="sortTable('Priority')">Priority<span class="sort-icon">↕</span></th>
-            <th onclick="sortTable('Status')">Status<span class="sort-icon">↕</span></th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="jobTableBody">
-          <tr>
-            <td colspan="12" style="text-align:center; padding: 40px;">Loading data...</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-scroll">
+        <table id="jobTable">
+          <thead>
+            <tr>
+              <th style="width: 60px;">PSN</th>
+              <th style="width: 80px;">PI Num</th>
+              <th style="width: 60px;">S-Code</th>
+              <th style="width: 160px;">Job Name</th>
+              <th style="width: 95px;">Item</th>
+              <th style="width: 95px;">Job Type</th>
+              <th style="width: 80px;">Quantity</th>
+              <th style="width: 80px;">Remaining</th>
+              <th style="width: 70px;">Partial Del</th>
+              <th style="width: 70px;">BTD</th>
+              <th style="width: 80px;">Total Del</th>
+              <th style="width: 80px;">Ord-Date</th>
+              <th class="sticky" style="right: 320px; width: 80px;">Del-Date</th>
+              <th class="sticky" style="right: 230px; width: 90px;">Priority</th>
+              <th class="sticky" style="right: 140px; width: 90px;">Status</th>
+              <th class="sticky" style="right: 0; width: 140px;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="jobTableBody">
+            <tr>
+              <td colspan="16" style="text-align:center; padding: 40px;">Loading data...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -922,7 +1109,7 @@
   <div id="priorityModal" class="modal-overlay">
     <div class="modal-content large-modal">
       <div class="modal-header">✏️ Edit Job Details</div>
-      
+
       <div class="job-summary">
         <div class="job-summary-item">
           <div class="job-summary-label">PSN :</div>
@@ -973,9 +1160,74 @@
     </div>
   </div>
 
+  <!-- Add Batch Modal -->
+  <div id="addBatchModal" class="modal-overlay">
+    <div class="modal-content large-modal">
+      <div class="modal-header">➕ Add New Batch</div>
+
+      <div class="job-summary">
+        <div class="batch-summary-top">
+          <div class="batch-summary-item">
+            <div class="label">PSN</div>
+            <div class="value" id="batchSummaryPsn">-</div>
+          </div>
+          <div class="batch-summary-item">
+            <div class="label">Job Name</div>
+            <div class="value" id="batchSummaryJobName">-</div>
+          </div>
+          <div class="batch-summary-item">
+            <div class="label">Total Job Quantity</div>
+            <div class="value" id="batchSummaryTotalQty">-</div>
+          </div>
+          <div class="batch-summary-item">
+            <div class="label">Remaining Production Qty</div>
+            <div class="value" id="batchSummaryRemaining" style="color: #ef4444;">-</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="edit-form">
+        <div class="batch-modal-body">
+          <div class="batch-panel">
+            <div class="batch-panel-header">📦 Batch Details</div>
+            <div class="form-group">
+              <label>Batch Quantity</label>
+              <input type="number" id="batchQuantity" placeholder="Enter batch quantity" min="1">
+            </div>
+            <div class="form-group">
+              <label>Remaining After Creation</label>
+              <div id="remainingAfter" style="font-weight: bold; color: #374151; padding: 0.75rem 0.9rem; border: 2px solid #e2e8f0; border-radius: 8px; background: #f9fafb;">
+                -
+              </div>
+            </div>
+          </div>
+
+          <div class="batch-panel process-panel">
+            <div class="batch-panel-header">📅 Process Expected Dates</div>
+            <div class="process-scroll">
+              <div id="processDatesContainer">
+                <div class="process-header">
+                  <div>Process Name</div>
+                  <div>Expected Date</div>
+                </div>
+                <div id="processDatesList" style="padding: 0.5rem;">
+                  <!-- Process rows will be generated here -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeAddBatchModal()">Cancel</button>
+        <button id="createBatchBtn" class="btn-save" onclick="submitNewBatch()">➕ Create Batch</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     let MASTER_DATA = [];
-    let currentSort = { column: null, direction: 'asc' };
     let activeFilters = {
       salesCodes: new Set(),
       priorities: new Set(),
@@ -987,7 +1239,10 @@
     let originalJobData = {};
     let pendingConfirmAction = null;
 
-    window.onload = fetchData;
+    window.onload = function () {
+      fetchData();
+      setupTableDragScroll();
+    };
 
     async function fetchData() {
       try {
@@ -1003,6 +1258,42 @@
         showToast('Failed to load data', 'error');
       }
     }
+
+    function setupTableDragScroll() {
+      const scrollArea = document.querySelector('.table-scroll');
+
+      let isDown = false;
+      let startX;
+      let scrollLeft;
+
+      scrollArea.addEventListener('mousedown', (e) => {
+        isDown = true;
+        scrollArea.classList.add('dragging');
+        startX = e.pageX - scrollArea.offsetLeft;
+        scrollLeft = scrollArea.scrollLeft;
+      });
+
+      scrollArea.addEventListener('mouseleave', () => {
+        isDown = false;
+        scrollArea.classList.remove('dragging');
+      });
+
+      scrollArea.addEventListener('mouseup', () => {
+        isDown = false;
+        scrollArea.classList.remove('dragging');
+      });
+
+      scrollArea.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+
+        e.preventDefault();
+
+        const x = e.pageX - scrollArea.offsetLeft;
+        const walk = (x - startX) * 1.5; // speed
+        scrollArea.scrollLeft = scrollLeft - walk;
+      });
+    }
+
     function parseDate(dateStr) {
       if (dateStr === undefined || dateStr === null || dateStr === '' || dateStr === '-') return null;
 
@@ -1174,7 +1465,6 @@
     }
 
     function clearFilters() {
-      currentSort = { column: null, direction: 'asc' };
       activeFilters = {
         salesCodes: new Set(),
         priorities: new Set(),
@@ -1187,7 +1477,6 @@
       document.getElementById('statusFilter').value = '';
 
       renderStats();
-      updateSortIcons();
       renderTable();
     }
 
@@ -1206,31 +1495,6 @@
       if (isAlmost) return 3;
       if (isCutQueue) return 4;
       return 5;
-    }
-
-    function compareByCurrentSort(a, b) {
-      if (!currentSort.column) return 0;
-
-      const map = {
-        'PSN': (x) => (x['Product Serial Number'] || x.PSN || '').toString().toLowerCase(),
-        'PI Number': (x) => (x['PI Number'] || x.PI_Number || x.pi || x.PI_No || '').toString().toLowerCase(),
-        'salesCode': (x) => (x.salesCode || x.Sales_Code || x.code || '').toString().toLowerCase(),
-        'Job Name': (x) => (x['Job Name'] || x.Job_Name || x.client || '').toString().toLowerCase(),
-        'Job Type': (x) => (x['Job Type'] || '').toString().toLowerCase(),
-        'Quantity': (x) => parseInt(x.Quantity) || 0,
-        'Order Date': (x) => parseDate(x['Order Date'] || x.Order_Date || x.orderDate) || new Date(0),
-        'Delivery Date': (x) => parseDate(x['Delivery Date'] || x.Delivery_Date || x.deliveryDate) || new Date(0),
-        'Item': (x) => (x.Item || '').toString().toLowerCase(),
-        'Priority': (x) => (x.Priority || 'Normal').toString().toLowerCase(),
-        'Status': (x) => (x.Status || 'ON SCHEDULE').toString().toLowerCase(),
-      };
-
-      const aVal = map[currentSort.column] ? map[currentSort.column](a) : (a[currentSort.column] || '').toString().toLowerCase();
-      const bVal = map[currentSort.column] ? map[currentSort.column](b) : (b[currentSort.column] || '').toString().toLowerCase();
-
-      if (aVal < bVal) return currentSort.direction === 'asc' ? -1 : 1;
-      if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
-      return 0;
     }
 
     function renderTable() {
@@ -1253,12 +1517,8 @@
         return matchesSearch && matchesSalesCode && matchesPriority && matchesStatus;
       });
 
-      // Apply business priority + overdue ordering first; then optional column sort
-      filteredData.sort((a, b) => {
-        const priorityDiff = getPriorityOrder(a) - getPriorityOrder(b);
-        if (priorityDiff !== 0) return priorityDiff;
-        return compareByCurrentSort(a, b);
-      });
+      // Apply business priority + overdue ordering
+      filteredData.sort((a, b) => getPriorityOrder(a) - getPriorityOrder(b));
 
       tbody.innerHTML = '';
       const countSummary = document.getElementById('jobCountSummary');
@@ -1267,7 +1527,7 @@
       }
 
       if (filteredData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="12" style="text-align:center; padding: 40px;">No matching jobs found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="16" style="text-align:center; padding: 40px;">No matching jobs found.</td></tr>';
         return;
       }
 
@@ -1286,6 +1546,14 @@
         const psnValue = psnText !== '-' ? (psnText.toString().endsWith('-1') ? psnText : `${psnText}-1`) : psnText;
         const psnLink = psnText !== '-' ? `<a href="/BatchDetail.html?id=${encodeURIComponent(psnValue)}" target="_top" style="color: #2563eb; font-weight: 600; text-decoration: none;"><i class="fas fa-external-link-alt" style="font-size: 0.7rem; margin-right: 4px;"></i>${psnText}</a>` : psnText;
 
+        const remaining = job.Remaining || job.remaining || 0;
+        const partialDelivery = job['Partial Delivery'] || 0;
+        const balanceToDelivery = job['Balance to Delivery'] || job['BTD'] || 0;
+        const totalDelivery = job['Total Delivery'] || 0;
+
+        const actionButtons = `<button class="action-btn" onclick="openPriorityModal('${job["Product Serial Number"] || job.PSN}')">Edit</button>`;
+        const createBatchBtn = remaining > 0 ? `<button class="action-btn" style="margin-left: 5px;" onclick="createBatch('${job["Product Serial Number"] || job.PSN}')">Add Batch</button>` : '';
+
         const row = document.createElement('tr');
         row.className = rowClass;
         row.innerHTML = `
@@ -1293,14 +1561,18 @@
             <td>${job["PI Number"] || job.PI_Number || job.pi || job.PI_No || '-'}</td>
             <td>${job.salesCode || job.Sales_Code || job.code || '-'}</td>
             <td>${jobName}</td>
+            <td>${item}</td>
             <td>${job["Job Type"] || '-'}</td>
             <td>${job.Quantity ? Number(job.Quantity).toLocaleString() : '-'}</td>
+            <td>${remaining ? Number(remaining).toLocaleString() : '-'}</td>
+            <td>${partialDelivery ? Number(partialDelivery).toLocaleString() : '-'}</td>
+            <td>${balanceToDelivery ? Number(balanceToDelivery).toLocaleString() : '-'}</td>
+            <td>${totalDelivery ? Number(totalDelivery).toLocaleString() : '-'}</td>
             <td>${formatDate(job["Order Date"] || job.Order_Date || job.orderDate)}</td>
-            <td>${formatDate(job["Delivery Date"] || job.Delivery_Date || job.deliveryDate)}</td>
-            <td>${item}</td>
-            <td><span class="pill ${priorityClass}">${priority}</span></td>
-            <td><span class="pill ${statusClass}">${status}</span></td>
-            <td><button class="action-btn" onclick="openPriorityModal('${job["Product Serial Number"] || job.PSN}')">Edit</button></td>
+            <td class="sticky" style="right: 320px; width: 80px;">${formatDate(job["Delivery Date"] || job.Delivery_Date || job.deliveryDate)}</td>
+            <td class="sticky" style="right: 230px; width: 90px;"><span class="pill ${priorityClass}">${priority}</span></td>
+            <td class="sticky" style="right: 140px; width: 90px;"><span class="pill ${statusClass}">${status}</span></td>
+            <td class="sticky" style="right: 0; width: 140px;">${actionButtons}${createBatchBtn}</td>
           `;
         tbody.appendChild(row);
       });
@@ -1313,34 +1585,6 @@
       return date.toLocaleDateString('en-GB'); // DD/MM/YYYY
     }
 
-    function sortTable(column) {
-      if (currentSort.column === column) {
-        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
-      } else {
-        currentSort.column = column;
-        currentSort.direction = 'asc';
-      }
-      updateSortIcons();
-      renderTable();
-    }
-
-    function updateSortIcons() {
-      document.querySelectorAll('th').forEach(th => {
-        th.classList.remove('active-sort');
-        const icon = th.querySelector('.sort-icon');
-        if (icon) icon.textContent = '↕';
-      });
-
-      if (currentSort.column) {
-        const th = [...document.querySelectorAll('th')].find(th => th.textContent.includes(currentSort.column));
-        if (th) {
-          th.classList.add('active-sort');
-          const icon = th.querySelector('.sort-icon');
-          if (icon) icon.textContent = currentSort.direction === 'asc' ? '↑' : '↓';
-        }
-      }
-    }
-
     function openPriorityModal(psn) {
       currentEditingPsn = psn;
       const job = MASTER_DATA.find(j => {
@@ -1349,31 +1593,31 @@
       });
       if (job) {
         const jobName = job["Job Name"] || job.Job_Name || job.client || 'Unknown';
-        
+
         // Update summary
         document.getElementById('summaryPsn').textContent = psn;
         document.getElementById('summaryJobName').textContent = jobName;
-        
+
         // Generate Job Type buttons
-        const jobTypes = ['Offset', 'FSC', 'Flexo & MMB/SOS', 'Fully Outsourced', 'FSC Fully Outsourced', 'Drawdown' , 'K SERIES' , 'Mock-Up'];
+        const jobTypes = ['Offset', 'FSC', 'Flexo & MMB/SOS', 'Fully Outsourced', 'FSC Fully Outsourced', 'Drawdown', 'K SERIES', 'Mock-Up'];
         const jobTypeButtons = document.getElementById('jobTypeButtons');
-        jobTypeButtons.innerHTML = jobTypes.map(type => 
+        jobTypeButtons.innerHTML = jobTypes.map(type =>
           `<button class="option-btn ${job["Job Type"] === type ? 'selected' : ''}" onclick="selectJobType(this, '${type}')">${type}</button>`
         ).join('');
-        
+
         // Set Item input
         document.getElementById('editItem').value = job.Item || '';
-        
+
         // Generate Priority buttons
         const priorities = ['Urgent', 'Cut Queue', 'Normal'];
         const priorityButtons = document.getElementById('priorityButtons');
-        priorityButtons.innerHTML = priorities.map(priority => 
+        priorityButtons.innerHTML = priorities.map(priority =>
           `<button class="option-btn ${job.Priority === priority ? 'selected' : ''}" onclick="selectPriority(this, '${priority}')">${priority}</button>`
         ).join('');
-        
+
         // Sales Code starts locked
         document.getElementById('salesCodeContainer').innerHTML = '<div class="sales-code-locked" onclick="unlockSalesCode()">🔒 Click to Unlock Sales Code</div>';
-        
+
         // Store current values
         originalJobData = {
           jobType: job["Job Type"] || '',
@@ -1384,7 +1628,7 @@
         currentJobData = { ...originalJobData };
         document.getElementById('saveBtn').disabled = true;
         renderEditChangeState();
-        
+
         document.getElementById('priorityModal').classList.add('show');
       }
     }
@@ -1573,6 +1817,181 @@
           console.error('Error updating job:', error);
           showToast('Network error while updating', 'error');
         });
+    }
+
+    function createBatch(psn) {
+      // Find the job data
+      const job = MASTER_DATA.find(j => {
+        const masterValue = String(j["Product Serial Number"] || j.PSN || "");
+        return masterValue === String(psn);
+      });
+      if (!job) {
+        showToast('Job not found', 'error');
+        return;
+      }
+
+      // Set modal summary
+      document.getElementById('batchSummaryPsn').textContent = psn;
+      document.getElementById('batchSummaryJobName').textContent = job["Job Name"] || job.Job_Name || job.client || '-';
+      const totalQuantity = (job.Quantity || 0);
+      const currentRemaining = (job.Remaining || job.remaining || 0);
+      document.getElementById('batchSummaryTotalQty').textContent = totalQuantity.toLocaleString();
+      document.getElementById('batchSummaryRemaining').textContent = currentRemaining.toLocaleString();
+
+      // Set initial remaining after
+      document.getElementById('remainingAfter').textContent = currentRemaining.toLocaleString();
+
+      // Add event listener to quantity input
+      const quantityInput = document.getElementById('batchQuantity');
+      quantityInput.addEventListener('input', () => {
+        const qty = parseInt(quantityInput.value) || 0;
+        const remainingAfter = Math.max(0, currentRemaining - qty);
+        document.getElementById('remainingAfter').textContent = remainingAfter.toLocaleString();
+      });
+
+      // Set loading state while preserving the header and list wrapper
+      const processDatesContainer = document.getElementById('processDatesContainer');
+      if (processDatesContainer) {
+        processDatesContainer.innerHTML = `
+          <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 0.75rem; font-weight: 600; color: #374151; padding: 1rem; background: #f1f5f9; border-bottom: 2px solid #e2e8f0; position: sticky; top: 0; z-index: 10;">
+            <div>Process Name</div>
+            <div>Expected Date</div>
+          </div>
+          <div id="processDatesList" style="padding: 0.5rem; min-height: 120px;">
+            <div style="grid-column: span 2; text-align: center; padding: 2rem; color: #64748b;">Loading data...</div>
+          </div>
+        `;
+      }
+
+      // Fetch latest batch data and populate the modal
+      fetchLatestBatchData(psn);
+
+      // Show modal
+      document.getElementById('addBatchModal').classList.add('show');
+    }
+
+    async function fetchLatestBatchData(psn) {
+      try {
+        const resp = await fetch('/api/batchListing');
+        const batches = await resp.json();
+        console.log(batches);
+        // Filter batches for this PSN and find the latest one
+        const psnBatches = batches.filter(b => String(b["Product Serial Number"] || b.psn || '').trim() === psn);
+        console.log(psnBatches);
+        if (psnBatches.length === 0) {
+          showToast('No existing batches found for this job', 'error');
+          return;
+        }
+
+        // Sort by batch ID descending to get the latest
+        psnBatches.sort((a, b) => {
+          const idA = String(a["Batch ID"] || a.batchId || '').split('-').pop();
+          const idB = String(b["Batch ID"] || b.batchId || '').split('-').pop();
+          return parseInt(idB) - parseInt(idA);
+        });
+
+        const latestBatch = psnBatches[0];
+        populateProcessDates(latestBatch);
+
+      } catch (error) {
+        console.error('Error fetching batch data:', error);
+        showToast('Failed to load batch data', 'error');
+      }
+    }
+
+    function populateProcessDates(latestBatch) {
+      const listContainer = document.getElementById('processDatesList');
+      if (!listContainer) {
+        console.error('processDatesList element not found');
+        return;
+      }
+      listContainer.innerHTML = '';
+      console.log(latestBatch);
+      // Process steps start from column 6, each block of 9 columns
+      const START_COL = 6;
+      const BLOCK_SIZE = 9;
+
+      // Convert object to array of values in column order
+      const batchValues = Object.values(latestBatch);
+      let rowCount = 0;
+
+      for (let i = 0; i < 12; i++) {
+        const processName = batchValues[START_COL + i * BLOCK_SIZE] || '';
+        const expectedDate = batchValues[START_COL + i * BLOCK_SIZE + 1] || '';
+
+        if (processName && processName !== '') {
+          rowCount++;
+          const processRow = document.createElement('div');
+          processRow.style.cssText = 'display: grid; grid-template-columns: 1fr 1.2fr; gap: 0.75rem; align-items: center; padding: 0.75rem; border-bottom: 1px solid #e2e8f0; background: white; margin-bottom: 0.5rem; border-radius: 6px;';
+          processRow.innerHTML = `
+            <div style="font-size: 0.9rem; font-weight: 500; color: #374151;">${processName}</div>
+            <input type="date" class="process-date" data-process-index="${i}" value="${expectedDate ? formatDateForInput(expectedDate) : ''}" style="padding: 0.6rem 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.85rem; box-sizing: border-box;">
+          `;
+          listContainer.appendChild(processRow);
+        }
+      }
+
+      if (rowCount === 0) {
+        listContainer.innerHTML = '<div style="grid-column: span 2; text-align: center; padding: 2rem; color: #64748b;">No process steps found for this batch.</div>';
+      }
+    }
+
+    function formatDateForInput(dateStr) {
+      if (!dateStr || dateStr === '-') return '';
+      const date = parseDate(dateStr);
+      if (!date) return '';
+      return date.toISOString().split('T')[0];
+    }
+
+    function closeAddBatchModal() {
+      document.getElementById('addBatchModal').classList.remove('show');
+      document.getElementById('batchQuantity').value = '';
+      document.getElementById('processDatesContainer').innerHTML = '';
+    }
+
+    async function submitNewBatch() {
+      const psn = document.getElementById('batchSummaryPsn').textContent;
+      const quantity = parseInt(document.getElementById('batchQuantity').value);
+
+      if (!quantity || quantity <= 0) {
+        showToast('Please enter a valid quantity', 'error');
+        return;
+      }
+
+      // Collect process dates
+      const processDates = {};
+      document.querySelectorAll('.process-date').forEach(input => {
+        const processIndex = input.dataset.processIndex;
+        const date = input.value;
+        if (date) {
+          processDates[processIndex] = date;
+        }
+      });
+
+      try {
+        const resp = await fetch('/api/createBatch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            psn,
+            quantity,
+            processDates
+          })
+        });
+
+        if (resp.ok) {
+          showToast('Batch created successfully', 'success');
+          closeAddBatchModal();
+          // Refresh data
+          fetchData();
+        } else {
+          const error = await resp.text();
+          showToast(`Failed to create batch: ${error}`, 'error');
+        }
+      } catch (error) {
+        console.error('Error creating batch:', error);
+        showToast('Failed to create batch', 'error');
+      }
     }
 
     function showToast(message, type = 'info') {

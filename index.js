@@ -375,6 +375,7 @@ async function generateDashboardData() {
   const jobInfoMap = {};
   jobListing.forEach((job) => {
     const psn = String(job["Product Serial Number"] || job.psn || "").trim();
+  
     if (!psn) return;
     if (!jobInfoMap[psn]) {
       jobInfoMap[psn] = {
@@ -390,6 +391,10 @@ async function generateDashboardData() {
           job["Delivery Date"] || job.Delivery_Date || job.deliveryDate,
         ),
         status: job.Status || "ON SCHEDULE",
+        remainingQty: job.Remaining || 0,
+        partialDelivery: job["Partial Delivery"] || 0,
+        balanceToDelivery: job.BTD || 0, 
+        totalDelivery: job["Total Delivery"] || 0,
       };
     }
   });
@@ -482,6 +487,10 @@ async function generateDashboardData() {
       priority: "NORMAL",
       deliveryDate: "-",
       status: "ON SCHEDULE",
+      remainingQty: "-",
+      partialDelivery: "-",
+      balanceToDelivery: "-", 
+      totalDelivery: "-"
     };
     batches.push({
       row: rowIdx,
@@ -501,12 +510,16 @@ async function generateDashboardData() {
       priority: info.priority,
       deliveryDate: info.deliveryDate,
       status: values[10] || info.status,
+      remainingQty: info.remainingQty,
+      partialDelivery: info.partialDelivery,
+      balanceToDelivery: info.balanceToDelivery,
+      totalDelivery: info.totalDelivery,
       splitRemark: String(values[118] || "").trim(),
       qtyString: String(values[119] || ""),
       maxQtyString: String(values[120] || ""),
     });
   });
-
+ 
   // Calculate process averages for workload display
   const processList = [
     "Sheeting",
@@ -737,10 +750,11 @@ async function generateDashboardData() {
 }
 
 // ============ EXPRESS ROUTES ============
-// Redirect root to dashboard.html
+// Redirect root to login.html
 app.get("/", (req, res) => {
-  console.log("[APP] GET / - redirecting to dashboard");
+  console.log("[APP] GET / - redirecting to login");
   res.redirect("/dashboard.html");
+  // res.redirect("/login.html");
 });
 // Serve static files from the 'public' directory (make sure to create this and add your frontend files)
 app.use(express.static(path.join(__dirname, "public")));
@@ -877,6 +891,10 @@ app.post("/api/submitData", async (req, res) => {
       data.priority || "",
       data.status || "ON SCHEDULE",
       formatDeliveryDate || "",
+      data.remaining || 0,  // Column M (13th column)
+      data.balanceToDelivery || 0,  // New column
+      data.partialDelivery || 0,  // New column
+      data.totalDelivery || 0,  // New column
     ];
 
     jobListingColumnCount = await getTableColumnCount("JobListing");
@@ -1146,6 +1164,132 @@ app.post("/api/updateJobListing", async (req, res) => {
   } catch (error) {
     console.error("[API] POST /api/updateJobListing - error:", error);
     res.status(500).json({ success: false, error: "Failed to update job details" });
+  }
+});
+
+// API route to create a new batch based on the latest batch for a PSN
+app.post("/api/createBatch", async (req, res) => {
+  try {
+    console.log("[API] POST /api/createBatch - request received");
+    const { psn, quantity, processDates } = req.body;
+
+    if (!psn || !quantity) {
+      return res.status(400).json({ error: "PSN and quantity are required" });
+    }
+
+    // Fetch all batches
+    const batches = await getTableRowsAsObjects("BatchListing");
+
+    // Filter batches for this PSN
+    const psnBatches = batches.filter(b => String(b["Product Serial Number"] || '').trim() === psn);
+
+    if (psnBatches.length === 0) {
+      return res.status(404).json({ error: "No existing batches found for this PSN" });
+    }
+
+    // Sort by batch ID descending to get the latest
+    psnBatches.sort((a, b) => {
+      const idA = String(a.BatchId || '').split('-').pop();
+      const idB = String(b.BatchId || '').split('-').pop();
+      console.log("A"+ idA);
+      console.log("B"+ idB);
+      return parseInt(idB) - parseInt(idA);
+    });
+
+    const latestBatch = psnBatches[0];
+    const latestBatchId = String(latestBatch.BatchId || '');
+    const baseId = latestBatchId.split('-')[0];
+    const nextIdNum = parseInt(latestBatchId.split('-').pop()) + 1;
+    const newBatchId = `${baseId}-${nextIdNum}`;
+   
+    // Create new batch row based on latest batch
+    const newBatchRow = Object.values(latestBatch);
+
+    // Update batch-specific fields
+    newBatchRow[1] = newBatchId; // Batch ID
+    newBatchRow[2] = toExcelDate(new Date()); // Batch Date
+    newBatchRow[4] = quantity; // Quantity
+
+    // Update process expected dates
+    const START_COL = 6;
+    const BLOCK_SIZE = 9;
+
+    if (processDates) {
+      Object.entries(processDates).forEach(([processIndex, date]) => {
+        const idx = parseInt(processIndex);
+        if (idx >= 0 && idx < 12) {
+          const expectedDateCol = START_COL + idx * BLOCK_SIZE + 1;
+          newBatchRow[expectedDateCol] = formatDateForExcel(date);
+        }
+      });
+    }
+
+    // Reset completion status and dates
+    newBatchRow[114] = "FALSE"; // Completion status
+    newBatchRow[115] = ""; // Completion date
+
+    // Update quantity strings
+    let activeProcessCols = [];
+    for (let j = 0; j < 12; j++) {
+      let baseIdx = START_COL + j * BLOCK_SIZE;
+      let processName = String(newBatchRow[baseIdx] || "").trim();
+      if (processName !== "" && processName !== "--") {
+        activeProcessCols.push(baseIdx);
+      }
+    }
+
+    const qtyStringZero = activeProcessCols.map(colIdx => `${colIdx}:${0}`).join("|");
+    const qtyString = activeProcessCols.map(colIdx => `${colIdx}:${quantity}`).join("|");
+
+    newBatchRow[119] = qtyStringZero;
+    newBatchRow[120] = qtyString;
+
+    // Add the new batch row
+    await addTableRow("BatchListing", newBatchRow);
+
+    // Update JobListing remaining
+    const ctx = await getSharePointFileContext();
+    const normalizedSearchPsn = normalizePsn(psn);
+
+    // Fetch all JobListing rows to find the matching PSN
+    const jobRows = await getTableRowsAsObjects("JobListing");
+
+    // Find the row index that matches the PSN
+    let targetRowIndex = -1;
+    for (let i = 0; i < jobRows.length; i++) {
+      const rowPsn = normalizePsn(jobRows[i]["Product Serial Number"] || jobRows[i].PSN || "");
+      if (rowPsn === normalizedSearchPsn) {
+        targetRowIndex = i;
+        break;
+      }
+    }
+
+    if (targetRowIndex !== -1) {
+      // Get current remaining
+      const currentRemaining = parseInt(jobRows[targetRowIndex]["Remaining"] || jobRows[targetRowIndex].remaining || 0);
+      const newRemaining = Math.max(0, currentRemaining - quantity);
+
+      // Update the remaining in JobListing
+      const physicalRow = targetRowIndex + 2; // Excel rows start at 1, plus header row
+      const remainingColIndex = 12; // 0-based, from jobRow structure
+      const colLetter = indexToColumnLetter(remainingColIndex);
+      const cellAddress = `${colLetter}${physicalRow}`;
+
+      await axios.patch(
+        `https://graph.microsoft.com/v1.0/drives/${ctx.driveId}/items/${ctx.fileId}/workbook/worksheets('JobListing')/range(address='${cellAddress}')`,
+        { values: [[newRemaining]] },
+        { headers: ctx.headers }
+      );
+
+      console.log(`[API] Updated JobListing remaining for PSN ${psn}: ${currentRemaining} -> ${newRemaining}`);
+    }
+
+    console.log(`[API] Successfully created new batch: ${newBatchId}`);
+    res.json({ success: true, message: `Batch ${newBatchId} created successfully` });
+
+  } catch (error) {
+    console.error("[API] POST /api/createBatch - error:", error);
+    res.status(500).json({ error: "Failed to create batch" });
   }
 });
 
