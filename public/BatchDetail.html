@@ -1576,6 +1576,37 @@
       flex-direction: column;
       transition: all 0.2s ease;
     }
+
+    /*new um batch switcher scroll bar ontop css*/
+    #batchSwitcher {
+      display: flex;
+      overflow-x: auto;
+      gap: 10px;
+      padding: 10px;
+      /* Flip the container so scrollbar is on top */
+      transform: rotateX(180deg);
+      -ms-overflow-style: auto;
+      /* Ensure scrollbar is visible */
+    }
+
+    /* Flip the content back so text is readable */
+    #batchSwitcher>div {
+      transform: rotateX(180deg);
+    }
+
+    /* Optional: Style the scrollbar to look cleaner at the top */
+    #batchSwitcher::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    #batchSwitcher::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    #batchSwitcher::-webkit-scrollbar-thumb {
+      background: #64748b;
+      border-radius: 10px;
+    }
   </style>
 </head>
 
@@ -1694,9 +1725,9 @@
     <div class="um-modal-inner">
       <!-- HEADER -->
       <div class="um-header">
+        <div class="um-batch-switcher" id="batchSwitcher"></div>
         <div id="modalBatchId"></div>
         <div id="modalPsn"></div>
-        <div class="um-batch-switcher" id="batchSwitcher"></div>
       </div>
 
       <!-- TWO-COLUMN BODY -->
@@ -3523,43 +3554,20 @@
       const modeBadgeHtml =
         mode === "edit"
           ? `<div class="um-mode-badge edit">
-               <span style="width:6px;height:6px;border-radius:50%;background:#f59e0b;display:inline-block;"></span>
-               Edit mode — adjusting expected dates
-             </div>`
+           <span style="width:6px;height:6px;border-radius:50%;background:#f59e0b;display:inline-block;"></span>
+           Edit mode — adjusting expected dates
+         </div>`
           : "";
 
-      // ── Batch pill ────────────────────────────────────────────────────────
-      document.getElementById("modalBatchId").innerHTML = `${modeBadgeHtml}
-           <div class="um-batch-pill">
-             <span class="um-batch-dot"></span>
-             Batch ID: ${job.batchId} &nbsp;|&nbsp; Qty: ${job.qty}
-           </div>`;
-
-      // ── Job name + split notice ───────────────────────────────────────────
-      const splitRemarkHtml = job.splitRemark
-        ? `<div class="um-split-notice"><strong>Batch origin:</strong> ${job.splitRemark}</div>`
-        : "";
-
-      document.getElementById("modalPsn").innerHTML =
-        `<div style="font-size:20px; color:#ffffff; margin-bottom:1px;font-weight;bold;">${job.psn}</div>
-           <div style="font-size:20px; font-weight:bold; color:#ffffff;">${job.jobName}</div>
-           ${splitRemarkHtml}
-           
-          <div id="timelineWrapper" style="margin-top: 15px;">
-            ${renderProgressTimeline(job)}
-          </div>
-        `;
-
       // ── Batch switcher ────────────────────────────────────────────────────
-      // Chips call the correct opener depending on which mode is active.
       const openerFn = mode === "edit" ? "openEditPopup" : "openUpdatePopup";
 
       const siblingBatches = MASTER_DATA.filter(
-        (b) => String(b.psn).trim() === String(job.psn).trim(),
+        (b) => String(b.psn).trim() === String(job.psn).trim()
       ).sort((a, b) =>
         String(a.batchId).localeCompare(String(b.batchId), undefined, {
           numeric: true,
-        }),
+        })
       );
 
       const switcherEl = document.getElementById("batchSwitcher");
@@ -3567,74 +3575,90 @@
 
       if (siblingBatches.length <= 1) {
         switcherEl.style.display = "none";
-        return;
-      }
+      } else {
+        switcherEl.style.display = "block";
+        switcherEl.innerHTML = siblingBatches
+          .map((b) => {
+            const isCurrent = b.row === job.row;
+            const totalSteps = b.steps ? b.steps.length : 0;
+            const doneSteps = b.steps
+              ? b.steps.filter((s) => s.isDone).length
+              : 0;
+            const isFullyDone = totalSteps > 0 && doneSteps === totalSteps;
+            const hasOverdue = b.steps
+              ? b.steps.some((s) => {
+                if (s.isDone) return false;
+                const t = parseDateStringToTime(s.expDate);
+                return t && t < new Date().setHours(0, 0, 0, 0);
+              })
+              : false;
 
+            let dotColor;
+            if (isFullyDone) dotColor = "#22c55e";
+            else if (hasOverdue) dotColor = "#ef4444";
+            else dotColor = "#f59e0b";
 
-      switcherEl.style.display = "block";
-      switcherEl.innerHTML = siblingBatches
-        .map((b) => {
-          const isCurrent = b.row === job.row;
-          const totalSteps = b.steps ? b.steps.length : 0;
-          const doneSteps = b.steps
-            ? b.steps.filter((s) => s.isDone).length
-            : 0;
-          const isFullyDone = totalSteps > 0 && doneSteps === totalSteps;
-          const hasOverdue = b.steps
-            ? b.steps.some((s) => {
-              if (s.isDone) return false;
-              const t = parseDateStringToTime(s.expDate);
-              return t && t < new Date().setHours(0, 0, 0, 0);
-            })
-            : false;
+            const chipStyle = isCurrent
+              ? `background:#0f172a; color:#ffffff; border-color:#0f172a; font-weight:600; cursor:default;`
+              : `background:white; color:#000000; border-color:#e2e8f0; cursor:pointer;`;
 
-          let dotColor;
-          if (isFullyDone) dotColor = "#22c55e";
-          else if (hasOverdue) dotColor = "#ef4444";
-          else dotColor = "#f59e0b";
+            const dotHtml = `<span style="width:6px;height:6px;border-radius:50%;background:${dotColor};display:inline-block;flex-shrink:0;"></span>`;
 
-          const chipStyle = isCurrent
-            ? `background:#0f172a; color:#ffffff; border-color:#0f172a; font-weight:600; cursor:default;`
-            : `background:white; color:#000000; border-color:#e2e8f0; cursor:pointer;`;
+            // Swapped the order: Label now comes BEFORE the chip in the map
+            const currentLabel = isCurrent
+              ? `<div style="font-size:10px; text-align:center; color:#ffffff; margin-bottom:2px; font-style:italic;font-weight:bold;">Current</div>`
+              : `<div style="height:14px;"></div>`; // Spacer to keep chips aligned
 
-          const dotHtml = `<span style="width:6px;height:6px;border-radius:50%;background:${dotColor};display:inline-block;flex-shrink:0;"></span>`;
-          const progressHtml =
-            totalSteps > 0
-              ? `<span style="font-size:10px; opacity:${isCurrent ? "1" : "1"};">${doneSteps}/${totalSteps}</span>`
-              : "";
-          const currentLabel = isCurrent
-            ? `<div style="font-size:10px; text-align:center; color:#ffffff; margin-top:2px; font-style:italic;font-weight:bold;">Current</div>`
-            : "";
-
-          return `
+            return `
             <div style="display:inline-flex; flex-direction:column; flex-shrink:0;">
+              ${currentLabel}
               <div
                 onclick="${isCurrent ? "" : `${openerFn}(${b.row})`}"
-                title="Batch ${b.batchId} — Qty: ${b.qty}"
-                style="display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:20px; border:1px solid; font-size:12px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; white-space:nowrap; transition:box-shadow 0.1s; ${chipStyle}"
+                title="Batch ${b.batchId}"
+                style="display:inline-flex; flex-direction:column; gap:2px; padding:6px 12px; border-radius:12px; border:1px solid; font-size:12px; transition:box-shadow 0.1s; ${chipStyle}"
                 onmouseenter="if(${!isCurrent}) this.style.boxShadow='0 0 0 3px #e2e8f0';"
                 onmouseleave="this.style.boxShadow='';"
               >
-                ${dotHtml}
-                ${b.batchId}
-                ${progressHtml}
+                <div style="display:flex; align-items:center; gap:6px;">
+                  ${dotHtml}
+                  <span>${b.batchId}</span>
+                  <span style="font-size:10px; opacity:0.8;">(${doneSteps}/${totalSteps})</span>
+                </div>
+                <div style="font-size:10px; padding-left:12px; opacity:0.9;">
+                   Qty: ${b.qty || 0}
+                </div>
               </div>
-              ${currentLabel}
             </div>`;
-        })
-        .join("");
+          })
+          .join("");
 
-      requestAnimationFrame(() => {
-        const currentChip = switcherEl.querySelector(
-          '[style*="cursor:default"]',
-        );
-        if (currentChip)
-          currentChip.scrollIntoView({
-            behavior: "smooth",
-            inline: "center",
-            block: "nearest",
-          });
-      });
+        requestAnimationFrame(() => {
+          // Find the parent container of the chip with cursor:default
+          const currentChipContainer = switcherEl.querySelector(
+            '[style*="cursor:default"]'
+          )?.parentElement;
+
+          if (currentChipContainer)
+            currentChipContainer.scrollIntoView({
+              behavior: "smooth",
+              inline: "center",
+              block: "nearest",
+            });
+        });
+      }
+
+      // ── Job name + split notice ───────────────────────────────────────────
+      const splitRemarkHtml = job.splitRemark
+        ? `<div class="um-split-notice"><strong>Batch origin:</strong> ${job.splitRemark}</div>`
+        : "";
+
+      document.getElementById("modalPsn").innerHTML =
+        `<div style="font-size:20px; color:#ffffff; margin-bottom:1px; font-weight:bold;">${job.psn}</div>
+       <div style="font-size:20px; font-weight:bold; color:#ffffff;">${job.jobName}</div>
+       ${splitRemarkHtml}
+       <div id="timelineWrapper" style="margin-top: 15px;">
+         ${renderProgressTimeline(job)}
+       </div>`;
     }
 
     function renderProgressTimeline(job) {
