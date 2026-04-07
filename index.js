@@ -375,7 +375,7 @@ async function generateDashboardData() {
   const jobInfoMap = {};
   jobListing.forEach((job) => {
     const psn = String(job["Product Serial Number"] || job.psn || "").trim();
-  
+
     if (!psn) return;
     if (!jobInfoMap[psn]) {
       jobInfoMap[psn] = {
@@ -393,7 +393,7 @@ async function generateDashboardData() {
         status: job.Status || "ON SCHEDULE",
         remainingQty: job.Remaining || 0,
         partialDelivery: job["Partial Delivery"] || 0,
-        balanceToDelivery: job.BTD || 0, 
+        balanceToDelivery: job.BTD || 0,
         totalDelivery: job["Total Delivery"] || 0,
       };
     }
@@ -489,8 +489,8 @@ async function generateDashboardData() {
       status: "ON SCHEDULE",
       remainingQty: "-",
       partialDelivery: "-",
-      balanceToDelivery: "-", 
-      totalDelivery: "-"
+      balanceToDelivery: "-",
+      totalDelivery: "-",
     };
     batches.push({
       row: rowIdx,
@@ -519,7 +519,7 @@ async function generateDashboardData() {
       maxQtyString: String(values[120] || ""),
     });
   });
- 
+
   // Calculate process averages for workload display
   const processList = [
     "Sheeting",
@@ -891,10 +891,10 @@ app.post("/api/submitData", async (req, res) => {
       data.priority || "",
       data.status || "ON SCHEDULE",
       formatDeliveryDate || "",
-      data.remaining || 0,  // Column M (13th column)
-      data.balanceToDelivery || 0,  // New column
-      data.partialDelivery || 0,  // New column
-      data.totalDelivery || 0,  // New column
+      data.remaining || 0, // Column M (13th column)
+      data.balanceToDelivery || 0, // New column
+      data.partialDelivery || 0, // New column
+      data.totalDelivery || 0, // New column
     ];
 
     jobListingColumnCount = await getTableColumnCount("JobListing");
@@ -1068,7 +1068,9 @@ app.post("/api/updateJobListing", async (req, res) => {
     // Find the row index that matches the PSN
     let targetRowIndex = -1;
     for (let i = 0; i < rows.length; i++) {
-      const rowPsn = normalizePsn(rows[i]["Product Serial Number"] || rows[i].PSN || "");
+      const rowPsn = normalizePsn(
+        rows[i]["Product Serial Number"] || rows[i].PSN || "",
+      );
       if (rowPsn === normalizedSearchPsn) {
         targetRowIndex = i;
         break;
@@ -1076,7 +1078,9 @@ app.post("/api/updateJobListing", async (req, res) => {
     }
 
     if (targetRowIndex === -1) {
-      return res.status(404).json({ success: false, error: "Job not found with the given PSN" });
+      return res
+        .status(404)
+        .json({ success: false, error: "Job not found with the given PSN" });
     }
 
     console.log(`[API] Found job at row index: ${targetRowIndex}`);
@@ -1084,7 +1088,7 @@ app.post("/api/updateJobListing", async (req, res) => {
     // Get header row to map column names to indices
     const headerRes = await axios.get(
       `https://graph.microsoft.com/v1.0/drives/${ctx.driveId}/items/${ctx.fileId}/workbook/tables('JobListing')/headerRowRange`,
-      { headers: ctx.headers }
+      { headers: ctx.headers },
     );
     const headers = headerRes.data.values?.[0] || [];
 
@@ -1093,15 +1097,21 @@ app.post("/api/updateJobListing", async (req, res) => {
 
     // Verify the row exists and is valid
     if (!rows[targetRowIndex]) {
-      return res.status(404).json({ success: false, error: "Row data is invalid" });
+      return res
+        .status(404)
+        .json({ success: false, error: "Row data is invalid" });
     }
 
     // Convert the object back to array format using headers
     const updatedRow = headers.map((header) => {
-      return rows[targetRowIndex][header] !== undefined ? rows[targetRowIndex][header] : null;
+      return rows[targetRowIndex][header] !== undefined
+        ? rows[targetRowIndex][header]
+        : null;
     });
 
-    console.log(`[API] Headers length: ${headers.length}, Row length: ${updatedRow.length}`);
+    console.log(
+      `[API] Headers length: ${headers.length}, Row length: ${updatedRow.length}`,
+    );
 
     // Find column indices for updates
     const findColumnIndex = (possibleNames) => {
@@ -1113,16 +1123,30 @@ app.post("/api/updateJobListing", async (req, res) => {
     };
 
     // Update fields by index
-    const salesCodeIdx = findColumnIndex(['salesCode', 'Sales Code', 'Sales_Code', 'SalesCode']);
-    const jobTypeIdx = findColumnIndex(['Job Type', 'Job_Type', 'JobType', 'jobType']);
-    const itemIdx = findColumnIndex(['Item']);
-    const priorityIdx = findColumnIndex(['Priority']);
+    const salesCodeIdx = findColumnIndex([
+      "salesCode",
+      "Sales Code",
+      "Sales_Code",
+      "SalesCode",
+    ]);
+    const jobTypeIdx = findColumnIndex([
+      "Job Type",
+      "Job_Type",
+      "JobType",
+      "jobType",
+    ]);
+    const itemIdx = findColumnIndex(["Item"]);
+    const priorityIdx = findColumnIndex(["Priority"]);
 
-    console.log(`[API] Column indices - salesCode: ${salesCodeIdx}, jobType: ${jobTypeIdx}, item: ${itemIdx}, priority: ${priorityIdx}`);
+    console.log(
+      `[API] Column indices - salesCode: ${salesCodeIdx}, jobType: ${jobTypeIdx}, item: ${itemIdx}, priority: ${priorityIdx}`,
+    );
 
     if (salesCode !== undefined && salesCodeIdx >= 0) {
       updatedRow[salesCodeIdx] = salesCode;
-      console.log(`[API] Updated Sales Code at index ${salesCodeIdx}: ${salesCode}`);
+      console.log(
+        `[API] Updated Sales Code at index ${salesCodeIdx}: ${salesCode}`,
+      );
     }
     if (jobType !== undefined && jobTypeIdx >= 0) {
       updatedRow[jobTypeIdx] = jobType;
@@ -1134,7 +1158,9 @@ app.post("/api/updateJobListing", async (req, res) => {
     }
     if (priority !== undefined && priorityIdx >= 0) {
       updatedRow[priorityIdx] = priority;
-      console.log(`[API] Updated Priority at index ${priorityIdx}: ${priority}`);
+      console.log(
+        `[API] Updated Priority at index ${priorityIdx}: ${priority}`,
+      );
     }
 
     console.log(`[API] Updated row data:`, updatedRow);
@@ -1150,20 +1176,25 @@ app.post("/api/updateJobListing", async (req, res) => {
     const url = `https://graph.microsoft.com/v1.0/drives/${ctx.driveId}/items/${ctx.fileId}/workbook/worksheets('JobListing')/range(address='${rangeAddress}')`;
 
     // Format values for Excel
-    const formattedValues = updatedRow.map(val => {
+    const formattedValues = updatedRow.map((val) => {
       if (val === true) return "TRUE";
       if (val === false) return "FALSE";
       return val === null || val === undefined ? "" : val;
     });
 
-    await axios.patch(url, { values: [formattedValues] }, { headers: ctx.headers });
+    await axios.patch(
+      url,
+      { values: [formattedValues] },
+      { headers: ctx.headers },
+    );
 
     console.log(`[API] Successfully updated JobListing for PSN: ${psn}`);
     res.json({ success: true, message: "Job details updated successfully" });
-
   } catch (error) {
     console.error("[API] POST /api/updateJobListing - error:", error);
-    res.status(500).json({ success: false, error: "Failed to update job details" });
+    res
+      .status(500)
+      .json({ success: false, error: "Failed to update job details" });
   }
 });
 
@@ -1181,27 +1212,35 @@ app.post("/api/createBatch", async (req, res) => {
     const batches = await getTableRowsAsObjects("BatchListing");
 
     // Filter batches for this PSN
-    const psnBatches = batches.filter(b => String(b["Product Serial Number"] || '').trim() === psn);
+    const psnBatches = batches.filter(
+      (b) => String(b["Product Serial Number"] || "").trim() === psn,
+    );
 
     if (psnBatches.length === 0) {
-      return res.status(404).json({ error: "No existing batches found for this PSN" });
+      return res
+        .status(404)
+        .json({ error: "No existing batches found for this PSN" });
     }
 
     // Sort by batch ID descending to get the latest
     psnBatches.sort((a, b) => {
-      const idA = String(a.BatchId || '').split('-').pop();
-      const idB = String(b.BatchId || '').split('-').pop();
-      console.log("A"+ idA);
-      console.log("B"+ idB);
+      const idA = String(a.BatchId || "")
+        .split("-")
+        .pop();
+      const idB = String(b.BatchId || "")
+        .split("-")
+        .pop();
+      console.log("A" + idA);
+      console.log("B" + idB);
       return parseInt(idB) - parseInt(idA);
     });
 
     const latestBatch = psnBatches[0];
-    const latestBatchId = String(latestBatch.BatchId || '');
-    const baseId = latestBatchId.split('-')[0];
-    const nextIdNum = parseInt(latestBatchId.split('-').pop()) + 1;
+    const latestBatchId = String(latestBatch.BatchId || "");
+    const baseId = latestBatchId.split("-")[0];
+    const nextIdNum = parseInt(latestBatchId.split("-").pop()) + 1;
     const newBatchId = `${baseId}-${nextIdNum}`;
-   
+
     // Create new batch row based on latest batch
     const newBatchRow = Object.values(latestBatch);
 
@@ -1238,8 +1277,12 @@ app.post("/api/createBatch", async (req, res) => {
       }
     }
 
-    const qtyStringZero = activeProcessCols.map(colIdx => `${colIdx}:${0}`).join("|");
-    const qtyString = activeProcessCols.map(colIdx => `${colIdx}:${quantity}`).join("|");
+    const qtyStringZero = activeProcessCols
+      .map((colIdx) => `${colIdx}:${0}`)
+      .join("|");
+    const qtyString = activeProcessCols
+      .map((colIdx) => `${colIdx}:${quantity}`)
+      .join("|");
 
     newBatchRow[119] = qtyStringZero;
     newBatchRow[120] = qtyString;
@@ -1257,7 +1300,9 @@ app.post("/api/createBatch", async (req, res) => {
     // Find the row index that matches the PSN
     let targetRowIndex = -1;
     for (let i = 0; i < jobRows.length; i++) {
-      const rowPsn = normalizePsn(jobRows[i]["Product Serial Number"] || jobRows[i].PSN || "");
+      const rowPsn = normalizePsn(
+        jobRows[i]["Product Serial Number"] || jobRows[i].PSN || "",
+      );
       if (rowPsn === normalizedSearchPsn) {
         targetRowIndex = i;
         break;
@@ -1266,7 +1311,11 @@ app.post("/api/createBatch", async (req, res) => {
 
     if (targetRowIndex !== -1) {
       // Get current remaining
-      const currentRemaining = parseInt(jobRows[targetRowIndex]["Remaining"] || jobRows[targetRowIndex].remaining || 0);
+      const currentRemaining = parseInt(
+        jobRows[targetRowIndex]["Remaining"] ||
+          jobRows[targetRowIndex].remaining ||
+          0,
+      );
       const newRemaining = Math.max(0, currentRemaining - quantity);
 
       // Update the remaining in JobListing
@@ -1278,15 +1327,19 @@ app.post("/api/createBatch", async (req, res) => {
       await axios.patch(
         `https://graph.microsoft.com/v1.0/drives/${ctx.driveId}/items/${ctx.fileId}/workbook/worksheets('JobListing')/range(address='${cellAddress}')`,
         { values: [[newRemaining]] },
-        { headers: ctx.headers }
+        { headers: ctx.headers },
       );
 
-      console.log(`[API] Updated JobListing remaining for PSN ${psn}: ${currentRemaining} -> ${newRemaining}`);
+      console.log(
+        `[API] Updated JobListing remaining for PSN ${psn}: ${currentRemaining} -> ${newRemaining}`,
+      );
     }
 
     console.log(`[API] Successfully created new batch: ${newBatchId}`);
-    res.json({ success: true, message: `Batch ${newBatchId} created successfully` });
-
+    res.json({
+      success: true,
+      message: `Batch ${newBatchId} created successfully`,
+    });
   } catch (error) {
     console.error("[API] POST /api/createBatch - error:", error);
     res.status(500).json({ error: "Failed to create batch" });
@@ -1585,7 +1638,7 @@ async function saveMultiBatchUpdate(payload) {
           Math.ceil(
             (new Date(todayISO) -
               new Date(startDate.toISOString().split("T")[0])) /
-            86400000,
+              86400000,
           ),
         );
 
@@ -1596,11 +1649,18 @@ async function saveMultiBatchUpdate(payload) {
 
         // DELIVERY SYNC
         if (isDeliveryStep) {
-          // Mark the entire row as completed in the final status columns
+          // 1. Mark BatchListing row as completed
           runningRowData[COL_COMPLETION_STATUS] = true;
           runningRowData[COL_COMPLETED_DATE] = todayISO;
 
-          // Delivery Sync to Job Listing
+          // 2. NEW LOGIC: Update JobListing Qty Sums (Column O & P)
+          const deliveryAmount = Number(u.qty || 0);
+          if (deliveryAmount > 0) {
+            // This is an async call, we await it to ensure JobListing is updated
+            await syncDeliveryToJobListing(psn, deliveryAmount);
+          }
+
+          // 3. Existing Delivery Date Sync
           const targetDate = payload.deliveryDate || payload.newDeliveryDate;
           if (targetDate && targetDate !== "KEEP_ORIGINAL") {
             await updateJobListingDeliveryDateByPsn(psn, targetDate);
@@ -1918,6 +1978,59 @@ function parseMapString(str, fallbackQty) {
   });
   return map;
 }
+
+async function syncDeliveryToJobListing(psn, addedQty) {
+  try {
+    const fileContext = await getSharePointFileContext();
+    const tableName = "JobListing";
+
+    // 1. Get all rows from JobListing to find the PSN and current totals
+    const response = await axios.get(
+      `https://graph.microsoft.com/v1.0/drives/${fileContext.driveId}/items/${fileContext.fileId}/workbook/tables('${tableName}')/rows`,
+      { headers: fileContext.headers }
+    );
+    const rows = response.data.value || [];
+
+    // 2. Find the row index and current values
+    // Row index in Excel is (arrayIndex + 2) because of 1-indexing and headers
+    let targetRowIndex = -1;
+    let currentPartial = 0;
+    let currentTotal = 0;
+
+    for (let i = 0; i < rows.length; i++) {
+      const rowValues = rows[i].values[0];
+      if (String(rowValues[0] || "").trim() === psn) {
+        targetRowIndex = i + 2; 
+        currentPartial = Number(rowValues[14] || 0); // Column O
+        currentTotal = Number(rowValues[15] || 0);   // Column P
+        break;
+      }
+    }
+
+    if (targetRowIndex === -1) {
+      console.warn(`[Sync] PSN ${psn} not found in JobListing.`);
+      return;
+    }
+
+    // 3. Calculate new values
+    const newPartial = currentPartial + addedQty;
+    const newTotal = currentTotal + addedQty;
+
+    // 4. Update Columns O and P (Indices 14 and 15)
+    // We address the specific range: 'JobListing'!O[index]:P[index]
+    const rangeAddress = `${tableName}!O${targetRowIndex}:P${targetRowIndex}`;
+    await axios.patch(
+      `https://graph.microsoft.com/v1.0/drives/${fileContext.driveId}/items/${fileContext.fileId}/workbook/worksheets/JobListing/range(address='${rangeAddress}')`,
+      { values: [[newPartial, newTotal]] },
+      { headers: fileContext.headers }
+    );
+
+    console.log(`[Sync Success] PSN ${psn}: Updated O/P to ${newPartial}/${newTotal}`);
+  } catch (error) {
+    console.error("[syncDeliveryToJobListing] Error:", error.response?.data || error.message);
+  }
+}
+
 
 // ============ API ENDPOINTS FOR BATCH UPDATES ============
 // Endpoint to update process quantities only (without marking as done)
