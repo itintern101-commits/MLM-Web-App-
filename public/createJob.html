@@ -376,6 +376,107 @@
         opacity: 0;
       }
     }
+
+    /* Custom Confirmation Dialog */
+    .confirm-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 1100;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(2px);
+    }
+
+    .confirm-overlay.show {
+      display: flex;
+    }
+
+    .confirm-dialog-content {
+      background: white;
+      border-radius: 16px;
+      padding: 0;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      animation: modalSlideIn 0.3s ease-out;
+    }
+
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .confirm-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1rem;
+      border-radius: 16px 16px 0 0;
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .confirm-body {
+      padding: 1.5rem;
+      text-align: center;
+      color: #4e5969;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .confirm-actions {
+      padding: 1rem 1.5rem 1.5rem;
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      border-top: 1px solid #e2e8f0;
+      background: #f8fafc;
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 16px;
+    }
+
+    .confirm-btn-cancel {
+      background: #e2e8f0;
+      color: #64748b;
+      border: none;
+      padding: 0.65rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    .confirm-btn-cancel:hover {
+      background: #cbd5e1;
+    }
+
+    .confirm-btn-ok {
+      background: var(--success);
+      color: white;
+      border: none;
+      padding: 0.65rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    .confirm-btn-ok:hover {
+      background: #228a3f;
+    }
   </style>
 </head>
 
@@ -407,6 +508,18 @@
   </script>
 
   <div id="toast-container"></div>
+
+  <!-- Remaining Quantity Confirmation Dialog -->
+  <div id="confirmOverlay" class="confirm-overlay">
+    <div class="confirm-dialog-content">
+      <div class="confirm-header">⚠️ Remaining Production Quantity</div>
+      <div class="confirm-body" id="confirmMessage">Remaining Production Quantity is <strong>0</strong>. Do you want to proceed and save the remaining for later batches?</div>
+      <div class="confirm-actions">
+        <button class="confirm-btn-cancel" onclick="cancelConfirm()">Cancel</button>
+        <button class="confirm-btn-ok" onclick="proceedWithSubmit()">Proceed</button>
+      </div>
+    </div>
+  </div>
 
   <div class="main-wrapper">
     <div class="container">
@@ -498,7 +611,15 @@
 
       <div id="batchArea"></div>
 
+      <div class="section-card">
+        <h3>Remaining Production Quantity</h3>
+        <div style="font-size: 18px; font-weight: bold; color: var(--primary);">
+          Remaining: <span id="remainingDisplay">0</span>
+        </div>
+      </div>
+
       <button class="btn-submit" id="submitBtn" onclick="submitForm()">Create Entry & Save</button>
+
       <div id="loadingMsg" class="loading">⌛ Saving to Database...</div>
     </div>
   </div>
@@ -507,6 +628,7 @@
     const processList = ["Sheeting", "Printing", "Lamination", "Efluting", "Die-cut", "Convert", "Baseboard", "Hotstamping", "Packing", "Double-Side-Tape", "Emboss", "Blind Emboss", "Gluing", "Side Glue", "2 Point Glue", "Attach Handle", "Peeling", "Punch Hole", "Slitting LF", "FlexoSlitting", "Spot UV", "Texture", "Trimming", "Varnish", "Waterbase"];
     let selectedSteps = [];
     let draggedElement = null;
+    let pendingSubmitData = null;
 
     // Initialize the form with default values and set up event listeners for dynamic interactions like date synchronization, instant tabbing, and process rendering
     window.onload = () => {
@@ -514,6 +636,7 @@
       document.getElementById('deliveryDate').addEventListener('change', syncDeliveryDates);
       renderPool();
       setupCreateJobEnterNavigation();
+      updateRemaining();
     };
 
     // Form shortcut: Enter navigates fields in order for faster data entry (PSN + PI + Qty + Job Name + Item Name)
@@ -623,6 +746,19 @@
         if (input) input.value = val;
         currentSum += val;
       }
+      updateRemaining();
+    }
+
+    // Function to update the remaining quantity display
+    function updateRemaining() {
+      const total = parseInt(document.getElementById('totalQuantity').value) || 0;
+      const count = parseInt(document.getElementById('batchCount').value);
+      let sum = 0;
+      for (let i = 1; i <= count; i++) {
+        sum += parseInt(document.getElementById(`qty_b${i}`).value) || 0;
+      }
+      const remaining = total - sum;
+      document.getElementById('remainingDisplay').textContent = remaining;
     }
 
     // Function to clear the entire selected process sequence with a single click, resetting the UI and showing a confirmation toast message
@@ -665,6 +801,7 @@
           tempSum += val;
         }
       }
+      updateRemaining();
     }
 
     // Function to validate the date input for each step, ensuring that it is not in the past and that it follows the correct sequence order relative to previous steps
@@ -802,7 +939,9 @@
           }
         });
       });
+      updateRemaining();
     }
+  
 
 
     // Function to handle the form submission when the user clicks the "Create Entry & Save" button, performing validation on all inputs, gathering the data into a structured format, and sending it to the server via a POST request while providing feedback on the submission status and handling redirection upon success
@@ -852,27 +991,72 @@
         });
       }
 
+      const remaining = totalQty - allData.reduce((sum, batch) => sum + batch.batchQty, 0);
+      if (remaining > 0) {
+        pendingSubmitData = {
+          psn,
+          piNumber,
+          jobName,
+          quantity: totalQty,
+          orderDate,
+          deliveryDate,
+          item,
+          salesCode: document.getElementById('salesCode').value,
+          jobType: document.getElementById('jobType').value,
+          priority: document.getElementById('priority').value,
+          batches: allData,
+          remaining: remaining,
+          balanceToDelivery: totalQty
+        };
+        showRemainingConfirm(remaining);
+        return;
+      }
+
+      await performSubmit({
+        psn,
+        piNumber,
+        jobName,
+        quantity: totalQty,
+        orderDate,
+        deliveryDate,
+        item,
+        salesCode: document.getElementById('salesCode').value,
+        jobType: document.getElementById('jobType').value,
+        priority: document.getElementById('priority').value,
+        batches: allData,
+        remaining: remaining,
+        balanceToDelivery: totalQty
+      });
+    }
+
+    function showRemainingConfirm(remaining) {
+      document.getElementById('confirmMessage').innerHTML = `Remaining Production Quantity is <strong>${remaining}</strong>. Do you want to proceed and save the remaining for later batches?`;
+      document.getElementById('confirmOverlay').classList.add('show');
+    }
+
+    function cancelConfirm() {
+      document.getElementById('confirmOverlay').classList.remove('show');
+      pendingSubmitData = null;
+      document.getElementById('submitBtn').disabled = false;
+      document.getElementById('loadingMsg').style.display = 'none';
+    }
+
+    function proceedWithSubmit() {
+      document.getElementById('confirmOverlay').classList.remove('show');
+      if (pendingSubmitData) {
+        performSubmit(pendingSubmitData);
+      }
+    }
+
+    async function performSubmit(data) {
       document.getElementById('submitBtn').disabled = true;
       document.getElementById('loadingMsg').style.display = 'block';
       const dashboard_url = '/dashboard.html';
-      console.log(allData);
       try {
         const response = await fetch('/api/submitData', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            psn,
-            piNumber,
-            jobName,
-            quantity: totalQty,
-            orderDate,
-            deliveryDate,
-            item,
-            salesCode: document.getElementById('salesCode').value,
-            jobType: document.getElementById('jobType').value,
-            priority: document.getElementById('priority').value,
-            batches: allData
-          }),
+          body: JSON.stringify(data),
         });
 
         const result = await response.json();
