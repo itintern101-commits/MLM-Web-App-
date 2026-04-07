@@ -1355,86 +1355,160 @@
     }
 
     /*PROGRESS TIMELINE ARROW CHART*/
+    /* 1. Container & Layout */
     .um-timeline-container {
       display: flex;
-      flex-wrap: wrap;
-      /* Allows wrapping */
-      gap: 10px 4px;
-      /* Vertical gap 10px, Horizontal 4px */
-      padding: 10px 0;
+      flex-direction: column;
+      gap: 20px;
       width: 100%;
+      padding: 10px;
       box-sizing: border-box;
+      overflow: hidden;
+      /* Fixes the scrollbar bug */
     }
 
-    .um-timeline-arrow {
+    .um-timeline-row {
+      display: flex;
+      width: 100%;
       position: relative;
-      /* Force exactly 6 items per row */
-      flex: 0 0 calc(16.66% - 4px);
-      max-width: calc(16.66% - 4px);
-      min-height: 65px;
-      padding: 6px 8px 6px 18px;
-      background: #e2e8f0;
-      color: #475569;
-      font-size: 12px;
-      font-weight: 600;
+    }
 
-      /* The Arrow Shape */
-      clip-path: polygon(92% 0%, 100% 50%, 92% 100%, 0% 100%, 8% 50%, 0% 0%);
-
+    /* 2. Base Arrow Styles */
+    .um-timeline-arrow {
+      flex: 1;
+      min-height: 80px;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      box-sizing: border-box;
+      position: relative;
       transition: all 0.2s ease;
-      /* For animation */
-      cursor: default;
+      overflow: hidden;
     }
 
-    .um-timeline-arrow:first-child {
-      clip-path: polygon(92% 0%, 100% 50%, 92% 100%, 0% 100%, 0% 50%, 0% 0%);
+    /* 3. S-Curve Flow (LTR) */
+    .row-normal {
+      flex-direction: row;
+    }
+
+    .row-normal .um-timeline-arrow {
+      clip-path: polygon(calc(100% - 15px) 0%, 100% 50%, calc(100% - 15px) 100%, 0% 100%, 15px 50%, 0% 0%);
+      padding: 8px 18px 8px 25px;
+      /* Clear the left notch */
+      margin-left: -14px;
+    }
+
+    .row-normal .um-timeline-arrow:first-child {
+      margin-left: 0;
+      clip-path: polygon(calc(100% - 15px) 0%, 100% 50%, calc(100% - 15px) 100%, 0% 100%, 0% 0%);
       padding-left: 10px;
     }
 
-    .um-arrow-name {
-      white-space: normal;
-      word-break: break-word;
-      line-height: 1.2;
-      font-size: 1rem;
+    /* 4. S-Curve Flow (RTL) */
+    .row-reverse {
+      flex-direction: row-reverse;
     }
 
-    /* HOVER ANIMATION */
-    .um-timeline-arrow:hover {
-      transform: translateY(-3px);
-      /* Lift up */
-      filter: brightness(1.1);
-      /* Lighten slightly */
-      z-index: 10;
-      /* Show above neighbors */
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    .row-reverse .um-timeline-arrow {
+      clip-path: polygon(100% 0%, calc(100% - 15px) 50%, 100% 100%, 15px 100%, 0% 50%, 15px 0%);
+      padding: 8px 25px 8px 18px;
+      /* Clear the right notch */
+      margin-right: -14px;
+      text-align: right;
     }
 
-    /* Status Colors */
+    .row-reverse .um-timeline-arrow:first-child {
+      margin-right: 0;
+      clip-path: polygon(100% 0%, 100% 100%, 15px 100%, 0% 50%, 15px 0%);
+      padding-right: 10px;
+    }
+
+    .row-reverse .um-arrow-header {
+      justify-content: flex-end;
+    }
+
+    /* 5. Directional Sweep Animations */
+    .um-sweep-ltr::after,
+    .um-sweep-rtl::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      pointer-events: none;
+    }
+
+    .um-sweep-ltr::after {
+      animation: sweep-ltr 3s infinite;
+    }
+
+    @keyframes sweep-ltr {
+      0% {
+        left: -100%;
+        opacity: 0;
+      }
+
+      20% {
+        opacity: 1;
+      }
+
+      50% {
+        left: 100%;
+        opacity: 0;
+      }
+
+      100% {
+        left: 100%;
+      }
+    }
+
+    .um-sweep-rtl::after {
+      animation: sweep-rtl 3s infinite;
+    }
+
+    @keyframes sweep-rtl {
+      0% {
+        right: -100%;
+        opacity: 0;
+      }
+
+      20% {
+        opacity: 1;
+      }
+
+      50% {
+        right: 100%;
+        opacity: 0;
+      }
+
+      100% {
+        right: 100%;
+      }
+    }
+
+    /* 6. Status Colors */
     .um-arrow-done {
       background: #10b981;
       color: white;
     }
 
-    .um-arrow-header {
-      display: flex;
-      align-items: baseline;
-      overflow: hidden;
-      line-height: 1.2;
+    .um-arrow-done-delayed {
+      background: #f5a30b;
+      color: white;
     }
 
     .um-arrow-active {
       background: #3b82f6;
       color: white;
-      border-bottom: 2px solid #1d4ed8;
+      z-index: 5;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
     }
 
-    .um-arrow-delayed {
+    .um-arrow-active-delayed {
       background: #ef4444;
       color: white;
+      animation: um-pulse-blue 2s infinite;
+      z-index: 5;
     }
 
     .um-arrow-pending {
@@ -1442,139 +1516,82 @@
       color: #64748b;
     }
 
-    .um-arrow-seq {
-      font-weight: 800;
-      opacity: 0.8;
-      margin-right: 4px;
-      font-size: 1.2rem;
-    }
-
-    .um-arrow-qty {
-      font-size: 12px;
-      font-style: italic;
-      font-weight: 650;
-    }
-
-    .um-arrow-date {
-      font-size: 12px;
-      margin-top: 1px;
-      font-weight: 650;
-      white-space: nowrap;
-      font-style: italic;
-    }
-
-    /* Context-aware coloring */
-    .um-arrow-done .um-arrow-date {
-      color: rgba(255, 255, 255, 0.9);
-    }
-
-    .um-arrow-active .um-arrow-date {
-      color: rgba(255, 255, 255, 0.95);
-    }
-
-    .um-arrow-delayed .um-arrow-date {
-      color: #ffe2e2;
-    }
-
-    .um-date-type {
-      font-weight: 800;
-      text-transform: uppercase;
-      font-size: 7.5px;
-      margin-right: 2px;
-    }
-
-    .um-timeline-container.cols-5 .um-timeline-arrow {
-      flex: 0 0 calc(20% - 6px);
-      max-width: calc(20% - 6px);
-    }
-
-    .um-timeline-container.cols-4 .um-timeline-arrow {
-      flex: 0 0 calc(25% - 6px);
-      max-width: calc(25% - 6px);
-    }
-
-    /* --- COLORS & STATES --- */
-
-    /* 1. DONE - ON TIME (Green) */
-    .um-arrow-done {
-      background: #10b981;
-      color: white;
-    }
-
-    /* 2. DONE - DELAYED (Amber/Orange) - Distinguishes from Red */
-    .um-arrow-done-delayed {
-      background: #f5a30b;
-      color: white;
-      border: 1.9px solid red;
-    }
-
-    /* 3. CURRENT - ON TIME (Blue) */
-    .um-arrow-active {
-      background: #3b82f6;
-      color: white;
-      box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #3b82f6;
-      z-index: 5;
-    }
-
-    /* 4. CURRENT - DELAYED (Red with Blue Pulse) */
-    /* This makes it clear it is CURRENT (Blue effect) but LATE (Red color) */
-    .um-arrow-active-delayed {
-      background: #ef4444;
-      color: white;
-      box-shadow: 0 0 0 2px #ffffff, 0 0 10px #3b82f6;
-      animation: um-pulse-blue 2s infinite;
-      z-index: 5;
-    }
-
-    /* 5. PENDING - DELAYED (Soft Red/Pink) */
-    /* Not done yet, but already past due */
     .um-arrow-pending-delayed {
       background: #fecaca;
       color: #991b1b;
       border: 1px dashed #ef4444;
     }
 
-    /* 6. PENDING - ON TIME (Gray) */
-    .um-arrow-pending {
-      background: #e2e8f0;
-      color: #64748b;
+    /* 7. Text & Typography */
+    .um-arrow-header {
+      display: flex;
+      align-items: baseline;
+      line-height: 1.2;
+      margin-bottom: 4px;
     }
 
-    /* --- ANIMATIONS & ELEMENTS --- */
-
-    @keyframes um-pulse-blue {
-      0% {
-        box-shadow: 0 0 0 0px rgba(59, 130, 246, 0.7);
-      }
-
-      70% {
-        box-shadow: 0 0 0 6px rgba(59, 130, 246, 0);
-      }
-
-      100% {
-        box-shadow: 0 0 0 0px rgba(59, 130, 246, 0);
-      }
+    .um-arrow-name {
+      font-size: 13px;
+      font-weight: bold;
+      white-space: normal;
+      word-break: break-word;
     }
 
+    .um-arrow-seq {
+      font-weight: 800;
+      margin: 0 4px;
+      font-size: 15px;
+    }
+
+    .um-date-label {
+      font-size: 12px;
+      font-weight: 750;
+      text-transform: uppercase;
+      opacity: 0.9;
+    }
+
+    .um-date-value,
+    .um-qty-value {
+      font-size: 12px;
+      font-weight: 750;
+      font-style: italic;
+    }
+
+    /* Active Dot & Pulse */
     .um-active-dot {
       width: 6px;
       height: 6px;
       background: #fff;
       border-radius: 50%;
-      display: inline-block;
-      margin-left: auto;
-      box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+      margin-left: 4px;
+      box-shadow: 0 0 5px #fff;
     }
 
-    /* Fix for the Arrow Shape (Keeping your layout) */
-    .um-timeline-arrow {
-      position: relative;
-      min-height: 75px;
-      padding: 8px 6px 8px 20px;
-      clip-path: polygon(92% 0%, 100% 50%, 92% 100%, 0% 100%, 8% 50%, 0% 0%);
-      display: flex;
-      flex-direction: column;
-      transition: all 0.2s ease;
+    @keyframes um-pulse-blue {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0px rgba(59, 130, 246, 0.7);
+      }
+
+      70% {
+        box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
+      }
+    }
+
+    /* Hover State */
+    .um-timeline-arrow:hover {
+      transform: translateY(-3px);
+      filter: brightness(1.1);
+      z-index: 10;
+    }
+
+    /* Active Step Special Glow */
+    .um-arrow-active,
+    .um-arrow-active-delayed {
+      z-index: 10;
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
     }
 
     /*new um batch switcher scroll bar ontop css*/
@@ -1756,7 +1773,7 @@
         </button>
 
         <button id="saveBtn" class="um-btn um-btn-primary" onclick="processUpdate()">
-          <span id="btnText">Save progress</span>
+          <span id="btnText">Save progress/Split Batch</span>
           <div id="btnSpinner" style="
                 display: none;
                 width: 13px;
@@ -2254,7 +2271,7 @@
       const btnText = document.getElementById("btnText");
       if (qtyBtn) qtyBtn.style.display = "inline-flex";
       if (saveBtn) saveBtn.style.display = "flex";
-      btnText.innerText = "Save progress";
+      btnText.innerText = "Save progress/Split Batch";
       saveBtn.onclick = () => processUpdate();
 
       renderModalHeader(job, "update");
@@ -3666,51 +3683,67 @@
 
       const today = new Date().setHours(0, 0, 0, 0);
       const activeStepIndex = job.steps.findIndex(s => !s.isDone);
-      const layoutClass = job.steps.length <= 5 ? "cols-5" : "cols-4";
+      const stepsPerRow = job.steps.length <= 5 ? 5 : 4;
 
-      const timelineHtml = job.steps.map((step, index) => {
-        const isDone = step.isDone;
-        const expTime = parseDateStringToTime(step.expDate);
-        const isOverdue = !isDone && expTime && expTime < today;
-        const isDelayedManually = step.status === "Delayed";
-        const isActive = index === activeStepIndex;
+      const rows = [];
+      for (let i = 0; i < job.steps.length; i += stepsPerRow) {
+        rows.push(job.steps.slice(i, i + stepsPerRow));
+      }
 
-        let statusClass = "um-arrow-pending";
+      const timelineHtml = rows.map((rowSteps, rowIndex) => {
+        const isReverseRow = rowIndex % 2 !== 0;
+        // We keep the steps in order to calculate their true "progress" 
+        // but the CSS 'flex-direction: row-reverse' will handle the visual flip
+        const rowHtml = rowSteps.map((step) => {
+          const originalIndex = job.steps.findIndex(s => s === step);
+          const isDone = step.isDone;
+          const expTime = parseDateStringToTime(step.expDate);
+          const isOverdue = !isDone && expTime && expTime < today;
+          const isDelayedManually = step.status === "Delayed";
+          const isActive = originalIndex === activeStepIndex;
+          const isPast = originalIndex < activeStepIndex || (activeStepIndex === -1 && isDone);
 
-        if (isDone) {
-          // Differentiation for Finished steps
-          statusClass = (isDelayedManually || (step.endDate && parseDateStringToTime(step.endDate) > expTime))
-            ? "um-arrow-done-delayed"
-            : "um-arrow-done";
-        } else if (isActive) {
-          // Current process: check if it's late or on time
-          statusClass = (isOverdue || isDelayedManually) ? "um-arrow-active-delayed" : "um-arrow-active";
-        } else if (isOverdue || isDelayedManually) {
-          // Not done, not current, but late (Pending Delay)
-          statusClass = "um-arrow-pending-delayed";
-        }
+          let statusClass = "um-arrow-pending";
+          if (isDone) {
+            statusClass = (isDelayedManually || (step.endDate && parseDateStringToTime(step.endDate) > expTime))
+              ? "um-arrow-done-delayed" : "um-arrow-done";
+          } else if (isActive) {
+            statusClass = (isOverdue || isDelayedManually) ? "um-arrow-active-delayed" : "um-arrow-active";
+          } else if (isOverdue || isDelayedManually) {
+            statusClass = "um-arrow-pending-delayed";
+          }
 
-        const stepQty = getQtyForProcess(job.qtyString, step.baseCol, job.qty);
-        const dateLabel = isDone ? "End on" : "Expected Date";
-        const displayDate = isDone ? (step.endDate || 'Done') : step.expDate;
+          // Identify which animation to use based on row direction
+          const animationClass = isPast ? (isReverseRow ? "um-sweep-rtl" : "um-sweep-ltr") : "";
 
-        return `
-          <div class="um-timeline-arrow ${statusClass}" title="${step.name}">
+          const stepQty = getQtyForProcess(job.qtyString, step.baseCol, job.qty);
+          const dateLabel = isDone ? "End on" : "Expected Date";
+
+          return `
+        <div class="um-timeline-arrow ${statusClass} ${animationClass}" 
+             style="animation-delay: ${originalIndex * 0.2}s" 
+             title="${step.name}">
+          <div class="um-arrow-content">
             <div class="um-arrow-header">
-              <span class="um-arrow-seq">${index + 1}.</span>
+              <span class="um-arrow-seq">${originalIndex + 1}.</span>
               <span class="um-arrow-name">${step.name}</span>
               ${isActive ? '<span class="um-active-dot"></span>' : ''}
             </div>
             <div class="um-arrow-body">
               <div class="um-date-label">${dateLabel}</div>
-              <div class="um-date-value">${displayDate}</div>
+              <div class="um-date-value">${isDone ? (step.endDate || 'Done') : step.expDate}</div>
               <div class="um-qty-value">Qty: ${stepQty}</div>
             </div>
           </div>
-        `;
+        </div>
+      `;
+        }).join("");
+
+        return `<div class="um-timeline-row ${isReverseRow ? 'row-reverse' : 'row-normal'}">${rowHtml}</div>`;
       }).join("");
 
-      return `<div class="um-timeline-container ${layoutClass}">${timelineHtml}</div>`;
+      // Added 'overflow: hidden' inline to prevent header scroll issues
+      return `<div class="um-timeline-container" style="overflow:hidden;">${timelineHtml}</div>`;
     }
   </script>
 </body>
