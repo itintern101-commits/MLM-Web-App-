@@ -542,7 +542,7 @@
       border-radius: 14px;
       width: 92%;
       max-width: 860px;
-      max-height: 92vh;
+      max-height: 99vh;
       display: flex;
       flex-direction: column;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
@@ -556,6 +556,8 @@
       border-bottom: 1px solid #f1f5f9;
       flex-shrink: 0;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      overflow-y: auto;
+      height: 370px;
     }
 
     .um-batch-pill {
@@ -1369,12 +1371,11 @@
       /* Force exactly 6 items per row */
       flex: 0 0 calc(16.66% - 4px);
       max-width: calc(16.66% - 4px);
-
-      min-height: 50px;
+      min-height: 65px;
       padding: 6px 8px 6px 18px;
       background: #e2e8f0;
       color: #475569;
-      font-size: 10px;
+      font-size: 12px;
       font-weight: 600;
 
       /* The Arrow Shape */
@@ -1389,10 +1390,16 @@
       cursor: default;
     }
 
-    /* Fix: The 1st, 7th, 13th, etc. items start a new row and have a flat left edge */
-    .um-timeline-arrow:nth-child(6n+1) {
+    .um-timeline-arrow:first-child {
       clip-path: polygon(92% 0%, 100% 50%, 92% 100%, 0% 100%, 0% 50%, 0% 0%);
       padding-left: 10px;
+    }
+
+    .um-arrow-name {
+      white-space: normal;
+      word-break: break-word;
+      line-height: 1.2;
+      font-size: 1rem;
     }
 
     /* HOVER ANIMATION */
@@ -1446,7 +1453,6 @@
       font-size: 12px;
       font-style: italic;
       font-weight: 650;
-
     }
 
     .um-arrow-date {
@@ -1474,8 +1480,101 @@
       font-weight: 800;
       text-transform: uppercase;
       font-size: 7.5px;
-      opacity: 0.8;
       margin-right: 2px;
+    }
+
+    .um-timeline-container.cols-5 .um-timeline-arrow {
+      flex: 0 0 calc(20% - 6px);
+      max-width: calc(20% - 6px);
+    }
+
+    .um-timeline-container.cols-4 .um-timeline-arrow {
+      flex: 0 0 calc(25% - 6px);
+      max-width: calc(25% - 6px);
+    }
+
+    /* --- COLORS & STATES --- */
+
+    /* 1. DONE - ON TIME (Green) */
+    .um-arrow-done {
+      background: #10b981;
+      color: white;
+    }
+
+    /* 2. DONE - DELAYED (Amber/Orange) - Distinguishes from Red */
+    .um-arrow-done-delayed {
+      background: #f5a30b;
+      color: white;
+      border: 1.9px solid red;
+    }
+
+    /* 3. CURRENT - ON TIME (Blue) */
+    .um-arrow-active {
+      background: #3b82f6;
+      color: white;
+      box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #3b82f6;
+      z-index: 5;
+    }
+
+    /* 4. CURRENT - DELAYED (Red with Blue Pulse) */
+    /* This makes it clear it is CURRENT (Blue effect) but LATE (Red color) */
+    .um-arrow-active-delayed {
+      background: #ef4444;
+      color: white;
+      box-shadow: 0 0 0 2px #ffffff, 0 0 10px #3b82f6;
+      animation: um-pulse-blue 2s infinite;
+      z-index: 5;
+    }
+
+    /* 5. PENDING - DELAYED (Soft Red/Pink) */
+    /* Not done yet, but already past due */
+    .um-arrow-pending-delayed {
+      background: #fecaca;
+      color: #991b1b;
+      border: 1px dashed #ef4444;
+    }
+
+    /* 6. PENDING - ON TIME (Gray) */
+    .um-arrow-pending {
+      background: #e2e8f0;
+      color: #64748b;
+    }
+
+    /* --- ANIMATIONS & ELEMENTS --- */
+
+    @keyframes um-pulse-blue {
+      0% {
+        box-shadow: 0 0 0 0px rgba(59, 130, 246, 0.7);
+      }
+
+      70% {
+        box-shadow: 0 0 0 6px rgba(59, 130, 246, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0px rgba(59, 130, 246, 0);
+      }
+    }
+
+    .um-active-dot {
+      width: 6px;
+      height: 6px;
+      background: #fff;
+      border-radius: 50%;
+      display: inline-block;
+      margin-left: auto;
+      box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+    }
+
+    /* Fix for the Arrow Shape (Keeping your layout) */
+    .um-timeline-arrow {
+      position: relative;
+      min-height: 75px;
+      padding: 8px 6px 8px 20px;
+      clip-path: polygon(92% 0%, 100% 50%, 92% 100%, 0% 100%, 8% 50%, 0% 0%);
+      display: flex;
+      flex-direction: column;
+      transition: all 0.2s ease;
     }
   </style>
 </head>
@@ -3539,44 +3638,56 @@
     }
 
     function renderProgressTimeline(job) {
-  if (!job || !job.steps) return "";
+      if (!job || !job.steps) return "";
 
-  const today = new Date().setHours(0, 0, 0, 0);
-  const activeStepIndex = job.steps.findIndex(s => !s.isDone);
+      const today = new Date().setHours(0, 0, 0, 0);
+      const activeStepIndex = job.steps.findIndex(s => !s.isDone);
+      const layoutClass = job.steps.length <= 5 ? "cols-5" : "cols-4";
 
-  const timelineHtml = job.steps.map((step, index) => {
-    const isDone = step.isDone;
-    const expTime = parseDateStringToTime(step.expDate);
-    const isOverdue = !isDone && expTime && expTime < today;
-    const isActive = index === activeStepIndex;
+      const timelineHtml = job.steps.map((step, index) => {
+        const isDone = step.isDone;
+        const expTime = parseDateStringToTime(step.expDate);
+        const isOverdue = !isDone && expTime && expTime < today;
+        const isDelayedManually = step.status === "Delayed";
+        const isActive = index === activeStepIndex;
 
-    let statusClass = "um-arrow-pending";
-    if (isDone) statusClass = "um-arrow-done";
-    else if (isOverdue) statusClass = "um-arrow-delayed";
-    else if (isActive) statusClass = "um-arrow-active";
+        let statusClass = "um-arrow-pending";
 
-    const stepQty = getQtyForProcess(job.qtyString, step.baseCol, job.qty);
+        if (isDone) {
+          // Differentiation for Finished steps
+          statusClass = (isDelayedManually || (step.endDate && parseDateStringToTime(step.endDate) > expTime))
+            ? "um-arrow-done-delayed"
+            : "um-arrow-done";
+        } else if (isActive) {
+          // Current process: check if it's late or on time
+          statusClass = (isOverdue || isDelayedManually) ? "um-arrow-active-delayed" : "um-arrow-active";
+        } else if (isOverdue || isDelayedManually) {
+          // Not done, not current, but late (Pending Delay)
+          statusClass = "um-arrow-pending-delayed";
+        }
 
-    // Dynamic Labeling logic
-    const dateLabel = isDone ? "Ends on" : "Expected Date";
-    const displayDate = isDone ? (step.endDate || 'Done') : step.expDate;
+        const stepQty = getQtyForProcess(job.qtyString, step.baseCol, job.qty);
+        const dateLabel = isDone ? "End on" : "Expected Date";
+        const displayDate = isDone ? (step.endDate || 'Done') : step.expDate;
 
-    return `
-      <div class="um-timeline-arrow ${statusClass}" title="${step.name}">
-        <div class="um-arrow-header">
-          <span class="um-arrow-seq">${index + 1}.</span>
-          <span class="um-arrow-name">${step.name}</span>
-        </div>
-        <div class="um-arrow-date">
-          <span class="um-date-type">${dateLabel}:</span> ${displayDate}
-        </div>
-        <div class="um-arrow-qty">Qty: ${stepQty}</div>
-      </div>
-    `;
-  }).join("");
+        return `
+          <div class="um-timeline-arrow ${statusClass}" title="${step.name}">
+            <div class="um-arrow-header">
+              <span class="um-arrow-seq">${index + 1}.</span>
+              <span class="um-arrow-name">${step.name}</span>
+              ${isActive ? '<span class="um-active-dot"></span>' : ''}
+            </div>
+            <div class="um-arrow-body">
+              <div class="um-date-label">${dateLabel}</div>
+              <div class="um-date-value">${displayDate}</div>
+              <div class="um-qty-value">Qty: ${stepQty}</div>
+            </div>
+          </div>
+        `;
+      }).join("");
 
-  return `<div class="um-timeline-container">${timelineHtml}</div>`;
-}
+      return `<div class="um-timeline-container ${layoutClass}">${timelineHtml}</div>`;
+    }
   </script>
 </body>
 
