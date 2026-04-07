@@ -541,7 +541,7 @@
       background: white;
       border-radius: 14px;
       width: 92%;
-      max-width: 860px;
+      max-width: 1000px;
       max-height: 99vh;
       display: flex;
       flex-direction: column;
@@ -1355,246 +1355,169 @@
     }
 
     /*PROGRESS TIMELINE ARROW CHART*/
-    /* 1. Container & Layout */
     .um-timeline-container {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 100px 0;
+      /* Vertical space for the flow animation */
+      padding: 40px;
       width: 100%;
-      padding: 10px;
       box-sizing: border-box;
-      overflow: hidden;
-      /* Fixes the scrollbar bug */
-    }
-
-    .um-timeline-row {
-      display: flex;
-      width: 100%;
+      background: #1e293b;
+      border-radius: 12px;
       position: relative;
     }
 
-    /* 2. Base Arrow Styles */
-    .um-timeline-arrow {
-      flex: 1;
-      min-height: 80px;
+    .um-step-cell {
+      position: relative;
       display: flex;
-      flex-direction: column;
       justify-content: center;
+      align-items: center;
+      height: 80px;
+    }
+
+    .um-node {
+      width: 125px;
+      height: 80px;
+      background: #334155;
+      border-radius: 10px;
+      padding: 10px;
+      color: white;
+      z-index: 10;
       position: relative;
-      transition: all 0.2s ease;
+    }
+
+    /* Horizontal Connector */
+    .um-connector-h {
+      position: absolute;
+      top: 50%;
+      left: calc(50% + 62px);
+      width: calc(100% - 125px);
+      height: 4px;
+      background: #475569;
+      transform: translateY(-50%);
+      z-index: 5;
       overflow: hidden;
     }
 
-    /* 3. S-Curve Flow (LTR) */
-    .row-normal {
-      flex-direction: row;
+    /* Reverse Row Connector (Right to Left) */
+    .um-connector-h.rev {
+      left: auto;
+      right: calc(50% + 62px);
     }
 
-    .row-normal .um-timeline-arrow {
-      clip-path: polygon(calc(100% - 15px) 0%, 100% 50%, calc(100% - 15px) 100%, 0% 100%, 15px 50%, 0% 0%);
-      padding: 8px 18px 8px 25px;
-      /* Clear the left notch */
-      margin-left: -14px;
+    /* Vertical Bridge (The S-Curve Jump) */
+    .um-s-bridge {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 4px;
+      height: 180px;
+      /* Bridge height between rows */
+      background: #475569;
+      transform: translateX(-50%);
+      z-index: 1;
+      overflow: hidden;
     }
 
-    .row-normal .um-timeline-arrow:first-child {
-      margin-left: 0;
-      clip-path: polygon(calc(100% - 15px) 0%, 100% 50%, calc(100% - 15px) 100%, 0% 100%, 0% 0%);
-      padding-left: 10px;
-    }
-
-    /* 4. S-Curve Flow (RTL) */
-    .row-reverse {
-      flex-direction: row-reverse;
-    }
-
-    .row-reverse .um-timeline-arrow {
-      clip-path: polygon(100% 0%, calc(100% - 15px) 50%, 100% 100%, 15px 100%, 0% 50%, 15px 0%);
-      padding: 8px 25px 8px 18px;
-      /* Clear the right notch */
-      margin-right: -14px;
-      text-align: right;
-    }
-
-    .row-reverse .um-timeline-arrow:first-child {
-      margin-right: 0;
-      clip-path: polygon(100% 0%, 100% 100%, 15px 100%, 0% 50%, 15px 0%);
-      padding-right: 10px;
-    }
-
-    .row-reverse .um-arrow-header {
-      justify-content: flex-end;
-    }
-
-    /* 5. Directional Sweep Animations */
-    .um-sweep-ltr::after,
-    .um-sweep-rtl::after {
+    /* Flow Animations */
+    .um-flow-on::after {
       content: "";
       position: absolute;
-      top: 0;
-      width: 50%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-      pointer-events: none;
-    }
-
-    .um-sweep-ltr::after {
-      animation: sweep-ltr 3s infinite;
-    }
-
-    @keyframes sweep-ltr {
-      0% {
-        left: -100%;
-        opacity: 0;
-      }
-
-      20% {
-        opacity: 1;
-      }
-
-      50% {
-        left: 100%;
-        opacity: 0;
-      }
-
-      100% {
-        left: 100%;
-      }
-    }
-
-    .um-sweep-rtl::after {
-      animation: sweep-rtl 3s infinite;
-    }
-
-    @keyframes sweep-rtl {
-      0% {
-        right: -100%;
-        opacity: 0;
-      }
-
-      20% {
-        opacity: 1;
-      }
-
-      50% {
-        right: 100%;
-        opacity: 0;
-      }
-
-      100% {
-        right: 100%;
-      }
-    }
-
-    /* 6. Status Colors */
-    .um-arrow-done {
-      background: #10b981;
-      color: white;
-    }
-
-    .um-arrow-done-delayed {
-      background: #f5a30b;
-      color: white;
-    }
-
-    .um-arrow-active {
       background: #3b82f6;
-      color: white;
-      z-index: 5;
-      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 0 10px #60a5fa;
     }
 
-    .um-arrow-active-delayed {
-      background: #ef4444;
-      color: white;
-      animation: um-pulse-blue 2s infinite;
-      z-index: 5;
+    /* Vertical Flow */
+    .um-s-bridge.um-flow-on::after {
+      left: 0;
+      width: 100%;
+      height: 60px;
+      animation: flow-down 1.5s linear infinite;
     }
 
-    .um-arrow-pending {
-      background: #cbd5e1;
-      color: #64748b;
+    /* Horizontal Flow */
+    .um-connector-h.um-flow-on::after {
+      height: 100%;
+      width: 60px;
     }
 
-    .um-arrow-pending-delayed {
-      background: #fecaca;
-      color: #991b1b;
-      border: 1px dashed #ef4444;
+    .um-connector-h.um-flow-on:not(.rev)::after {
+      animation: flow-ltr 1.5s linear infinite;
     }
 
-    /* 7. Text & Typography */
-    .um-arrow-header {
+    .um-connector-h.um-flow-on.rev::after {
+      animation: flow-rtl 1.5s linear infinite;
+    }
+
+    @keyframes flow-down {
+      from {
+        top: -60px;
+      }
+
+      to {
+        top: 100%;
+      }
+    }
+
+    @keyframes flow-ltr {
+      from {
+        left: -60px;
+      }
+
+      to {
+        left: 100%;
+      }
+    }
+
+    @keyframes flow-rtl {
+      from {
+        right: -60px;
+      }
+
+      to {
+        right: 100%;
+      }
+    }
+
+    /* Status Colors & Polish */
+    .um-node-done {
+      background: #10b981;
+    }
+
+    .um-node-active {
+      background: #3b82f6;
+      border: 2px solid white;
+      transform: scale(1.05);
+      z-index: 20;
+    }
+
+    .um-node-pending {
+      background: #475569;
+      color: #94a3b8;
+    }
+
+    .um-node-header {
       display: flex;
-      align-items: baseline;
-      line-height: 1.2;
+      gap: 4px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       margin-bottom: 4px;
     }
 
-    .um-arrow-name {
-      font-size: 13px;
-      font-weight: bold;
-      white-space: normal;
-      word-break: break-word;
+    .um-node-name {
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .um-arrow-seq {
-      font-weight: 800;
-      margin: 0 4px;
-      font-size: 15px;
+    .um-date,
+    .um-qty {
+      font-size: 10px;
     }
 
-    .um-date-label {
-      font-size: 12px;
-      font-weight: 750;
-      text-transform: uppercase;
-      opacity: 0.9;
-    }
-
-    .um-date-value,
-    .um-qty-value {
-      font-size: 12px;
-      font-weight: 750;
-      font-style: italic;
-    }
-
-    /* Active Dot & Pulse */
-    .um-active-dot {
-      width: 6px;
-      height: 6px;
-      background: #fff;
-      border-radius: 50%;
-      margin-left: 4px;
-      box-shadow: 0 0 5px #fff;
-    }
-
-    @keyframes um-pulse-blue {
-
-      0%,
-      100% {
-        box-shadow: 0 0 0 0px rgba(59, 130, 246, 0.7);
-      }
-
-      70% {
-        box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
-      }
-    }
-
-    /* Hover State */
-    .um-timeline-arrow:hover {
-      transform: translateY(-3px);
-      filter: brightness(1.1);
-      z-index: 10;
-    }
-
-    /* Active Step Special Glow */
-    .um-arrow-active,
-    .um-arrow-active-delayed {
-      z-index: 10;
-      transform: scale(1.05);
-      box-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
-    }
-
-    /*new um batch switcher scroll bar ontop css*/
+    /*NEW BATCHSWITCHER scroll bar ontop css*/
     #batchSwitcher {
       display: flex;
       overflow-x: auto;
@@ -3683,67 +3606,67 @@
 
       const today = new Date().setHours(0, 0, 0, 0);
       const activeStepIndex = job.steps.findIndex(s => !s.isDone);
-      const stepsPerRow = job.steps.length <= 5 ? 5 : 4;
+      const stepsPerRow = 6;
 
-      const rows = [];
-      for (let i = 0; i < job.steps.length; i += stepsPerRow) {
-        rows.push(job.steps.slice(i, i + stepsPerRow));
-      }
+      const timelineHtml = job.steps.map((step, index) => {
+        const isDone = step.isDone;
+        const expTime = parseDateStringToTime(step.expDate);
+        const isOverdue = !isDone && expTime && expTime < today;
+        const isDelayedManually = step.status === "Delayed";
+        const isActive = index === activeStepIndex;
+        const isPast = index < activeStepIndex || (activeStepIndex === -1 && isDone);
 
-      const timelineHtml = rows.map((rowSteps, rowIndex) => {
+        const rowIndex = Math.floor(index / stepsPerRow);
         const isReverseRow = rowIndex % 2 !== 0;
-        // We keep the steps in order to calculate their true "progress" 
-        // but the CSS 'flex-direction: row-reverse' will handle the visual flip
-        const rowHtml = rowSteps.map((step) => {
-          const originalIndex = job.steps.findIndex(s => s === step);
-          const isDone = step.isDone;
-          const expTime = parseDateStringToTime(step.expDate);
-          const isOverdue = !isDone && expTime && expTime < today;
-          const isDelayedManually = step.status === "Delayed";
-          const isActive = originalIndex === activeStepIndex;
-          const isPast = originalIndex < activeStepIndex || (activeStepIndex === -1 && isDone);
+        const colIndex = index % stepsPerRow;
 
-          let statusClass = "um-arrow-pending";
-          if (isDone) {
-            statusClass = (isDelayedManually || (step.endDate && parseDateStringToTime(step.endDate) > expTime))
-              ? "um-arrow-done-delayed" : "um-arrow-done";
-          } else if (isActive) {
-            statusClass = (isOverdue || isDelayedManually) ? "um-arrow-active-delayed" : "um-arrow-active";
-          } else if (isOverdue || isDelayedManually) {
-            statusClass = "um-arrow-pending-delayed";
+        // FIX: Calculate grid column to push 2nd row items to the right
+        // Normal row: 1, 2, 3, 4, 5, 6
+        // Reverse row: 6, 5, 4, 3, 2, 1
+        const gridColumn = isReverseRow ? (stepsPerRow - colIndex) : (colIndex + 1);
+
+        let statusClass = "um-node-pending";
+        if (isDone) {
+          statusClass = (isDelayedManually || (step.endDate && parseDateStringToTime(step.endDate) > expTime))
+            ? "um-node-done-delayed" : "um-node-done";
+        } else if (isActive) {
+          statusClass = (isOverdue || isDelayedManually) ? "um-node-active-delayed" : "um-node-active";
+        }
+
+        const flowAnim = isPast ? 'um-flow-on' : '';
+        const isLastInRow = (index + 1) % stepsPerRow === 0;
+        const isNotLastOverall = index < job.steps.length - 1;
+
+        let connectors = "";
+        if (isNotLastOverall) {
+          if (isLastInRow) {
+            // Vertical Bridge
+            connectors = `<div class="um-s-bridge ${flowAnim}"></div>`;
+          } else {
+            // Horizontal Line
+            connectors = `<div class="um-connector-h ${isReverseRow ? 'rev' : ''} ${flowAnim}"></div>`;
           }
+        }
 
-          // Identify which animation to use based on row direction
-          const animationClass = isPast ? (isReverseRow ? "um-sweep-rtl" : "um-sweep-ltr") : "";
-
-          const stepQty = getQtyForProcess(job.qtyString, step.baseCol, job.qty);
-          const dateLabel = isDone ? "End on" : "Expected Date";
-
-          return `
-        <div class="um-timeline-arrow ${statusClass} ${animationClass}" 
-             style="animation-delay: ${originalIndex * 0.2}s" 
-             title="${step.name}">
-          <div class="um-arrow-content">
-            <div class="um-arrow-header">
-              <span class="um-arrow-seq">${originalIndex + 1}.</span>
-              <span class="um-arrow-name">${step.name}</span>
-              ${isActive ? '<span class="um-active-dot"></span>' : ''}
+        return `
+          <div class="um-step-cell" style="grid-column: ${gridColumn}; grid-row: ${rowIndex + 1};">
+            <div class="um-node ${statusClass}">
+              <div class="um-node-header">
+                <span class="um-node-seq">${index + 1}</span>
+                <span class="um-node-name">${step.name}</span>
+              </div>
+              <div class="um-node-body">
+                <div class="um-date">${isDone ? (step.endDate || 'Done') : (step.expDate || 'N/A')}</div>
+                <div class="um-qty">Qty: ${getQtyForProcess(job.qtyString, step.baseCol, job.qty)}</div>
+              </div>
+              ${isActive ? '<div class="um-node-pulse"></div>' : ''}
             </div>
-            <div class="um-arrow-body">
-              <div class="um-date-label">${dateLabel}</div>
-              <div class="um-date-value">${isDone ? (step.endDate || 'Done') : step.expDate}</div>
-              <div class="um-qty-value">Qty: ${stepQty}</div>
-            </div>
+            ${connectors}
           </div>
-        </div>
-      `;
-        }).join("");
-
-        return `<div class="um-timeline-row ${isReverseRow ? 'row-reverse' : 'row-normal'}">${rowHtml}</div>`;
+        `;
       }).join("");
 
-      // Added 'overflow: hidden' inline to prevent header scroll issues
-      return `<div class="um-timeline-container" style="overflow:hidden;">${timelineHtml}</div>`;
+      return `<div class="um-timeline-container">${timelineHtml}</div>`;
     }
   </script>
 </body>
