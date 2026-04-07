@@ -1860,48 +1860,60 @@ async function revertProcessStep(rowIdx, baseCol, revertRemark) {
       throw new Error("Revert remark is mandatory.");
 
     let rowValues = await getBatchListingRow(rowIdx);
+    const psn = String(rowValues[0] || "").trim(); // Get PSN for JobListing sync
     const batchQty = Number(rowValues[4] || 0);
 
     let currentQtyMap = parseMapString(rowValues[119], batchQty);
-    // maxQtyMap remains untouched to preserve the ceiling
 
     for (let i = 0; i < 12; i++) {
       let currentStepBase = 6 + i * 9;
 
-      // Only evaluate the target step and those physically after it in the sequence
       if (currentStepBase >= baseCol) {
-        const pName = rowValues[currentStepBase];
+        const pName = String(rowValues[currentStepBase] || "").trim();
         if (!pName || pName === "" || pName === "--") continue;
 
+        const isDelivery = pName.toLowerCase().includes("delivery");
         const wasDone =
           rowValues[currentStepBase + 8] === true ||
           String(rowValues[currentStepBase + 8]).toUpperCase() === "TRUE";
 
         if (currentStepBase === baseCol) {
           // --- TARGET STEP ---
-          // Force to 0 so user can resubmit full amount
-          currentQtyMap[currentStepBase] = 0;
 
-          rowValues[currentStepBase + 2] = ""; // End Date
-          rowValues[currentStepBase + 3] = ""; // Duration
-          rowValues[currentStepBase + 5] = "Reverted";
-          rowValues[currentStepBase + 6] = ""; // Completion Remark
-          rowValues[currentStepBase + 7] = revertRemark;
-          rowValues[currentStepBase + 8] = false; // IsDone
-        } else if (wasDone) {
-          // --- SEQUENTIAL AUTO-REVERT ---
-          // Only reset to 0 if it was actually "Done"
-          currentQtyMap[currentStepBase] = 0;
+          // NEW LOGIC: If target is Delivery, sync back to JobListing
+          if (isDelivery) {
+            const qtyToRevert = Number(currentQtyMap[currentStepBase] || 0);
+            if (qtyToRevert > 0) {
+              await syncRevertToJobListing(psn, qtyToRevert);
+            }
+          }
 
+          currentQtyMap[currentStepBase] = 0;
           rowValues[currentStepBase + 2] = "";
           rowValues[currentStepBase + 3] = "";
-          rowValues[currentStepBase + 5] = ""; // Clear status
+          rowValues[currentStepBase + 5] = "Reverted";
+          rowValues[currentStepBase + 6] = "";
+          rowValues[currentStepBase + 7] = revertRemark;
+          rowValues[currentStepBase + 8] = false;
+        } else if (wasDone) {
+          // --- SEQUENTIAL AUTO-REVERT ---
+
+          // NEW LOGIC: If a sequential step being auto-reverted is also a Delivery
+          if (isDelivery) {
+            const qtyToRevert = Number(currentQtyMap[currentStepBase] || 0);
+            if (qtyToRevert > 0) {
+              await syncRevertToJobListing(psn, qtyToRevert);
+            }
+          }
+
+          currentQtyMap[currentStepBase] = 0;
+          rowValues[currentStepBase + 2] = "";
+          rowValues[currentStepBase + 3] = "";
+          rowValues[currentStepBase + 5] = "";
           rowValues[currentStepBase + 6] = "";
           rowValues[currentStepBase + 7] = "Auto-reverted (Sequential)";
           rowValues[currentStepBase + 8] = false;
         }
-        // ELSE: If it's a future step that was NOT "Done", we do nothing.
-        // This preserves any "Delayed" quantities or pending 0s already there.
       }
     }
 
@@ -1987,22 +1999,23 @@ async function syncDeliveryToJobListing(psn, addedQty) {
     // 1. Get all rows from JobListing to find the PSN and current totals
     const response = await axios.get(
       `https://graph.microsoft.com/v1.0/drives/${fileContext.driveId}/items/${fileContext.fileId}/workbook/tables('${tableName}')/rows`,
-      { headers: fileContext.headers }
+      { headers: fileContext.headers },
     );
     const rows = response.data.value || [];
 
     // 2. Find the row index and current values
-    // Row index in Excel is (arrayIndex + 2) because of 1-indexing and headers
     let targetRowIndex = -1;
-    let currentPartial = 0;
-    let currentTotal = 0;
+    let currentRemaining = 0; // Column N (Index 13)
+    let currentPartial = 0; // Column O (Index 14)
+    let currentTotal = 0; // Column P (Index 15)
 
     for (let i = 0; i < rows.length; i++) {
       const rowValues = rows[i].values[0];
       if (String(rowValues[0] || "").trim() === psn) {
-        targetRowIndex = i + 2; 
-        currentPartial = Number(rowValues[14] || 0); // Column O
-        currentTotal = Number(rowValues[15] || 0);   // Column P
+        targetRowIndex = i + 2;
+        currentRemaining = Number(rowValues[13] || 0);
+        currentPartial = Number(rowValues[14] || 0);
+        currentTotal = Number(rowValues[15] || 0);
         break;
       }
     }
@@ -2013,24 +2026,82 @@ async function syncDeliveryToJobListing(psn, addedQty) {
     }
 
     // 3. Calculate new values
+    // Subtract from Remaining, Add to Partial and Total
+    const newRemaining = Math.max(0, currentRemaining - addedQty);
     const newPartial = currentPartial + addedQty;
     const newTotal = currentTotal + addedQty;
 
-    // 4. Update Columns O and P (Indices 14 and 15)
-    // We address the specific range: 'JobListing'!O[index]:P[index]
-    const rangeAddress = `${tableName}!O${targetRowIndex}:P${targetRowIndex}`;
+    // 4. Update Columns N, O, and P (Indices 13, 14, and 15)
+    // Range address spans from N to P: N[index]:P[index]
+    const rangeAddress = `${tableName}!N${targetRowIndex}:P${targetRowIndex}`;
+
     await axios.patch(
       `https://graph.microsoft.com/v1.0/drives/${fileContext.driveId}/items/${fileContext.fileId}/workbook/worksheets/JobListing/range(address='${rangeAddress}')`,
-      { values: [[newPartial, newTotal]] },
-      { headers: fileContext.headers }
+      { values: [[newRemaining, newPartial, newTotal]] },
+      { headers: fileContext.headers },
     );
 
-    console.log(`[Sync Success] PSN ${psn}: Updated O/P to ${newPartial}/${newTotal}`);
+    console.log(
+      `[Sync Success] PSN ${psn}: Rem: ${newRemaining}, Part: ${newPartial}, Tot: ${newTotal}`,
+    );
   } catch (error) {
-    console.error("[syncDeliveryToJobListing] Error:", error.response?.data || error.message);
+    console.error(
+      "[syncDeliveryToJobListing] Error:",
+      error.response?.data || error.message,
+    );
   }
 }
 
+async function syncRevertToJobListing(psn, revertQty) {
+  try {
+    const fileContext = await getSharePointFileContext();
+    const tableName = "JobListing";
+
+    const response = await axios.get(
+      `https://graph.microsoft.com/v1.0/drives/${fileContext.driveId}/items/${fileContext.fileId}/workbook/tables('${tableName}')/rows`,
+      { headers: fileContext.headers },
+    );
+    const rows = response.data.value || [];
+
+    let targetRowIndex = -1;
+    let currentRemaining = 0; // N
+    let currentPartial = 0; // O
+    let currentTotal = 0; // P
+
+    for (let i = 0; i < rows.length; i++) {
+      const rowValues = rows[i].values[0];
+      if (String(rowValues[0] || "").trim() === psn) {
+        targetRowIndex = i + 2;
+        currentRemaining = Number(rowValues[13] || 0);
+        currentPartial = Number(rowValues[14] || 0);
+        currentTotal = Number(rowValues[15] || 0);
+        break;
+      }
+    }
+
+    if (targetRowIndex === -1) return;
+
+    // REVERT MATH:
+    // Add back to Remaining, Subtract from Deliveries
+    const newRemaining = currentRemaining + revertQty;
+    const newPartial = Math.max(0, currentPartial - revertQty);
+    const newTotal = Math.max(0, currentTotal - revertQty);
+
+    const rangeAddress = `${tableName}!N${targetRowIndex}:P${targetRowIndex}`;
+
+    await axios.patch(
+      `https://graph.microsoft.com/v1.0/drives/${fileContext.driveId}/items/${fileContext.fileId}/workbook/worksheets/JobListing/range(address='${rangeAddress}')`,
+      { values: [[newRemaining, newPartial, newTotal]] },
+      { headers: fileContext.headers },
+    );
+
+    console.log(
+      `[Revert Sync] PSN ${psn}: Rem: ${newRemaining}, Part: ${newPartial}, Tot: ${newTotal}`,
+    );
+  } catch (error) {
+    console.error("[syncRevertToJobListing] Error:", error.message);
+  }
+}
 
 // ============ API ENDPOINTS FOR BATCH UPDATES ============
 // Endpoint to update process quantities only (without marking as done)
