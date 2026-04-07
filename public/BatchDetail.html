@@ -1358,9 +1358,8 @@
     .um-timeline-container {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
-      gap: 100px 0;
-      /* Vertical space for the flow animation */
-      padding: 40px;
+      gap: 40px 0;
+      padding: 30px;
       width: 100%;
       box-sizing: border-box;
       background: #1e293b;
@@ -1385,6 +1384,7 @@
       color: white;
       z-index: 10;
       position: relative;
+      box-sizing: border-box;
     }
 
     /* Horizontal Connector */
@@ -1412,8 +1412,7 @@
       top: 50%;
       left: 50%;
       width: 4px;
-      height: 180px;
-      /* Bridge height between rows */
+      height: 120px;
       background: #475569;
       transform: translateX(-50%);
       z-index: 1;
@@ -1483,15 +1482,37 @@
     /* Status Colors & Polish */
     .um-node-done {
       background: #10b981;
+      border: 1px solid #059669;
     }
 
+    /* 2. Done - Delayed (Amber with Red Border) */
+    .um-node-done-delayed {
+      background: #f59e0b;
+      border: 3px solid #ef4444;
+    }
+
+    /* 3. Current - On Time (Blue with White Pulse) */
     .um-node-active {
       background: #3b82f6;
       border: 2px solid white;
       transform: scale(1.05);
-      z-index: 20;
     }
 
+    /* 4. Current - Delayed (Red with Blue Pulse) */
+    .um-node-active-delayed {
+      background: #ef4444;
+      border: 2px solid #3b82f6;
+      transform: scale(1.05);
+    }
+
+    /* 5. Pending - Delayed (Pale Red/Pink) */
+    .um-node-pending-delayed {
+      background: #742a2a;
+      border: 1px dashed #f87171;
+      color: #fca5a5;
+    }
+
+    /* 6. Pending - On Time (Slate) */
     .um-node-pending {
       background: #475569;
       color: #94a3b8;
@@ -1515,6 +1536,105 @@
     .um-date,
     .um-qty {
       font-size: 10px;
+    }
+
+    /* --- CONNECTORS WITH ARROW HEADS --- */
+
+    /* Horizontal Connector Base */
+    .um-connector-h {
+      position: absolute;
+      top: 50%;
+      left: calc(50% + 62px);
+      width: calc(100% - 120px);
+      height: 8px;
+      /* Slightly thicker for better arrow visibility */
+      background: #475569;
+      transform: translateY(-50%);
+      z-index: 5;
+      clip-path: polygon(0% 25%, calc(100% - 10px) 25%, calc(100% - 10px) 0%, 100% 50%, calc(100% - 10px) 100%, calc(100% - 10px) 75%, 0% 75%);
+    }
+
+    /* Reverse Row (Right to Left) Arrow */
+    .um-connector-h.rev {
+      left: auto;
+      right: calc(50% + 62px);
+      clip-path: polygon(100% 25%, 10px 25%, 10px 0%, 0% 50%, 10px 100%, 10px 75%, 100% 75%);
+    }
+
+    /* Vertical Bridge (Down Arrow) */
+    .um-s-bridge {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 12px;
+      height: 120px;
+      background: #475569;
+      transform: translateX(-50%);
+      z-index: 1;
+      clip-path: polygon(35% 0%, 65% 0%, 65% calc(100% - 12px), 100% calc(100% - 12px), 50% 100%, 0% calc(100% - 12px), 35% calc(100% - 12px));
+    }
+
+    /* --- ANIMATION FLOW THROUGH ARROWS --- */
+
+    .um-flow-on::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, #3b82f6, #60a5fa, transparent);
+      background-size: 200% 100%;
+      animation: flow-shimmer 1.5s linear infinite;
+    }
+
+    /* Vertical flow needs a 180deg gradient */
+    .um-s-bridge.um-flow-on::after {
+      background: linear-gradient(180deg, transparent, #3b82f6, #60a5fa, transparent);
+      background-size: 100% 200%;
+      animation: flow-shimmer-v 1.5s linear infinite;
+    }
+
+    @keyframes flow-shimmer {
+      0% {
+        background-position: 200% 0;
+      }
+
+      100% {
+        background-position: -200% 0;
+      }
+    }
+
+    @keyframes flow-shimmer-v {
+      0% {
+        background-position: 0 200%;
+      }
+
+      100% {
+        background-position: 0 -200%;
+      }
+    }
+
+    /* ---PULSE ANIMATIONS --- */
+    .um-node-pulse {
+      position: absolute;
+      inset: -6px;
+      border-radius: 14px;
+      border: 3px solid #3b82f6;
+      animation: um-pulse-ring 2s infinite;
+      pointer-events: none;
+    }
+
+    @keyframes um-pulse-ring {
+      0% {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      100% {
+        transform: scale(1.15);
+        opacity: 0;
+      }
     }
 
     /*NEW BATCHSWITCHER scroll bar ontop css*/
@@ -3611,26 +3731,27 @@
       const timelineHtml = job.steps.map((step, index) => {
         const isDone = step.isDone;
         const expTime = parseDateStringToTime(step.expDate);
+        const endTime = isDone ? parseDateStringToTime(step.endDate) : null;
+
+        const wasDelayed = isDone && endTime && expTime && endTime > expTime;
         const isOverdue = !isDone && expTime && expTime < today;
         const isDelayedManually = step.status === "Delayed";
+
         const isActive = index === activeStepIndex;
         const isPast = index < activeStepIndex || (activeStepIndex === -1 && isDone);
 
         const rowIndex = Math.floor(index / stepsPerRow);
         const isReverseRow = rowIndex % 2 !== 0;
         const colIndex = index % stepsPerRow;
-
-        // FIX: Calculate grid column to push 2nd row items to the right
-        // Normal row: 1, 2, 3, 4, 5, 6
-        // Reverse row: 6, 5, 4, 3, 2, 1
         const gridColumn = isReverseRow ? (stepsPerRow - colIndex) : (colIndex + 1);
 
         let statusClass = "um-node-pending";
         if (isDone) {
-          statusClass = (isDelayedManually || (step.endDate && parseDateStringToTime(step.endDate) > expTime))
-            ? "um-node-done-delayed" : "um-node-done";
+          statusClass = (wasDelayed || isDelayedManually) ? "um-node-done-delayed" : "um-node-done";
         } else if (isActive) {
           statusClass = (isOverdue || isDelayedManually) ? "um-node-active-delayed" : "um-node-active";
+        } else if (isOverdue || isDelayedManually) {
+          statusClass = "um-node-pending-delayed";
         }
 
         const flowAnim = isPast ? 'um-flow-on' : '';
@@ -3640,10 +3761,8 @@
         let connectors = "";
         if (isNotLastOverall) {
           if (isLastInRow) {
-            // Vertical Bridge
             connectors = `<div class="um-s-bridge ${flowAnim}"></div>`;
           } else {
-            // Horizontal Line
             connectors = `<div class="um-connector-h ${isReverseRow ? 'rev' : ''} ${flowAnim}"></div>`;
           }
         }
