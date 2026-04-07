@@ -473,8 +473,9 @@
 
       .um-badge-pending {
         background: #f1f5f9;
-        color: #64748b;
+        color: #000000;
         border: 1px solid #e2e8f0;
+        font-weight: 750;
       }
 
       /* Qty inputs */
@@ -565,7 +566,7 @@
         border-radius: 20px;
         padding: 3px 10px;
         font-size: 12px;
-        color: #64748b;
+        color: #000000;
         margin-bottom: 6px;
       }
 
@@ -616,7 +617,7 @@
         flex-shrink: 0;
         font-size: 11px;
         font-weight: 600;
-        color: #94a3b8;
+        color: #33373d;
         text-transform: uppercase;
         letter-spacing: 0.06em;
       }
@@ -672,14 +673,14 @@
 
       .um-step-name {
         font-size: 13px;
-        font-weight: 600;
+        font-weight: 1000;
         color: #0f172a;
         margin: 0 0 2px;
       }
 
       .um-step-meta {
         font-size: 11px;
-        color: #64748b;
+        color: #000000;
         margin: 0;
         line-height: 1.5;
       }
@@ -704,11 +705,11 @@
       .um-revert-btn {
         font-size: 11px;
         padding: 3px 8px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #a09b9b;
         border-radius: 6px;
         cursor: pointer;
         background: white;
-        color: #64748b;
+        color: #000000;
         flex-shrink: 0;
       }
 
@@ -763,10 +764,10 @@
         gap: 5px;
         padding: 5px 11px;
         border-radius: 20px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #747474;
         background: white;
         font-size: 12px;
-        color: #64748b;
+        color: #000000;
         cursor: pointer;
         user-select: none;
         font-family: inherit;
@@ -851,10 +852,11 @@
       }
 
       .um-qty-block label {
-        font-size: 11px;
-        color: #64748b;
+        font-size: 12px;
+        color: #000000;
         display: block;
         margin-bottom: 3px;
+        font-weight: 650;
       }
 
       .um-max-block {
@@ -1125,7 +1127,7 @@
       }
       .um-formula-cell-label {
         font-size: 10px;
-        color: #94a3b8;
+        color: #000000;
         display: block;
         margin-bottom: 2px;
         text-transform: uppercase;
@@ -1133,10 +1135,11 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        font-weight:750;
       }
       .um-formula-cell-value {
         font-size: 13px;
-        font-weight: 600;
+        font-weight: 500;
         color: #0f172a;
       }
       .um-formula-op {
@@ -1168,9 +1171,10 @@
       }
       .um-result-label {
         font-size: 12px;
-        color: #64748b;
+        color: #000000;
         display: block;
         margin-bottom: 1px;
+        font-weight: 750;
       }
       .um-result-label.is-full {
         color: #166534;
@@ -1179,8 +1183,9 @@
         color: #991b1b;
       }
       .um-result-eq {
-        font-size: 11px;
-        color: #94a3b8;
+        font-size: 15px;
+        color: #000000;
+        font-weight: 450;
       }
       .um-result-val {
         font-size: 16px;
@@ -1999,102 +2004,6 @@
         btnText.innerText = "Save progress";
         saveBtn.onclick = () => processUpdate();
 
-        //     // ── Header: batch pill + job name ────────────────────────────────────────
-        //     const splitRemarkHtml = job.splitRemark
-        //       ? `<div class="um-split-notice"><strong>Batch origin:</strong> ${job.splitRemark}</div>`
-        //       : "";
-
-        //     document.getElementById("modalBatchId").innerHTML =
-        //       `<div class="um-batch-pill">
-        //    <span class="um-batch-dot"></span>
-        //    Batch ID: ${job.batchId} &nbsp;|&nbsp; Qty: ${job.qty}
-        //  </div>`;
-
-        //     document.getElementById("modalPsn").innerHTML =
-        //       `<div style="font-size:20px; color:#ffffff; margin-bottom:1px;font-weight:bold;">${job.psn}</div>
-        //  <div style="font-size:20px; font-weight:bold; color:#ffffff;">${job.jobName}</div>
-        //  ${splitRemarkHtml}`;
-
-        //     // ── Header: batch switcher row ───────────────────────────────────────────
-        //     const siblingBatches = MASTER_DATA.filter(
-        //       (b) => String(b.psn).trim() === String(job.psn).trim(),
-        //     ).sort((a, b) =>
-        //       String(a.batchId).localeCompare(String(b.batchId), undefined, {
-        //         numeric: true,
-        //       }),
-        //     );
-
-        //     const switcherEl = document.getElementById("batchSwitcher");
-        //     if (switcherEl) {
-        //       if (siblingBatches.length <= 1) {
-        //         switcherEl.style.display = "none";
-        //       } else {
-        //         switcherEl.style.display = "block";
-        //         switcherEl.innerHTML = siblingBatches
-        //           .map((b) => {
-        //             const isCurrent = b.row === job.row;
-        //             const totalSteps = b.steps ? b.steps.length : 0;
-        //             const doneSteps = b.steps
-        //               ? b.steps.filter((s) => s.isDone).length
-        //               : 0;
-        //             const isFullyDone = totalSteps > 0 && doneSteps === totalSteps;
-        //             const hasOverdue = b.steps
-        //               ? b.steps.some((s) => {
-        //                   if (s.isDone) return false;
-        //                   const t = parseDateStringToTime(s.expDate);
-        //                   return t && t < new Date().setHours(0, 0, 0, 0);
-        //                 })
-        //               : false;
-
-        //             let dotColor;
-        //             if (isFullyDone) dotColor = "#22c55e";
-        //             else if (hasOverdue) dotColor = "#ef4444";
-        //             else dotColor = "#f59e0b";
-
-        //             const chipStyle = isCurrent
-        //               ? `background:#0f172a; color:#ffffff; border-color:#0f172a; font-weight:600; cursor:default;`
-        //               : `background:white; color:#475569; border-color:#e2e8f0; cursor:pointer;`;
-
-        //             const dotHtml = `<span style="width:6px;height:6px;border-radius:50%;background:${dotColor};display:inline-block;flex-shrink:0;"></span>`;
-        //             const progressHtml =
-        //               totalSteps > 0
-        //                 ? `<span style="font-size:10px; opacity:${isCurrent ? "0.65" : "0.5"};">${doneSteps}/${totalSteps}</span>`
-        //                 : "";
-        //             const currentLabel = isCurrent
-        //               ? `<div style="font-size:10px; text-align:center; color:#ffffff; margin-top:2px; font-style:italic;">Current</div>`
-        //               : "";
-
-        //             return `
-        //       <div style="display:inline-flex; flex-direction:column; flex-shrink:0;">
-        //         <div
-        //           onclick="${isCurrent ? "" : `openUpdatePopup(${b.row})`}"
-        //           title="Batch ${b.batchId} — Qty: ${b.qty}"
-        //           style="display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:20px; border:1px solid; font-size:12px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; white-space:nowrap; transition:box-shadow 0.1s; ${chipStyle}"
-        //           onmouseenter="if(${!isCurrent}) this.style.boxShadow='0 0 0 3px #e2e8f0';"
-        //           onmouseleave="this.style.boxShadow='';"
-        //         >
-        //           ${dotHtml}
-        //           ${b.batchId}
-        //           ${progressHtml}
-        //         </div>
-        //         ${currentLabel}
-        //       </div>`;
-        //           })
-        //           .join("");
-
-        //         requestAnimationFrame(() => {
-        //           const currentChip = switcherEl.querySelector(
-        //             '[style*="cursor:default"]',
-        //           );
-        //           if (currentChip)
-        //             currentChip.scrollIntoView({
-        //               behavior: "smooth",
-        //               inline: "center",
-        //               block: "nearest",
-        //             });
-        //         });
-        //       }
-        //     }
         renderModalHeader(job, "update");
 
         // ── LEFT: Completed History ──────────────────────────────────────────────
@@ -2269,23 +2178,18 @@
               : ""
           }
  
-          <div class="um-current-qty-row">
-            <span class="um-current-qty-label">Current qty:</span>
-            <span class="um-current-qty-value">${processQty.toLocaleString()}</span>
-          </div>
- 
-          <!-- formula breakdown row: [ceiling] − [backend] − [adding] -->
+          <!-- formula breakdown row: [ceiling] - [backend]- [adding] -->
           <div class="um-formula-row">
             <div class="um-formula-cell">
-              <span class="um-formula-cell-label" data-formula-ceiling-label="${step.baseCol}">Max allowed</span>
+              <span class="um-formula-cell-label" data-formula-ceiling-label="${step.baseCol}">Order Qty</span>
               <span class="um-formula-cell-value" data-formula-ceiling="${step.baseCol}">${maxQty.toLocaleString()}</span>
             </div>
-            <span class="um-formula-op">−</span>
+            <span class="um-formula-op">-</span>
             <div class="um-formula-cell">
               <span class="um-formula-cell-label">Already done</span>
               <span class="um-formula-cell-value">${processQty.toLocaleString()}</span>
             </div>
-            <span class="um-formula-op">−</span>
+            <span class="um-formula-op">-</span>
             <div class="um-formula-cell">
               <span class="um-formula-cell-label">Adding now</span>
               <span class="um-formula-cell-value" data-formula-adding="${step.baseCol}">0</span>
@@ -2302,7 +2206,7 @@
                 data-base="${step.baseCol}"
                 data-system-max="${maxQty}"
                 data-current-qty="${processQty}"
-                value="0"
+                value=""
                 min="0"
                 placeholder="Amount to add..."
               >
@@ -3465,12 +3369,12 @@
 
             const chipStyle = isCurrent
               ? `background:#0f172a; color:#ffffff; border-color:#0f172a; font-weight:600; cursor:default;`
-              : `background:white; color:#475569; border-color:#e2e8f0; cursor:pointer;`;
+              : `background:white; color:#000000; border-color:#e2e8f0; cursor:pointer;`;
 
             const dotHtml = `<span style="width:6px;height:6px;border-radius:50%;background:${dotColor};display:inline-block;flex-shrink:0;"></span>`;
             const progressHtml =
               totalSteps > 0
-                ? `<span style="font-size:10px; opacity:${isCurrent ? "0.65" : "0.5"};">${doneSteps}/${totalSteps}</span>`
+                ? `<span style="font-size:10px; opacity:${isCurrent ? "1" : "1"};">${doneSteps}/${totalSteps}</span>`
                 : "";
             const currentLabel = isCurrent
               ? `<div style="font-size:10px; text-align:center; color:#ffffff; margin-top:2px; font-style:italic;font-weight:bold;">Current</div>`
