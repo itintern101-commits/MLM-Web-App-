@@ -1210,16 +1210,16 @@
           <thead>
             <tr>
               <th style="width: 60px;">PSN</th>
-              <th style="width: 80px;">PI Num</th>
+              <th style="width: 60px;">PI Num</th>
               <th style="width: 60px;">S-Code</th>
               <th style="width: 160px;">Job Name</th>
-              <th style="width: 95px;">Item</th>
-              <th style="width: 95px;">Job Type</th>
-              <th style="width: 80px;">Quantity</th>
-              <th style="width: 80px;">Remaining</th>
+              <th style="width: 70px;">Quantity</th>
+              <th style="width: 70px;">Remaining</th>
               <th style="width: 70px;">Partial Del</th>
               <th style="width: 70px;">BTD</th>
               <th style="width: 80px;">Total Del</th>
+              <th style="width: 95px;">Item</th>
+              <th style="width: 95px;">Job Type</th>
               <th style="width: 80px;">Ord-Date</th>
               <th class="sticky" style="right: 320px; width: 80px;">Del-Date</th>
               <th class="sticky" style="right: 230px; width: 90px;">Priority</th>
@@ -1735,13 +1735,13 @@
             <td>${job["PI Number"] || job.PI_Number || job.pi || job.PI_No || '-'}</td>
             <td>${job.salesCode || job.Sales_Code || job.code || '-'}</td>
             <td>${jobName}</td>
-            <td>${item}</td>
-            <td>${job["Job Type"] || '-'}</td>
             <td>${job.Quantity ? Number(job.Quantity).toLocaleString() : '-'}</td>
             <td>${remaining ? Number(remaining).toLocaleString() : '-'}</td>
             <td>${partialDelivery ? Number(partialDelivery).toLocaleString() : '-'}</td>
             <td>${balanceToDelivery ? Number(balanceToDelivery).toLocaleString() : '-'}</td>
             <td>${totalDelivery ? Number(totalDelivery).toLocaleString() : '-'}</td>
+            <td>${item}</td>
+            <td>${job["Job Type"] || '-'}</td>
             <td>${formatDate(job["Order Date"] || job.Order_Date || job.orderDate)}</td>
             <td class="sticky" style="right: 320px; width: 80px;">${formatDate(job["Delivery Date"] || job.Delivery_Date || job.deliveryDate)}</td>
             <td class="sticky" style="right: 230px; width: 90px;"><span class="pill ${priorityClass}">${priority}</span></td>
