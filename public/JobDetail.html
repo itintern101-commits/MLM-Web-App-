@@ -571,6 +571,19 @@
       min-height: 0;
     }
 
+    .small-modal {
+      max-width: 500px;
+      max-height: 750px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-content.small-modal .edit-form {
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
+    }
+
     /* Confirmation Dialog Styles */
     .confirm-dialog {
       display: none;
@@ -1015,6 +1028,7 @@
       .large-modal {
         max-width: 100%;
       }
+
     }
 
     @media (max-width: 920px) {
@@ -1240,7 +1254,7 @@
 
   <!-- Priority Edit Modal -->
   <div id="priorityModal" class="modal-overlay">
-    <div class="modal-content large-modal">
+    <div class="modal-content small-modal">
       <div class="modal-header">✏️ Edit Job Details</div>
 
       <div class="job-summary">
