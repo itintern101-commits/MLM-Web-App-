@@ -155,8 +155,9 @@
     .table-scroll {
       width: 100%;
       overflow-x: auto;
-      overflow-y: hidden;
+      overflow-y: auto;
       display: block;
+      max-height: 650px;
     }
 
     /* ===== TABLE ===== */
@@ -570,6 +571,19 @@
       min-height: 0;
     }
 
+    .small-modal {
+      max-width: 500px;
+      max-height: 750px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-content.small-modal .edit-form {
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
+    }
+
     /* Confirmation Dialog Styles */
     .confirm-dialog {
       display: none;
@@ -816,7 +830,7 @@
       padding: 1rem 1rem 0.9rem 1rem;
     }
 
-    .batch-card + .batch-card {
+    .batch-card+.batch-card {
       margin-top: 0.5rem;
     }
 
@@ -1014,13 +1028,14 @@
       .large-modal {
         max-width: 100%;
       }
+
     }
 
     @media (max-width: 920px) {
       .batch-modal-body {
         grid-template-columns: 1fr;
       }
-      
+
       .large-modal {
         max-width: 100%;
       }
@@ -1239,7 +1254,7 @@
 
   <!-- Priority Edit Modal -->
   <div id="priorityModal" class="modal-overlay">
-    <div class="modal-content large-modal">
+    <div class="modal-content small-modal">
       <div class="modal-header">✏️ Edit Job Details</div>
 
       <div class="job-summary">
@@ -1337,7 +1352,8 @@
               </div>
               <div class="form-group">
                 <label class="batch-detail-label">Remaining After Creation</label>
-                <div id="remainingAfter" class="batch-detail-value" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.75rem 0.9rem; font-weight: 700;">
+                <div id="remainingAfter" class="batch-detail-value"
+                  style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.75rem 0.9rem; font-weight: 700;">
                   -
                 </div>
               </div>
@@ -1384,11 +1400,13 @@
     let originalJobData = {};
     let pendingConfirmAction = null;
 
+    // Initialize the dashboard
     window.onload = function () {
       fetchData();
       setupTableDragScroll();
     };
 
+    // Fetch data from the server
     async function fetchData() {
       try {
         const resp = await fetch('/api/jobListing');
@@ -1404,6 +1422,7 @@
       }
     }
 
+    // Setup drag-to-scroll for the table
     function setupTableDragScroll() {
       const scrollArea = document.querySelector('.table-scroll');
 
@@ -1439,6 +1458,7 @@
       });
     }
 
+    // Utility function to parse dates from various formats
     function parseDate(dateStr) {
       if (dateStr === undefined || dateStr === null || dateStr === '' || dateStr === '-') return null;
 
@@ -1466,6 +1486,7 @@
       return isNaN(parsed.getTime()) ? null : parsed;
     }
 
+    // Calculate status based on delivery date
     function renderStats() {
       const stats = {
         salesCodes: {},
@@ -1546,6 +1567,7 @@
       statsBar.appendChild(priorityStatusCard);
     }
 
+    // Toggle filters for sales codes, priorities, and statuses
     function toggleFilter(filterType, value) {
       if (filterType === 'priorities' || filterType === 'statuses') {
         const currentlyActive = activeFilters[filterType].size === 1 && activeFilters[filterType].has(value);
@@ -1564,12 +1586,14 @@
       filterTable();
     }
 
+    // Set filter programmatically (used by dropdowns)
     function setFilter(type, value) {
       activeFilters[type] = value;
       renderStats();
       filterTable();
     }
 
+    // Calculate job status based on delivery date
     function calculateStatus(deliveryDate) {
       if (!deliveryDate || deliveryDate === '-') return 'ON SCHEDULE';
       const today = new Date();
@@ -1581,6 +1605,7 @@
       return 'ON SCHEDULE';
     }
 
+    // Filter table based on active filters and search query
     function filterTable() {
       activeFilters.search = (document.getElementById('searchInput').value || '').trim().toLowerCase();
 
@@ -1594,6 +1619,7 @@
       renderTable();
     }
 
+    // Determine row color class based on priority and status
     function getRowColorClass(job) {
       const priority = job.Priority || 'Normal';
       const status = calculateStatus(job['Delivery Date'] || job.Delivery_Date || job.deliveryDate);
@@ -1609,6 +1635,7 @@
       return 'row-safe';
     }
 
+    // Clear all filters and reset the table
     function clearFilters() {
       activeFilters = {
         salesCodes: new Set(),
@@ -1625,6 +1652,7 @@
       renderTable();
     }
 
+    // Get priority order for sorting (Urgent + Overdue > Urgent > Overdue > Almost Due > Cut Queue > Normal)
     function getPriorityOrder(job) {
       const priority = (job.Priority || 'Normal').toLowerCase();
       const status = calculateStatus(job['Delivery Date'] || job.Delivery_Date || job.deliveryDate).toUpperCase();
@@ -1642,6 +1670,7 @@
       return 5;
     }
 
+    // Render the job table based on filtered data
     function renderTable() {
       const tbody = document.getElementById('jobTableBody');
       let filteredData = MASTER_DATA.filter(job => {
@@ -1723,6 +1752,7 @@
       });
     }
 
+    // Format date strings into DD/MM/YYYY format, handling various input formats
     function formatDate(dateStr) {
       if (!dateStr || dateStr === '-' || (typeof dateStr !== 'string' && typeof dateStr !== 'number')) return '-';
       const date = parseDate(dateStr);
@@ -1730,6 +1760,7 @@
       return date.toLocaleDateString('en-GB'); // DD/MM/YYYY
     }
 
+    // Open the priority edit modal and populate it with job details
     function openPriorityModal(psn) {
       currentEditingPsn = psn;
       const job = MASTER_DATA.find(j => {
@@ -1778,6 +1809,7 @@
       }
     }
 
+    // Handle selection of job type and update current job data
     function selectJobType(button, type) {
       // Remove selected class from all buttons
       document.querySelectorAll('#jobTypeButtons .option-btn').forEach(btn => btn.classList.remove('selected'));
@@ -1787,6 +1819,7 @@
       renderEditChangeState();
     }
 
+    // Handle selection of priority and update current job data
     function selectPriority(button, priority) {
       // Remove selected class from all buttons
       document.querySelectorAll('#priorityButtons .option-btn').forEach(btn => btn.classList.remove('selected'));
@@ -1796,11 +1829,13 @@
       renderEditChangeState();
     }
 
+    // Handle changes to the item input and update current job data
     function handleEditItemChange() {
       currentJobData.item = document.getElementById('editItem').value;
       renderEditChangeState();
     }
 
+    // Handle changes to the sales code dropdown and update current job data
     function handleSalesCodeChange() {
       const salesCodeSelect = document.getElementById('editSalesCode');
       if (salesCodeSelect) {
@@ -1809,6 +1844,7 @@
       }
     }
 
+    // Update the UI to reflect changes and enable/disable save button
     function renderEditChangeState() {
       const saveBtn = document.getElementById('saveBtn');
       const editItem = document.getElementById('editItem');
@@ -1874,6 +1910,7 @@
       }
     }
 
+    // Unlock the sales code field with confirmation before allowing edits
     function unlockSalesCode() {
       showConfirmDialog(
         '🔓 Unlock Sales Code',
@@ -1882,6 +1919,7 @@
       );
     }
 
+    // Replace the locked sales code display with a dropdown to allow editing
     function performUnlockSalesCode() {
       const container = document.getElementById('salesCodeContainer');
       container.innerHTML = `
@@ -1906,6 +1944,7 @@
       }
     }
 
+    // Show a confirmation dialog with custom title, message, and confirm action
     function showConfirmDialog(title, message, onConfirm) {
       document.getElementById('confirmIcon').textContent = '⚠️';
       document.getElementById('confirmTitle').textContent = title;
@@ -1914,6 +1953,7 @@
       document.getElementById('confirmDialog').classList.add('show');
     }
 
+    // Handle the confirm action when user clicks "Yes"
     function confirmDialogAction() {
       if (pendingConfirmAction) {
         pendingConfirmAction();
@@ -1921,17 +1961,20 @@
       cancelConfirmDialog();
     }
 
+    // Handle the cancel action when user clicks "No"
     function cancelConfirmDialog() {
       document.getElementById('confirmDialog').classList.remove('show');
       pendingConfirmAction = null;
     }
 
+    // Close the priority edit modal and reset current editing state
     function closePriorityModal() {
       document.getElementById('priorityModal').classList.remove('show');
       currentEditingPsn = null;
       currentJobData = {};
     }
 
+    // Save the edited job details by sending an update request to the server
     function saveJobDetails() {
       const salesCodeSelect = document.getElementById('editSalesCode');
       const updatedData = {
@@ -1964,6 +2007,7 @@
         });
     }
 
+    // Open the create batch modal, fetch latest batch data for the job, and populate the process expected dates
     function createBatch(psn) {
       // Find the job data
       const job = MASTER_DATA.find(j => {
@@ -2014,6 +2058,7 @@
       document.getElementById('addBatchModal').classList.add('show');
     }
 
+    // Fetch the latest batch data for a given PSN and populate the process expected dates in the modal
     async function fetchLatestBatchData(psn) {
       try {
         const resp = await fetch('/api/batchListing');
@@ -2043,6 +2088,7 @@
       }
     }
 
+    // Populate the process expected dates in the modal based on the latest batch data
     function populateProcessDates(latestBatch) {
       const listContainer = document.getElementById('processDatesList');
       if (!listContainer) {
@@ -2083,6 +2129,7 @@
       }
     }
 
+    // Format date for input fields (YYYY-MM-DD), handling various input formats
     function formatDateForInput(dateStr) {
       if (!dateStr || dateStr === '-') return '';
       const date = parseDate(dateStr);
@@ -2090,12 +2137,14 @@
       return date.toISOString().split('T')[0];
     }
 
+    // Close the add batch modal and reset the input fields
     function closeAddBatchModal() {
       document.getElementById('addBatchModal').classList.remove('show');
       document.getElementById('batchQuantity').value = '';
       document.getElementById('processDatesContainer').innerHTML = '';
     }
 
+    // Submit the new batch data to the server to create a new batch entry
     async function submitNewBatch() {
       const psn = document.getElementById('batchSummaryPsn').textContent;
       const quantity = parseInt(document.getElementById('batchQuantity').value);
@@ -2141,6 +2190,7 @@
       }
     }
 
+    // Utility function to show toast notifications with different types (info, success, error)
     function showToast(message, type = 'info') {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');

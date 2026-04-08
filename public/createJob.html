@@ -411,6 +411,7 @@
         opacity: 0;
         transform: translateY(-20px) scale(0.95);
       }
+
       to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -513,7 +514,8 @@
   <div id="confirmOverlay" class="confirm-overlay">
     <div class="confirm-dialog-content">
       <div class="confirm-header">⚠️ Remaining Production Quantity</div>
-      <div class="confirm-body" id="confirmMessage">Remaining Production Quantity is <strong>0</strong>. Do you want to proceed and save the remaining for later batches?</div>
+      <div class="confirm-body" id="confirmMessage">Remaining Production Quantity is <strong>0</strong>. Do you want to
+        proceed and save the remaining for later batches?</div>
       <div class="confirm-actions">
         <button class="confirm-btn-cancel" onclick="cancelConfirm()">Cancel</button>
         <button class="confirm-btn-ok" onclick="proceedWithSubmit()">Proceed</button>
@@ -828,7 +830,6 @@
         }
       }
 
-      // No auto-copy to next date; user sets each step manually.
     }
 
 
@@ -941,7 +942,7 @@
       });
       updateRemaining();
     }
-  
+
 
 
     // Function to handle the form submission when the user clicks the "Create Entry & Save" button, performing validation on all inputs, gathering the data into a structured format, and sending it to the server via a POST request while providing feedback on the submission status and handling redirection upon success
@@ -957,6 +958,7 @@
       const salesCode = document.getElementById('salesCode').value;
       const jobType = document.getElementById('jobType').value;
 
+      // --- Validation ---
       if (!psn) { showToast('PSN is required', 'error'); return; }
       if (!piNumber) { showToast('PI Number is required', 'error'); return; }
       if (!/^\d{4}(-\d)?\/26$/.test(piNumber)) { showToast('PI Number must be in format XXXX/26 or XXXX-Y/26', 'error'); return; }
@@ -972,6 +974,8 @@
       let allData = [];
       const bCount = parseInt(document.getElementById('batchCount').value);
 
+      // Gather data for each batch and its steps, validating that all required fields are filled and 
+      // that the delivery date is included for each batch, while structuring the data in a way that can be easily processed by the server  
       for (let b = 1; b <= bCount; b++) {
         let steps = [];
         for (let s = 1; s <= selectedSteps.length; s++) {
@@ -1029,11 +1033,15 @@
       });
     }
 
+    // Function to show a custom confirmation dialog when there is a remaining quantity that has not been allocated to batches,
+    // asking the user if they want to proceed with saving the entry while keeping the remaining quantity for later processing
     function showRemainingConfirm(remaining) {
       document.getElementById('confirmMessage').innerHTML = `Remaining Production Quantity is <strong>${remaining}</strong>. Do you want to proceed and save the remaining for later batches?`;
       document.getElementById('confirmOverlay').classList.add('show');
     }
 
+    // Function to handle the cancellation of the confirmation dialog, hiding the dialog  
+    // resetting any pending submission data while re-enabling the submit button and hiding the loading message
     function cancelConfirm() {
       document.getElementById('confirmOverlay').classList.remove('show');
       pendingSubmitData = null;
@@ -1041,6 +1049,7 @@
       document.getElementById('loadingMsg').style.display = 'none';
     }
 
+    // Function to proceed with the form submission after the user confirms that they want to save the entry with the remaining quantity, hiding the confirmation dialog and calling the performSubmit function with the pending submission data
     function proceedWithSubmit() {
       document.getElementById('confirmOverlay').classList.remove('show');
       if (pendingSubmitData) {
@@ -1048,6 +1057,10 @@
       }
     }
 
+    // Function to perform the actual submission of the form data to the server, 
+    // sending a POST request to the specified API endpoint with the structured data, 
+    // handling the response to show appropriate success or error messages, 
+    // and managing the UI state during the submission process including disabling the submit button and showing a loading message
     async function performSubmit(data) {
       document.getElementById('submitBtn').disabled = true;
       document.getElementById('loadingMsg').style.display = 'block';
@@ -1090,6 +1103,7 @@
           window.location.replace(dashboard_url);
         }
       } else {
+        // If top-level access is not available, redirect the current window as a fallback
         window.location.href = dashboard_url;
       }
     }
