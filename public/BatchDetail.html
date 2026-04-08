@@ -1387,23 +1387,42 @@
       box-sizing: border-box;
     }
 
-    /* Horizontal Connector */
     .um-connector-h {
       position: absolute;
       top: 50%;
       left: calc(50% + 62px);
-      width: calc(100% - 125px);
-      height: 4px;
+      width: calc(100% - 120px);
+      height: 10px;
+      /* Slightly thicker for the arrow head */
       background: #475569;
       transform: translateY(-50%);
       z-index: 5;
       overflow: hidden;
+      clip-path: polygon(0% 25%, calc(100% - 10px) 25%, calc(100% - 10px) 0%, 100% 50%, calc(100% - 10px) 100%, calc(100% - 10px) 75%, 0% 75%);
     }
 
-    /* Reverse Row Connector (Right to Left) */
     .um-connector-h.rev {
       left: auto;
       right: calc(50% + 62px);
+      clip-path: polygon(100% 25%, 10px 25%, 10px 0%, 0% 50%, 10px 100%, 10px 75%, 100% 75%);
+    }
+
+    /* The Animated Light Strip */
+    .um-connector-h.um-flow-on::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100px;
+      /* Fixed width shimmer for consistent speed */
+      height: 100%;
+      background: linear-gradient(90deg, transparent, #3b82f6, #60a5fa, transparent);
+      animation: flow-horizontal 1.5s linear infinite;
+    }
+
+    /* Reverse the shimmer direction for the 2nd row */
+    .um-connector-h.rev.um-flow-on::after {
+      animation-direction: reverse;
     }
 
     /* Vertical Bridge (The S-Curve Jump) */
@@ -1435,18 +1454,9 @@
       animation: flow-down 1.5s linear infinite;
     }
 
-    /* Horizontal Flow */
-    .um-connector-h.um-flow-on::after {
-      height: 100%;
-      width: 60px;
-    }
 
     .um-connector-h.um-flow-on:not(.rev)::after {
       animation: flow-ltr 1.5s linear infinite;
-    }
-
-    .um-connector-h.um-flow-on.rev::after {
-      animation: flow-rtl 1.5s linear infinite;
     }
 
     @keyframes flow-down {
@@ -1565,12 +1575,14 @@
     .um-s-bridge {
       position: absolute;
       top: 50%;
+      /* Starts at the middle of the node */
       left: 50%;
       width: 12px;
       height: 120px;
       background: #475569;
       transform: translateX(-50%);
       z-index: 1;
+      overflow: hidden;
       clip-path: polygon(35% 0%, 65% 0%, 65% calc(100% - 12px), 100% calc(100% - 12px), 50% 100%, 0% calc(100% - 12px), 35% calc(100% - 12px));
     }
 
@@ -1588,11 +1600,16 @@
       animation: flow-shimmer 1.5s linear infinite;
     }
 
-    /* Vertical flow needs a 180deg gradient */
     .um-s-bridge.um-flow-on::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 80px;
+      /* Fixed height shimmer */
       background: linear-gradient(180deg, transparent, #3b82f6, #60a5fa, transparent);
-      background-size: 100% 200%;
-      animation: flow-shimmer-v 1.5s linear infinite;
+      animation: flow-vertical 1.5s linear infinite;
     }
 
     @keyframes flow-shimmer {
@@ -1634,6 +1651,26 @@
       100% {
         transform: scale(1.15);
         opacity: 0;
+      }
+    }
+
+    @keyframes flow-horizontal {
+      0% {
+        transform: translateX(-100%);
+      }
+
+      100% {
+        transform: translateX(200%);
+      }
+    }
+
+    @keyframes flow-vertical {
+      0% {
+        transform: translateY(-100%);
+      }
+
+      100% {
+        transform: translateY(200%);
       }
     }
 
