@@ -558,8 +558,8 @@
     }
 
     .large-modal {
-      max-width: 750px;
-      max-height: 95vh;
+      max-width: 1000px;
+      max-height: 1000px;
       display: flex;
       flex-direction: column;
     }
@@ -792,105 +792,237 @@
 
     .batch-modal-body {
       display: grid;
-      grid-template-columns: 1fr 1.4fr;
+      grid-template-columns: minmax(280px, 1fr) 1.2fr;
       gap: 1rem;
       align-items: start;
+      min-height: 450px;
     }
 
-    .batch-panel {
+    .batch-left-column {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .batch-card,
+    .batch-detail-card,
+    .process-panel {
       background: white;
       border: 1px solid #e2e8f0;
-      border-radius: 14px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+    }
+
+    .batch-card {
+      padding: 1rem 1rem 0.9rem 1rem;
+    }
+
+    .batch-card + .batch-card {
+      margin-top: 0.5rem;
+    }
+
+    .batch-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .batch-card-header h2 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .batch-card-header span {
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+
+    .batch-summary-list {
+      display: grid;
+      gap: 0.85rem;
+    }
+
+    .batch-summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #eff2f7;
+    }
+
+    .batch-summary-row:last-child {
+      border-bottom: none;
+    }
+
+    .batch-summary-label,
+    .batch-detail-label {
+      color: #64748b;
+      font-size: 0.82rem;
+      font-weight: 600;
+      min-width: 115px;
+    }
+
+    .batch-summary-value,
+    .batch-detail-value {
+      font-size: 0.95rem;
+      color: #111827;
+      font-weight: 700;
+      text-align: right;
+      word-break: break-word;
+      flex: 1;
+    }
+
+    .batch-detail-card {
       padding: 1rem;
       display: flex;
       flex-direction: column;
       gap: 1rem;
-      min-height: 280px;
-    }
-
-    .batch-panel-header {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #1f2937;
-      margin-bottom: 0.5rem;
     }
 
     .process-panel {
       display: flex;
       flex-direction: column;
       min-height: 0;
+      overflow: hidden;
+    }
+
+    .process-panel-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid #e2e8f0;
+      background: #f8fafc;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .process-panel-header h2 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .process-panel-header small {
+      color: #64748b;
+      font-size: 0.82rem;
     }
 
     .process-scroll {
       overflow-y: auto;
       flex: 1;
-      min-height: 0;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      background: #f9fafb;
-      padding: 0.5rem;
+      max-height: 420px;
+      border: none;
+      background: #f8fafc;
+      padding: 1rem 1rem 0.75rem 1rem;
+    }
+
+    .process-table {
+      display: grid;
+      gap: 0.75rem;
+      width: 100%;
     }
 
     .process-header {
       display: grid;
-      grid-template-columns: 1fr 1.2fr;
-      gap: 0.75rem;
-      font-weight: 600;
-      color: #374151;
-      padding: 1rem;
-      background: #f1f5f9;
-      border-bottom: 2px solid #e2e8f0;
-      position: sticky;
-      top: 0;
-      z-index: 5;
-      border-radius: 12px 12px 0 0;
+      grid-template-columns: 50px 2fr 180px;
+      gap: 1rem;
+      align-items: center;
+      padding: 0.95rem 1rem;
+      background: #eef2ff;
+      border-radius: 12px;
+      font-size: 0.83rem;
+      color: #334155;
+      font-weight: 700;
+      border: 1px solid #dbeafe;
     }
 
     .process-row {
       display: grid;
-      grid-template-columns: 1fr 1.2fr;
-      gap: 0.75rem;
-      align-items: center;
-      padding: 0.75rem;
-      border-bottom: 1px solid #e2e8f0;
-      background: white;
-      margin-bottom: 0.5rem;
-      border-radius: 8px;
-    }
-
-    .batch-summary-top {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: 50px 2fr 180px;
       gap: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .batch-summary-item {
+      align-items: center;
+      padding: 0.85rem 1rem;
       background: white;
       border: 1px solid #e2e8f0;
+      border-left: 5px solid var(--primary);
       border-radius: 12px;
-      padding: 0.85rem 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
 
-    .batch-summary-item .label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: #64748b;
+    .process-row:nth-of-type(odd) {
+      background: #f8fafc;
     }
 
-    .batch-summary-item .value {
-      font-size: 1rem;
+    .process-row:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    }
+
+    .step-num-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #eef2ff;
+      color: var(--primary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       font-weight: 700;
-      color: #111827;
-      word-wrap: break-word;
+      font-size: 0.85rem;
+    }
+
+    .process-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .process-row input {
+      width: 100%;
+      padding: 0.65rem 0.75rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      color: #0f172a;
+      background: #f8fafc;
+      box-sizing: border-box;
+    }
+
+    #addBatchModal .edit-form {
+      overflow: hidden;
+    }
+
+    .batch-summary-top,
+    .batch-summary-item,
+    .batch-summary-item .label,
+    .batch-summary-item .value {
+      display: initial;
     }
 
     @media (max-width: 920px) {
       .batch-modal-body {
         grid-template-columns: 1fr;
+      }
+
+      .large-modal {
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 920px) {
+      .batch-modal-body {
+        grid-template-columns: 1fr;
+      }
+      
+      .large-modal {
+        max-width: 100%;
       }
     }
 
@@ -1165,54 +1297,67 @@
     <div class="modal-content large-modal">
       <div class="modal-header">➕ Add New Batch</div>
 
-      <div class="job-summary">
-        <div class="batch-summary-top">
-          <div class="batch-summary-item">
-            <div class="label">PSN</div>
-            <div class="value" id="batchSummaryPsn">-</div>
-          </div>
-          <div class="batch-summary-item">
-            <div class="label">Job Name</div>
-            <div class="value" id="batchSummaryJobName">-</div>
-          </div>
-          <div class="batch-summary-item">
-            <div class="label">Total Job Quantity</div>
-            <div class="value" id="batchSummaryTotalQty">-</div>
-          </div>
-          <div class="batch-summary-item">
-            <div class="label">Remaining Production Qty</div>
-            <div class="value" id="batchSummaryRemaining" style="color: #ef4444;">-</div>
-          </div>
-        </div>
-      </div>
-
       <div class="edit-form">
         <div class="batch-modal-body">
-          <div class="batch-panel">
-            <div class="batch-panel-header">📦 Batch Details</div>
-            <div class="form-group">
-              <label>Batch Quantity</label>
-              <input type="number" id="batchQuantity" placeholder="Enter batch quantity" min="1">
+          <!-- LEFT COLUMN -->
+          <div class="batch-left-column">
+            <div class="batch-card">
+              <div class="batch-card-header">
+                <h2>Batch Info</h2>
+                <span>Summary</span>
+              </div>
+              <div class="batch-summary-list">
+                <div class="batch-summary-row">
+                  <div class="batch-summary-label">PSN</div>
+                  <div class="batch-summary-value" id="batchSummaryPsn">-</div>
+                </div>
+                <div class="batch-summary-row">
+                  <div class="batch-summary-label">Job Name</div>
+                  <div class="batch-summary-value" id="batchSummaryJobName">-</div>
+                </div>
+                <div class="batch-summary-row">
+                  <div class="batch-summary-label">Total Job Qty</div>
+                  <div class="batch-summary-value" id="batchSummaryTotalQty">-</div>
+                </div>
+                <div class="batch-summary-row">
+                  <div class="batch-summary-label">Remaining Production Qty</div>
+                  <div class="batch-summary-value" id="batchSummaryRemaining" style="color: #ef4444;">-</div>
+                </div>
+              </div>
             </div>
-            <div class="form-group">
-              <label>Remaining After Creation</label>
-              <div id="remainingAfter" style="font-weight: bold; color: #374151; padding: 0.75rem 0.9rem; border: 2px solid #e2e8f0; border-radius: 8px; background: #f9fafb;">
-                -
+
+            <div class="batch-detail-card">
+              <div class="batch-card-header">
+                <h2>Batch Details</h2>
+                <span>Enter values</span>
+              </div>
+              <div class="form-group">
+                <label class="batch-detail-label">Batch Quantity</label>
+                <input type="number" id="batchQuantity" placeholder="Enter batch quantity" min="1">
+              </div>
+              <div class="form-group">
+                <label class="batch-detail-label">Remaining After Creation</label>
+                <div id="remainingAfter" class="batch-detail-value" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.75rem 0.9rem; font-weight: 700;">
+                  -
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="batch-panel process-panel">
-            <div class="batch-panel-header">📅 Process Expected Dates</div>
+          <!-- RIGHT COLUMN -->
+          <div class="process-panel">
+            <div class="process-panel-header">
+              <h2>Process Expected Dates</h2>
+              <small>Fill dates for each step</small>
+            </div>
             <div class="process-scroll">
-              <div id="processDatesContainer">
+              <div id="processDatesContainer" class="process-table">
                 <div class="process-header">
+                  <div>#</div>
                   <div>Process Name</div>
                   <div>Expected Date</div>
                 </div>
-                <div id="processDatesList" style="padding: 0.5rem;">
-                  <!-- Process rows will be generated here -->
-                </div>
+                <div id="processDatesList"></div>
               </div>
             </div>
           </div>
@@ -1853,13 +1998,12 @@
       const processDatesContainer = document.getElementById('processDatesContainer');
       if (processDatesContainer) {
         processDatesContainer.innerHTML = `
-          <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 0.75rem; font-weight: 600; color: #374151; padding: 1rem; background: #f1f5f9; border-bottom: 2px solid #e2e8f0; position: sticky; top: 0; z-index: 10;">
+          <div class="process-header">
+            <div>#</div>
             <div>Process Name</div>
             <div>Expected Date</div>
           </div>
-          <div id="processDatesList" style="padding: 0.5rem; min-height: 120px;">
-            <div style="grid-column: span 2; text-align: center; padding: 2rem; color: #64748b;">Loading data...</div>
-          </div>
+          <div id="processDatesList" style="text-align: center; padding: 2rem; color: #64748b;">Loading data...</div>
         `;
       }
 
@@ -1906,33 +2050,36 @@
         return;
       }
       listContainer.innerHTML = '';
-      console.log(latestBatch);
+      console.log('latestBatch:', latestBatch);
       // Process steps start from column 6, each block of 9 columns
       const START_COL = 6;
       const BLOCK_SIZE = 9;
 
       // Convert object to array of values in column order
       const batchValues = Object.values(latestBatch);
+      console.log('batchValues:', batchValues);
       let rowCount = 0;
 
       for (let i = 0; i < 12; i++) {
         const processName = batchValues[START_COL + i * BLOCK_SIZE] || '';
         const expectedDate = batchValues[START_COL + i * BLOCK_SIZE + 1] || '';
+        console.log(`i=${i}, index=${START_COL + i * BLOCK_SIZE}, processName="${processName}", expectedDate="${expectedDate}"`);
 
         if (processName && processName !== '') {
           rowCount++;
           const processRow = document.createElement('div');
-          processRow.style.cssText = 'display: grid; grid-template-columns: 1fr 1.2fr; gap: 0.75rem; align-items: center; padding: 0.75rem; border-bottom: 1px solid #e2e8f0; background: white; margin-bottom: 0.5rem; border-radius: 6px;';
+          processRow.className = 'process-row';
           processRow.innerHTML = `
-            <div style="font-size: 0.9rem; font-weight: 500; color: #374151;">${processName}</div>
-            <input type="date" class="process-date" data-process-index="${i}" value="${expectedDate ? formatDateForInput(expectedDate) : ''}" style="padding: 0.6rem 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.85rem; box-sizing: border-box;">
+            <div class="step-num-badge">${i + 1}</div>
+            <div class="process-name" title="${processName}">${processName}</div>
+            <input type="date" class="process-date" data-process-index="${i}" value="${expectedDate ? formatDateForInput(expectedDate) : ''}">
           `;
           listContainer.appendChild(processRow);
         }
       }
 
       if (rowCount === 0) {
-        listContainer.innerHTML = '<div style="grid-column: span 2; text-align: center; padding: 2rem; color: #64748b;">No process steps found for this batch.</div>';
+        listContainer.innerHTML = '<div style="text-align: center; padding: 2rem; color: #64748b; grid-column: 1 / -1;">No process steps found for this batch.</div>';
       }
     }
 
