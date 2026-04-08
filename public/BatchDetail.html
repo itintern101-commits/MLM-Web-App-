@@ -2621,6 +2621,10 @@
       let needsSplitRemark = false;
       let isDeliveryDone = false;
 
+      // --- WATERFALL VALIDATION TRACKING ---
+      let runningWaterfallLimit = null;
+      let lastStepName = "";
+
       for (let i = 0; i < stepRows.length; i++) {
         const row = stepRows[i];
         const doneCheck = row.querySelector(".step-done-check");
@@ -2631,81 +2635,83 @@
         const done = doneCheck ? doneCheck.checked : false;
         const delay = delayCheck ? delayCheck.checked : false;
 
-        // Track sequential progress (for the sequential-done guard below)
         if (!done) firstIncompleteFound = true;
 
-        if (!done && !delay) continue; // row untouched — skip entirely
+        // ── Qty calculation ───────────────────────────────────────────────────
+        const systemMax = parseInt(qtyInput.getAttribute("data-system-max")) || 0;
+        const backendQty = parseInt(qtyInput.getAttribute("data-current-qty")) || 0;
+        const userTyped = parseInt(qtyInput.value) || 0;
+
+        // SUM OF BOTH: This is what we are validating
+        const proposedTotal = backendQty + userTyped;
+
+        // Calculate current ceiling based on previous step's total output
+        let currentStepLimit = (runningWaterfallLimit === null)
+          ? systemMax
+          : Math.min(systemMax, runningWaterfallLimit);
 
         // ── Sequential check ─────────────────────────────────────────────────
         if (done && firstIncompleteFound) {
-          alert(
-            `Sequential Error: Cannot complete "${stepName}" while a previous process is still pending.`
-          );
+          alert(`Sequential Error: Cannot complete "${stepName}" while a previous process is still pending.`);
           validationError = true;
           break;
         }
 
-        // ── Qty calculation ───────────────────────────────────────────────────
-        const backendQty = parseInt(qtyInput.getAttribute("data-current-qty")) || 0;
-        const userTyped = parseInt(qtyInput.value) || 0;
-        const proposedTotal = backendQty + userTyped;
+        // ── Validation (Only if user is marking as done or entering data) ──────
+        if (done || delay || userTyped > 0) {
+          if (done) {
+            if (proposedTotal <= 0) {
+              showToast(`"${stepName}" has no quantity. Enter an amount.`, "error");
+              qtyInput.focus();
+              validationError = true;
+              break;
+            }
 
-        // ── Waterfall ceiling ─────────────────────────────────────────────────
-        const remainingShown = parseInt(row.querySelector(".waterfall-max-label").innerText) || 0;
-        const dynamicCeiling = remainingShown + proposedTotal;
+            // Check if (Already Done + Typing Now) exceeds the waterfall limit
+            if (proposedTotal > currentStepLimit) {
+              const limitSource = lastStepName || "Order Qty";
+              showToast(
+                `"${stepName}" total (${proposedTotal}) exceeds the available limit from "${limitSource}" (${currentStepLimit}).`,
+                "error"
+              );
+              qtyInput.focus();
+              validationError = true;
+              break;
+            }
 
-        if (done) {
-          // ── Zero qty guard ──────────────────────────────────────────────────
-          if (proposedTotal <= 0) {
-            showToast(
-              `"${stepName}" has no quantity. Enter an amount to add before marking done.`,
-              "error"
-            );
-            qtyInput.focus();
-            validationError = true;
-            break;
+            if (proposedTotal < currentStepLimit) needsSplitRemark = true;
+            if (stepName === "Delivery") isDeliveryDone = true;
           }
 
-          // ── Waterfall overflow guard ────────────────────────────────────────
-          if (proposedTotal > dynamicCeiling) {
-            const errorSource = qtyInput.getAttribute("data-error-source") || "System Limit";
-            showToast(
-              `"${stepName}" total (${proposedTotal}) exceeds the limit set by "${errorSource}" (${dynamicCeiling}).`,
-              "error"
-            );
-            qtyInput.focus();
-            validationError = true;
-            break;
+          // Die-cut validation...
+          let detail = "";
+          if (stepName === "Die-cut" && done) {
+            const select = row.querySelector(".step-detail-select");
+            if (!select || select.value === "") {
+              alert("Please choose a Die-Cut machine option.");
+              validationError = true;
+              break;
+            }
+            detail = select.value;
           }
 
-          // ── Split remark trigger ────────────────────────────────────────────
-          if (proposedTotal < dynamicCeiling) needsSplitRemark = true;
-
-          // ── Delivery step detection ─────────────────────────────────────────
-          if (stepName === "Delivery") isDeliveryDone = true;
+          updates.push({
+            baseCol: parseInt(doneCheck.dataset.base),
+            isDone: done,
+            isDelayed: delay,
+            remark: row.querySelector(".step-remark-input")?.value || "",
+            qty: proposedTotal, // This saves the cumulative total back to the sheet
+            detail: detail,
+            maxQty: currentStepLimit,
+          });
         }
 
-        // ── Die-cut machine validation ────────────────────────────────────────
-        let detail = "";
-        if (stepName === "Die-cut" && done) {
-          const select = row.querySelector(".step-detail-select");
-          if (!select || select.value === "") {
-            alert("Please choose a Die-Cut machine option.");
-            validationError = true;
-            break;
-          }
-          detail = select.value;
-        }
-
-        updates.push({
-          baseCol: parseInt(doneCheck.dataset.base),
-          isDone: done,
-          isDelayed: delay,
-          remark: row.querySelector(".step-remark-input")?.value || "",
-          qty: proposedTotal,
-          detail: detail,
-          maxQty: dynamicCeiling,
-        });
+        // --- CRITICAL UPDATE ---
+        // Update the limit for the NEXT step regardless of whether the user typed anything.
+        // If the user didn't touch this row, the limit for the next row is simply the backendQty.
+        // If they did touch it, it's the proposedTotal.
+        runningWaterfallLimit = proposedTotal;
+        lastStepName = stepName;
       }
 
       if (validationError) return;
