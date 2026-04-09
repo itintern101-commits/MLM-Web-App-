@@ -1377,7 +1377,7 @@
 
     .um-node {
       width: 125px;
-      height: 80px;
+      height: 90px;
       background: #334155;
       border-radius: 10px;
       padding: 10px;
@@ -1385,6 +1385,23 @@
       z-index: 10;
       position: relative;
       box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-sizing: border-box;
+    }
+
+    /* 2. Fix the header to handle text without breaking the box */
+    .um-node-header {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      width: 100%;
+      margin-bottom: 6px;
+      min-width: 0;
+      /* Keep ellipsis working */
+      padding-bottom: 4px;
     }
 
     .um-connector-h {
@@ -1490,49 +1507,21 @@
     }
 
     /* Status Colors & Polish */
+
+    /* 1. Done - On Time (Green) */
     .um-node-done {
       background: #10b981;
       border: 1px solid #059669;
+      color: #ffffff;
+      /* Added white text */
     }
 
     /* 2. Done - Delayed (Amber with Red Border) */
     .um-node-done-delayed {
       background: #f59e0b;
       border: 3px solid #ef4444;
-    }
-
-    /* 3. Current - On Time (Blue with White Pulse) */
-    .um-node-active {
-      background: #3b82f6;
-      border: 2px solid white;
-      transform: scale(1.05);
-    }
-
-    /* 4. Current - Delayed (Red with Blue Pulse) */
-    .um-node-active-delayed {
-      background: #ef4444;
-      border: 2px solid #3b82f6;
-      transform: scale(1.05);
-    }
-
-    /* 5. Pending - Delayed (Pale Red/Pink) */
-    .um-node-pending-delayed {
-      background: #742a2a;
-      border: 1px dashed #f87171;
-      color: #fca5a5;
-    }
-
-    /* 6. Pending - On Time (Slate) */
-    .um-node-pending {
-      background: #475569;
-      color: #94a3b8;
-    }
-
-    .um-node-header {
-      display: flex;
-      gap: 4px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      margin-bottom: 4px;
+      color: #ffffff;
+      /* Added white text */
     }
 
     .um-node-name {
@@ -1541,11 +1530,69 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      flex: 1;
+      /* Take up remaining space */
+      min-width: 0;
+      /* Mandatory for ellipsis in flexbox */
+    }
+
+    /* 3. Current - On Time (Blue with White Pulse) */
+    .um-node-active {
+      background: #3b82f6;
+      border: 2px solid white;
+      transform: scale(1.05);
+      color: #ffffff;
+      /* Added white text */
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+    }
+
+    /* 4. Current - Delayed (Red with Blue Pulse) */
+    .um-node-active-delayed {
+      background: #ef4444;
+      border: 2px solid #3b82f6;
+      transform: scale(1.05);
+      color: #ffffff;
+      /* Added white text */
+      box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+    }
+
+    /* 5. Pending - Delayed (Dark Red) */
+    .um-node-pending-delayed {
+      background: #742a2a;
+      border: 1px dashed #f87171;
+      color: #fca5a5;
+      /* Keep the pinkish text for a "warning" look */
+    }
+
+    /* 6. Pending - On Time (Slate) */
+    .um-node-pending {
+      background: #475569;
+      color: #e2e8f0;
+      /* Light slate text for better contrast */
+    }
+
+    /* Ensure secondary text (labels) are visible on dark backgrounds */
+    .um-node-body .um-date-label {
+      color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    .um-node-body .um-date,
+    .um-node-body .um-qty {
+      color: #ffffff;
+    }
+
+    /* Ensure body text stays inside */
+    .um-node-body {
+      font-size: 11px;
+      line-height: 1.2;
+      word-wrap: break-word;
+      /* Forces long words to wrap */
     }
 
     .um-date,
     .um-qty {
       font-size: 10px;
+      white-space: nowrap;
     }
 
     /* --- CONNECTORS WITH ARROW HEADS --- */
@@ -1673,6 +1720,47 @@
         transform: translateY(200%);
       }
     }
+
+    /* 3. Ensure the pulse border matches the node's delay status */
+    .um-node-active-delayed .um-node-pulse {
+      border-color: #3b82f6;
+      /* Keep your blue pulse logic */
+    }
+
+    /* Wrapper to keep the label and date paired */
+    .um-date-wrapper {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 2px;
+    }
+
+    .um-date-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      color: #64748b;
+      /* Subtle slate color */
+      font-weight: 600;
+      display: block;
+      line-height: 1;
+      margin-bottom: 2px;
+    }
+
+    .um-node-seq {
+      background: rgba(0, 0, 0, 0.3);
+      /* Darker circle for contrast */
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      min-width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      flex-shrink: 0;
+      /* Prevent the circle from squishing */
+    }
+
 
     /*NEW BATCHSWITCHER scroll bar ontop css*/
     #batchSwitcher {
@@ -1807,6 +1895,14 @@
 
     .date-updated-flash {
       animation: dateFlash 1s ease-out;
+    }
+
+    /*PAGE SCROLL LOCK LOGIC CSS*/
+    /* Class to lock background scrolling */
+    body.modal-open {
+      overflow: hidden;
+      /* Optional: prevents layout shift if a scrollbar disappears */
+      padding-right: 15px;
     }
   </style>
 </head>
@@ -2711,6 +2807,9 @@
 
       syncWaterfallUI();
       document.getElementById("updateModal").style.display = "flex";
+      // LOCK SCROLL
+      document.body.classList.add("modal-open");
+
       setModalLoading(false);
     }
 
@@ -3014,6 +3113,9 @@
       const modalButtons = document.querySelectorAll("#updateModal button");
       modalButtons.forEach((btn) => (btn.disabled = false));
 
+      // UNLOCK SCROLL
+      document.body.classList.remove("modal-open");
+
       const multiList = document.getElementById("multiProcessList");
       if (multiList) multiList.innerHTML = "";
     }
@@ -3222,6 +3324,9 @@
       renderDateEditRows(job);
 
       document.getElementById("updateModal").style.display = "flex";
+      // LOCK SCROLL
+      document.body.classList.add("modal-open");
+
       setModalLoading(false);
     }
 
@@ -3343,7 +3448,6 @@
           closeModal();
 
           // 1. Refresh the background data
-          if (typeof loadBatchData === "function") await loadBatchData();
           if (typeof fetchData === "function") await fetchData();
 
           // 2. Re-open the popup with the fresh data
@@ -3899,11 +4003,7 @@
         const isActive = index === activeStepIndex;
         const isPast = index < activeStepIndex || (activeStepIndex === -1 && isDone);
 
-        const rowIndex = Math.floor(index / stepsPerRow);
-        const isReverseRow = rowIndex % 2 !== 0;
-        const colIndex = index % stepsPerRow;
-        const gridColumn = isReverseRow ? (stepsPerRow - colIndex) : (colIndex + 1);
-
+        // --- RE-ADDED STATUS LOGIC ---
         let statusClass = "um-node-pending";
         if (isDone) {
           statusClass = (wasDelayed || isDelayedManually) ? "um-node-done-delayed" : "um-node-done";
@@ -3912,6 +4012,14 @@
         } else if (isOverdue || isDelayedManually) {
           statusClass = "um-node-pending-delayed";
         }
+
+        let dateLabel = isDone ? "Ends on:" : (isOverdue ? "Overdue:" : "Expected:");
+        let dateDisplayValue = isDone ? (step.endDate || 'Done') : (step.expDate || 'N/A');
+
+        const rowIndex = Math.floor(index / stepsPerRow);
+        const isReverseRow = rowIndex % 2 !== 0;
+        const colIndex = index % stepsPerRow;
+        const gridColumn = isReverseRow ? (stepsPerRow - colIndex) : (colIndex + 1);
 
         const flowAnim = isPast ? 'um-flow-on' : '';
         const isLastInRow = (index + 1) % stepsPerRow === 0;
@@ -3929,12 +4037,15 @@
         return `
           <div class="um-step-cell" style="grid-column: ${gridColumn}; grid-row: ${rowIndex + 1};">
             <div class="um-node ${statusClass}">
-              <div class="um-node-header">
+              <div class="um-node-header" style="min-width: 0;">
                 <span class="um-node-seq">${index + 1}</span>
-                <span class="um-node-name">${step.name}</span>
+                <span class="um-node-name" title="${step.name}">${step.name}</span>
               </div>
               <div class="um-node-body">
-                <div class="um-date">${isDone ? (step.endDate || 'Done') : (step.expDate || 'N/A')}</div>
+                <div class="um-date-wrapper">
+                  <span class="um-date-label">${dateLabel}</span>
+                  <div class="um-date">${dateDisplayValue}</div>
+                </div>
                 <div class="um-qty">Qty: ${getQtyForProcess(job.qtyString, step.baseCol, job.qty)}</div>
               </div>
               ${isActive ? '<div class="um-node-pulse"></div>' : ''}
