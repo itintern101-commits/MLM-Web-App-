@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use("/public", express.static(path.join(__dirname, "public")));
 
+app.use('/scripts', express.static(path.join(__dirname, 'scripts')));
 //Date format not string
 const toExcelDate = (date) => {
   if (!(date instanceof Date)) return null;
@@ -209,6 +210,15 @@ const toExcelDateText = (value) => {
 
 // ============ Microsoft Graph API Authentication Setup ============
 // Configure MSAL for authentication with Microsoft Graph API using Client Credentials flow
+// Endpoint to send config to frontend
+app.get("/config", (req, res) => {
+  res.json({
+    clientId: process.env.CLIENT_ID,
+    tenantId: process.env.TENANT_ID,
+    clientSecret: process.env.CLIENT_SECRET
+  });
+});
+
 const msalConfig = {
   auth: {
     clientId: process.env.CLIENT_ID,

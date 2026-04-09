@@ -584,6 +584,108 @@
       min-height: 0;
     }
 
+    /* Custom Confirmation Dialog */
+    .confirm-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 1100;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(2px);
+    }
+
+    .confirm-overlay.show {
+      display: flex;
+    }
+
+    .confirm-dialog-content {
+      background: white;
+      border-radius: 16px;
+      padding: 0;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      animation: modalSlideIn 0.3s ease-out;
+    }
+
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .confirm-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1rem;
+      border-radius: 16px 16px 0 0;
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .confirm-body {
+      padding: 1.5rem;
+      text-align: center;
+      color: #4e5969;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .confirm-actions {
+      padding: 1rem 1.5rem 1.5rem;
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      border-top: 1px solid #e2e8f0;
+      background: #f8fafc;
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 16px;
+    }
+
+    .confirm-btn-cancel {
+      background: #e2e8f0;
+      color: #64748b;
+      border: none;
+      padding: 0.65rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    .confirm-btn-cancel:hover {
+      background: #cbd5e1;
+    }
+
+    .confirm-btn-ok {
+      background: var(--success);
+      color: white;
+      border: none;
+      padding: 0.65rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    .confirm-btn-ok:hover {
+      background: #228a3f;
+    }
+
     /* Confirmation Dialog Styles */
     .confirm-dialog {
       display: none;
@@ -610,6 +712,17 @@
       width: 90%;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
       text-align: center;
+      animation: modalSlideIn 0.3s ease-out;
+    }
+
+    .confirm-overlay-content {
+      background: white;
+      border-radius: 16px;
+      padding: 0;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      animation: modalSlideIn 0.3s ease-out;
     }
 
     .confirm-dialog-icon {
@@ -635,38 +748,6 @@
       display: flex;
       gap: 1rem;
       justify-content: center;
-    }
-
-    .confirm-btn-cancel {
-      background: #e2e8f0;
-      color: #64748b;
-      border: none;
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.95rem;
-      font-weight: 600;
-      transition: background 0.2s;
-    }
-
-    .confirm-btn-cancel:hover {
-      background: #cbd5e1;
-    }
-
-    .confirm-btn-ok {
-      background: #ef4444;
-      color: white;
-      border: none;
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.95rem;
-      font-weight: 600;
-      transition: background 0.2s;
-    }
-
-    .confirm-btn-ok:hover {
-      background: #dc2626;
     }
 
     .modal-header {
@@ -932,7 +1013,7 @@
       max-height: 420px;
       border: none;
       background: #f8fafc;
-      padding: 1rem 1rem 0.75rem 1rem;
+      padding: 0rem 1rem 0.75rem 1rem;
     }
 
     .process-table {
@@ -953,6 +1034,9 @@
       color: #334155;
       font-weight: 700;
       border: 1px solid #dbeafe;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
 
     .process-row {
@@ -996,6 +1080,7 @@
       white-space: nowrap;
       font-weight: 700;
       color: #0f172a;
+      text-align: left;
     }
 
     .process-row input {
@@ -1176,8 +1261,10 @@
         });
       })
       .catch(console.error);
-  </script>
 
+    const user = sessionStorage.getItem("user");
+
+  </script>
   <div class="main-wrapper">
     <div class="dashboard-header">
       <h1>Job Dashboard</h1>
@@ -1252,6 +1339,20 @@
     </div>
   </div>
 
+  <!-- Remaining Quantity Confirmation Dialog -->
+  <div id="confirmOverlay" class="confirm-overlay">
+    <div class="confirm-overlay-content">
+      <div class="confirm-header" id="confirmHeader">⚠️ Remaining Production Quantity</div>
+      <div class="confirm-body" id="confirmOverlayMessage">Remaining Production Quantity is <strong></strong>. Do you
+        want to
+        proceed and save the remaining for later batches?</div>
+      <div class="confirm-actions">
+        <button class="confirm-btn-cancel" onclick="cancelConfirm()">Cancel</button>
+        <button class="confirm-btn-ok" onclick="confirmOverlayAction()">OK</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Priority Edit Modal -->
   <div id="priorityModal" class="modal-overlay">
     <div class="modal-content small-modal">
@@ -1319,7 +1420,6 @@
             <div class="batch-card">
               <div class="batch-card-header">
                 <h2>Batch Info</h2>
-                <span>Summary</span>
               </div>
               <div class="batch-summary-list">
                 <div class="batch-summary-row">
@@ -1344,14 +1444,13 @@
             <div class="batch-detail-card">
               <div class="batch-card-header">
                 <h2>Batch Details</h2>
-                <span>Enter values</span>
               </div>
               <div class="form-group">
-                <label class="batch-detail-label">Batch Quantity</label>
-                <input type="number" id="batchQuantity" placeholder="Enter batch quantity" min="1">
+                <label class="batch-detail-label">📦 Batch Quantity</label>
+                <input type="number" id="batchQuantity" placeholder="🔢 Enter batch quantity" min="1">
               </div>
               <div class="form-group">
-                <label class="batch-detail-label">Remaining After Creation</label>
+                <label class="batch-detail-label">Remaining Production Qty After Creation</label>
                 <div id="remainingAfter" class="batch-detail-value"
                   style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.75rem 0.9rem; font-weight: 700;">
                   -
@@ -1364,7 +1463,6 @@
           <div class="process-panel">
             <div class="process-panel-header">
               <h2>Process Expected Dates</h2>
-              <small>Fill dates for each step</small>
             </div>
             <div class="process-scroll">
               <div id="processDatesContainer" class="process-table">
@@ -1398,12 +1496,33 @@
     let currentJobData = {};
     let originalJobData = {};
     let pendingConfirmAction = null;
+    let pendingSubmitData = null;
 
     // Initialize the dashboard
     window.onload = function () {
       fetchData();
       setupTableDragScroll();
     };
+
+    // Input validation and dynamic styling for batch quantity
+    const input = document.getElementById("batchQuantity");
+
+    // Function to update input style based on its value
+    function updateStyle() {
+      if (input.value.trim() === "") {
+        input.style.background = "#f3f4f6"; // light grey
+        input.style.border = "2px solid red";
+      } else {
+        input.style.background = "#e8f5e8";
+        input.style.border = "2px solid var(--success)";
+      }
+    }
+
+    // Attach the input event listener to validate and style the input in real-time
+    input.addEventListener("input", updateStyle);
+
+    // run once when page loads
+    updateStyle();
 
     // Fetch data from the server
     async function fetchData() {
@@ -1960,10 +2079,26 @@
       cancelConfirmDialog();
     }
 
+    // Handle the confirm action for overlay
+    function confirmOverlayAction() {
+      if (pendingConfirmAction) {
+        pendingConfirmAction();
+      }
+      cancelConfirm();
+    }
+
     // Handle the cancel action when user clicks "No"
     function cancelConfirmDialog() {
       document.getElementById('confirmDialog').classList.remove('show');
       pendingConfirmAction = null;
+      pendingSubmitData = null;
+    }
+
+    // Cancel the confirmation and reset pending data
+    function cancelConfirm() {
+      document.getElementById('confirmOverlay').classList.remove('show');
+      pendingConfirmAction = null;
+      pendingSubmitData = null;
     }
 
     // Close the priority edit modal and reset current editing state
@@ -2042,11 +2177,11 @@
       if (processDatesContainer) {
         processDatesContainer.innerHTML = `
           <div class="process-header">
-            <div>#</div>
+            <div>Step</div>
             <div>Process Name</div>
             <div>Expected Date</div>
           </div>
-          <div id="processDatesList" style="text-align: center; padding: 2rem; color: #64748b;">Loading data...</div>
+          <div id="processDatesList" style="text-align: center;  color: #64748b;">Loading data...</div>
         `;
       }
 
@@ -2117,17 +2252,49 @@
           processRow.innerHTML = `
             <div class="step-num-badge">${i + 1}</div>
             <div class="process-name" title="${processName}">${processName}</div>
-            <input type="date" class="process-date" data-process-index="${i}" value="${expectedDate ? formatDateForInput(expectedDate) : ''}">
+            <input type="date" class="process-date" id="processDate_${i}" data-process-index="${i}" onchange="validateProcessDate(${i}, this)">
           `;
           listContainer.appendChild(processRow);
         }
       }
 
       if (rowCount === 0) {
-        listContainer.innerHTML = '<div style="text-align: center; padding: 2rem; color: #64748b; grid-column: 1 / -1;">No process steps found for this batch.</div>';
+        listContainer.innerHTML = '<div style="text-align: center;  color: #64748b; grid-column: 1 / -1;">No process steps found for this batch.</div>';
       }
     }
 
+    // Validate the selected process date to ensure it is not in the past and follows the sequence of previous steps
+    function validateProcessDate(stepIndex, input) {
+      input.classList.remove('input-error');
+
+      const selectedDate = new Date(input.value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // ❌ 1. Block past date
+      if (selectedDate < today) {
+        showToast("Past date forbidden", "error");
+        input.classList.add('input-error');
+        input.value = "";
+        return;
+      }
+
+      // ❌ 2. Check previous step
+      if (stepIndex > 0) {
+        const prevInput = document.getElementById(`processDate_${stepIndex - 1}`);
+
+        if (prevInput && prevInput.value) {
+          const prevDate = new Date(prevInput.value);
+
+          if (selectedDate <= prevDate) {
+            showToast(`Must be after Step ${stepIndex}`, "error");
+            input.classList.add('input-error');
+            input.value = "";
+            return;
+          }
+        }
+      }
+    }
     // Format date for input fields (YYYY-MM-DD), handling various input formats
     function formatDateForInput(dateStr) {
       if (!dateStr || dateStr === '-') return '';
@@ -2136,41 +2303,30 @@
       return date.toISOString().split('T')[0];
     }
 
-    // Close the add batch modal and reset the input fields
-    function closeAddBatchModal() {
-      document.getElementById('addBatchModal').classList.remove('show');
-      document.getElementById('batchQuantity').value = '';
-      document.getElementById('processDatesContainer').innerHTML = '';
+    // Show a confirmation dialog when there is remaining quantity after creating the batch
+    function showRemainingConfirm(remaining) {
+      console.log(remaining);
+      document.getElementById('confirm').innerHTML = `Remaining Production Quantity is <strong>${remaining}</strong>. Do you want to proceed and save the remaining for later batches?`;
+      document.getElementById('confirmOverlay').classList.add('show');
     }
 
-    // Submit the new batch data to the server to create a new batch entry
-    async function submitNewBatch() {
-      const psn = document.getElementById('batchSummaryPsn').textContent;
-      const quantity = parseInt(document.getElementById('batchQuantity').value);
+    // Cancel the confirmation and reset pending data
+    function cancelConfirm() {
+      document.getElementById('confirmOverlay').classList.remove('show');
+      pendingConfirmAction = null;
+      pendingSubmitData = null;
+    }
 
-      if (!quantity || quantity <= 0) {
-        showToast('Please enter a valid quantity', 'error');
-        return;
-      }
-
-      // Collect process dates
-      const processDates = {};
-      document.querySelectorAll('.process-date').forEach(input => {
-        const processIndex = input.dataset.processIndex;
-        const date = input.value;
-        if (date) {
-          processDates[processIndex] = date;
-        }
-      });
-
+    // Perform the actual batch submission
+    async function performSubmitBatch(data) {
       try {
         const resp = await fetch('/api/createBatch', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            psn,
-            quantity,
-            processDates
+            psn: data.psn,
+            quantity: data.quantity,
+            processDates: data.processDates
           })
         });
 
@@ -2189,6 +2345,85 @@
       }
     }
 
+    // Close the add batch modal and reset the input fields
+    function closeAddBatchModal() {
+      document.getElementById('addBatchModal').classList.remove('show');
+      document.getElementById('batchQuantity').value = '';
+      document.getElementById('processDatesContainer').innerHTML = '';
+    }
+
+    // Submit the new batch data to the server to create a new batch entry
+    async function submitNewBatch() {
+      const psn = document.getElementById('batchSummaryPsn').textContent;
+      const quantity = parseInt(document.getElementById('batchQuantity').value);
+      const currentRemaining = parseInt(document.getElementById('batchSummaryRemaining').textContent.replace(/,/g, ''));
+
+      if (!quantity || quantity <= 0) {
+        showToast('Please enter a valid quantity', 'error');
+        return;
+      }
+
+      if (quantity > currentRemaining) {
+        showToast('Batch quantity cannot exceed remaining production quantity', 'error');
+        return;
+      }
+
+      // ❗ NEW: Require ALL dates to be filled
+      const allInputs = document.querySelectorAll('.process-date');
+      let hasEmpty = false;
+
+      allInputs.forEach(input => {
+        if (!input.value) {
+          hasEmpty = true;
+          input.classList.add('input-error'); // highlight empty field
+        } else {
+          input.classList.remove('input-error');
+        }
+      });
+
+      if (hasEmpty) {
+        showToast('Please fill ALL expected dates', 'error');
+        return;
+      }
+
+      // ✅ Then collect data (only runs if all filled)
+      const processDates = {};
+      allInputs.forEach(input => {
+        const processIndex = input.dataset.processIndex;
+        processDates[processIndex] = input.value;
+      });
+
+      const remainingAfter = currentRemaining - quantity;
+      if (remainingAfter > 0) {
+        pendingSubmitData = {
+          psn,
+          quantity,
+          processDates,
+          remainingAfter
+        };
+        showRemainingConfirm(remainingAfter);
+        return;
+      }
+
+      await performSubmitBatch({
+        psn,
+        quantity,
+        processDates
+      });
+    }
+
+    // Show a confirmation dialog when there is remaining quantity after creating the batch
+    function showRemainingConfirm(remaining) {
+      document.getElementById('confirmHeader').innerHTML = '⚠️ Remaining Production Quantity';
+      document.getElementById('confirmOverlayMessage').innerHTML = `Remaining Production Quantity is <strong>${remaining.toLocaleString()}</strong>. Do you want to proceed and save the remaining for later batches?`;
+      pendingConfirmAction = () => {
+        if (pendingSubmitData) {
+          performSubmitBatch(pendingSubmitData);
+        }
+      };
+      document.getElementById('confirmOverlay').classList.add('show');
+    }
+
     // Utility function to show toast notifications with different types (info, success, error)
     function showToast(message, type = 'info') {
       const container = document.getElementById('toast-container');
@@ -2204,6 +2439,8 @@
     }
   </script>
 </body>
+<script src="https://alcdn.msauth.net/browser/2.28.1/js/msal-browser.min.js"></script>
+<script src="/scripts/auth.js"></script>
 
 </html>
 </content>
