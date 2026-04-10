@@ -985,12 +985,18 @@
           steps.push({ processName: customName, expDate: d });
         }
         const deliveryD = document.getElementById(`date_b${b}_s${selectedSteps.length + 1}`).value;
+        const qtyInput = document.getElementById(`qty_b${b}`).value;
+
+        if (!qtyInput || isNaN(qtyInput) || parseInt(qtyInput) <= 0) {
+          showToast(`Batch ${b} quantity must be greater than 0`, 'error');
+          return;
+        }
         if (!deliveryD) { showToast(`Delivery date missing B${b}`); return; }
         steps.push({ processName: "Delivery", expDate: deliveryD });
 
         allData.push({
           batchId: bCount > 1 ? `${psn}-${b}` : psn,
-          batchQty: parseInt(document.getElementById(`qty_b${b}`).value),
+          batchQty: parseInt(qtyInput),
           steps: steps
         });
       }
