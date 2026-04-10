@@ -2656,8 +2656,11 @@
           const isRemarkReadOnly = hasExistingDelay;
 
           let currentRemark = step.remark || "";
-          if (isOverdue && !currentRemark)
-            currentRemark = "OVERDUE: Enter reason here";
+
+          // New: Determine a warning label for overdue items
+          const delayWarningLabel = (isOverdue && !hasExistingDelay)
+            ? `<span style="color:#ef4444; font-size:10px; font-weight:700; display:block; margin: 4px 0 2px 0;">ACTION REQUIRED: Step is Overdue. Please enter reason below:</span>`
+            : "";
 
           const card = document.createElement("div");
           card.className = "um-active-card multi-step-row";
@@ -2704,10 +2707,11 @@
 
                 </div>
 
+                ${delayWarningLabel}
                 <input
                   type="text"
                   class="um-delay-input step-remark-input"
-                  placeholder="Describe the reason for delay..."
+                  placeholder="${isOverdue ? "Required: Why is this process overdue?" : "Describe the reason for delay..."}"
                   value="${currentRemark}"
                   ${isRemarkReadOnly ? "readonly" : ""}
                   style="display:${shouldLockDelay || currentRemark ? "block" : "none"};"
