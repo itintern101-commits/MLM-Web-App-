@@ -983,6 +983,7 @@
         // 1. Group the MASTER_DATA (keeping your exact logic)
         const psnGroups = {};
         MASTER_DATA.forEach(job => {
+          console.log(job);
           if (!psnGroups[job.psn]) {
             psnGroups[job.psn] = {
               psn: job.psn,
@@ -997,7 +998,10 @@
               status: job.status || "ON SCHEDULE",
               batches: []
             };
+            psnGroups[job.psn].qty += Number(job.remainingQty) || 0;
           }
+
+          // const remaining = Number(job.remainingQty);
           psnGroups[job.psn].batches.push(job);
           psnGroups[job.psn].qty += Number(job.qty);
           // console.log(psnGroups);

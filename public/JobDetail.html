@@ -1725,7 +1725,7 @@
 
     // Filter table based on active filters and search query
     function filterTable() {
-      activeFilters.search = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+      activeFilters.search = (document.getElementById('searchInput').value || '').trim().toUpperCase();
 
       const prioritySelected = document.getElementById('priorityFilter').value;
       const statusSelected = document.getElementById('statusFilter').value;
@@ -1792,10 +1792,20 @@
     function renderTable() {
       const tbody = document.getElementById('jobTableBody');
       let filteredData = MASTER_DATA.filter(job => {
-        const search = activeFilters.search || '';
+        const search = (activeFilters.search || '').toUpperCase().trim();
+
+        const psn = String(job["Product Serial Number"] || job.PSN || '').toUpperCase();
+        const jobName = String(job["Job Name"] || job.Job_Name || job.client || '').toUpperCase();
+        const pi = String(job["PI Number"] || job.PI_Number || job.pi || job.PI_No || '').toUpperCase();
+        const saleCode = String(job.salesCode || job.Sales_Code || job.code || '').toUpperCase();
+        const item = String(job.Item || '').toUpperCase();
+
         const matchesSearch = !search ||
-          (job["Product Serial Number"] || job.PSN || '').toLowerCase().includes(search) ||
-          (job["Job Name"] || job.Job_Name || job.client || '').toLowerCase().includes(search);
+          psn.includes(search) ||
+          jobName.includes(search) ||
+          pi.includes(search) ||
+          saleCode.includes(search) ||
+          item.includes(search);
 
         const salesCode = job.salesCode || job.Sales_Code || job.code;
         const matchesSalesCode = activeFilters.salesCodes.size === 0 || activeFilters.salesCodes.has(salesCode);
