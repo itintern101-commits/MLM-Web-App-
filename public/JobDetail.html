@@ -20,11 +20,11 @@
       color: #1e293b;
     }
 
-    /* Sidebar Integration Wrapper */
-    .sidebar-wrapper {
-      display: flex;
+    .main {
+      flex: 1;
       min-height: 100vh;
-      font-family: 'Segoe UI', sans-serif;
+      min-width: 0;
+      overflow-x: hidden;
     }
 
     .dashboard-header {
@@ -389,7 +389,7 @@
 
     /* Mobile Responsiveness */
     @media (max-width: 1024px) {
-      .main-wrapper {
+      .main {
         margin-left: 0;
       }
 
@@ -1255,57 +1255,100 @@
 </head>
 
 <body>
+  <div id="sidebar-container"></div>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      const pageContent = document.querySelector('.main').innerHTML;
       fetch('/Sidebar.html')
-        .then(r => r.text())
-        .then(html => {
+        .then((r) => r.text())
+        .then((html) => {
           const parser = new DOMParser();
           const doc = parser.parseFromString(html, 'text/html');
 
-          doc.head.querySelectorAll('style, link[rel="stylesheet"]').forEach(node => {
+          // 1. Copy sidebar CSS into <head>
+          doc.head.querySelectorAll('style, link[rel="stylesheet"]').forEach((node) => {
             document.head.appendChild(node.cloneNode(true));
           });
 
-          const sidebarBody = doc.body ? doc.body.innerHTML : html;
-          document.body.innerHTML = sidebarBody;
-
-          const mainEl = document.querySelector('.main');
-          if (!mainEl) {
-            console.error('Sidebar load failed: .main not found after injection');
+          // 2. Get the <aside id="sidebar"> from Sidebar.html
+          const sidebarEl = doc.getElementById('sidebar');
+          if (!sidebarEl) {
+            console.error('Sidebar load failed: #sidebar not found in Sidebar.html');
             return;
           }
-          mainEl.innerHTML = pageContent;
 
-          // Toggle system
+          // 3. Scoop up every existing node in <body> into a fragment
+          //    This includes: loader, page content, toast, modal — everything
+          const fragment = document.createDocumentFragment();
+          while (document.body.firstChild) {
+            fragment.appendChild(document.body.firstChild);
+          }
+
+          // 4. Build the flex layout in JS:
+          //    <div class="sidebar-wrapper">
+          //      <aside id="sidebar">  ← from Sidebar.html
+          //      <div class="main">    ← all original BatchDetail content
+          //    </div>
+          const wrapper = document.createElement('div');
+          wrapper.className = 'sidebar-wrapper';
+
+          const mainDiv = document.createElement('div');
+          mainDiv.className = 'main';
+          mainDiv.appendChild(fragment);
+
+          wrapper.appendChild(sidebarEl.cloneNode(true));
+          wrapper.appendChild(mainDiv);
+          document.body.appendChild(wrapper);
+
+          // 5. Wire up toggle
           const btn = document.getElementById('sidebarToggle');
           const sidebar = document.getElementById('sidebar');
+
+          if (!btn || !sidebar) {
+            console.error('Sidebar: #sidebarToggle or #sidebar missing after DOM build');
+            return;
+          }
+
           function setSidebar(collapsed) {
             sidebar.classList.toggle('sidebar--collapsed', collapsed);
             btn.setAttribute('aria-expanded', String(!collapsed));
-            sidebar.querySelectorAll('.label').forEach(el => {
+            sidebar.querySelectorAll('.label').forEach((el) => {
               el.setAttribute('aria-hidden', String(collapsed));
             });
           }
+
           const savedState = localStorage.getItem('sidebar-collapsed') === '1';
           setSidebar(savedState);
+
           btn.addEventListener('click', () => {
             const collapsed = !sidebar.classList.contains('sidebar--collapsed');
             setSidebar(collapsed);
             localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0');
           });
-          // Active page
-          const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
-          document.querySelectorAll('.item').forEach(link => {
+
+          // 6. Highlight active nav link
+          const currentPage = window.location.pathname
+            .split('/')
+            .pop()
+            .replace('.html', '');
+          document.querySelectorAll('.item').forEach((link) => {
             if (link.dataset.page === currentPage) {
               link.classList.add('active');
             }
           });
-        });
+
+          // 7. Wire up logout
+          const logoutBtn = document.getElementById('logoutBtn');
+          if (logoutBtn) {
+            logoutBtn.addEventListener('click', (e) => {
+              e.preventDefault();
+              localStorage.clear();
+              window.location.href = '/login.html';
+            });
+          }
+        })
+        .catch(console.error);
     });
   </script>
-
   <div class="main">
     <div class="dashboard-header">
       <h1>Job Dashboard</h1>
@@ -1526,8 +1569,6 @@
   </div>
 
   <script>
-
-
     let MASTER_DATA = [];
     let activeFilters = {
       salesCodes: new Set(),

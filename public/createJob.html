@@ -478,51 +478,248 @@
     .confirm-btn-ok:hover {
       background: #228a3f;
     }
+
+    /* =========================================================
+       RESPONSIVE DESIGN - BASED ON DASHBOARD.HTML
+    ========================================================= */
+
+    /* =========================
+       LAYOUT WRAPPER (from Sidebar.html)
+    ========================== */
+    .sidebar-wrapper {
+      display: flex;
+      min-height: 100vh;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+
+    /* =========================
+       MAIN CONTENT
+    ========================== */
+    .main {
+      flex: 1;
+      min-height: 100vh;
+      min-width: 0;
+      overflow-x: hidden;
+      padding: 40px;
+    }
+
+    /* =========================================================
+       TABLET  ≤1024px
+    ========================================================= */
+    @media (max-width: 1024px) {
+      .grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+      }
+    }
+
+    /* =========================================================
+       MOBILE  ≤768px
+       Core changes: stack grids, adjust padding, resize elements
+    ========================================================= */
+    @media (max-width: 768px) {
+      .main {
+        padding: 14px 10px;
+      }
+
+      h2 {
+        font-size: 1.7rem;
+        margin-top: 0;
+      }
+
+      .section-card {
+        padding: 14px 10px;
+        border-radius: 10px;
+        margin-bottom: 18px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .input-group label {
+        font-size: 12px;
+      }
+
+      input, select {
+        font-size: 13px;
+        padding: 8px 12px;
+      }
+
+      .process-pool {
+        gap: 6px;
+      }
+
+      .proc-pill {
+        padding: 5px 12px;
+        font-size: 11px;
+      }
+
+      .selected-sequence {
+        padding: 12px;
+        gap: 6px;
+      }
+
+      .seq-item {
+        padding: 5px 10px;
+        font-size: 12px;
+      }
+
+      .batch-container {
+        border-radius: 10px;
+      }
+
+      .batch-header {
+        padding: 12px 15px;
+      }
+
+      .vertical-steps {
+        padding: 8px;
+        gap: 6px;
+      }
+
+      .step-row {
+        padding: 10px;
+        grid-template-columns: 40px 1fr 140px 30px;
+      }
+
+      .step-num-badge {
+        width: 24px;
+        height: 24px;
+        font-size: 11px;
+      }
+
+      .step-select-input {
+        font-size: 12px;
+      }
+
+      input[type="date"] {
+        font-size: 12px;
+      }
+
+      .drag-handle {
+        font-size: 16px;
+      }
+
+      .btn-submit {
+        padding: 16px;
+        font-size: 16px;
+      }
+
+      .toast {
+        min-width: 280px;
+        font-size: 14px;
+      }
+    }
+
+    /* =========================================================
+       SMALL PHONES  ≤480px
+    ========================================================= */
+    @media (max-width: 480px) {
+      .main {
+        padding: 10px 8px;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      .section-card {
+        padding: 10px 8px;
+      }
+
+      .grid {
+        gap: 10px;
+      }
+
+      input, select {
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+
+      .proc-pill {
+        padding: 4px 10px;
+        font-size: 10px;
+      }
+
+      .selected-sequence {
+        padding: 10px;
+      }
+
+      .seq-item {
+        padding: 4px 8px;
+        font-size: 11px;
+      }
+
+      .step-row {
+        padding: 8px;
+        grid-template-columns: 35px 1fr 120px 25px;
+      }
+
+      .step-num-badge {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+      }
+
+      .btn-submit {
+        padding: 14px;
+        font-size: 15px;
+      }
+
+      .toast {
+        min-width: 250px;
+        font-size: 13px;
+      }
+    }
   </style>
 </head>
 
 <body>
   <script>
-    fetch('/Sidebar.html')
-      .then(r => r.text())
-      .then(html => {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
+    document.addEventListener('DOMContentLoaded', function () {
+      fetch('/Sidebar.html')
+        .then(r => r.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
 
-        doc.head.querySelectorAll('style, link[rel="stylesheet"]').forEach(node => {
-          document.head.appendChild(node.cloneNode(true));
-        });
-
-        const pageContent = document.querySelector('.main').innerHTML;
-        const sidebarBody = doc.body ? doc.body.innerHTML : html;
-        document.body.innerHTML = sidebarBody;
-        document.querySelector('.main').innerHTML = pageContent;
-        // Toggle system
-        const btn = document.getElementById('sidebarToggle');
-        const sidebar = document.getElementById('sidebar');
-        function setSidebar(collapsed) {
-          sidebar.classList.toggle('sidebar--collapsed', collapsed);
-          btn.setAttribute('aria-expanded', String(!collapsed));
-          sidebar.querySelectorAll('.label').forEach(el => {
-            el.setAttribute('aria-hidden', String(collapsed));
+          doc.head.querySelectorAll('style, link[rel="stylesheet"]').forEach(node => {
+            document.head.appendChild(node.cloneNode(true));
           });
-        }
-        const savedState = localStorage.getItem('sidebar-collapsed') === '1';
-        setSidebar(savedState);
-        btn.addEventListener('click', () => {
-          const collapsed = !sidebar.classList.contains('sidebar--collapsed');
-          setSidebar(collapsed);
-          localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0');
-        });
-        // Active page
-        const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
-        document.querySelectorAll('.item').forEach(link => {
-          if (link.dataset.page === currentPage) {
-            link.classList.add('active');
+
+          const pageContent = document.querySelector('.main').innerHTML;
+          const sidebarBody = doc.body ? doc.body.innerHTML : html;
+          document.body.innerHTML = sidebarBody;
+          document.querySelector('.main').innerHTML = pageContent;
+          // Toggle system
+          const btn = document.getElementById('sidebarToggle');
+          const sidebar = document.getElementById('sidebar');
+          function setSidebar(collapsed) {
+            sidebar.classList.toggle('sidebar--collapsed', collapsed);
+            btn.setAttribute('aria-expanded', String(!collapsed));
+            sidebar.querySelectorAll('.label').forEach(el => {
+              el.setAttribute('aria-hidden', String(collapsed));
+            });
           }
-        });
-      })
-      .catch(console.error);
+          const savedState = localStorage.getItem('sidebar-collapsed') === '1';
+          setSidebar(savedState);
+          btn.addEventListener('click', () => {
+            const collapsed = !sidebar.classList.contains('sidebar--collapsed');
+            setSidebar(collapsed);
+            localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0');
+          });
+          // Active page
+          const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
+          document.querySelectorAll('.item').forEach(link => {
+            if (link.dataset.page === currentPage) {
+              link.classList.add('active');
+            }
+          });
+        })
+        .catch(console.error);
+    });
   </script>
   <div id="page-content" style="display:none;">
 
