@@ -1,131 +1,51 @@
 <!DOCTYPE html>
 <html>
 
-
 <head>
   <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
     /* =========================
-       LAYOUT
+       ROOT & BASE
     ========================== */
-    .sidebar-wrapper {
-      display: flex;
-      min-height: 100vh;
-      font-family: 'Segoe UI', sans-serif;
-    }
-
-    /* =========================
-       SIDEBAR
-    ========================== */
-    .sidebar {
-      width: 220px;
-      background: #ffffff;
-      border-right: 1px solid #e0e0e0;
-      transition: width 0.25s ease;
-      overflow: hidden;
-      position: relative;
-    }
-
-    /* COLLAPSED */
-    .sidebar--collapsed {
-      width: 60px;
-    }
-
-    /* =========================
-       TOGGLE BUTTON
-    ========================== */
-    .toggle-btn {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      background: #1a73e8;
-      color: white;
-      font-size: 18px;
-      cursor: pointer;
-    }
-
-    /* =========================
-       MENU
-    ========================== */
-    .menu {
-      display: flex;
-      flex-direction: column;
-      padding-top: 10px;
-    }
-
-    /* ITEM */
-    .item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px;
-      text-decoration: none;
-      color: #3c4043;
-      transition: 0.2s;
-      border-left: 4px solid transparent;
-    }
-
-    .item:hover {
-      background: #f1f3f4;
-      color: #1a73e8;
-    }
-
-    /* ACTIVE LINK */
-    .item.active {
-      background: #e8f0fe;
-      border-left: 4px solid #1a73e8;
-      color: #1a73e8;
-      font-weight: 600;
-    }
-
-    /* ICON */
-    .icon {
-      width: 24px;
-      text-align: center;
-    }
-
-    /* LABEL */
-    .label {
-      white-space: nowrap;
-      transition: opacity 0.15s ease;
-    }
-
-    /* HIDE LABEL WHEN COLLAPSED */
-    .sidebar--collapsed .label {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    /* =========================
-       MAIN CONTENT
-    ========================== */
-    .main {
-      flex: 1;
-      padding: 40px;
-    }
-
     :root {
       --primary: #1a73e8;
       --success: #34a853;
       --warning: #fbbc04;
       --danger: #ea4335;
       --bg: #f1f3f4;
+      --surface: #ffffff;
       --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --text-main: #202124;
+      --text-muted: #5f6368;
+      --sidebar-width: 280px;
     }
 
     body {
       font-family: 'Segoe UI', Roboto, sans-serif;
       margin: 0;
       background: var(--bg);
-      color: #202124;
+      color: var(--text-main);
     }
 
-    .main-wrapper {
-      margin-left: 0;
-      padding: 0;
+    /* =========================
+       LAYOUT WRAPPER (from Sidebar.html)
+    ========================== */
+    /* .sidebar-wrapper will be provided by Sidebar.html */
+
+    /* =========================
+       MAIN CONTENT
+    ========================== */
+    .main {
+      flex: 1;
+      min-height: 100vh;
+      min-width: 0;
+      overflow-x: hidden;
+      padding:40px;
     }
 
     h1 {
@@ -136,12 +56,6 @@
       color: #1a0dab;
     }
 
-    .subtitle {
-      font-size: 1.2rem;
-      color: #5f6368;
-      margin-bottom: 30px;
-    }
-
     .section-title {
       font-size: 1.8rem;
       font-weight: bold;
@@ -149,32 +63,27 @@
       display: block;
       border-left: 8px solid var(--primary);
       padding-left: 15px;
-      color: #202124;
+      color: var(--text-main);
     }
 
-    /* Top Status Grid */
+    /* =========================
+       STATUS GRID
+    ========================== */
     .status-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(220px, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 25px;
       margin-bottom: 20px;
     }
 
-    .totals-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(300px, 1fr));
-      gap: 25px;
-      margin-bottom: 40px;
-    }
-
     .status-card {
-      background: white;
+      background: var(--surface);
       padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
       text-align: center;
       cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
 
     .status-card:hover {
@@ -182,40 +91,29 @@
       box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
     }
 
-    .status-card {
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .job-table tbody tr:hover,
-    .clickable-row:hover,
-    #processJobsTableContent tbody tr:hover {
-      background-color: #f5f9ff;
-    }
-
     .status-card.active-status {
-      border-top-width: 10px;
-      border-top-color: #1a73e8;
+      border-top-width: 10px !important;
       box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
-    }
-
-    .status-card.total-summary {
-      border: 1px solid #d0e4ff;
     }
 
     .status-card h3 {
       margin: 0;
-      font-size: 1.1rem;
-      color: #5f6368;
+      font-size: 1rem;
+      color: var(--text-muted);
       text-transform: uppercase;
+      letter-spacing: 0.03em;
     }
 
     .status-card .val {
       font-size: 3.5rem;
       font-weight: 800;
       margin: 10px 0;
+      line-height: 1;
     }
 
-    /* Compact Process Grid */
+    /* =========================
+       PROCESS CONTAINER
+    ========================== */
     .process-container {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -225,17 +123,21 @@
 
     .process-item {
       padding: 10px 12px;
-      background: white;
+      background: var(--surface);
       border-radius: 8px;
       border-left: 4px solid var(--primary);
-      /* Switched to side border to save height */
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      transition: box-shadow 0.2s;
     }
 
-    .clickable-process:hover {
+    .process-item:hover {
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .clickable-process {
       cursor: pointer;
     }
 
@@ -254,204 +156,240 @@
       max-width: 120px;
     }
 
-    .process-time {
-      font-size: 1.1rem;
-      font-weight: 800;
-      color: var(--primary);
-    }
-
-    /* Machine Capacity Tables */
-    .date-section {
-      margin-bottom: 40px;
-    }
-
-    .date-header {
-      background: #202124;
-      color: white;
-      padding: 20px 30px;
-      border-radius: 12px 12px 0 0;
-      font-size: 2rem;
-      font-weight: 800;
-    }
-
-    .capacity-table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      border-radius: 0 0 12px 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .capacity-table th {
-      background: #f8f9fa;
-      padding: 18px;
-      text-align: left;
-      font-size: 1.1rem;
-    }
-
-    .capacity-table td {
-      padding: 18px;
-      border-bottom: 1px solid #eee;
-      font-size: 1.1rem;
-    }
-
-    .machine-label {
-      font-weight: bold;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 0.9rem;
-    }
-
-    /* Section Card */
+    /* =========================
+       SECTION CARD
+    ========================== */
     .section-card {
-      background: white;
-      border-radius: 15px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      background: var(--surface);
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
       padding: 25px;
       margin-bottom: 40px;
     }
 
-    /* Job List */
+    /* =========================
+       FLEX HELPERS
+    ========================== */
     .table-header-flex {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
     }
 
+    .section-header-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    /* =========================
+       FILTER INPUTS
+    ========================== */
     .filter-select {
       padding: 10px 15px;
       border-radius: 8px;
       border: 1px solid #ccc;
+      font-size: 0.9rem;
+      font-family: inherit;
     }
 
+    .week-label {
+      background: var(--surface);
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 1px solid #ddd;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    #btnViewMonth,
+    #btnViewWeek {
+      transition: all 0.2s ease;
+      color: var(--text-muted);
+    }
+
+    #btnViewMonth:hover,
+    #btnViewWeek:hover {
+      color: var(--primary);
+    }
+
+    /* =========================
+       CAPACITY
+    ========================== */
+    .capacity-container {
+      margin-bottom: 0;
+    }
+
+    .capacity-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .cap-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+      border: 1px solid var(--border);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .cap-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .machine-badge {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+    }
+
+    /* chart canvas wrapper — height controlled here and overridden in media queries */
+    .chart-canvas-wrapper {
+      height: 300px;
+    }
+
+    /* =========================
+       JOB TABLE — DESKTOP
+    ========================== */
     .job-table {
       width: 100%;
       border-collapse: collapse;
-      background: white;
+      background: var(--surface);
       border-radius: 12px;
       overflow: hidden;
-      box-shadow: none;
     }
 
     .job-table th {
       background: #f8f9fa;
       text-align: left;
-      padding: 15px;
-      color: #5f6368;
-      font-size: 0.9rem;
+      padding: 14px 15px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
       position: sticky;
       top: 0;
       z-index: 1;
+      border-bottom: 2px solid var(--border);
     }
 
     .job-table td {
-      padding: 15px;
+      padding: 13px 15px;
       border-bottom: 1px solid #f1f3f4;
-      font-size: 0.95rem;
+      font-size: 0.93rem;
+      vertical-align: middle;
     }
 
-    .clickable-row:hover {
-      background-color: #f8faff !important;
+    .clickable-row {
       cursor: pointer;
     }
 
-    /* Row background colors for priority */
+    .clickable-row:hover,
+    #processJobsTableContent tbody tr:hover {
+      background-color: #f0f7ff !important;
+    }
+
     .row-overdue {
       background-color: #fce8e6 !important;
-      /* Red background for overdue */
     }
 
     .row-almost-due {
       background-color: #fef7e0 !important;
-      /* Light orange background for almost due */
     }
 
     .row-normal {
       background-color: white !important;
-      /* White background for normal */
     }
 
     .row-completed {
       background-color: #e6f4ea !important;
-      /* Light green for completed */
     }
 
-    /* Row background colors for priority (duplicated block kept for safe override) */
-    .row-overdue {
-      background-color: #fce8e6 !important;
-      /* Red background for overdue */
+    /* scroll wrapper */
+    .job-table-scroll-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      max-height: 600px;
+      overflow-y: auto;
     }
 
-    .row-almost-due {
-      background-color: #fef7e0 !important;
-      /* Light orange background for almost due */
-    }
-
-    .row-normal {
-      background-color: white !important;
-      /* White background for normal */
-    }
-
+    /* =========================
+       BATCH INNER TABLE
+    ========================== */
     .batch-detail-row {
       display: none;
-      background-color: #fcfcfc;
     }
 
-    .batch-inner-table thead {
-      position: sticky;
-      top: 0;
-      background: #f8f9fa;
-      z-index: 10;
-    }
-
-    /* Batch Inner Table Styles */
     .batch-inner-table {
       width: 100%;
-      margin: 5px;
       border-radius: 8px;
       border: 1px solid #e0e0e0;
-      background: white;
+      background: var(--surface);
       border-collapse: collapse;
     }
 
     .batch-inner-table th {
       font-size: 0.8rem;
       text-transform: uppercase;
-      color: #5f6368;
+      color: var(--text-muted);
       background: #f8f9fa;
-      padding: 12px;
+      padding: 10px 12px;
       border-bottom: 2px solid #eee;
     }
 
     .batch-inner-table td {
-      font-size: 0.9rem;
-      padding: 12px;
+      font-size: 0.88rem;
+      padding: 10px 12px;
       border-bottom: 1px solid #f1f1f1;
     }
 
-    /* Status Pills */
+    /* =========================
+       PILLS / TAGS / BADGES
+    ========================== */
     .pill {
-      padding: 4px 10px;
+      padding: 3px 9px;
       border-radius: 4px;
       font-weight: 600;
-      font-size: 0.75rem;
+      font-size: 0.73rem;
+      display: inline-block;
     }
 
     .pill-running {
       background: #e8f0fe;
-      color: #1a73e8;
+      color: var(--primary);
     }
 
     .pill-delayed {
       background: #fce8e6;
-      color: #ea4335;
+      color: var(--danger);
     }
 
     .pill-completed {
       background: #e6f4ea;
-      color: #34a853;
+      color: var(--success);
     }
 
     .pill-almost {
@@ -461,11 +399,11 @@
 
     .process-step-badge {
       background: #e8f0fe;
-      color: #1a73e8;
+      color: var(--primary);
       padding: 2px 6px;
       border-radius: 4px;
-      font-size: 0.9rem;
-      margin-right: 6px;
+      font-size: 0.85rem;
+      margin-right: 5px;
       font-weight: 700;
     }
 
@@ -474,19 +412,19 @@
       color: #b06000;
       padding: 2px 6px;
       border-radius: 4px;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 600;
     }
 
-    /* Progress & Tags */
     .tag {
-      padding: 6px 12px;
+      padding: 5px 10px;
       border-radius: 20px;
-      font-weight: bold;
-      font-size: 0.85rem;
+      font-weight: 700;
+      font-size: 0.8rem;
       display: inline-block;
-      min-width: 100px;
+      min-width: 90px;
       text-align: center;
+      white-space: nowrap;
     }
 
     .tag-overdue {
@@ -505,11 +443,12 @@
     }
 
     .progress-bar {
-      height: 8px;
+      height: 7px;
       background: #e2e8f0;
       border-radius: 4px;
       width: 100px;
-      margin-top: 5px;
+      margin-top: 4px;
+      overflow: hidden;
     }
 
     .progress-fill {
@@ -519,1450 +458,1383 @@
       transition: width 0.5s;
     }
 
-    /* New Capacity Card Styles */
-    .capacity-container {
-      margin-bottom: 40px;
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg)
+      }
+
+      100% {
+        transform: rotate(360deg)
+      }
     }
 
-    .capacity-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      margin-top: 15px;
+    /* =========================================================
+       TABLET  ≤1024px
+    ========================================================= */
+    @media (max-width: 1024px) {
+      /* .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100%;
+        z-index: 200;
+        box-shadow: 4px 0 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .main {
+        padding: 24px 20px;
+      } */
+
+      .process-container {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .status-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+      }
     }
 
-    .cap-card {
-      background: white;
-      border-radius: 15px;
-      padding: 25px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-      border: 1px solid #eee;
-      transition: transform 0.2s;
+    /* =========================================================
+       MOBILE  ≤768px
+       Core change: tables → stacked "card" rows via data-label
+    ========================================================= */
+    @media (max-width: 768px) {
+
+      /* ✅ FIXED SIDEBAR
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 220px;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 0;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      } */
+
+      .main {
+        padding: 14px 10px;
+      }
+
+      /* ✅ FIXED PROCESS GRID */
+      .process-container {
+        grid-template-columns: 1fr !important;
+      }
+
+      h1 {
+        font-size: 1.7rem;
+        margin-top: 0;
+      }
+
+      .section-title {
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+        border-left-width: 5px;
+        padding-left: 10px;
+      }
+
+      /* --- Status cards --- */
+      .status-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+
+      .status-card {
+        padding: 12px 8px;
+        border-radius: 10px;
+      }
+
+      .status-card h3 {
+        font-size: 0.65rem;
+      }
+
+      .status-card .val {
+        font-size: 2rem;
+        margin: 4px 0;
+      }
+
+      /* --- Section card --- */
+      .section-card {
+        padding: 14px 10px;
+        border-radius: 10px;
+        margin-bottom: 18px;
+      }
+
+      /* --- Flex filter rows: stack vertically --- */
+      .table-header-flex,
+      .section-header-flex {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 7px;
+        margin-bottom: 10px;
+      }
+
+      .table-header-flex>div,
+      .section-header-flex>div {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        width: 100%;
+      }
+
+      /* All filter inputs go full-width */
+      .filter-select,
+      #searchInput,
+      #processSearchInput,
+      #reqSearchInput,
+      #monthPicker,
+      #processDueFilter,
+      #reqStatusFilter,
+      #salesCodeFilter,
+      #priorityFilter,
+      #jobTypeFilter,
+      #statusFilter {
+        width: 100% !important;
+        box-sizing: border-box;
+        font-size: 0.82rem;
+        padding: 8px 10px;
+      }
+
+      .week-label {
+        font-size: 0.75rem;
+        padding: 6px 10px;
+        gap: 8px;
+        justify-content: center;
+      }
+
+      /* --- Capacity grid: 1 column --- */
+      .capacity-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .cap-card {
+        padding: 14px;
+        border-radius: 10px;
+      }
+
+      /* --- Chart taller on mobile --- */
+      .chart-canvas-wrapper {
+        height: 280px !important;
+      }
+
+      /* --- Tags/pills: auto-width --- */
+      .tag {
+        min-width: auto;
+        padding: 4px 8px;
+        font-size: 0.75rem;
+      }
+
+      .progress-bar {
+        width: 70px;
+      }
+
+      /* ────────────────────────────────────────────────────────
+         STACKED CARD TABLE — JOB FULFILLMENT (#jobTable)
+      ──────────────────────────────────────────────────────── */
+
+      /* Unwrap the scroll limiter so cards flow freely */
+      #jobTable-wrapper {
+        max-height: none;
+        overflow: visible;
+        box-shadow: none;
+        border-radius: 0;
+      }
+
+      /* Hide the real header row */
+      #jobTable thead {
+        display: none;
+      }
+
+      /* Each <tr> becomes a card */
+      #jobTable tbody tr.clickable-row {
+        display: block;
+        margin-bottom: 12px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+        background: var(--surface);
+      }
+
+      #jobTable tbody tr.row-overdue {
+        background: #fce8e6 !important;
+        border-color: #fca5a5;
+      }
+
+      #jobTable tbody tr.row-almost-due {
+        background: #fef7e0 !important;
+        border-color: #fcd34d;
+      }
+
+      /* Each <td> = a label+value row */
+      #jobTable tbody tr.clickable-row td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 9px 13px;
+        border-bottom: 1px solid #f1f3f4;
+        font-size: 0.85rem;
+        white-space: normal;
+        text-align: right;
+      }
+
+      #jobTable tbody tr.clickable-row td:last-child {
+        border-bottom: none;
+      }
+
+      /* Inject label from data-label attribute */
+      #jobTable tbody tr.clickable-row td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 0.72rem;
+        color: var(--text-muted);
+        text-align: left;
+        margin-right: 10px;
+        flex-shrink: 0;
+        min-width: 88px;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+      }
+
+      /* Batch detail: display as block, not table-row */
+      #jobTable tbody tr.batch-detail-row {
+        display: block !important;
+        margin-bottom: 12px;
+        margin-top: -14px;
+        border: 1px solid var(--primary);
+        border-top: none;
+        border-radius: 0 0 10px 10px;
+        overflow: hidden;
+      }
+
+      #jobTable tbody tr.batch-detail-row td {
+        display: block !important;
+        padding: 0;
+        border: none;
+      }
+
+      #jobTable tbody tr.batch-detail-row td::before {
+        display: none;
+      }
+
+      /* Inner batch table: also stack */
+      .batch-inner-table thead {
+        display: none;
+      }
+
+      .batch-inner-table tbody tr {
+        display: block;
+        padding: 8px 10px;
+        border-bottom: 1px solid #f1f1f1;
+      }
+
+      .batch-inner-table tbody td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px 0;
+        font-size: 0.82rem;
+        border-bottom: none;
+      }
+
+      .batch-inner-table tbody td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        flex-shrink: 0;
+        min-width: 70px;
+      }
+
+      /* ────────────────────────────────────────────────────────
+         STACKED CARD TABLE — REQUIREMENT UPDATE LISTING
+      ──────────────────────────────────────────────────────── */
+      #requirementTable-wrapper {
+        max-height: none;
+        overflow: visible;
+        box-shadow: none;
+        border-radius: 0;
+      }
+
+      #requirementTable thead {
+        display: none;
+      }
+
+      #requirementTable tbody tr.clickable-row {
+        display: block;
+        margin-bottom: 10px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+        background: var(--surface);
+      }
+
+      #requirementTable tbody tr.row-overdue {
+        background: #fce8e6 !important;
+        border-color: #fca5a5;
+      }
+
+      #requirementTable tbody tr.row-almost-due {
+        background: #fef7e0 !important;
+        border-color: #fcd34d;
+      }
+
+      #requirementTable tbody tr.clickable-row td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 9px 13px;
+        border-bottom: 1px solid #f1f3f4;
+        font-size: 0.85rem;
+        text-align: right;
+      }
+
+      #requirementTable tbody tr.clickable-row td:last-child {
+        border-bottom: none;
+      }
+
+      #requirementTable tbody tr.clickable-row td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 0.72rem;
+        color: var(--text-muted);
+        text-align: left;
+        margin-right: 10px;
+        flex-shrink: 0;
+        min-width: 95px;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+      }
+
+      /* ────────────────────────────────────────────────────────
+         STACKED CARD TABLE — PROCESS JOBS (#processJobsTableContent)
+      ──────────────────────────────────────────────────────── */
+      #processJobsTableContent-wrapper {
+        max-height: none;
+        overflow: visible;
+        box-shadow: none;
+        border-radius: 0;
+      }
+
+      #processJobsTableContent thead {
+        display: none;
+      }
+
+      #processJobsTableContent tbody tr {
+        display: block;
+        margin-bottom: 10px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+        background: var(--surface);
+      }
+
+      #processJobsTableContent tbody tr.row-overdue {
+        background: #fce8e6 !important;
+        border-color: #fca5a5;
+      }
+
+      #processJobsTableContent tbody tr.row-almost-due {
+        background: #fef7e0 !important;
+        border-color: #fcd34d;
+      }
+
+      #processJobsTableContent tbody tr td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 9px 13px;
+        border-bottom: 1px solid #f1f3f4;
+        font-size: 0.85rem;
+        text-align: right;
+      }
+
+      #processJobsTableContent tbody tr td:last-child {
+        border-bottom: none;
+      }
+
+      #processJobsTableContent tbody tr td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 0.72rem;
+        color: var(--text-muted);
+        text-align: left;
+        margin-right: 10px;
+        flex-shrink: 0;
+        min-width: 88px;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+      }
     }
 
-    .cap-card:hover {
-      transform: translateY(-5px);
-    }
+    /* =========================================================
+       SMALL PHONES  ≤480px
+    ========================================================= */
+    @media (max-width: 480px) {
+      .main {
+        padding: 10px 8px;
+      }
 
-    .card-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-    }
+      h1 {
+        font-size: 1.4rem;
+      }
 
-    .machine-badge {
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-weight: bold;
-      font-size: 0.85rem;
-      text-transform: uppercase;
-    }
+      .status-card .val {
+        font-size: 1.7rem;
+      }
 
-    .utilization-text {
-      font-size: 1.8rem;
-      font-weight: 800;
-      color: #202124;
-    }
+      .status-card h3 {
+        font-size: 0.6rem;
+      }
 
-    .progress-track {
-      background-color: #e8eaed;
-      height: 12px;
-      border-radius: 10px;
-      margin: 15px 0;
-      overflow: hidden;
-    }
+      .process-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 5px;
+      }
 
-    .stats-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.95rem;
-      color: #5f6368;
-    }
-
-    /* Machine Specific Colors */
-    .bg-ijami {
-      background: #e8f0fe;
-      color: #1a73e8;
-    }
-
-    .bg-hand {
-      background: #fef7e0;
-      color: #b06000;
-    }
-
-    .bg-out {
-      background: #f3e5f5;
-      color: #7b1fa2;
-    }
-
-    .fill-ijami {
-      background: #1a73e8;
-    }
-
-    .fill-hand {
-      background: #f9ab00;
-    }
-
-    .fill-out {
-      background: #7b1fa2;
-    }
-
-    .section-header-flex {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .week-label {
-      background: #fff;
-      padding: 8px 16px;
-      border-radius: 20px;
-      border: 1px solid #ddd;
-      font-size: 0.9rem;
-      font-weight: 600;
-    }
-
-    #btnViewMonth,
-    #btnViewWeek {
-      transition: all 0.2s ease;
-      color: #5f6368;
-    }
-
-    #btnViewMonth:hover,
-    #btnViewWeek:hover {
-      color: var(--primary);
-    }
-
-    /* Active State */
-    #btnViewMonth[style*="white"],
-    #btnViewWeek[style*="white"] {
-      color: var(--primary) !important;
-    }
-
-    #searchInput {
-      flex-grow: 1;
-      width: auto;
+      .chart-canvas-wrapper {
+        height: 240px !important;
+      }
     }
   </style>
 </head>
 
 <body>
   <script>
-    fetch('/Sidebar.html')
-      .then(r => r.text())
-      .then(html => {
-        const pageContent = document.getElementById('page-content').innerHTML;
-        document.body.innerHTML = html;
-        document.querySelector('.main').innerHTML = pageContent;
-        // Toggle system
-        const btn = document.getElementById('sidebarToggle');
-        const sidebar = document.getElementById('sidebar');
-        function setSidebar(collapsed) {
-          sidebar.classList.toggle('sidebar--collapsed', collapsed);
-          btn.setAttribute('aria-expanded', String(!collapsed));
-          sidebar.querySelectorAll('.label').forEach(el => {
-            el.setAttribute('aria-hidden', String(collapsed));
+    document.addEventListener('DOMContentLoaded', function () {
+      fetch('/Sidebar.html')
+        .then((r) => r.text())
+        .then((html) => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+
+          // 1. Copy sidebar CSS into <head>
+          doc.head.querySelectorAll('style, link[rel="stylesheet"]').forEach((node) => {
+            document.head.appendChild(node.cloneNode(true));
           });
-        }
-        const savedState = localStorage.getItem('sidebar-collapsed') === '1';
-        setSidebar(savedState);
-        btn.addEventListener('click', () => {
-          const collapsed = !sidebar.classList.contains('sidebar--collapsed');
-          setSidebar(collapsed);
-          localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0');
-        });
-        // Active page
-        const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
-        document.querySelectorAll('.item').forEach(link => {
-          if (link.dataset.page === currentPage) {
-            link.classList.add('active');
+
+          // 2. Get the <aside id="sidebar"> from Sidebar.html
+          const sidebarEl = doc.getElementById('sidebar');
+          if (!sidebarEl) {
+            console.error('Sidebar load failed: #sidebar not found in Sidebar.html');
+            return;
           }
-        });
-      })
-      .catch(console.error);
+
+          // 3. Scoop up every existing node in <body> into a fragment
+          //    This includes: loader, page content, toast, modal — everything
+          const fragment = document.createDocumentFragment();
+          while (document.body.firstChild) {
+            fragment.appendChild(document.body.firstChild);
+          }
+
+          // 4. Build the flex layout in JS:
+          //    <div class="sidebar-wrapper">
+          //      <aside id="sidebar">  ← from Sidebar.html
+          //      <div class="main">    ← all original BatchDetail content
+          //    </div>
+          const wrapper = document.createElement('div');
+          wrapper.className = 'sidebar-wrapper';
+
+          const mainDiv = document.createElement('div');
+          mainDiv.className = 'main';
+          mainDiv.appendChild(fragment);
+
+          wrapper.appendChild(sidebarEl.cloneNode(true));
+          wrapper.appendChild(mainDiv);
+          document.body.appendChild(wrapper);
+
+          // 5. Wire up toggle
+          const btn = document.getElementById('sidebarToggle');
+          const sidebar = document.getElementById('sidebar');
+
+          if (!btn || !sidebar) {
+            console.error('Sidebar: #sidebarToggle or #sidebar missing after DOM build');
+            return;
+          }
+
+          function setSidebar(collapsed) {
+            sidebar.classList.toggle('sidebar--collapsed', collapsed);
+            btn.setAttribute('aria-expanded', String(!collapsed));
+            sidebar.querySelectorAll('.label').forEach((el) => {
+              el.setAttribute('aria-hidden', String(collapsed));
+            });
+          }
+
+          const savedState = localStorage.getItem('sidebar-collapsed') === '1';
+          setSidebar(savedState);
+
+          btn.addEventListener('click', () => {
+            const collapsed = !sidebar.classList.contains('sidebar--collapsed');
+            setSidebar(collapsed);
+            localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0');
+          });
+
+          // 6. Highlight active nav link
+          const currentPage = window.location.pathname
+            .split('/')
+            .pop()
+            .replace('.html', '');
+          document.querySelectorAll('.item').forEach((link) => {
+            if (link.dataset.page === currentPage) {
+              link.classList.add('active');
+            }
+          });
+
+          // 7. Wire up logout
+          const logoutBtn = document.getElementById('logoutBtn');
+          if (logoutBtn) {
+            logoutBtn.addEventListener('click', (e) => {
+              e.preventDefault();
+              localStorage.clear();
+              window.location.href = '/login.html';
+            });
+          }
+        })
+        .catch(console.error);
+    });
   </script>
-  <div id="page-content" style="display:none;">
-    <div id="toast-container"
-      style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: none;">
+
+  <!-- Page Content Starts Here -->
+
+
+  <!-- Toast container -->
+  <div id="toast-container" style="position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:10000;
+             display:flex;flex-direction:column;align-items:center;gap:10px;pointer-events:none;">
+  </div>
+
+  <h1>Dashboard</h1>
+
+  <!-- ══════════ STATUS GRID ══════════ -->
+  <div class="status-grid">
+    <div class="status-card" data-status="ON SCHEDULE" style="border-top:8px solid var(--success);">
+      <h3>On Schedule</h3>
+      <div class="val" style="color:var(--success);" id="stat-schedule">00</div>
     </div>
-
-  </script>
-
-    <h1>Dashboard</h1>
-    <!-- <div class="totals-grid">
-      <div class="status-card total-summary" style="border-top: 8px solid #1976d2;">
-        <h3>Total Jobs</h3>
-        <div class="val" style="color: #1976d2;" id="stat-total-jobs">0</div>
-      </div>
-      <div class="status-card total-summary" style="border-top: 8px solid #0b8043;">
-        <h3>Total Batches</h3>
-        <div class="val" style="color: #0b8043;" id="stat-total-batches">0</div>
-      </div>
-    </div> -->
-
-    <div class="status-grid">
-      <div class="status-card" data-status="ON SCHEDULE" style="border-top: 8px solid var(--success);">
-        <h3>On Schedule</h3>
-        <div class="val" style="color: var(--success);" id="stat-schedule">00</div>
-      </div>
-      <div class="status-card" data-status="ALMOST DUE" style="border-top: 8px solid var(--warning);">
-        <h3>Almost Due</h3>
-        <div class="val" style="color: var(--warning);" id="stat-almost">00</div>
-      </div>
-      <div class="status-card" data-status="OVERDUE" style="border-top: 8px solid var(--danger);">
-        <h3>Overdue</h3>
-        <div class="val" style="color: var(--danger);" id="stat-overdue">00</div>
-      </div>
+    <div class="status-card" data-status="ALMOST DUE" style="border-top:8px solid var(--warning);">
+      <h3>Almost Due</h3>
+      <div class="val" style="color:var(--warning);" id="stat-almost">00</div>
     </div>
-
-
-    <div class="section-card">
-      <span class="section-title">PROCESS WORKLOAD & AVERAGE PERFORMANCE</span>
-      <div class="cap-card" style="margin-bottom: 40px; padding: 25px;">
-        <div class="process-container" id="processStatsContainer"
-          style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;">
-          <p style="color: #94a3b8; font-size: 12px;">Sorting and loading processes...</p>
-        </div>
-
-        <div id="processJobsTable" style="display: none; margin-top: 20px;">
-          <span class="section-title">Jobs in Process: <span class="process-step-badge" id="selectedProcessName"
-              style="font-size:25px;"></span></span>
-          <div class="table-header-flex"
-            style="margin: 10px 0 10px; gap: 10px; align-items: center; justify-content: flex-end;">
-            <input type="text" id="processSearchInput" onkeyup="filterProcessJobs()"
-              placeholder="Search PSN, BatchID, Job..." class="filter-select" style="width: 240px;">
-            <select id="processDueFilter" onchange="filterProcessJobs()" class="filter-select" style="width: 180px;">
-              <option value="ALL">All Due Status</option>
-              <option value="OVERDUE">Overdue</option>
-              <option value="DUE_TODAY">Due Today</option>
-              <option value="NEAR_DUE">Near Due (1-2d)</option>
-            </select>
-          </div>
-          <div
-            style="max-height: 600px; overflow-y: auto; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-            <table class="job-table" id="processJobsTableContent" style="max-height: none; overflow: visible;">
-              <thead>
-                <tr>
-                  <th>PSN</th>
-                  <th>Batch ID</th>
-                  <th>Client Name</th>
-                  <th>Quantity</th>
-                  <th>Priority(Expected Date)</th>
-                  <th>Expected Date</th>
-                </tr>
-              </thead>
-              <tbody id="processJobsBody">
-                <tr>
-                  <td colspan="6" style="text-align:center; padding: 20px;">Click on a process above to view jobs in
-                    progress.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+    <div class="status-card" data-status="OVERDUE" style="border-top:8px solid var(--danger);">
+      <h3>Overdue</h3>
+      <div class="val" style="color:var(--danger);" id="stat-overdue">00</div>
     </div>
+  </div>
 
-    <div class="section-card">
-      <div class="capacity-container">
-        <div class="section-header-flex">
-          <div>
-            <span class="section-title">Machine Load Capacity</span>
-          </div>
-          <div style="display: flex; gap: 10px; align-items: center;">
-            <select id="monthPicker" onchange="calculateCapacity()" class="filter-select"
-              style="font-weight: bold; border: 1px solid var(--primary);">
-            </select>
-            <div class="week-label" style="display: flex; align-items: center; gap: 15px;">
-              <button onclick="changeWeek(-1)"
-                style="border: none; background: none; cursor: pointer; color: var(--primary);"><i
-                  class="fas fa-chevron-left"></i></button>
-              <div id="currentWeekRange">
-                <i class="far fa-calendar-alt"></i> Loading Week...
-              </div>
-              <button onclick="changeWeek(1)"
-                style="border: none; background: none; cursor: pointer; color: var(--primary);"><i
-                  class="fas fa-chevron-right"></i></button>
-            </div>
-          </div>
-        </div>
+  <!-- ══════════ PROCESS WORKLOAD ══════════ -->
+  <div class="section-card">
+    <span class="section-title">PROCESS WORKLOAD &amp; AVERAGE PERFORMANCE</span>
 
-        <div class="capacity-grid" id="machineCapacityContainer"></div>
-
-        <div id="chartSection" style="margin-top: 30px; margin-bottom: 0; display: none;">
-          <div class="section-header-flex">
-            <div>
-              <span class="section-title" id="chartTitle">Machine Load</span>
-              <div id="chartSubtitle" style="font-size: 0.85rem; color: #5f6368; margin-top: -15px; margin-left: 25px;">
-              </div>
-            </div>
-            <div style="display: flex; gap: 10px; align-items: center;">
-              <div
-                style="background: #f1f3f4; padding: 4px; border-radius: 8px; display: flex; gap: 4px; margin-right: 20px;">
-                <button id="btnViewMonth" onclick="setChartViewMode('MONTH')"
-                  style="border:none; padding: 6px 12px; border-radius: 6px; cursor:pointer; font-weight:600; font-size:0.8rem;">Monthly</button>
-                <button id="btnViewWeek" onclick="setChartViewMode('WEEK')"
-                  style="border:none; padding: 6px 12px; border-radius: 6px; cursor:pointer; font-weight:600; font-size:0.8rem;">Weekly</button>
-              </div>
-              <button onclick="document.getElementById('chartSection').style.display='none'"
-                style="border:none; background:none; cursor:pointer; color:#ea4335;"><i class="fas fa-times"></i>
-                Close</button>
-            </div>
-          </div>
-          <div style="height: 300px;">
-            <canvas id="capacityChart"></canvas>
-          </div>
-        </div>
+    <div class="cap-card" style="margin-bottom:30px;">
+      <div class="process-container" id="processStatsContainer">
+        <p style="color:#94a3b8;font-size:12px;">Sorting and loading processes...</p>
       </div>
-    </div>
 
-    <div class="section-card">
-      <!-- REQUIREMENT UPDATE LISTING -->
-      <div style="margin-bottom :30px">
-        <div class="table-header-flex" style="flex-wrap: wrap; gap: 15px;">
-          <span class="section-title" style="margin-bottom: 0;">REQUIREMENT UPDATE LISTING</span>
-          <div style="display: flex; gap: 10px; flex-grow: 1; justify-content: flex-end;">
-            <input type="text" id="reqSearchInput" onkeyup="filterRequirementUpdates()"
-              placeholder="Search PSN or Batch ID or Client Name..." class="filter-select" style="width: 250px;">
-            <select class="filter-select" id="reqStatusFilter" onchange="filterRequirementUpdates()">
-              <option value="ALL">All Status</option>
-              <option value="OVERDUE">Overdue</option>
-              <option value="ALMOST DUE">Almost Due</option>
-            </select>
-          </div>
+      <div id="processJobsTable" style="display:none;margin-top:20px;">
+        <span class="section-title" style="font-size:1.3rem;">
+          Jobs in Process:
+          <span class="process-step-badge" id="selectedProcessName" style="font-size:1.1rem;"></span>
+        </span>
+
+        <div class="table-header-flex" style="margin:10px 0;">
+          <input type="text" id="processSearchInput" onkeyup="filterProcessJobs()"
+            placeholder="Search PSN, BatchID, Job..." class="filter-select" style="width:240px;">
+          <select id="processDueFilter" onchange="filterProcessJobs()" class="filter-select" style="width:180px;">
+            <option value="ALL">All Due Status</option>
+            <option value="OVERDUE">Overdue</option>
+            <option value="DUE_TODAY">Due Today</option>
+            <option value="NEAR_DUE">Near Due (1-2d)</option>
+          </select>
         </div>
-        <div
-          style="max-height: 600px; overflow-y: auto; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-          <table class="job-table" id="requirementTable" style="max-height: none; overflow: visible;">
+
+        <!-- id used by mobile CSS -->
+        <div id="processJobsTableContent-wrapper" class="job-table-scroll-wrapper">
+          <table class="job-table" id="processJobsTableContent">
             <thead>
               <tr>
                 <th>PSN</th>
                 <th>Batch ID</th>
                 <th>Client Name</th>
                 <th>Quantity</th>
-                <th>Current Process</th>
-                <th>In Progress</th>
-                <th style="cursor:pointer;" onclick="setReqSort('dueDays')">Days to Due Date <span
-                    id="reqSortIcon">▲</span>
-                </th>
-                <th>Previous Step & EndDate</th>
+                <th>Priority (Expected Date)</th>
+                <th>Expected Date</th>
               </tr>
             </thead>
-            <tbody id="requirementBody">
+            <tbody id="processJobsBody">
               <tr>
-                <td colspan="8" style="text-align:center; padding: 20px;">Loading requirement updates...</td>
+                <td colspan="6" style="text-align:center;padding:20px;">
+                  Click on a process above to view jobs in progress.
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
-    <div class="section-card">
-      <div class="table-header-flex" style="flex-wrap: wrap; gap: 15px;">
-        <span class="section-title" style="margin-bottom: 0;">JOB FULFILLMENT LIST</span>
+  </div>
 
-        <div style="display: flex; gap: 10px; flex-grow: 1; justify-content: flex-end;">
-          <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search PSN or Client Name..."
-            class="filter-select" style="width: 250px;">
+  <!-- ══════════ MACHINE LOAD CAPACITY ══════════ -->
+  <div class="section-card">
+    <div class="capacity-container">
+      <div class="section-header-flex">
+        <span class="section-title" style="margin-bottom:0;">Machine Load Capacity</span>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <select id="monthPicker" onchange="calculateCapacity()" class="filter-select"
+            style="font-weight:bold;border:1px solid var(--primary);"></select>
+          <div class="week-label">
+            <button onclick="changeWeek(-1)" style="border:none;background:none;cursor:pointer;color:var(--primary);">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <div id="currentWeekRange"><i class="far fa-calendar-alt"></i> Loading…</div>
+            <button onclick="changeWeek(1)" style="border:none;background:none;cursor:pointer;color:var(--primary);">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
 
-          <select class="filter-select" id="salesCodeFilter" onchange="filterTable()">
-            <option value="ALL">All Sales Codes</option>
-            <option value="AO">AO</option>
-            <option value="SHU">SHU</option>
-            <option value="NT">NT</option>
-            <option value="AK">AK</option>
-            <option value="NY">NY</option>
-            <option value="OC">OC</option>
-            <option value="PAO">PAO</option>
-            <option value="PNY">PNY</option>
-            <option value="SO">SO</option>
-            <option value="SC">SC</option>
-          </select>
-          <select class="filter-select" id="priorityFilter" onchange="filterTable()">
-            <option value="ALL">All Priorities</option>
-            <option value="Urgent">Urgent</option>
-            <option value="Cut Queue">Cut Queue</option>
-            <option value="Normal">Normal</option>
-          </select>
+      <div class="capacity-grid" id="machineCapacityContainer"></div>
 
-          <select class="filter-select" id="jobTypeFilter" onchange="filterTable()">
-            <option value="ALL">All Job Types</option>
-            <option value="Offset">Offset</option>
-            <option value="FSC">FSC</option>
-            <option value="Flexo & MMB/SOS">Flexo & MMB/SOS</option>
-            <option value="Fully Outsourced">Fully Outsourced</option>
-            <option value="FSCFully Outsourced">FSC Fully Outsourced</option>
-            <option value="Drawdown">Drawdown</option>
-            <option value="K SERIES">K SERIES</option>
-            <option value="Mock-Up">Mock-Up</option>
-          </select>
+      <div id="chartSection" style="margin-top:30px;display:none;">
+        <div class="section-header-flex">
+          <div>
+            <span class="section-title" id="chartTitle" style="margin-bottom:4px;">Machine Load</span>
+            <div id="chartSubtitle" style="font-size:0.85rem;color:var(--text-muted);margin-left:18px;"></div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <div style="background:#f1f3f4;padding:4px;border-radius:8px;display:flex;gap:4px;">
+              <button id="btnViewMonth" onclick="setChartViewMode('MONTH')"
+                style="border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-weight:600;font-size:0.8rem;">Monthly</button>
+              <button id="btnViewWeek" onclick="setChartViewMode('WEEK')"
+                style="border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-weight:600;font-size:0.8rem;">Weekly</button>
+            </div>
+            <button onclick="document.getElementById('chartSection').style.display='none'"
+              style="border:none;background:none;cursor:pointer;color:var(--danger);">
+              <i class="fas fa-times"></i> Close
+            </button>
+          </div>
+        </div>
+        <!-- Wrapper controls height responsively via CSS class -->
+        <div class="chart-canvas-wrapper">
+          <canvas id="capacityChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
 
-          <select class="filter-select" id="statusFilter" onchange="filterTable()">
+  <!-- ══════════ REQUIREMENT UPDATE LISTING ══════════ -->
+  <div class="section-card">
+    <div style="margin-bottom:20px;">
+      <div class="table-header-flex">
+        <span class="section-title" style="margin-bottom:0;">REQUIREMENT UPDATE LISTING</span>
+        <div style="display:flex;gap:10px;flex-grow:1;justify-content:flex-end;flex-wrap:wrap;">
+          <input type="text" id="reqSearchInput" onkeyup="filterRequirementUpdates()"
+            placeholder="Search PSN / Batch ID / Client…" class="filter-select" style="width:250px;">
+          <select class="filter-select" id="reqStatusFilter" onchange="filterRequirementUpdates()">
             <option value="ALL">All Status</option>
-            <option value="ON SCHEDULE">On Schedule</option>
-            <option value="ALMOST DUE">Almost Due</option>
             <option value="OVERDUE">Overdue</option>
+            <option value="ALMOST DUE">Almost Due</option>
           </select>
         </div>
       </div>
 
-      <div style="max-height: 600px; overflow-y: auto; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-        <table class="job-table" id="jobTable" style="max-height: none; overflow: visible;">
+      <!-- id used by mobile CSS -->
+      <div id="requirementTable-wrapper" class="job-table-scroll-wrapper">
+        <table class="job-table" id="requirementTable">
           <thead>
             <tr>
               <th>PSN</th>
+              <th>Batch ID</th>
               <th>Client Name</th>
-              <th>Sales Code</th>
-              <th>PI No.</th>
-              <th>Qty</th>
-              <th>Order Date</th>
-              <th>Delivery Date</th>
-              <th>Progress</th>
-              <th>Priority</th>
-              <th>Status(Delivery)</th>
+              <th>Quantity</th>
+              <th>Current Process</th>
+              <th>In Progress</th>
+              <th style="cursor:pointer;" onclick="setReqSort('dueDays')">Days to Due Date <span
+                  id="reqSortIcon">▲</span></th>
+              <th>Previous Step &amp; EndDate</th>
             </tr>
           </thead>
-          <tbody id="jobListBody">
+          <tbody id="requirementBody">
             <tr>
-              <td colspan="9" style="text-align:center; padding: 40px;">Loading live data...</td>
+              <td colspan="8" style="text-align:center;padding:20px;">Loading requirement updates…</td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
-    <script>
-      let MASTER_DATA = [];
-      let RAW_CAPACITY = [];
-      let capacityChart = null;
-      let activeMachine = null;
-      let activeViewMode = 'MONTH'; // Default to monthly when clicking a card
-      let CURRENT_VIEW_DATE = new Date(); // Stores the date for the week we are looking at
-      let requirementUpdates = [];
-      let selectedProcess = null;
-      let processJobsCache = [];
-      let activeProcessName = null;
-      // --- NEW: CALCULATION FOR TOP CARDS START ---
-      let countSchedule = 0;
-      let countAlmost = 0;
-      let countOverdue = 0;
-      let countScheduleBatches = 0;
-      let countAlmostBatches = 0;
-      let countOverdueBatches = 0;
-      let totalJobs = 0;
-      let totalBatches = 0;
+  </div>
+
+  <!-- ══════════ JOB FULFILLMENT LIST ══════════ -->
+  <div class="section-card">
+    <div class="table-header-flex">
+      <span class="section-title" style="margin-bottom:0;">JOB FULFILLMENT LIST</span>
+      <div style="display:flex;gap:10px;flex-grow:1;justify-content:flex-end;flex-wrap:wrap;">
+        <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search PSN or Client Name…"
+          class="filter-select" style="width:250px;">
+
+        <select class="filter-select" id="salesCodeFilter" onchange="filterTable()">
+          <option value="ALL">All Sales Codes</option>
+          <option value="AO">AO</option>
+          <option value="SHU">SHU</option>
+          <option value="NT">NT</option>
+          <option value="AK">AK</option>
+          <option value="NY">NY</option>
+          <option value="OC">OC</option>
+          <option value="PAO">PAO</option>
+          <option value="PNY">PNY</option>
+          <option value="SO">SO</option>
+          <option value="SC">SC</option>
+        </select>
+
+        <select class="filter-select" id="priorityFilter" onchange="filterTable()">
+          <option value="ALL">All Priorities</option>
+          <option value="Urgent">Urgent</option>
+          <option value="Cut Queue">Cut Queue</option>
+          <option value="Normal">Normal</option>
+        </select>
+
+        <select class="filter-select" id="jobTypeFilter" onchange="filterTable()">
+          <option value="ALL">All Job Types</option>
+          <option value="Offset">Offset</option>
+          <option value="FSC">FSC</option>
+          <option value="Flexo & MMB/SOS">Flexo &amp; MMB/SOS</option>
+          <option value="Fully Outsourced">Fully Outsourced</option>
+          <option value="FSCFully Outsourced">FSC Fully Outsourced</option>
+          <option value="Drawdown">Drawdown</option>
+          <option value="K SERIES">K SERIES</option>
+          <option value="Mock-Up">Mock-Up</option>
+        </select>
+
+        <select class="filter-select" id="statusFilter" onchange="filterTable()">
+          <option value="ALL">All Status</option>
+          <option value="ON SCHEDULE">On Schedule</option>
+          <option value="ALMOST DUE">Almost Due</option>
+          <option value="OVERDUE">Overdue</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- id="jobTable-wrapper" targeted by mobile CSS -->
+    <div id="jobTable-wrapper" class="job-table-scroll-wrapper">
+      <table class="job-table" id="jobTable">
+        <thead>
+          <tr>
+            <th>PSN</th>
+            <th>Client Name</th>
+            <th>Sales Code</th>
+            <th>PI No.</th>
+            <th>Qty</th>
+            <th>Order Date</th>
+            <th>Delivery Date</th>
+            <th>Progress</th>
+            <th>Priority</th>
+            <th>Status (Delivery)</th>
+          </tr>
+        </thead>
+        <tbody id="jobListBody">
+          <tr>
+            <td colspan="10" style="text-align:center;padding:40px;">Loading live data…</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════ SCRIPTS ══════════ -->
+  <script>
+    /* ── State ── */
+    let MASTER_DATA = [], RAW_CAPACITY = [], capacityChart = null;
+    let activeMachine = null, activeViewMode = 'MONTH';
+    let CURRENT_VIEW_DATE = new Date();
+    let requirementUpdates = [], selectedProcess = null;
+    let processJobsCache = [], activeProcessName = null;
+    let countSchedule = 0, countAlmost = 0, countOverdue = 0;
+    let countScheduleBatches = 0, countAlmostBatches = 0, countOverdueBatches = 0;
+    let totalJobs = 0, totalBatches = 0;
+
+    /* ── Toast ── */
+    function showToast(message, type = 'info') {
+      const c = document.getElementById('toast-container');
+      if (!c) return;
+      const t = document.createElement('div');
+      const col = type === 'success' ? '#28a745' : type === 'error' ? '#d93025' : '#1a73e8';
+      Object.assign(t.style, {
+        background: 'rgba(45,55,72,0.95)', color: 'white', padding: '12px 20px',
+        borderRadius: '10px', minWidth: '280px', textAlign: 'center',
+        boxShadow: '0 10px 20px rgba(0,0,0,0.2)', fontWeight: '600',
+        pointerEvents: 'auto', borderBottom: `4px solid ${col}`
+      });
+      t.innerText = message;
+      c.appendChild(t);
+      setTimeout(() => {
+        Object.assign(t.style, { transition: 'opacity 0.4s,transform 0.4s', opacity: '0', transform: 'translateY(-20px)' });
+        setTimeout(() => t.remove(), 400);
+      }, 3000);
+    }
+
+    /* ── On load ── */
+    window.onload = async () => {
+      try {
+        const msg = sessionStorage.getItem('toastMessage');
+        if (msg) { showToast(msg, 'success'); sessionStorage.removeItem('toastMessage'); }
+
+        const resp = await fetch('/api/dashboard');
+        const data = await resp.json();
+
+        generateMonthOptions();
+        MASTER_DATA = data?.jobs || [];
+        RAW_CAPACITY = data?.rawCapacity || [];
+
+        renderDashboard();
+
+        /* ─ Process board ─ */
+        const sc = document.getElementById('processStatsContainer');
+        const processList = [
+          "Sheeting", "Printing", "Lamination", "Efluting", "Die-cut", "Convert", "Baseboard",
+          "Hotstamping", "Packing", "Double-Side-Tape", "Emboss", "Blind Emboss", "Gluing",
+          "Side Glue", "2 Point Glue", "Attach Handle", "Peeling", "Punch Hole", "Slitting LF",
+          "FlexoSlitting", "Spot UV", "Texture", "Trimming", "Varnish", "Waterbase", "Delivery"
+        ];
+
+        const sm = {};
+        (data.averages || []).forEach(i => { sm[i.name] = i; });
+
+        const pd = processList.map(n => ({ name: n, time: sm[n]?.avgTime ?? 0, activeCount: sm[n]?.activeCount ?? 0 }));
+        pd.sort((a, b) => b.activeCount - a.activeCount || b.time - a.time);
 
 
-      function showToast(message, type = 'info') {
-        const container = document.getElementById('toast-container');
-        if (!container) return;
-        const toast = document.createElement('div');
-        const color = type === 'success' ? '#28a745' : type === 'error' ? '#d93025' : '#1a73e8';
-        toast.className = 'toast';
-        toast.style.background = 'rgba(45, 55, 72, 0.95)';
-        toast.style.color = 'white';
-        toast.style.padding = '12px 20px';
-        toast.style.borderRadius = '10px';
-        toast.style.minWidth = '280px';
-        toast.style.textAlign = 'center';
-        toast.style.boxShadow = '0 10px 20px rgba(0,0,0,0.2)';
-        toast.style.fontWeight = '600';
-        toast.style.pointerEvents = 'auto';
-        toast.style.borderBottom = `4px solid ${color}`;
-        toast.innerText = message;
-        container.appendChild(toast);
-        setTimeout(() => {
-          toast.style.transition = 'opacity 0.4s, transform 0.4s';
-          toast.style.opacity = '0';
-          toast.style.transform = 'translateY(-20px)';
-          setTimeout(() => toast.remove(), 400);
-        }, 3000);
-      }
-
-
-      // Fetch data and initialize dashboard on load  
-      window.onload = async () => {
-        try {
-          const toastMessage = sessionStorage.getItem('toastMessage');
-          if (toastMessage) {
-            showToast(toastMessage, 'success');
-            sessionStorage.removeItem('toastMessage');
-          }
-          console.log('Dashboard: Starting data fetch...');
-          const resp = await fetch('/api/dashboard');
-          const data = await resp.json();
-
-          // console.log('Dashboard: Fetched data:', data);
-          // console.log('Dashboard: jobs count:', data?.jobs?.length);
-          // console.log('Dashboard: jobListing count:', data?.jobListing?.length);
-          // console.log('Dashboard: batchListing count:', data?.batchListing?.length);
-
-          generateMonthOptions();
-          // Use 'jobs' which has the processed batch data with steps
-          MASTER_DATA = data && data.jobs ? data.jobs : [];
-          // Also keep RAW_CAPACITY for backward compatibility
-          RAW_CAPACITY = data && data.rawCapacity ? data.rawCapacity : [];
-
-          // console.log('Dashboard: MASTER_DATA:', MASTER_DATA);
-
-          renderDashboard();
-
-          // --- RENDER SPLIT PROCESS BOARD ---
-          const statsContainer = document.getElementById('processStatsContainer');
-          const processList = ["Sheeting", "Printing", "Lamination", "Efluting", "Die-cut", "Convert", "Baseboard", "Hotstamping", "Packing", "Double-Side-Tape", "Emboss", "Blind Emboss", "Gluing", "Side Glue", "2 Point Glue", "Attach Handle", "Peeling", "Punch Hole", "Slitting LF", "FlexoSlitting", "Spot UV", "Texture", "Trimming", "Varnish", "Waterbase", "Delivery"];
-
-          const statsMap = {};
-          if (data.averages) {
-            data.averages.forEach(item => { statsMap[item.name] = item; });
-          }
-
-          const processData = processList.map(name => ({
-            name: name,
-            time: statsMap[name] ? statsMap[name].avgTime : 0,
-            activeCount: statsMap[name] ? statsMap[name].activeCount : 0
-          }));
-
-          // Sort by workload (active jobs) first, then by duration
-          processData.sort((a, b) => b.activeCount - a.activeCount || b.time - a.time);
-
-          statsContainer.innerHTML = processData.map(proc => {
-            const isZeroTime = proc.time === 0;
-            const hasActiveJobs = proc.activeCount > 0;
-            const borderColor = hasActiveJobs ? 'var(--success)' : (isZeroTime ? '#cbd5e1' : 'var(--primary)');
-
-            return `
-            <div class="process-item clickable-process" onclick="showProcessJobs('${proc.name}')" style="border-left: 5px solid ${borderColor}; background: #fff; display: flex; padding: 10px; align-items: center; gap: 8px;">
-              <div style="flex: 1; border-right: 1px dashed #e2e8f0; padding-right: 5px; overflow: hidden;">
-                <div class="process-name" style="font-size: 0.7rem; color: #64748b; margin-bottom: 2px;">${proc.name}</div>
-                <div style="font-size: 1.1rem; font-weight: 800; color: ${isZeroTime ? '#cbd5e1' : '#1a73e8'};">
-                  ${proc.time}<span style="font-size: 0.6rem; font-weight: 600; margin-left: 2px;">DAYS</span>
+        sc.innerHTML = pd.map(p => {
+          const iz = p.time === 0, hj = p.activeCount > 0;
+          const bc = hj ? 'var(--success)' : (iz ? '#cbd5e1' : 'var(--primary)');
+          return `
+              <div class="process-item clickable-process" onclick="showProcessJobs('${p.name}')" style="border-left:5px solid ${bc};">
+                <div style="flex:1;border-right:1px dashed #e2e8f0;padding-right:5px;overflow:hidden;">
+                  <div class="process-name">${p.name}</div>
+                  <div style="font-size:1rem;font-weight:800;color:${iz ? '#cbd5e1' : 'var(--primary)'};">
+                    ${p.time}<span style="font-size:0.6rem;font-weight:600;margin-left:2px;">DAYS</span>
+                  </div>
                 </div>
-              </div>
-              <div style="text-align: center; min-width: 75px;">
-                <div style="font-size: 0.6rem; color: ${hasActiveJobs ? 'var(--success)' : '#94a3b8'}; font-weight: 800; white-space: nowrap;">
-                  ${hasActiveJobs ? '● IN PROGRESS' : 'IDLE'}
+                <div style="text-align:center;min-width:50px;">
+                  <div style="font-size:0.58rem;color:${hj ? 'var(--success)' : '#94a3b8'};font-weight:800;white-space:nowrap;">
+                    ${hj ? '● IN PROGRESS' : 'IDLE'}
+                  </div>
+                  <div style="font-size:1.2rem;font-weight:900;color:${hj ? '#1e293b' : '#e2e8f0'};line-height:1.1;">${p.activeCount}</div>
+                  <div style="font-size:0.52rem;color:#94a3b8;font-weight:600;">JOBS</div>
                 </div>
-                <div style="font-size: 1.3rem; font-weight: 900; color: ${hasActiveJobs ? '#1e293b' : '#e2e8f0'}; line-height: 1;">
-                  ${proc.activeCount}
-                </div>
-                <div style="font-size: 0.55rem; color: #94a3b8; font-weight: 600;">JOBS</div>
-              </div>
-            </div>
-          `;
-          }).join('');
+              </div>`;
+        }).join('');
 
-          // Optional summaries for the Dashboard UI
-          const stats = data.stats || {};
-          const jobsElem = document.getElementById('totalJobs');
-          if (jobsElem) jobsElem.innerText = stats.totalJobs ?? MASTER_DATA.length;
-          const batchesElem = document.getElementById('totalBatches');
-          if (batchesElem) batchesElem.innerText = stats.totalBatches ?? RAW_CAPACITY.length;
-          const qtyElem = document.getElementById('totalQuantity');
-          if (qtyElem) qtyElem.innerText = stats.totalQuantity ?? 0;
+        calculateCapacity();
+        requirementUpdates = data.requirementUpdates || [];
+        filterRequirementUpdates();
 
-          calculateCapacity();
-          requirementUpdates = data.requirementUpdates || [];
-          filterRequirementUpdates();
-
-          document.querySelectorAll('.status-card').forEach(card => {
-            card.addEventListener('click', () => {
-              const status = card.dataset.status;
-              if (!status) return;
-
-              document.getElementById('statusFilter').value = status;
-              filterTable();
-              document.querySelectorAll('.status-card').forEach(c => c.classList.remove('active-status'));
-              card.classList.add('active-status');
-
-              document.getElementById('jobTable').scrollIntoView({ behavior: 'smooth', block: 'start' });
-            });
+        document.querySelectorAll('.status-card').forEach(card => {
+          card.addEventListener('click', () => {
+            const s = card.dataset.status; if (!s) return;
+            document.getElementById('statusFilter').value = s;
+            filterTable();
+            document.querySelectorAll('.status-card').forEach(c => c.classList.remove('active-status'));
+            card.classList.add('active-status');
+            document.getElementById('jobTable').scrollIntoView({ behavior: 'smooth', block: 'start' });
           });
-        } catch (err) {
-          console.error('Dashboard load failed', err);
+        });
+
+      } catch (e) { console.error('Dashboard load failed', e); }
+    };
+
+    /* ── filterTable ── */
+    function filterTable() {
+      const st = document.getElementById('searchInput').value.toUpperCase();
+      const sc = document.getElementById('salesCodeFilter').value;
+      const pc = document.getElementById('priorityFilter').value;
+      const jt = document.getElementById('jobTypeFilter').value;
+      const ss = document.getElementById('statusFilter').value;
+
+      const g = {};
+      MASTER_DATA.forEach(job => {
+        if (!g[job.psn]) {
+          g[job.psn] = {
+            psn: job.psn, client: job.jobName || job.client || '-',
+            salesCode: job.salesCode || job.code || '-', pi: job.piNumber || job.pi || '-',
+            jobType: job.jobType || '-', qty: 0,
+            orderDate: job.orderDate || job.date || '-', deliveryDate: job.deliveryDate || '-',
+            priority: job.priority || 'Normal', status: job.status || 'ON SCHEDULE', batches: []
+          };
+          g[job.psn].qty += Number(job.remainingQty) || 0;
         }
-      };
+        g[job.psn].batches.push(job);
+        g[job.psn].qty += Number(job.qty);
+      });
 
+      let pl = Object.values(g);
+      countSchedule = countAlmost = countOverdue = 0;
+      countScheduleBatches = countAlmostBatches = countOverdueBatches = 0;
+      totalJobs = pl.length; totalBatches = pl.reduce((a, i) => a + (i.batches?.length || 0), 0);
 
-      // Main function to filter, sort, and display the job table
-      function filterTable() {
-        const searchTerm = document.getElementById('searchInput').value.toUpperCase();
-        const salesCodeType = document.getElementById('salesCodeFilter').value;
-        const priorityType = document.getElementById('priorityFilter').value;
-        const jobTypeType = document.getElementById('jobTypeFilter').value;
-        const statusType = document.getElementById('statusFilter').value;
+      pl.forEach(i => {
+        if (i.status === 'ON SCHEDULE') { countSchedule++; countScheduleBatches += i.batches.length; }
+        else if (i.status === 'ALMOST DUE') { countAlmost++; countAlmostBatches += i.batches.length; }
+        else if (i.status === 'OVERDUE') { countOverdue++; countOverdueBatches += i.batches.length; }
+      });
 
-        // 1. Group the MASTER_DATA (keeping your exact logic)
-        const psnGroups = {};
-        MASTER_DATA.forEach(job => {
-          console.log(job);
-          if (!psnGroups[job.psn]) {
-            psnGroups[job.psn] = {
-              psn: job.psn,
-              client: job.jobName || job.client || "-",
-              salesCode: job.salesCode || job.code || "-",
-              pi: job.piNumber || job.pi || "-",
-              jobType: job.jobType || "-",
-              qty: 0,
-              orderDate: job.orderDate || job.date || "-",
-              deliveryDate: job.deliveryDate || "-",
-              priority: job.priority || "Normal",
-              status: job.status || "ON SCHEDULE",
-              batches: []
-            };
-            psnGroups[job.psn].qty += Number(job.remainingQty) || 0;
+      document.getElementById('stat-schedule').innerText = String(countSchedule).padStart(2, '0');
+      document.getElementById('stat-almost').innerText = String(countAlmost).padStart(2, '0');
+      document.getElementById('stat-overdue').innerText = String(countOverdue).padStart(2, '0');
+
+      const fl = pl.filter(i => {
+        const ms = i.psn.toUpperCase().includes(st) || i.client.toUpperCase().includes(st) || i.pi.toUpperCase().includes(st);
+        return ms && (sc === 'ALL' || i.salesCode === sc) && (pc === 'ALL' || i.priority === pc) && (jt === 'ALL' || i.jobType === jt) && (ss === 'ALL' || i.status === ss);
+      });
+
+      fl.sort((a, b) => {
+        const po = { Urgent: 1, 'Cut Queue': 2, Normal: 3 }, so = { OVERDUE: 1, 'ALMOST DUE': 2, 'ON SCHEDULE': 3 };
+        const d = (po[a.priority] || 4) - (po[b.priority] || 4);
+        return d !== 0 ? d : (so[a.status] || 4) - (so[b.status] || 4);
+      });
+      drawTable(fl);
+    }
+
+    /* ── drawTable — data-label on every td ── */
+    function drawTable(list) {
+      const tbody = document.getElementById('jobListBody');
+      tbody.innerHTML = '';
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;">No matching jobs found.</td></tr>';
+        return;
+      }
+
+      list.forEach((g, idx) => {
+        const ap = Math.round((g.batches.reduce((s, b) => s + (b.progress || 0), 0) / g.batches.length) * 100);
+        const sc = g.status === 'OVERDUE' ? 'tag-overdue' : g.status === 'ALMOST DUE' ? 'tag-almost' : 'tag-schedule';
+        const pc = g.priority === 'Urgent' ? 'tag-overdue' : g.priority === 'Cut Queue' ? 'tag-almost' : 'tag-schedule';
+        const rc = getRowClass(g, 'job');
+
+        const row = document.createElement('tr');
+        row.className = `clickable-row ${rc}`;
+        row.onclick = () => toggleBatch(idx);
+        row.innerHTML = `
+            <td data-label="PSN"><strong>${g.psn}</strong></td>
+            <td data-label="Client">${g.client}</td>
+            <td data-label="Sales Code">${g.salesCode}</td>
+            <td data-label="PI No.">${g.pi}</td>
+            <td data-label="Qty">${g.qty.toLocaleString()}</td>
+            <td data-label="Order Date">${formatDateDMY(g.orderDate)}</td>
+            <td data-label="Delivery">${formatDateDMY(g.deliveryDate)}</td>
+            <td data-label="Progress">
+              ${ap}%
+              <div class="progress-bar"><div class="progress-fill" style="width:${ap}%;"></div></div>
+            </td>
+            <td data-label="Priority"><span class="tag ${pc}">${g.priority}</span></td>
+            <td data-label="Status"><span class="tag ${sc}">${g.status}</span></td>`;
+
+        /* Batch detail row */
+        const dr = document.createElement('tr');
+        dr.id = 'batch-row-' + idx;
+        dr.className = 'batch-detail-row';
+
+        const bHtml = g.batches.map(b => {
+          const cs = b.steps?.find(s => !s.isDone) ?? null;
+          const d = calculateDaysToDueFromStep(b);
+          const io = d < 0, idt = d === 0, ind = d > 0 && d <= 2;
+          let bsc = 'row-normal';
+          if (!cs) bsc = 'row-completed';
+          else if (io) bsc = 'row-overdue';
+          else if (idt || ind) bsc = 'row-almost-due';
+          const st = cs ? (cs.name + (io ? ': Delayed' : idt ? ': Due Today' : ind ? ': Almost Due' : ': Running')) : 'Completed';
+          const pl = !cs ? 'pill-completed' : io ? 'pill-delayed' : (idt || ind) ? 'pill-almost' : 'pill-running';
+          return `<tr class="${bsc}">
+              <td data-label="Batch ID">
+                <a href="${getUpdateUrl(b.batchId)}" target="_top" style="color:var(--primary);font-weight:bold;text-decoration:none;">
+                  <i class="fas fa-external-link-alt" style="font-size:0.65rem;"></i> ${b.batchId}
+                </a>
+              </td>
+              <td data-label="Qty">${Number(b.qty).toLocaleString()}</td>
+              <td data-label="Progress">
+                ${(b.progress * 100).toFixed(0)}%
+                <div class="progress-bar" style="width:70px;"><div class="progress-fill" style="width:${(b.progress * 100).toFixed(0)}%;"></div></div>
+              </td>
+              <td data-label="Status"><span class="pill ${pl}">${st}</span></td>
+            </tr>`;
+        }).join('');
+
+        dr.innerHTML = `<td colspan="10" style="padding:0;">
+            <div style="padding:16px 20px;background:#fdfdfd;border-bottom:2px solid var(--primary);overflow-x:auto;">
+              <table class="batch-inner-table">
+                <thead><tr><th>Batch ID</th><th>Qty</th><th>Progress</th><th>Status</th></tr></thead>
+                <tbody>${bHtml}</tbody>
+              </table>
+            </div>
+          </td>`;
+
+        tbody.appendChild(row);
+        tbody.appendChild(dr);
+      });
+    }
+
+    /* ── Helpers ── */
+    function getUpdateUrl(id) { return `/BatchDetail.html?id=${encodeURIComponent(id)}`; }
+
+    function formatDateDMY(r) {
+      if (!r || r === '-') return '-';
+      let d;
+      if (typeof r === 'string') {
+        const p = r.trim().split(/[-\/]/);
+        if (p.length === 3) {
+          const [a, b, c] = p;
+          if (a.length === 4) d = new Date(+a, +b - 1, +c);
+          else { const y = c.length === 2 ? Number('20' + c) : +c; if (!isNaN(+a) && !isNaN(+b) && !isNaN(y)) d = new Date(y, +b - 1, +a); }
+        }
+      }
+      if (!d || isNaN(d.getTime())) d = new Date(r);
+      if (!d || isNaN(d.getTime())) return '-';
+      return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+    }
+
+    function renderDashboard() { filterTable(); }
+
+    /* ── toggleBatch — block on mobile, table-row on desktop ── */
+    function toggleBatch(id) {
+      const row = document.getElementById('batch-row-' + id);
+      const vis = row.style.display === 'table-row' || row.style.display === 'block';
+      document.querySelectorAll('.batch-detail-row').forEach(r => r.style.display = 'none');
+      if (!vis) row.style.display = window.innerWidth <= 768 ? 'block' : 'table-row';
+    }
+
+    document.getElementById('statusFilter').addEventListener('change', function () {
+      const v = this.value;
+      const tr = document.getElementById('jobTable').getElementsByTagName('tr');
+      for (let i = 1; i < tr.length; i++) {
+        const td = tr[i].getElementsByTagName('td')[9];
+        if (td) tr[i].style.display = (v === 'ALL' || (td.textContent || td.innerText).trim() === v) ? '' : 'none';
+      }
+    });
+
+    /* ── Capacity ── */
+    function changeWeek(dir) { CURRENT_VIEW_DATE.setDate(CURRENT_VIEW_DATE.getDate() + dir * 7); calculateCapacity(); }
+
+    function calculateCapacity() {
+      const sel = document.getElementById('monthPicker').value;
+      const con = document.getElementById('machineCapacityContainer');
+      const wl = document.getElementById('currentWeekRange');
+
+      const M = { IJIMA: { color: '#1a73e8', bg: '#e8f0fe' }, HANDSWITCH: { color: '#b06000', bg: '#fef7e0' }, OUTSOURCED: { color: '#7b1fa2', bg: '#f3e5f5' } };
+      const T = { IJIMA: { m: 0, w: 0 }, HANDSWITCH: { m: 0, w: 0 }, OUTSOURCED: { m: 0, w: 0 } };
+
+      const tmp = new Date(CURRENT_VIEW_DATE), dy = tmp.getDay();
+      const diff = tmp.getDate() - dy + (dy === 0 ? -6 : 1);
+      const mon = new Date(tmp.setDate(diff)); mon.setHours(0, 0, 0, 0);
+      const sun = new Date(mon); sun.setDate(mon.getDate() + 6); sun.setHours(23, 59, 59, 999);
+
+      const fmt = d => d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+      wl.innerHTML = `<i class="far fa-calendar-alt"></i> ${fmt(mon)} – ${fmt(sun)}`;
+
+      RAW_CAPACITY.forEach(it => {
+        const [dd, mm, yy] = it.date.split('/').map(Number);
+        const td = new Date(yy, mm - 1, dd);
+        const ms = String(mm).padStart(2, '0') + '/' + String(yy).substring(2);
+        if (ms === sel && T[it.machine]) T[it.machine].m += it.qty;
+        if (td >= mon && td <= sun && T[it.machine]) T[it.machine].w += it.qty;
+      });
+
+      con.innerHTML = Object.keys(M).map(mn => {
+        const m = M[mn], d = T[mn];
+        return `
+            <div class="cap-card" onclick="showMachineChart('${mn}')" style="border-left:6px solid ${m.color};cursor:pointer;">
+              <div class="card-top">
+                <span class="machine-badge" style="background:${m.bg};color:${m.color};">${mn}</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px;">
+                <div>
+                  <div style="font-size:10px;color:#94a3b8;font-weight:700;">WEEK VIEW</div>
+                  <div style="font-size:22px;font-weight:800;color:${m.color};">
+                    ${d.w.toLocaleString()} <small style="font-size:11px;font-weight:500;">PCS</small>
+                  </div>
+                </div>
+                <div style="text-align:right;border-left:1px solid #eee;padding-left:12px;">
+                  <div style="font-size:10px;color:#94a3b8;font-weight:700;">MONTH (${sel})</div>
+                  <div style="font-size:18px;font-weight:800;color:#1e293b;">${d.m.toLocaleString()}</div>
+                </div>
+              </div>
+            </div>`;
+      }).join('');
+
+      const cs = document.getElementById('chartSection');
+      if (cs?.style.display === 'block' && activeMachine) updateChartData(activeMachine);
+    }
+
+    function generateMonthOptions() {
+      const p = document.getElementById('monthPicker'), now = new Date();
+      for (let i = -3; i <= 8; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+        const v = `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getFullYear()).substring(2)}`;
+        const t = `${d.toLocaleString('default', { month: 'short' })} ${d.getFullYear()}`;
+        const o = Object.assign(document.createElement('option'), { value: v, text: t });
+        if (i === 0) o.selected = true;
+        p.appendChild(o);
+      }
+    }
+
+    function setChartViewMode(mode) { activeViewMode = mode; if (activeMachine) updateChartData(activeMachine); }
+
+    function showMachineChart(mn) {
+      const cs = document.getElementById('chartSection');
+      if (activeMachine === mn && cs.style.display === 'block') { cs.style.display = 'none'; activeMachine = null; return; }
+      activeMachine = mn; activeViewMode = 'MONTH'; cs.style.display = 'block'; updateChartData(mn);
+    }
+
+    function updateChartData(mn) {
+      const ctx = document.getElementById('capacityChart').getContext('2d');
+      const cols = { IJIMA: '#1a73e8', HANDSWITCH: '#f9ab00', OUTSOURCED: '#7b1fa2' };
+      const sv = document.getElementById('monthPicker').value;
+      const [sM, sY] = sv.split('/');
+      const bM = document.getElementById('btnViewMonth'), bW = document.getElementById('btnViewWeek');
+      if (bM) bM.style.background = activeViewMode === 'MONTH' ? 'white' : 'transparent';
+      if (bW) bW.style.background = activeViewMode === 'WEEK' ? 'white' : 'transparent';
+
+      let labels = [], counts = [];
+
+      if (activeViewMode === 'MONTH') {
+        labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        counts = new Array(12).fill(0);
+        RAW_CAPACITY.forEach(it => {
+          const [, mm, yy] = it.date.split('/');
+          if (it.machine === mn && String(yy).substring(2) === sY) counts[parseInt(mm) - 1] += it.qty;
+        });
+        document.getElementById('chartSubtitle').innerText = `Annual Performance for 20${sY}`;
+      } else {
+        const yr = 2000 + parseInt(sY), mo = parseInt(sM) - 1;
+        const fd = new Date(yr, mo, 1), ld = new Date(yr, mo + 1, 0);
+        const wt = [0, 0, 0, 0, 0, 0];
+        RAW_CAPACITY.forEach(it => {
+          const [dd, mm, yy] = it.date.split('/').map(Number);
+          if (it.machine === mn && mm === parseInt(sM) && String(yy).substring(2) === sY) {
+            wt[Math.ceil((dd + fd.getDay()) / 7) - 1] += it.qty;
           }
-
-          // const remaining = Number(job.remainingQty);
-          psnGroups[job.psn].batches.push(job);
-          psnGroups[job.psn].qty += Number(job.qty);
-          // console.log(psnGroups);
         });
-
-        let psnList = Object.values(psnGroups);
-
-        // Calculate total counts BEFORE filtering
-        countSchedule = 0;
-        countAlmost = 0;
-        countOverdue = 0;
-        countScheduleBatches = 0;
-        countAlmostBatches = 0;
-        countOverdueBatches = 0;
-        totalJobs = psnList.length;
-        totalBatches = psnList.reduce((acc, item) => acc + (item.batches ? item.batches.length : 0), 0);
-
-        psnList.forEach(item => {
-          if (item.status === "ON SCHEDULE") {
-            countSchedule++;
-            countScheduleBatches += item.batches.length;
-          } else if (item.status === "ALMOST DUE") {
-            countAlmost++;
-            countAlmostBatches += item.batches.length;
-          } else if (item.status === "OVERDUE") {
-            countOverdue++;
-            countOverdueBatches += item.batches.length;
-          }
-        });
-
-        // Update the HTML values (using padStart to keep the 00 format)
-        document.getElementById('stat-schedule').innerText = String(countSchedule).padStart(2, '0');
-        document.getElementById('stat-almost').innerText = String(countAlmost).padStart(2, '0');
-        document.getElementById('stat-overdue').innerText = String(countOverdue).padStart(2, '0');
-
-        // document.getElementById('stat-total-jobs').innerText = String(totalJobs);
-        // document.getElementById('stat-total-batches').innerText = String(totalBatches);
-
-        // 2. APPLY FILTERS
-        const filteredList = psnList.filter(item => {
-          const matchesSearch = item.psn.toUpperCase().includes(searchTerm) ||
-            item.client.toUpperCase().includes(searchTerm) ||
-            item.pi.toUpperCase().includes(searchTerm);
-
-          const matchesSalesCode = salesCodeType === "ALL" || item.salesCode === salesCodeType;
-          const matchesPriority = priorityType === "ALL" || item.priority === priorityType;
-          const matchesJobType = jobTypeType === "ALL" || item.jobType === jobTypeType;
-          const matchesStatus = statusType === "ALL" || item.status === statusType;
-
-          return matchesSearch && matchesSalesCode && matchesPriority && matchesJobType && matchesStatus;
-        });
-
-        // 3. APPLY SMART SORT
-        filteredList.sort((a, b) => {
-          const priorityOrder = { "Urgent": 1, "Cut Queue": 2, "Normal": 3 };
-          const statusOrder = { "OVERDUE": 1, "ALMOST DUE": 2, "ON SCHEDULE": 3 };
-          const aPri = priorityOrder[a.priority] || 4;
-          const bPri = priorityOrder[b.priority] || 4;
-          const aStat = statusOrder[a.status] || 4;
-          const bStat = statusOrder[b.status] || 4;
-          if (aPri !== bPri) return aPri - bPri;
-          return aStat - bStat;
-        });
-
-        // 4. DRAW THE TABLE
-        drawTable(filteredList);
+        const nw = Math.ceil((ld.getDate() + fd.getDay()) / 7);
+        for (let i = 1; i <= nw; i++) labels.push(`Week ${i}`);
+        counts = wt.slice(0, nw);
+        const mn2 = document.getElementById('monthPicker').options[document.getElementById('monthPicker').selectedIndex].text;
+        document.getElementById('chartSubtitle').innerText = `Weekly Breakdown for ${mn2}`;
       }
 
-      // Separate the drawing logic so it can be called by the filter
-      function drawTable(dataList) {
-        const tbody = document.getElementById('jobListBody');
-        tbody.innerHTML = '';
+      if (capacityChart) capacityChart.destroy();
+      /* Responsive datalabel font size */
+      const dlSize = window.innerWidth <= 480 ? 9 : window.innerWidth <= 768 ? 10 : 12;
 
-        if (dataList.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding: 40px;">No matching jobs found.</td></tr>';
-          return;
-        }
-
-        // For each PSN group, create a row and a hidden detail row for batches
-        dataList.forEach((group, index) => {
-          const avgProgress = Math.round((group.batches.reduce((sum, b) => sum + (b.progress || 0), 0) / group.batches.length) * 100);
-          const statusClass = group.status === 'OVERDUE' ? 'tag-overdue' : (group.status === 'ALMOST DUE' ? 'tag-almost' : 'tag-schedule');
-          const priorityClass = group.priority === 'Urgent' ? 'tag-overdue' : (group.priority === 'Cut Queue' ? 'tag-almost' : 'tag-schedule');
-          const rowClass = getRowClass(group, 'job');
-
-          const row = document.createElement('tr');
-          row.className = `clickable-row ${rowClass}`;
-          row.onclick = () => toggleBatch(index);
-          row.innerHTML = `
-          <td><strong>${group.psn}</strong></td>
-          <td>${group.client}</td>
-          <td>${group.salesCode}</td>
-          <td>${group.pi}</td>
-          <td>${group.qty.toLocaleString()}</td>
-          <td>${formatDateDMY(group.orderDate)}</td>
-          <td>${formatDateDMY(group.deliveryDate)}</td>
-          <td>
-            ${avgProgress}%
-            <div class="progress-bar"><div class="progress-fill" style="width: ${avgProgress}%;"></div></div>
-          </td>
-          <td><span class="tag ${priorityClass}">${group.priority}</span></td>
-          <td><span class="tag ${statusClass}">${group.status}</span></td>
-        `;
-
-          // Re-use your detailRow logic here...
-          const detailRow = document.createElement('tr');
-          detailRow.id = 'batch-row-' + index;
-          detailRow.className = 'batch-detail-row';
-
-          // ... (Keep your existing batchRowsHtml generation here) ...
-          let batchRowsHtml = group.batches.map(b => {
-            const currentStep = b.steps ? b.steps.find((s) => !s.isDone) : null;
-            const days = calculateDaysToDueFromStep(b);
-            const isOverdue = days < 0;
-            const isDueToday = days === 0;
-            const isNearDue = days > 0 && days <= 2;
-
-            let batchStatusClass = 'row-normal';
-            if (!currentStep) batchStatusClass = 'row-completed';
-            else if (isOverdue) batchStatusClass = 'row-overdue';
-            else if (isDueToday || isNearDue) batchStatusClass = 'row-almost-due';
-
-            const statusText = currentStep ? `${currentStep.name}${isOverdue ? ': Delayed' : (isDueToday ? ': Due Today' : (isNearDue ? ': Almost Due' : ': Running'))}` : 'Completed';
-            const pillClass = !currentStep ? 'pill-completed' : (isOverdue ? 'pill-delayed' : (isDueToday || isNearDue ? 'pill-almost' : 'pill-running'));
-
-            return `<tr class="${batchStatusClass}"><td>
-      <a href="${getUpdateUrl(b.batchId)}" target="_top" style="color: var(--primary); font-weight: bold; text-decoration: none;">
-        <i class="fas fa-external-link-alt" style="font-size: 0.7rem;"></i> ${b.batchId}
-      </a>
-    </td><td>${Number(b.qty).toLocaleString()}</td><td>
-      ${(b.progress * 100).toFixed(0)}%
-      <div class="progress-bar" style="width: 80px;"><div class="progress-fill" style="width: ${(b.progress * 100).toFixed(0)}%;"></div></div>
-    </td><td><span class="pill ${pillClass}">${statusText}</span></td></tr>`;
-          }).join('');
-
-          detailRow.innerHTML = `<td colspan="10" style="padding: 0;"><div style="padding:20px; background:#fdfdfd; border-bottom:2px solid var(--primary);"><table class="batch-inner-table"><tbody><tr style="background: #f8f9fa; font-weight: bold;"><td>Batch ID</td><td>Qty</td><td>Progress</td><td>Status</td></tr>${batchRowsHtml}</tbody></table></div></td>`;
-
-          tbody.appendChild(row);
-          tbody.appendChild(detailRow);
-        });
-      }
-
-      // Helper function to generate the URL for batch details
-      function getUpdateUrl(batchId) {
-        // Node.js server: direct link to BatchDetail
-        return `/BatchDetail.html?id=${encodeURIComponent(batchId)}`;
-      }
-
-      // Update renderDashboard to simply call the filter
-      function formatDateDMY(rawDate) {
-        if (!rawDate || rawDate === '-') return '-';
-
-        // Normalize input to Date object:
-        let date;
-        if (typeof rawDate === 'string') {
-          // force as DD/MM/YYYY or MM/DD/YYYY fallback
-          const parts = rawDate.trim().split(/[-\/]/);
-          if (parts.length === 3) {
-            const [a, b, c] = parts;
-            // guess if first part is year or month/day
-            if (a.length === 4) {
-              date = new Date(Number(a), Number(b) - 1, Number(c));
-            } else {
-              // dd/mm/yyyy -> english locale by manual conversion
-              const day = Number(a);
-              const month = Number(b);
-              const year = c.length === 2 ? Number('20' + c) : Number(c);
-              if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
-                date = new Date(year, month - 1, day);
-              }
-            }
-          }
-        }
-        if (!date || isNaN(date.getTime())) {
-          date = new Date(rawDate);
-        }
-        if (!date || isNaN(date.getTime())) return '-';
-
-        const dd = String(date.getDate()).padStart(2, '0');
-        const mm = String(date.getMonth() + 1).padStart(2, '0');
-        const yyyy = String(date.getFullYear());
-        return `${dd}/${mm}/${yyyy}`;
-      }
-
-      // Main function to render the dashboard, now simplified to just call filterTable
-      function renderDashboard() {
-        filterTable();
-      }
-
-      // New function to render the requirement updates table
-      function renderRequirementUpdates(updates) {
-        const tbody = document.getElementById('requirementBody');
-        tbody.innerHTML = '';
-
-        if (updates.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 20px;">No urgent updates required.</td></tr>';
-          return;
-        }
-
-        updates.forEach(update => {
-          const row = document.createElement('tr');
-          row.className = 'clickable-row';
-          const durationClass = update.isDelayed ? 'tag-overdue' : 'tag-almost';
-          row.innerHTML = `
-          <td><strong>${update.psn}</strong></td>
-          <td>
-            <a href="${getUpdateUrl(update.batchId)}" target="_top" style="color: var(--primary); font-weight: bold; text-decoration: none;">
-              <i class="fas fa-external-link-alt" style="font-size: 0.7rem;"></i> ${update.batchId}
-            </a>
-          </td>
-          <td>${update.jobName}</td>
-          <td>${update.quantity.toLocaleString()}</td>
-          <td>${update.currentProcess}</td>
-          <td style="text-align: center;">${update.prevDurationTime} days</td>
-          <td><span class="tag ${durationClass}">${update.duration}</span></td>
-          <td>${update.lastUpdated}</td>
-        `;
-          tbody.appendChild(row);
-        });
-      }
-
-      // Function to toggle batch details visibility
-      function toggleBatch(id) {
-        const detailRow = document.getElementById('batch-row-' + id);
-        const isVisible = detailRow.style.display === 'table-row';
-        document.querySelectorAll('.batch-detail-row').forEach(r => {
-          r.style.display = 'none';
-          r.classList.remove('sticky-expanded-section');
-          // Remove sticky from all job rows
-          const prevRow = r.previousElementSibling;
-          if (prevRow) prevRow.classList.remove('sticky-job-row');
-        });
-        if (!isVisible) {
-          detailRow.style.display = 'table-row';
-          detailRow.classList.add('sticky-expanded-section');
-        }
-      }
-
-      // Event listener for the new Status filter
-      document.getElementById('statusFilter').addEventListener('change', function () {
-        const selectedValue = this.value;
-        const table = document.getElementById('jobTable');
-        const tr = table.getElementsByTagName('tr');
-
-        // Loop through all table rows, skip the header (index 0)
-        for (let i = 1; i < tr.length; i++) {
-          // Priority column is index 7
-          const td = tr[i].getElementsByTagName('td')[9];
-
-          if (td) {
-            const txtValue = td.textContent || td.innerText;
-
-            // Show row if it matches selection OR if "ALL" is selected
-            if (selectedValue === "ALL" || txtValue.trim() === selectedValue) {
-              tr[i].style.display = "";
-            } else {
-              tr[i].style.display = "none";
-            }
+      capacityChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels, datasets: [{
+            label: 'Total Qty (PCS)', data: counts,
+            backgroundColor: cols[mn] + 'CC', borderColor: cols[mn], borderWidth: 1, borderRadius: 8
+          }]
+        },
+        plugins: [ChartDataLabels],
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          layout: { padding: { top: 30 } },
+          plugins: {
+            legend: { display: false },
+            datalabels: {
+              anchor: 'end', align: 'top', offset: 4, color: '#1e293b',
+              font: { weight: '900', size: dlSize },
+              formatter: v => v > 0 ? v.toLocaleString() : ''
+            },
+            tooltip: { callbacks: { label: c => `Total: ${c.raw.toLocaleString()} PCS` } }
+          },
+          scales: {
+            y: { beginAtZero: true, grace: '15%', ticks: { callback: v => v.toLocaleString(), color: '#94a3b8' }, grid: { color: '#f1f5f9' } },
+            x: { grid: { display: false }, ticks: { color: '#64748b', font: { weight: 'bold' } } }
           }
         }
       });
+    }
 
-      // Function to move the week back or forth
-      function changeWeek(direction) {
-        // Move the date by 7 days
-        CURRENT_VIEW_DATE.setDate(CURRENT_VIEW_DATE.getDate() + (direction * 7));
-        calculateCapacity(); // Refresh the UI
-      }
+    /* ── Requirement Updates ── */
+    let reqSortField = 'dueDays', reqSortAsc = true;
 
-      // Main function to calculate and render the capacity cards based on RAW_CAPACITY and current filters
-      function calculateCapacity() {
-        const selectedMonthYear = document.getElementById('monthPicker').value;
-        const container = document.getElementById('machineCapacityContainer');
-        const weekLabel = document.getElementById('currentWeekRange');
-
-        const machines = {
-          "IJIMA": { color: "#1a73e8", bg: "#e8f0fe" },
-          "HANDSWITCH": { color: "#b06000", bg: "#fef7e0" },
-          "OUTSOURCED": { color: "#7b1fa2", bg: "#f3e5f5" }
-        };
-
-        let totals = {
-          "IJIMA": { month: 0, week: 0 },
-          "HANDSWITCH": { month: 0, week: 0 },
-          "OUTSOURCED": { month: 0, week: 0 }
-        };
-
-        // --- CALCULATE DYNAMIC WEEK RANGE BASED ON CURRENT_VIEW_DATE ---
-        const tempDate = new Date(CURRENT_VIEW_DATE);
-        const day = tempDate.getDay();
-        const diff = tempDate.getDate() - day + (day == 0 ? -6 : 1); // Monday
-
-        const monday = new Date(tempDate.setDate(diff));
-        monday.setHours(0, 0, 0, 0);
-
-        const sunday = new Date(monday);
-        sunday.setDate(monday.getDate() + 6);
-        sunday.setHours(23, 59, 59, 999);
-
-        const fmt = (d) => d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
-        weekLabel.innerHTML = `<i class="far fa-calendar-alt"></i> ${fmt(monday)} - ${fmt(sunday)}`;
-
-        RAW_CAPACITY.forEach(item => {
-          const parts = item.date.split("/");
-          // Parse D/M/YYYY format
-          let day = parseInt(parts[0]);
-          let month = parseInt(parts[1]);
-          let year = parseInt(parts[2]);
-
-          // Create date object
-          const taskDate = new Date(year, month - 1, day);
-          // Format for month year comparison: MM/YY
-          const monthStr = String(month).padStart(2, '0');
-          const yearStr = String(year).substring(2);
-          const taskMonthYear = monthStr + "/" + yearStr;
-
-          // Month filter stays linked to the Dropdown
-          if (taskMonthYear === selectedMonthYear) {
-            if (totals[item.machine]) totals[item.machine].month += item.qty;
-          }
-
-          // Week filter now follows the Back/Next buttons
-          if (taskDate >= monday && taskDate <= sunday) {
-            if (totals[item.machine]) totals[item.machine].week += item.qty;
-          }
-        });
-
-        // ... (Keep the rest of your existing render code inside calculateCapacity) ...
-        container.innerHTML = Object.keys(machines).map(mName => {
-          const m = machines[mName];
-          const data = totals[mName];
-          return `
-          <div class="cap-card" onclick="showMachineChart('${mName}')" style="border-left: 6px solid ${m.color};">
-            <div class="card-top">
-              <span class="machine-badge" style="background:${m.bg}; color:${m.color}">${mName}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-              <div>
-                <div style="font-size: 10px; color: #94a3b8; font-weight: 700;">WEEK VIEW</div>
-                <div style="font-size: 22px; font-weight: 800; color: ${m.color};">
-                  ${data.week.toLocaleString()} <small style="font-size: 11px; font-weight: 500;">PCS</small>
-                </div>
-              </div>
-              <div style="text-align: right; border-left: 1px solid #eee; padding-left: 15px;">
-                <div style="font-size: 10px; color: #94a3b8; font-weight: 700;">MONTH (${selectedMonthYear})</div>
-                <div style="font-size: 18px; font-weight: 800; color: #1e293b;">
-                  ${data.month.toLocaleString()}
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
-        }).join('');
-
-        // --- UPDATED FIX START ---
-        const chartSection = document.getElementById('chartSection');
-        // Check if the chart is visible and a machine has been selected before
-        if (chartSection && chartSection.style.display === 'block' && typeof activeMachine !== 'undefined' && activeMachine) {
-          updateChartData(activeMachine); // This will refresh the chart with the new month/year
-        }
-
-      }
-
-      // Function to generate month options for the dropdown, showing 3 months back and 8 months ahead
-      function generateMonthOptions() {
-        const picker = document.getElementById('monthPicker');
-        const now = new Date();
-        const currentMonth = now.getMonth();
-        const currentYear = now.getFullYear();
-
-        // Generate months: 3 months back to 8 months ahead
-        for (let i = -3; i <= 8; i++) {
-          const d = new Date(currentYear, currentMonth + i, 1);
-          const monthVal = ("0" + (d.getMonth() + 1)).slice(-2); // "03"
-          const yearShort = String(d.getFullYear()).substring(2); // "26"
-          const value = `${monthVal}/${yearShort}`; // "03/26"
-
-          const monthName = d.toLocaleString('default', { month: 'short' }); // "Mar"
-          const yearFull = d.getFullYear(); // 2026
-
-          const option = document.createElement('option');
-          option.value = value;
-          option.text = `${monthName} ${yearFull}`;
-
-          // Auto-select the current month
-          if (i === 0) option.selected = true;
-
-          picker.appendChild(option);
-        }
-      }
-
-
-      // Function to set the active view mode and refresh chart data if a machine is selected
-      function setChartViewMode(mode) {
-        activeViewMode = mode;
-        if (activeMachine) {
-          updateChartData(activeMachine);
-        }
-      }
-
-      // Function to display the chart for a specific machine, or hide it if the same machine is clicked again
-      function showMachineChart(mName) {
-        if (activeMachine === mName && document.getElementById('chartSection').style.display === 'block') {
-          // Same machine clicked, close the chart
-          document.getElementById('chartSection').style.display = 'none';
-          activeMachine = null;
-          return;
-        }
-        activeMachine = mName;
-        activeViewMode = 'MONTH'; // Reset to Month view whenever a new machine is clicked
-        document.getElementById('chartSection').style.display = 'block';
-        updateChartData(mName);
-        // Removed scrollIntoView to keep the entire Machine Load Capacity section in view
-      }
-
-      // Main function to update the chart data based on the selected machine and view mode
-      function updateChartData(mName) {
-        const ctx = document.getElementById('capacityChart').getContext('2d');
-        const colors = {
-          "IJIMA": "#1a73e8",
-          "HANDSWITCH": "#f9ab00",
-          "OUTSOURCED": "#7b1fa2"
-        };
-
-        const selectedMonthYear = document.getElementById('monthPicker').value; // "MM/YY"
-        const [selMM, selYY] = selectedMonthYear.split("/");
-
-        // Update Toggle Button UI
-        const btnMonth = document.getElementById('btnViewMonth');
-        const btnWeek = document.getElementById('btnViewWeek');
-        if (btnMonth) btnMonth.style.background = activeViewMode === 'MONTH' ? 'white' : 'transparent';
-        if (btnWeek) btnWeek.style.background = activeViewMode === 'WEEK' ? 'white' : 'transparent';
-
-        let labels = [];
-        let counts = [];
-
-        if (activeViewMode === 'MONTH') {
-          // --- YEARLY VIEW (12 MONTHS) ---
-          const monthsShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-          labels = monthsShort;
-          counts = new Array(12).fill(0);
-
-          RAW_CAPACITY.forEach(item => {
-            const parts = item.date.split("/");
-            if (parts.length < 3) return;
-            const d = parseInt(parts[0]);
-            const m = parseInt(parts[1]);
-            const y = parseInt(parts[2]);
-            const yy = String(y).substring(2);
-            if (item.machine === mName && yy === selYY) {
-              counts[m - 1] += item.qty;
-            }
-          });
-          document.getElementById('chartSubtitle').innerText = `Annual Performance for 20${selYY}`;
-
-        } else {
-          // --- MONTHLY VIEW (BY WEEKS) ---
-          const year = 2000 + parseInt(selYY);
-          const month = parseInt(selMM) - 1;
-          const firstDay = new Date(year, month, 1);
-          const lastDay = new Date(year, month + 1, 0);
-
-          let weekTotals = [0, 0, 0, 0, 0, 0];
-
-          RAW_CAPACITY.forEach(item => {
-            const parts = item.date.split("/");
-            if (parts.length < 3) return;
-            const d = parseInt(parts[0]);
-            const m = parseInt(parts[1]);
-            const y = parseInt(parts[2]);
-            const yy = String(y).substring(2);
-            if (item.machine === mName && m === parseInt(selMM) && yy === selYY) {
-              const dateObj = new Date(year, month, d);
-              const dayOfMonth = dateObj.getDate();
-              const weekIndex = Math.ceil((dayOfMonth + firstDay.getDay()) / 7) - 1;
-              weekTotals[weekIndex] += item.qty;
-            }
-          });
-
-          const numWeeks = Math.ceil((lastDay.getDate() + firstDay.getDay()) / 7);
-          for (let i = 1; i <= numWeeks; i++) labels.push(`Week ${i}`);
-          counts = weekTotals.slice(0, numWeeks);
-
-          const monthName = document.getElementById('monthPicker').options[document.getElementById('monthPicker').selectedIndex].text;
-          document.getElementById('chartSubtitle').innerText = `Weekly Breakdown for ${monthName}`;
-        }
-
-        // --- CHART INITIALIZATION ---
-        if (capacityChart) capacityChart.destroy();
-
-        capacityChart = new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels: labels,
-            datasets: [{
-              label: 'Total Qty (PCS)',
-              data: counts,
-              backgroundColor: colors[mName] + 'CC',
-              borderColor: colors[mName],
-              borderWidth: 1,
-              borderRadius: 8 // Slightly rounder bars look more modern
-            }]
-          },
-          // IMPORTANT: Register the plugin here
-          plugins: [ChartDataLabels],
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            layout: {
-              padding: {
-                top: 30 // Extra space at the top so labels don't hit the ceiling
-              }
-            },
-            plugins: {
-              legend: { display: false },
-              // --- DATA LABELS CONFIGURATION ---
-              datalabels: {
-                anchor: 'end',      // Position at the end of the bar
-                align: 'top',       // Place text above the anchor
-                offset: 4,          // 4px space between bar and text
-                color: '#1e293b',   // Dark slate color
-                font: {
-                  weight: '900',
-                  size: 12
-                },
-                formatter: (value) => {
-                  return value > 0 ? value.toLocaleString() : ''; // Hide '0' for cleaner look
-                }
-              },
-              tooltip: {
-                enabled: true,
-                callbacks: {
-                  label: (ctx) => `Total: ${ctx.raw.toLocaleString()} PCS`
-                }
-              }
-            },
-            scales: {
-              y: {
-                beginAtZero: true,
-                grace: '15%', // Automatically adds 15% extra height to the Y-axis
-                ticks: {
-                  callback: (val) => val.toLocaleString(),
-                  color: '#94a3b8'
-                },
-                grid: { color: '#f1f5f9' }
-              },
-              x: {
-                grid: { display: false },
-                ticks: { color: '#64748b', font: { weight: 'bold' } }
-              }
-            }
-          }
+    function filterRequirementUpdates() {
+      const s = document.getElementById('reqSearchInput').value.toUpperCase();
+      const sf = document.getElementById('reqStatusFilter').value;
+      let fl = requirementUpdates.filter(u => {
+        const ms = u.psn.toUpperCase().includes(s) || u.jobName.toUpperCase().includes(s) || u.batchId.toUpperCase().includes(s);
+        const st = sf === 'ALL' || (sf === 'OVERDUE' && u.isDelayed) || (sf === 'ALMOST DUE' && !u.isDelayed);
+        return ms && st;
+      });
+      if (reqSortField === 'dueDays') {
+        fl.sort((a, b) => {
+          const ao = a.dueDays < 0, bo = b.dueDays < 0;
+          if (ao && !bo) return reqSortAsc ? -1 : 1;
+          if (!ao && bo) return reqSortAsc ? 1 : -1;
+          return reqSortAsc ? a.dueDays - b.dueDays : b.dueDays - a.dueDays;
         });
       }
+      renderRequirementUpdates(fl);
+    }
 
-      let reqSortField = 'dueDays';
-      let reqSortAsc = true;
+    function setReqSort(f) {
+      if (reqSortField === f) reqSortAsc = !reqSortAsc; else { reqSortField = f; reqSortAsc = true; }
+      document.getElementById('reqSortIcon').innerText = reqSortAsc ? '▲' : '▼';
+      filterRequirementUpdates();
+    }
 
-      // Main function to filter, sort, and display the requirement updates table
-      function filterRequirementUpdates() {
-        const searchTerm = document.getElementById('reqSearchInput').value.toUpperCase();
-        const statusFilter = document.getElementById('reqStatusFilter').value;
-
-        let filtered = requirementUpdates.filter(update => {
-          const matchesSearch =
-            update.psn.toUpperCase().includes(searchTerm) ||
-            update.jobName.toUpperCase().includes(searchTerm) ||
-            update.batchId.toUpperCase().includes(searchTerm);
-
-          const matchesStatus =
-            statusFilter === 'ALL' ||
-            (statusFilter === 'OVERDUE' && update.isDelayed) ||
-            (statusFilter === 'ALMOST DUE' && !update.isDelayed);
-
-          return matchesSearch && matchesStatus;
-        });
-
-        // ✅ Correct sorting logic
-        if (reqSortField === 'dueDays') {
-          filtered.sort((a, b) => {
-            const aDays = a.dueDays;
-            const bDays = b.dueDays;
-
-            const aOverdue = aDays < 0;
-            const bOverdue = bDays < 0;
-
-            // 🔴 Overdue always first
-            if (aOverdue && !bOverdue) return reqSortAsc ? -1 : 1;
-            if (!aOverdue && bOverdue) return reqSortAsc ? 1 : -1;
-
-            // 🔴 Both overdue → bigger delay first (-13 before -3)
-            if (aOverdue && bOverdue) {
-              return reqSortAsc ? (aDays - bDays) : (bDays - aDays);
-            }
-
-            // 🟡🟢 Due today & upcoming → smaller first (0 → 2 → 5)
-            return reqSortAsc ? (aDays - bDays) : (bDays - aDays);
-          });
-        }
-
-        renderRequirementUpdates(filtered);
+    /* renderRequirementUpdates — with data-label */
+    function renderRequirementUpdates(updates) {
+      const tbody = document.getElementById('requirementBody');
+      tbody.innerHTML = '';
+      if (!updates.length) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;">No urgent updates required.</td></tr>';
+        return;
       }
+      updates.forEach(u => {
+        const row = document.createElement('tr');
+        row.className = `clickable-row ${getRowClass(u, 'requirement')}`;
+        const dc = u.isDelayed ? 'tag-overdue' : 'tag-almost';
+        const pts = (u.lastUpdated || '').split('-');
+        const step = pts.slice(0, -1).join(' ') || '-';
+        const date = pts[pts.length - 1] || '-';
+        row.innerHTML = `
+            <td data-label="PSN"><strong>${u.psn}</strong></td>
+            <td data-label="Batch ID">
+              <a href="${getUpdateUrl(u.batchId)}" target="_top" style="color:var(--primary);font-weight:bold;text-decoration:none;">
+                <i class="fas fa-external-link-alt" style="font-size:0.65rem;"></i> ${u.batchId}
+              </a>
+            </td>
+            <td data-label="Client">${u.jobName}</td>
+            <td data-label="Quantity">${u.quantity.toLocaleString()}</td>
+            <td data-label="Process">${u.currentProcess}</td>
+            <td data-label="In Progress" style="text-align:center;">${u.prevDurationTime} days</td>
+            <td data-label="Days to Due"><span class="tag ${dc}">${u.duration}</span></td>
+            <td data-label="Prev Step">
+              <span class="process-step-badge">${step}</span>
+              <span class="process-date-badge">${date}</span>
+            </td>`;
+        tbody.appendChild(row);
+      });
+    }
 
-      // Helper function to convert duration text to a sortable number of days
-      function parseReqDays(duration) {
-        if (duration.includes('Overdue')) return -999;
-        if (duration.includes('Due today')) return 0;
-        const match = duration.match(/(\d+) days? left/);
-        return match ? parseInt(match[1]) : 999;
+    /* ── Process Jobs ── */
+    function showProcessJobs(pn) {
+      const tbody = document.getElementById('processJobsBody');
+      const td = document.getElementById('processJobsTable');
+      if (selectedProcess === pn) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;">Click a process to view jobs.</td></tr>';
+        selectedProcess = null;
+        document.querySelectorAll('.process-item').forEach(i => i.classList.remove('selected'));
+        document.getElementById('selectedProcessName').innerText = '';
+        td.style.display = 'none'; return;
       }
+      selectedProcess = pn;
+      document.querySelectorAll('.process-item').forEach(i => i.classList.remove('selected'));
+      document.querySelectorAll('.process-item').forEach(i => {
+        if (i.querySelector('.process-name').textContent === pn) i.classList.add('selected');
+      });
+      td.style.display = 'block';
+      renderProcessJobs(pn);
+    }
 
-      // Function to handle sorting when the header is clicked
-      function setReqSort(field) {
-        if (reqSortField === field) {
-          reqSortAsc = !reqSortAsc;
-        } else {
-          reqSortField = field;
-          reqSortAsc = true;
-        }
-        document.getElementById('reqSortIcon').innerText = reqSortAsc ? '▲' : '▼';
-        filterRequirementUpdates();
-      }
+    function renderProcessJobs(pn) {
+      activeProcessName = pn;
+      const jobs = MASTER_DATA.filter(j => { const cs = j.steps?.find(s => !s.isDone); return cs && cs.name === pn; });
+      jobs.sort((a, b) => { const ad = calculateDaysToDueFromStep(a), bd = calculateDaysToDueFromStep(b); return (ad < 0 && bd >= 0) ? -1 : (bd < 0 && ad >= 0) ? 1 : ad - bd; });
+      processJobsCache = jobs;
+      document.getElementById('selectedProcessName').innerText = pn;
+      drawProcessJobs(jobs);
+    }
 
-      // Function to render the requirement updates table based on the filtered and sorted data
-      function renderRequirementUpdates(updates) {
-        const tbody = document.getElementById('requirementBody');
-        tbody.innerHTML = '';
-        if (updates.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px;">No urgent updates required.</td></tr>';
-          return;
-        }
-        updates.forEach(update => {
-          const row = document.createElement('tr');
-          const rowClass = getRowClass(update, 'requirement');
-          row.className = `clickable-row ${rowClass}`;
-          const durationClass = update.isDelayed ? 'tag-overdue' : 'tag-almost';
-          const parts = (update.lastUpdated || '').split('-');
-          const step = parts.slice(0, -1).join(' ') || '-';
-          const date = parts[parts.length - 1] || '-';
-          row.innerHTML = `
-          <td><strong>${update.psn}</strong></td>
-          <td>
-            <a href="${getUpdateUrl(update.batchId)}" target="_top" style="color: var(--primary); font-weight: bold; text-decoration: none;">
-              <i class="fas fa-external-link-alt" style="font-size: 0.7rem;"></i> ${update.batchId}
-            </a>
-          </td>
-          <td>${update.jobName}</td>
-          <td>${update.quantity.toLocaleString()}</td>
-          <td>${update.currentProcess}</td>
-          <td style="text-align: center;">${update.prevDurationTime} days</td>
-          <td><span class="tag ${durationClass}">${update.duration}</span></td>
-          <td>
-            <span class="process-step-badge">${step}</span>
-            <span class="process-date-badge">${date}</span>
-          </td>
-        `;
-          tbody.appendChild(row);
-        });
-      }
+    function filterProcessJobs() {
+      const s = document.getElementById('processSearchInput').value.toUpperCase();
+      const df = document.getElementById('processDueFilter').value;
+      const fl = processJobsCache.filter(j => {
+        const jn = (j.jobName || j.client || '').toUpperCase();
+        if (!j.psn.toUpperCase().includes(s) && !j.batchId.toUpperCase().includes(s) && !jn.includes(s)) return false;
+        const d = calculateDaysToDueFromStep(j);
+        if (df === 'OVERDUE' && d >= 0) return false;
+        if (df === 'DUE_TODAY' && d !== 0) return false;
+        if (df === 'NEAR_DUE' && !(d > 0 && d <= 2)) return false;
+        return true;
+      });
+      drawProcessJobs(fl);
+    }
 
-      // Variable to cache the currently displayed process jobs for filtering
-      function showProcessJobs(processName) {
-        const tbody = document.getElementById('processJobsBody');
-        const tableDiv = document.getElementById('processJobsTable');
-        if (selectedProcess === processName) {
-          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px;">Click on a process above to view jobs in progress.</td></tr>';
-          selectedProcess = null;
-          document.querySelectorAll('.process-item').forEach(item => item.classList.remove('selected'));
-          document.getElementById('selectedProcessName').innerText = '';
-          tableDiv.style.display = 'none';
-          return;
-        }
+    /* drawProcessJobs — with data-label */
+    function drawProcessJobs(jobs) {
+      const tbody = document.getElementById('processJobsBody');
+      if (!tbody) return;
+      tbody.innerHTML = jobs.map(j => {
+        const d = calculateDaysToDueFromStep(j);
+        const pt = getPriorityText(d), pc = getPriorityClass(pt), rc = getRowClass(j, 'process');
+        const cs = j.steps?.find(s => !s.isDone);
+        return `<tr class="${rc}">
+            <td data-label="PSN" style="font-weight:bold;">${j.psn}</td>
+            <td data-label="Batch ID">
+              <a href="${getUpdateUrl(j.batchId)}" target="_top" style="color:var(--primary);font-weight:bold;text-decoration:none;">
+                <i class="fas fa-external-link-alt" style="font-size:0.65rem;"></i> ${j.batchId}
+              </a>
+            </td>
+            <td data-label="Client">${j.jobName || j.client || '-'}</td>
+            <td data-label="Quantity">${Number(j.qty).toLocaleString()}</td>
+            <td data-label="Priority"><span class="tag ${pc}">${pt}</span></td>
+            <td data-label="Exp. Date"><span class="process-date-badge">${cs?.expDate || '-'}</span></td>
+          </tr>`;
+      }).join('');
+      if (!jobs.length) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;">No jobs match the filter.</td></tr>';
+    }
 
-        selectedProcess = processName;
-        document.querySelectorAll('.process-item').forEach(item => item.classList.remove('selected'));
-        const items = document.querySelectorAll('.process-item');
-        items.forEach(item => {
-          if (item.querySelector('.process-name').textContent === processName) {
-            item.classList.add('selected');
-          }
-        });
-        tableDiv.style.display = 'block';
-        renderProcessJobs(processName);
-      }
+    /* ── Calc helpers ── */
+    function calculateDaysToDueFromStep(job) {
+      if (!job?.steps?.length) return 999;
+      const cs = job.steps.find(s => !s.isDone);
+      if (!cs?.expDate || cs.expDate === '-') return 999;
+      const d = parseDate(cs.expDate);
+      return d ? Math.ceil((d - new Date()) / 86400000) : 999;
+    }
 
-      // Cache for the currently displayed process jobs to enable client-side filtering without re-processing the entire dataset
-      function renderProcessJobs(processName) {
-        activeProcessName = processName;
-        const jobs = MASTER_DATA.filter(job => {
-          const currentStep = job.steps ? job.steps.find(s => !s.isDone) : null;
-          return currentStep && currentStep.name === processName;
-        });
-
-        jobs.sort((a, b) => {
-          const aDays = calculateDaysToDueFromStep(a);
-          const bDays = calculateDaysToDueFromStep(b);
-          if (aDays < 0 && bDays >= 0) return -1;
-          if (bDays < 0 && aDays >= 0) return 1;
-          if (aDays < 0 && bDays < 0) return aDays - bDays; // more overdue first
-          return aDays - bDays; // closest due first
-        });
-
-        processJobsCache = jobs;
-        document.getElementById('selectedProcessName').innerText = processName;
-        drawProcessJobs(jobs);
-      }
-
-      // Function to filter the currently displayed process jobs based on search input and due date filters without re-querying the entire dataset
-      function filterProcessJobs() {
-        const searchTerm = document.getElementById('processSearchInput').value.toUpperCase();
-        const dueFilter = document.getElementById('processDueFilter').value;
-
-        const filtered = processJobsCache.filter(job => {
-          const currentStep = job.steps ? job.steps.find(s => !s.isDone) : null;
-          const jobName = (job.jobName || job.client || '').toUpperCase();
-          const matchSearch = job.psn.toUpperCase().includes(searchTerm) ||
-            job.batchId.toUpperCase().includes(searchTerm) ||
-            jobName.includes(searchTerm);
-
-          if (!matchSearch) return false;
-
-          const days = calculateDaysToDueFromStep(job);
-
-          if (dueFilter === 'OVERDUE' && days >= 0) return false;
-          if (dueFilter === 'DUE_TODAY' && days !== 0) return false;
-          if (dueFilter === 'NEAR_DUE' && !(days > 0 && days <= 2)) return false;
-
-          return true;
-        });
-
-        drawProcessJobs(filtered);
-      }
-
-      // Function to render the process jobs table based on the currently selected process and applied filters
-      function drawProcessJobs(jobs) {
-        const tbody = document.getElementById('processJobsBody');
-        if (!tbody) return;
-
-        tbody.innerHTML = jobs.map(job => {
-          const days = calculateDaysToDueFromStep(job);
-          const priority = getPriorityText(days);
-          const priorityClass = getPriorityClass(priority);
-          const rowClass = getRowClass(job, 'process');
-          const currentStep = job.steps ? job.steps.find(s => !s.isDone) : null;
-          const expDateLabel = currentStep && currentStep.expDate ? currentStep.expDate : '-';
-
-          return `<tr class="${rowClass}">
-          <td style="font-weight:bold;">${job.psn}</td>
-          <td><a href="${getUpdateUrl(job.batchId)}" target="_top" style="color: var(--primary); font-weight: bold; text-decoration: none;"><i class="fas fa-external-link-alt" style="font-size: 0.7rem;"></i> ${job.batchId}</a></td>
-          <td>${job.jobName || job.client || '-'}</td>
-          <td>${Number(job.qty).toLocaleString()}</td>
-          <td><span class="tag ${priorityClass}">${priority}</span></td>
-          <td><span class="process-date-badge">${expDateLabel}</span></td>
-        </tr>`;
-        }).join('');
-
-        if (jobs.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px;">No jobs match the filter.</td></tr>';
+    function parseDate(raw) {
+      if (!raw || raw === '-') return null;
+      let d;
+      if (typeof raw === 'string') {
+        const p = raw.trim().split(/[-\/]/);
+        if (p.length === 3) {
+          const [a, b, c] = p;
+          if (a.length === 4) d = new Date(+a, +b - 1, +c);
+          else { const y = c.length === 2 ? Number('20' + c) : +c; if (!isNaN(+a) && !isNaN(+b) && !isNaN(y)) d = new Date(y, +b - 1, +a); }
         }
       }
+      if (!d || isNaN(d.getTime())) d = new Date(raw);
+      return d && !isNaN(d.getTime()) ? d : null;
+    }
 
-      // Helper function to calculate days to due date from a given delivery date string, with robust parsing and error handling
-      function calculateDaysToDue(deliveryDate) {
-        // keep for backwards compatibility
-        if (!deliveryDate || deliveryDate === '-') return 999;
-        const date = parseDate(deliveryDate);
-        if (!date) return 999;
-        const now = new Date();
-        const diffTime = date - now;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays;
-      }
+    function getPriorityText(d) { return d < 0 ? `Overdue ${Math.abs(d)} days` : d === 0 ? 'Due Today' : `${d} Days Left`; }
 
-      // New helper function to calculate days to due date based on the current step's expected date, with robust parsing and error handling
-      function calculateDaysToDueFromStep(job) {
-        if (!job || !job.steps || job.steps.length === 0) return 999;
-        const currentStep = job.steps.find(s => !s.isDone);
-        if (!currentStep) return 999;
-        if (!currentStep.expDate || currentStep.expDate === '-') return 999;
-        const date = parseDate(currentStep.expDate);
-        if (!date) return 999;
-        const now = new Date();
-        const diffTime = date - now;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays;
-      }
+    function getPriorityClass(t) {
+      if (t.includes('Overdue')) return 'tag-overdue';
+      if (t.includes('Due Today') || t.includes('Days Left')) return 'tag-almost';
+      return 'tag-schedule';
+    }
 
-      // Robust date parsing function that can handle various formats and gracefully return null for invalid inputs
-      function parseDate(rawDate) {
-        if (!rawDate || rawDate === '-') return null;
-        let date;
-        if (typeof rawDate === 'string') {
-          const parts = rawDate.trim().split(/[-\/]/);
-          if (parts.length === 3) {
-            const [a, b, c] = parts;
-            if (a.length === 4) {
-              date = new Date(Number(a), Number(b) - 1, Number(c));
-            } else {
-              const day = Number(a);
-              const month = Number(b);
-              const year = c.length === 2 ? Number('20' + c) : Number(c);
-              if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
-                date = new Date(year, month - 1, day);
-              }
-            }
-          }
-        }
-        if (!date || isNaN(date.getTime())) {
-          date = new Date(rawDate);
-        }
-        return date && !isNaN(date.getTime()) ? date : null;
+    function getRowClass(item, type) {
+      if (type === 'process') { const d = calculateDaysToDueFromStep(item); return d < 0 ? 'row-overdue' : d <= 2 ? 'row-almost-due' : 'row-normal'; }
+      if (type === 'requirement') return item.isDelayed ? 'row-overdue' : 'row-almost-due';
+      if (type === 'job') {
+        if (item.status === 'OVERDUE' || item.priority === 'Urgent') return 'row-overdue';
+        if (item.status === 'ALMOST DUE' || item.priority === 'Cut Queue') return 'row-almost-due';
       }
+      return 'row-normal';
+    }
 
-      // Helper function to convert days to due into a user-friendly priority text
-      function getPriorityText(days) {
-        if (days < 0) return `Overdue ${Math.abs(days)} days`;
-        if (days === 0) return 'Due Today';
-        return `${days} Days Left`;
-      }
+  </script>
 
-      // Helper function to determine the CSS class for the priority tag based on the priority text
-      function getPriorityClass(priorityText) {
-        if (priorityText.includes('Overdue')) return 'tag-overdue';
-        if (priorityText.includes('Due Today') || priorityText.includes('Days Left')) return 'tag-almost';
-        return 'tag-schedule';
-      }
-
-      // Helper function to determine the CSS class for the entire row based on the job's status and due date, with different logic for process jobs vs requirement updates
-      function getRowClass(item, tableType) {
-        if (tableType === 'process') {
-          // For process workload table
-          const days = calculateDaysToDueFromStep(item);
-          if (days < 0) return 'row-overdue';
-          if (days <= 2) return 'row-almost-due';
-          return 'row-normal';
-        } else if (tableType === 'requirement') {
-          // For requirement updates
-          if (item.isDelayed) return 'row-overdue';
-          return 'row-almost-due'; // Since requirement updates only show urgent ones
-        } else if (tableType === 'job') {
-          // For job fulfillment list
-          if (item.status === 'OVERDUE' || item.priority === 'Urgent') return 'row-overdue';
-          if (item.status === 'ALMOST DUE' || item.priority === 'Cut Queue') return 'row-almost-due';
-          return 'row-normal';
-        }
-        return 'row-normal';
-      }
-    </script>
-  </div>
 </body>
 <!-- <script src="https://alcdn.msauth.net/browser/2.28.1/js/msal-browser.min.js"></script>
 <script src="/scripts/auth.js"></script> -->
