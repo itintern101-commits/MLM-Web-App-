@@ -5,6 +5,7 @@
 let msalInstance;
 
 // Fetch config from backend
+// This is done to keep sensitive info like clientId and tenantId out of the public code
 fetch("/config")
   .then(res => res.json())
   .then(async (config) => {
@@ -81,8 +82,6 @@ function checkExistingLogin() {
     window.location.href = "/dashboard.html";
   }
 }
-
-
 // ================================
 // 💬 STATUS
 // ================================
