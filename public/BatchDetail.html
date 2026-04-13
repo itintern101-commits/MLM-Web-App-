@@ -22,10 +22,8 @@
     }
 
     /* Sidebar Integration Wrapper */
-    .main-wrapper {
-      margin-left: var(--sidebar-width);
+    .main {
       min-height: 100vh;
-      transition: margin-left 0.3s ease;
     }
 
     /* Header & Stats */
@@ -2115,37 +2113,66 @@
 </head>
 
 <body>
-  <div id="sidebar-container"></div>
   <script>
-    fetch("/Sidebar.html")
-      .then((r) => r.text())
-      .then((html) => {
-        document.getElementById("sidebar-container").innerHTML = html;
+    document.addEventListener('DOMContentLoaded', function () {
+      const pageContent = document.getElementById('page-content').innerHTML;
 
-        // ✅ RUN AFTER sidebar is inserted
-        const currentPage = window.location.pathname
-          .split("/")
-          .pop()
-          .replace(".html", "")
-          .toLowerCase();
+      fetch('/Sidebar.html')
+        .then((r) => r.text())
+        .then((html) => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
 
-        document.querySelectorAll(".nav-link").forEach((link) => {
-          const page = link.dataset.page.toLowerCase();
+          doc.head.querySelectorAll('style, link[rel="stylesheet"]').forEach((node) => {
+            document.head.appendChild(node.cloneNode(true));
+          });
 
-          if (page === currentPage) {
-            link.classList.add("active");
+          const sidebarBody = doc.body ? doc.body.innerHTML : html;
+          document.body.innerHTML = sidebarBody;
+
+          const mainEl = document.querySelector('.main');
+          if (!mainEl) {
+            console.error('Sidebar load failed: .main not found after injection');
+            return;
           }
-        });
-      })
-      .catch(console.error);
+          mainEl.innerHTML = pageContent;
 
+          const btn = document.getElementById('sidebarToggle');
+          const sidebar = document.getElementById('sidebar');
+          function setSidebar(collapsed) {
+            sidebar.classList.toggle('sidebar--collapsed', collapsed);
+            btn.setAttribute('aria-expanded', String(!collapsed));
+            sidebar.querySelectorAll('.label').forEach((el) => {
+              el.setAttribute('aria-hidden', String(collapsed));
+            });
+          }
+          const savedState = localStorage.getItem('sidebar-collapsed') === '1';
+          setSidebar(savedState);
+          btn.addEventListener('click', () => {
+            const collapsed = !sidebar.classList.contains('sidebar--collapsed');
+            setSidebar(collapsed);
+            localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0');
+          });
+
+          const currentPage = window.location.pathname
+            .split('/')
+            .pop()
+            .replace('.html', '');
+          document.querySelectorAll('.item').forEach((link) => {
+            if (link.dataset.page === currentPage) {
+              link.classList.add('active');
+            }
+          });
+        })
+        .catch(console.error);
+    });
   </script>
 
   <div id="loader" class="loading-overlay">
     <h2>Initializing Batch Webpage...</h2>
   </div>
 
-  <div class="main-wrapper">
+  <div id="page-content">
     <div class="dashboard-header">
       <h1 style="font-weight: bold; color: #ffffff">Batch Dashboard</h1>
       <div>

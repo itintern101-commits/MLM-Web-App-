@@ -21,10 +21,10 @@
       color: var(--text);
     }
 
-    .main-wrapper {
-      margin-left: 280px;
-      padding: 30px;
+    .sidebar-wrapper {
+      display: flex;
       min-height: 100vh;
+      font-family: 'Segoe UI', system-ui, sans-serif;
     }
 
     .container {
@@ -482,32 +482,51 @@
 </head>
 
 <body>
-
-  <div id="sidebar-container"></div>
   <script>
     fetch('/Sidebar.html')
       .then(r => r.text())
       .then(html => {
-        document.getElementById('sidebar-container').innerHTML = html;
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
 
-        // ✅ RUN AFTER sidebar is inserted
-        const currentPage = window.location.pathname
-          .split('/')
-          .pop()
-          .replace('.html', '')
-          .toLowerCase();
+        doc.head.querySelectorAll('style, link[rel="stylesheet"]').forEach(node => {
+          document.head.appendChild(node.cloneNode(true));
+        });
 
-        document.querySelectorAll('.nav-link').forEach(link => {
-          const page = link.dataset.page.toLowerCase();
-
-          if (page === currentPage) {
+        const pageContent = document.querySelector('.main').innerHTML;
+        const sidebarBody = doc.body ? doc.body.innerHTML : html;
+        document.body.innerHTML = sidebarBody;
+        document.querySelector('.main').innerHTML = pageContent;
+        // Toggle system
+        const btn = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        function setSidebar(collapsed) {
+          sidebar.classList.toggle('sidebar--collapsed', collapsed);
+          btn.setAttribute('aria-expanded', String(!collapsed));
+          sidebar.querySelectorAll('.label').forEach(el => {
+            el.setAttribute('aria-hidden', String(collapsed));
+          });
+        }
+        const savedState = localStorage.getItem('sidebar-collapsed') === '1';
+        setSidebar(savedState);
+        btn.addEventListener('click', () => {
+          const collapsed = !sidebar.classList.contains('sidebar--collapsed');
+          setSidebar(collapsed);
+          localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0');
+        });
+        // Active page
+        const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
+        document.querySelectorAll('.item').forEach(link => {
+          if (link.dataset.page === currentPage) {
             link.classList.add('active');
           }
         });
       })
       .catch(console.error);
-
   </script>
+  <div id="page-content" style="display:none;">
+
+  
   <div id="toast-container"></div>
 
   <!-- Remaining Quantity Confirmation Dialog -->
@@ -523,7 +542,7 @@
     </div>
   </div>
 
-  <div class="main-wrapper">
+  <div class="main">
     <div class="container">
       <h2>📋 Create Job & Batch Entry</h2>
 
@@ -1115,6 +1134,7 @@
       }
     }
   </script>
+  </div>
 </body>
 <!-- <script src="https://alcdn.msauth.net/browser/2.28.1/js/msal-browser.min.js"></script>
 <script src="/scripts/auth.js"></script> -->

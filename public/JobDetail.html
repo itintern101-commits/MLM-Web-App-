@@ -21,10 +21,10 @@
     }
 
     /* Sidebar Integration Wrapper */
-    .main-wrapper {
-      margin-left: var(--sidebar-width);
+    .sidebar-wrapper {
+      display: flex;
       min-height: 100vh;
-      transition: margin-left 0.3s ease;
+      font-family: 'Segoe UI', sans-serif;
     }
 
     .dashboard-header {
@@ -1255,34 +1255,58 @@
 </head>
 
 <body>
-  <div id="sidebar-container"></div>
   <script>
-    fetch('/Sidebar.html')
-      .then(r => r.text())
-      .then(html => {
-        document.getElementById('sidebar-container').innerHTML = html;
+    document.addEventListener('DOMContentLoaded', function () {
+      const pageContent = document.querySelector('.main').innerHTML;
+      fetch('/Sidebar.html')
+        .then(r => r.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
 
-        // ✅ RUN AFTER sidebar is inserted
-        const currentPage = window.location.pathname
-          .split('/')
-          .pop()
-          .replace('.html', '')
-          .toLowerCase();
+          doc.head.querySelectorAll('style, link[rel="stylesheet"]').forEach(node => {
+            document.head.appendChild(node.cloneNode(true));
+          });
 
-        document.querySelectorAll('.nav-link').forEach(link => {
-          const page = link.dataset.page.toLowerCase();
+          const sidebarBody = doc.body ? doc.body.innerHTML : html;
+          document.body.innerHTML = sidebarBody;
 
-          if (page === currentPage) {
-            link.classList.add('active');
+          const mainEl = document.querySelector('.main');
+          if (!mainEl) {
+            console.error('Sidebar load failed: .main not found after injection');
+            return;
           }
+          mainEl.innerHTML = pageContent;
+
+          // Toggle system
+          const btn = document.getElementById('sidebarToggle');
+          const sidebar = document.getElementById('sidebar');
+          function setSidebar(collapsed) {
+            sidebar.classList.toggle('sidebar--collapsed', collapsed);
+            btn.setAttribute('aria-expanded', String(!collapsed));
+            sidebar.querySelectorAll('.label').forEach(el => {
+              el.setAttribute('aria-hidden', String(collapsed));
+            });
+          }
+          const savedState = localStorage.getItem('sidebar-collapsed') === '1';
+          setSidebar(savedState);
+          btn.addEventListener('click', () => {
+            const collapsed = !sidebar.classList.contains('sidebar--collapsed');
+            setSidebar(collapsed);
+            localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0');
+          });
+          // Active page
+          const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
+          document.querySelectorAll('.item').forEach(link => {
+            if (link.dataset.page === currentPage) {
+              link.classList.add('active');
+            }
+          });
         });
-      })
-      .catch(console.error);
-
-    const user = sessionStorage.getItem("user");
-
+    });
   </script>
-  <div class="main-wrapper">
+
+  <div class="main">
     <div class="dashboard-header">
       <h1>Job Dashboard</h1>
       <div class="header-right">
@@ -1502,6 +1526,8 @@
   </div>
 
   <script>
+
+
     let MASTER_DATA = [];
     let activeFilters = {
       salesCodes: new Set(),

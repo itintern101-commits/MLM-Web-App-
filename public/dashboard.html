@@ -8,6 +8,105 @@
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
+    /* =========================
+       LAYOUT
+    ========================== */
+    .sidebar-wrapper {
+      display: flex;
+      min-height: 100vh;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    /* =========================
+       SIDEBAR
+    ========================== */
+    .sidebar {
+      width: 220px;
+      background: #ffffff;
+      border-right: 1px solid #e0e0e0;
+      transition: width 0.25s ease;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* COLLAPSED */
+    .sidebar--collapsed {
+      width: 60px;
+    }
+
+    /* =========================
+       TOGGLE BUTTON
+    ========================== */
+    .toggle-btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      background: #1a73e8;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    /* =========================
+       MENU
+    ========================== */
+    .menu {
+      display: flex;
+      flex-direction: column;
+      padding-top: 10px;
+    }
+
+    /* ITEM */
+    .item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      text-decoration: none;
+      color: #3c4043;
+      transition: 0.2s;
+      border-left: 4px solid transparent;
+    }
+
+    .item:hover {
+      background: #f1f3f4;
+      color: #1a73e8;
+    }
+
+    /* ACTIVE LINK */
+    .item.active {
+      background: #e8f0fe;
+      border-left: 4px solid #1a73e8;
+      color: #1a73e8;
+      font-weight: 600;
+    }
+
+    /* ICON */
+    .icon {
+      width: 24px;
+      text-align: center;
+    }
+
+    /* LABEL */
+    .label {
+      white-space: nowrap;
+      transition: opacity 0.15s ease;
+    }
+
+    /* HIDE LABEL WHEN COLLAPSED */
+    .sidebar--collapsed .label {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* =========================
+       MAIN CONTENT
+    ========================== */
+    .main {
+      flex: 1;
+      padding: 40px;
+    }
+
     :root {
       --primary: #1a73e8;
       --success: #34a853;
@@ -25,8 +124,8 @@
     }
 
     .main-wrapper {
-      margin-left: 230px;
-      padding: 40px;
+      margin-left: 0;
+      padding: 0;
     }
 
     h1 {
@@ -550,38 +649,48 @@
 </head>
 
 <body>
-  <div id="sidebar-container"></div>
-  <div id="toast-container"
-    style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: none;">
-  </div>
   <script>
     fetch('/Sidebar.html')
       .then(r => r.text())
       .then(html => {
-        document.getElementById('sidebar-container').innerHTML = html;
-
-        // ✅ RUN AFTER sidebar is inserted
-        const currentPage = window.location.pathname
-          .split('/')
-          .pop()
-          .replace('.html', '')
-          .toLowerCase();
-
-        document.querySelectorAll('.nav-link').forEach(link => {
-          const page = link.dataset.page.toLowerCase();
-
-          if (page === currentPage) {
+        const pageContent = document.getElementById('page-content').innerHTML;
+        document.body.innerHTML = html;
+        document.querySelector('.main').innerHTML = pageContent;
+        // Toggle system
+        const btn = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        function setSidebar(collapsed) {
+          sidebar.classList.toggle('sidebar--collapsed', collapsed);
+          btn.setAttribute('aria-expanded', String(!collapsed));
+          sidebar.querySelectorAll('.label').forEach(el => {
+            el.setAttribute('aria-hidden', String(collapsed));
+          });
+        }
+        const savedState = localStorage.getItem('sidebar-collapsed') === '1';
+        setSidebar(savedState);
+        btn.addEventListener('click', () => {
+          const collapsed = !sidebar.classList.contains('sidebar--collapsed');
+          setSidebar(collapsed);
+          localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0');
+        });
+        // Active page
+        const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
+        document.querySelectorAll('.item').forEach(link => {
+          if (link.dataset.page === currentPage) {
             link.classList.add('active');
           }
         });
       })
       .catch(console.error);
+  </script>
+  <div id="page-content" style="display:none;">
+    <div id="toast-container"
+      style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: none;">
+    </div>
 
   </script>
 
-  <div class="main-wrapper">
     <h1>Dashboard</h1>
-
     <!-- <div class="totals-grid">
       <div class="status-card total-summary" style="border-top: 8px solid #1976d2;">
         <h3>Total Jobs</h3>
@@ -1853,6 +1962,7 @@
         return 'row-normal';
       }
     </script>
+  </div>
 </body>
 <!-- <script src="https://alcdn.msauth.net/browser/2.28.1/js/msal-browser.min.js"></script>
 <script src="/scripts/auth.js"></script> -->
