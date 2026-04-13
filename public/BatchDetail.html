@@ -3106,8 +3106,8 @@
       let needsSplitRemark = false;
       let isDeliveryDone = false;
 
-      // --- WATERFALL VALIDATION TRACKING ---
-      let runningWaterfallLimit = null;
+      // Waterfall ceiling — mirrors syncWaterfallUI logic exactly
+      let ceilingIn = null;
       let lastStepName = "";
 
       for (let i = 0; i < stepRows.length; i++) {
@@ -3115,121 +3115,177 @@
         const doneCheck = row.querySelector(".step-done-check");
         const delayCheck = row.querySelector(".step-delay-check");
         const qtyInput = row.querySelector(".step-qty-input");
+        const remarkInput = row.querySelector(".step-remark-input");
         const stepName = row.getAttribute("data-name");
 
         const done = doneCheck ? doneCheck.checked : false;
-        const delay = delayCheck ? delayCheck.checked : false;
-        const remark = row.querySelector(".step-remark-input")?.value || "";
+        const remark = remarkInput ? remarkInput.value.trim() : "";
 
-        if (!done) firstIncompleteFound = true;
+        // ── Classify the delay state of this row ─────────────────────────────────
+        // isAutoOverdue: the delay chip was locked by the system at render time
+        //   → identified by the checkbox having the `disabled` attribute
+        // isManualDelay: the user themselves checked the delay chip (not locked)
+        const delayCheckbox = delayCheck ? delayCheck.querySelector
+          ? delayCheck  // delayCheck is already the input
+          : delayCheck.querySelector('input[type=checkbox]')
+          : null;
+        const isAutoOverdue = delayCheckbox ? delayCheckbox.disabled : false;
+        const delayChecked = delayCheckbox ? delayCheckbox.checked : false;
+        const isManualDelay = delayChecked && !isAutoOverdue;
 
-        // ── Qty calculation ───────────────────────────────────────────────────
+        // ── Waterfall ceiling for this row ────────────────────────────────────────
         const systemMax = parseInt(qtyInput.getAttribute("data-system-max")) || 0;
         const backendQty = parseInt(qtyInput.getAttribute("data-current-qty")) || 0;
         const userTyped = parseInt(qtyInput.value) || 0;
         const proposedTotal = backendQty + userTyped;
 
-
-        // ── NEW GUARD: Qty typed but 'Done' not checked ──────────────────────
-        // If there is a number in the box but Mark Done isn't checked, block it.
-        if (userTyped > 0 && !done) {
-          showToast(
-            `"${stepName}" has a quantity entered. Either check 'Mark as done' or clear the input to save other changes (like delays).`,
-            "error"
-          );
-          qtyInput.focus();
-          validationError = true;
-          break;
+        // Seed ceiling on first row; subsequent rows capped by both their own
+        // systemMax and whatever the previous row passed down.
+        if (ceilingIn === null) {
+          ceilingIn = systemMax;
+        } else {
+          ceilingIn = Math.min(ceilingIn, systemMax);
         }
 
-        // ── GUARD 2: Delay checked but no remark ───────────────────────────
-        if (delay && remark === "") {
-          showToast(`Please provide a remark for the delay in "${stepName}".`, "error");
-          remarkInput.focus();
-          validationError = true;
-          break;
+        // ── Sequential tracking ───────────────────────────────────────────────────
+        if (!done) firstIncompleteFound = true;
+
+        // ── Determine if this row has any user-initiated action ───────────────────
+        const isUserDone = done;
+        const isUserManualDelay = isManualDelay;
+
+        // Auto-overdue row with a changed remark — user typed something new
+        // (not the placeholder, not empty, and the chip was system-locked)
+        const isAutoOverdueWithUpdatedRemark =
+          isAutoOverdue &&
+          remark !== "" &&
+          remark !== "OVERDUE: Enter reason here";
+
+        const hasAnyAction = isUserDone || isUserManualDelay || isAutoOverdueWithUpdatedRemark;
+
+        // Skip rows the user hasn't touched at all
+        if (!hasAnyAction) {
+          // Still update waterfall ceiling passthrough for untouched rows
+          // (ceiling passes through unchanged when user didn't type)
+          if (userTyped > 0) ceilingIn = proposedTotal;
+          continue;
         }
 
-        // Calculate current ceiling based on previous step's total output
-        let currentStepLimit = (runningWaterfallLimit === null)
-          ? systemMax
-          : Math.min(systemMax, runningWaterfallLimit);
+        // ── Validations for rows with actions ────────────────────────────────────
 
-        // ── Sequential check ─────────────────────────────────────────────────
-        if (done && firstIncompleteFound) {
-          showToast(`Sequential Error: Cannot complete "${stepName}" while a previous process is still pending.`, "error");
-          validationError = true;
-          break;
-        }
+        // DONE validations
+        if (isUserDone) {
 
-        // ── Validation (Only if user is marking as done or entering data) ──────
-        if (done || (delay && remark !== "")) {
-          if (done) {
-            if (proposedTotal <= 0) {
-              showToast(`"${stepName}" has no quantity. Enter an amount.`, "error");
-              qtyInput.focus();
-              validationError = true;
-              break;
-            }
-
-            // Check if (Already Done + Typing Now) exceeds the waterfall limit
-            if (proposedTotal > currentStepLimit) {
-              const limitSource = lastStepName || "Order Qty";
-              showToast(
-                `"${stepName}" total (${proposedTotal}) exceeds the available limit from "${limitSource}" (${currentStepLimit}).`,
-                "error"
-              );
-              qtyInput.focus();
-              validationError = true;
-              break;
-            }
-
-            if (proposedTotal < currentStepLimit) needsSplitRemark = true;
-            if (stepName === "Delivery") isDeliveryDone = true;
+          // Sequential: cannot mark done if a previous step is still pending
+          if (firstIncompleteFound) {
+            showToast(
+              `Sequential Error: Cannot complete "${stepName}" while a previous process is still pending.`,
+              "error"
+            );
+            validationError = true;
+            break;
           }
 
-          // Die-cut validation...
-          let detail = "";
-          if (stepName === "Die-cut" && done) {
-            const select = row.querySelector(".step-detail-select");
-            if (!select || select.value === "") {
-              showToast("Please choose a Die-Cut machine option.", "error");
-              validationError = true;
-              break;
-            }
-            detail = select.value;
+          // Qty must be positive
+          if (proposedTotal <= 0) {
+            showToast(
+              `"${stepName}" has no quantity. Enter an amount to add before marking done.`,
+              "error"
+            );
+            qtyInput.focus();
+            validationError = true;
+            break;
           }
 
-          updates.push({
-            baseCol: parseInt(doneCheck.dataset.base),
-            isDone: done,
-            isDelayed: delay,
-            remark: row.querySelector(".step-remark-input")?.value || "",
-            qty: proposedTotal, // This saves the cumulative total back to the sheet
-            detail: detail,
-            maxQty: currentStepLimit,
-          });
+          // Waterfall overflow
+          if (proposedTotal > ceilingIn) {
+            const limitSource = lastStepName || "Order Qty";
+            showToast(
+              `"${stepName}" total (${proposedTotal.toLocaleString()}) exceeds the limit from "${limitSource}" (${ceilingIn.toLocaleString()}).`,
+              "error"
+            );
+            qtyInput.focus();
+            validationError = true;
+            break;
+          }
+
+          // Split trigger: processing less than the available ceiling
+          if (proposedTotal < ceilingIn) needsSplitRemark = true;
+
+          // Delivery detection
+          if (stepName === "Delivery") isDeliveryDone = true;
         }
 
-        // --- CRITICAL UPDATE ---
-        // Update the limit for the NEXT step regardless of whether the user typed anything.
-        // If the user didn't touch this row, the limit for the next row is simply the backendQty.
-        // If they did touch it, it's the proposedTotal.
-        runningWaterfallLimit = proposedTotal;
-        lastStepName = stepName;
+        // MANUAL DELAY validations
+        if (isUserManualDelay && !isUserDone) {
+          // Remark is required for a manually-flagged delay
+          if (remark === "") {
+            showToast(
+              `Please describe the reason for the delay in "${stepName}" before saving.`,
+              "error"
+            );
+            if (remarkInput) remarkInput.focus();
+            validationError = true;
+            break;
+          }
+        }
+
+        // Die-cut machine selection
+        let detail = "";
+        if (stepName === "Die-cut" && isUserDone) {
+          const select = row.querySelector(".step-detail-select");
+          if (!select || select.value === "") {
+            showToast("Please choose a Die-Cut machine option.", "error");
+            validationError = true;
+            break;
+          }
+          detail = select.value;
+        }
+
+        // ── Build update payload ──────────────────────────────────────────────────
+        updates.push({
+          baseCol: parseInt(doneCheck.dataset.base),
+          isDone: isUserDone,
+          isDelayed: delayChecked,   // true for both manual delay and auto-overdue with remark
+          remark: remark,
+          qty: proposedTotal,
+          detail: detail,
+          maxQty: ceilingIn,
+        });
+
+        // ── Update waterfall ceiling for next row ─────────────────────────────────
+        // Only tighten when the user actually typed a qty
+        if (userTyped > 0) {
+          ceilingIn = proposedTotal;
+          lastStepName = stepName;
+        }
+        // else: ceilingIn passes through unchanged
       }
 
       if (validationError) return;
 
-      // ── Final Actionable Guard ─────────────────────────────────────────────
-      // Valid actions are: Completing a step OR Flagging a delay WITH a remark
-      const hasActionableChange = updates.some(u => u.isDone || (u.isDelayed && u.remark !== ""));
-
-      if (!hasActionableChange) {
-        showToast("No valid changes detected. Mark a step as done or provide a delay remark.", "warning");
+      // ── Nothing actionable ────────────────────────────────────────────────────
+      if (updates.length === 0) {
+        showToast(
+          "No changes to save. Mark a step as done, flag a delay with a reason, or update an overdue remark.",
+          "warning"
+        );
         return;
       }
 
+      // ── At least one step must be done (qty-only paths use Update Qty Only) ───
+      // Exception: pure delay-remark-only saves are valid (user updating remarks
+      // on flagged steps without completing anything)
+      const hasDoneStep = updates.some((u) => u.isDone);
+      const hasDelayOnly = updates.every((u) => !u.isDone && u.isDelayed);
+
+      if (!hasDoneStep && !hasDelayOnly) {
+        showToast(
+          "No valid changes detected. Mark a step as done, or provide a delay remark.",
+          "warning"
+        );
+        return;
+      }
 
       // ── Split remark prompt ───────────────────────────────────────────────────
       let splitRemark = "";
