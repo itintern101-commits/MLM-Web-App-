@@ -1001,6 +1001,7 @@
         });
       }
 
+      
       const remaining = totalQty - allData.reduce((sum, batch) => sum + batch.batchQty, 0);
       if (remaining > 0) {
         pendingSubmitData = {
