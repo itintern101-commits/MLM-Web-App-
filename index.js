@@ -258,12 +258,12 @@ async function getSharePointFileContext() {
 
   // Get the file ID for Database.xlsx in the drive (adjust the path if the file is in a subfolder)
   const fileRes = await axios.get(
-    `https://graph.microsoft.com/v1.0/drives/${driveId}/root:/Database.xlsx`,
+    `https://graph.microsoft.com/v1.0/drives/${driveId}/root:/Testing Database.xlsx`,
     { headers },
   );
 
   const fileId = fileRes.data.id;
-  if (!fileId) throw new Error("Could not find fileId for Database.xlsx");
+  if (!fileId) throw new Error("Could not find fileId for Testing Database.xlsx");
 
   return { token, headers, siteId, driveId, fileId };
 }
