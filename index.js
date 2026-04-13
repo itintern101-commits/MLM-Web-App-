@@ -1,6 +1,7 @@
 ﻿const express = require("express");
 const path = require("path");
 const axios = require("axios");
+
 require("dotenv").config();
 const { ConfidentialClientApplication } = require("@azure/msal-node");
 
@@ -1323,8 +1324,8 @@ app.post("/api/createBatch", async (req, res) => {
       // Get current remaining
       const currentRemaining = parseInt(
         jobRows[targetRowIndex]["Remaining"] ||
-          jobRows[targetRowIndex].remaining ||
-          0,
+        jobRows[targetRowIndex].remaining ||
+        0,
       );
       const newRemaining = Math.max(0, currentRemaining - quantity);
 
@@ -1648,7 +1649,7 @@ async function saveMultiBatchUpdate(payload) {
           Math.ceil(
             (new Date(todayISO) -
               new Date(startDate.toISOString().split("T")[0])) /
-              86400000,
+            86400000,
           ),
         );
 

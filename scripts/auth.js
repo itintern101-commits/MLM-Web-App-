@@ -5,6 +5,7 @@
 let msalInstance;
 
 // Fetch config
+// This is done to keep sensitive info like clientId and tenantId out of the public code
 fetch("/config")
     .then(res => res.json())
     .then((config) => {
