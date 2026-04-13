@@ -1234,6 +1234,23 @@
     .btn-cancel:hover {
       background: #cbd5e1;
     }
+
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid #fff;
+      border-top: 2px solid transparent;
+      border-radius: 50%;
+      display: inline-block;
+      animation: spin 0.6s linear infinite;
+      margin-right: 5px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
   </style>
 </head>
 
@@ -2120,6 +2137,16 @@
 
     // Save the edited job details by sending an update request to the server
     function saveJobDetails() {
+      const saveBtn = document.getElementById('saveBtn');
+
+      // ✅ Prevent multiple clicks
+      if (saveBtn.disabled) return;
+
+      // ✅ Set loading state
+      saveBtn.disabled = true;
+      const originalText = saveBtn.innerHTML;
+      saveBtn.innerHTML = '<span class="spinner"></span> Saving...';
+
       const salesCodeSelect = document.getElementById('editSalesCode');
       const updatedData = {
         psn: currentEditingPsn,
@@ -2129,7 +2156,6 @@
         salesCode: salesCodeSelect ? salesCodeSelect.value : currentJobData.salesCode
       };
 
-      // Send to API
       fetch('/api/updateJobListing', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -2140,7 +2166,7 @@
           if (data.success) {
             showToast('Job details updated successfully', 'success');
             closePriorityModal();
-            fetchData(); // Refresh the data
+            fetchData();
           } else {
             showToast('Failed to update: ' + (data.error || 'Unknown error'), 'error');
           }
@@ -2148,6 +2174,11 @@
         .catch(error => {
           console.error('Error updating job:', error);
           showToast('Network error while updating', 'error');
+        })
+        .finally(() => {
+          // ✅ Restore button
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = originalText;
         });
     }
 
@@ -2367,6 +2398,10 @@
       const psn = document.getElementById('batchSummaryPsn').textContent;
       const quantity = parseInt(document.getElementById('batchQuantity').value);
       const currentRemaining = parseInt(document.getElementById('batchSummaryRemaining').textContent.replace(/,/g, ''));
+      const btn = document.getElementById('createBatchBtn');
+
+      // ✅ Prevent double click
+      if (btn.disabled) return;
 
       if (!quantity || quantity <= 0) {
         showToast('Please enter a valid quantity', 'error');
@@ -2377,6 +2412,7 @@
         showToast('Batch quantity cannot exceed remaining production quantity', 'error');
         return;
       }
+
 
       // ❗ NEW: Require ALL dates to be filled
       const allInputs = document.querySelectorAll('.process-date');
@@ -2396,6 +2432,10 @@
         return;
       }
 
+      // ✅ Set loading state
+      btn.disabled = true;
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '⏳ Creating...';
       // ✅ Then collect data (only runs if all filled)
       const processDates = {};
       allInputs.forEach(input => {
