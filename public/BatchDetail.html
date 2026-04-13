@@ -1942,6 +1942,171 @@
    ============================================ */
     @media (max-width: 768px) {
 
+      .stats-bar {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        padding: 8px 12px;
+      }
+
+      .stat-card {
+        min-height: auto;
+        padding: 10px 12px;
+        font-size: 0.9rem;
+      }
+
+      .mb-stat-row {
+        display: flex;
+        gap: 5px;
+      }
+
+      .mb-stat-chip {
+        flex: 1;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 4px;
+        cursor: pointer;
+      }
+
+      .mb-stat-chip .v {
+        font-size: 15px;
+        font-weight: 700;
+        display: block;
+        line-height: 1.1;
+      }
+
+      .mb-stat-chip .l {
+        font-size: 9px;
+        opacity: 0.75;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+
+      .mb-stat-chip.track {
+        background: #e0f2fe;
+        color: #0369a1;
+      }
+
+      .mb-stat-chip.delay {
+        background: #fee2e2;
+        color: #b91c1c;
+      }
+
+      .mb-stat-chip.done {
+        background: #dcfce7;
+        color: #166534;
+      }
+
+      .mb-accordion {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        margin: 0 12px 8px;
+        overflow: hidden;
+        grid-column: 1 / -1;
+      }
+
+      .mb-accordion.delay-accent {
+        border-left: 3px solid #ef4444;
+      }
+
+      .mb-accordion-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 12px;
+        cursor: pointer;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .mb-accordion-title {
+        font-size: 12px;
+        font-weight: 600;
+        color: #334155;
+      }
+
+      .mb-accordion-title.danger {
+        color: #b91c1c;
+      }
+
+      .mb-accordion-meta {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .mb-accordion-badge {
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 20px;
+      }
+
+      .mb-accordion-badge.blue {
+        background: #dbeafe;
+        color: #1e40af;
+      }
+
+      .mb-accordion-badge.red {
+        background: #fee2e2;
+        color: #b91c1c;
+      }
+
+      .mb-accordion-chevron {
+        font-size: 11px;
+        color: #94a3b8;
+        transition: transform 0.2s;
+        display: inline-block;
+      }
+
+      .mb-accordion-chevron.open {
+        transform: rotate(180deg);
+      }
+
+      .mb-accordion-body {
+        border-top: 1px solid #f1f5f9;
+        padding: 4px 10px 8px;
+        display: none;
+      }
+
+      .mb-accordion-body.open {
+        display: block;
+      }
+
+      .mb-filter-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 4px;
+        font-size: 12px;
+        color: #334155;
+        border-bottom: 1px solid #f8fafc;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .mb-filter-row:last-child {
+        border-bottom: none;
+      }
+
+      .mb-filter-row.active {
+        background: #eff6ff;
+        border-radius: 6px;
+      }
+
+      .mb-filter-row.active-delay {
+        background: #fff1f2;
+        border-radius: 6px;
+      }
+
+      .mb-filter-count {
+        font-weight: 700;
+        color: #2563eb;
+      }
+
+      .mb-filter-count.red {
+        color: #ef4444;
+      }
+
       table,
       thead,
       tbody,
@@ -1956,63 +2121,193 @@
       }
 
       #jobTableBody tr {
-        margin-bottom: 12px;
+        margin-bottom: 8px;
         background: white;
-        border-radius: 8px;
+        border-radius: 10px;
         border: 1px solid #e2e8f0;
-        padding: 10px 12px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        padding: 0;
       }
 
-      #jobTableBody td {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 7px 4px;
-        border-bottom: 1px solid #f1f5f9;
-        font-size: 0.85rem;
-      }
-
-      #jobTableBody td:last-child {
-        border-bottom: none;
-      }
-
-      #jobTableBody td::before {
-        content: attr(data-label);
-        font-weight: 600;
-        color: #64748b;
-        font-size: 0.75rem;
-        flex-shrink: 0;
-        margin-right: 8px;
-      }
-
-      #jobTableBody td[data-label="Actions"] {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 6px;
-        padding-top: 10px;
-      }
-
-      #jobTableBody td[data-label="Actions"]::before {
+      -- Hide all the old label-value rows — we replace with custom layout -- #jobTableBody td {
         display: none;
       }
 
-      #jobTableBody .update-btn,
-      #jobTableBody .edit-btn {
-        width: 100%;
+      -- Show only our new custom cells -- #jobTableBody td.mb-main-cell,
+      #jobTableBody td.mb-actions-cell {
+        display: block;
+        padding: 0;
+        border: none;
+      }
+
+      -- Main cell inner layout -- .mb-card-main {
+        padding: 10px 12px 8px;
+      }
+
+      .mb-card-top {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+
+      .mb-card-id {
+        font-size: 13px;
+        font-weight: 700;
+        color: #1e293b;
+        font-family: monospace;
+        white-space: nowrap;
+      }
+
+      .mb-card-name {
+        font-size: 11px;
+        color: #475569;
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 180px;
+      }
+
+      .mb-status-pill {
+        font-size: 10px;
+        font-weight: 600;
+        padding: 3px 8px;
+        border-radius: 20px;
+        white-space: nowrap;
+        margin-left: auto;
+        flex-shrink: 0;
+        align-self: flex-start;
+      }
+
+      .mb-status-pill.running {
+        background: #dcfce7;
+        color: #166534;
+      }
+
+      .mb-status-pill.delayed {
+        background: #fee2e2;
+        color: #b91c1c;
+      }
+
+      .mb-status-pill.done {
+        background: #e0e7ff;
+        color: #4338ca;
+      }
+
+      .mb-status-pill.partial {
+        background: #fffbeb;
+        color: #92400e;
+      }
+
+      .mb-card-bottom {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .mb-progress-wrap {
+        flex: 1;
+      }
+
+      .mb-progress-track {
+        height: 5px;
+        background: #e2e8f0;
+        border-radius: 3px;
+        overflow: hidden;
+        margin-bottom: 3px;
+      }
+
+      .mb-progress-fill {
+        height: 100%;
+        background: #2563eb;
+        border-radius: 3px;
+      }
+
+      .mb-progress-fill.delayed {
+        background: #ef4444;
+      }
+
+      .mb-progress-fill.done {
+        background: #10b981;
+      }
+
+      .mb-progress-label {
+        font-size: 10px;
+        color: #94a3b8;
+      }
+
+      .mb-qty-label {
+        font-size: 11px;
+        color: #64748b;
+        flex-shrink: 0;
+        font-weight: 500;
+      }
+
+      -- Actions accordion per card -- .mb-actions-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 7px 12px;
+        border-top: 1px solid #f1f5f9;
+        cursor: pointer;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .mb-actions-label {
+        font-size: 11px;
+        color: #94a3b8;
+        font-weight: 500;
+        margin-left: 10px;
+      }
+
+      .mb-actions-chevron {
+        font-size: 10px;
+        color: #cbd5e1;
+        transition: transform 0.15s;
+        display: inline-block;
+      }
+
+      .mb-actions-chevron.open {
+        transform: rotate(180deg);
+      }
+
+      .mb-actions-body {
+        display: none;
+        padding: 8px 12px 10px;
+        gap: 8px;
+      }
+
+      .mb-actions-body.open {
+        display: flex;
+      }
+
+      .mb-action-btn {
+        flex: 1;
+        padding: 9px 8px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
         text-align: center;
-        padding: 8px 12px;
+        border: none;
+        font-family: inherit;
+        -webkit-tap-highlight-color: transparent;
       }
 
-      .progress-track {
-        width: 100px;
+      .mb-action-btn.primary {
+        background: #2563eb;
+        color: white;
       }
-    }
 
-    /* ============================================
-   MOBILE: Modal Full-Screen
-   ============================================ */
-    @media (max-width: 768px) {
+      .mb-action-btn.secondary {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+      }
+
       #updateModal {
         align-items: flex-start !important;
       }
@@ -2056,12 +2351,33 @@
         justify-content: center;
         text-align: center;
       }
-    }
 
-    /* ============================================
-   MOBILE: Timeline Snake → Vertical Ladder
-   ============================================ */
-    @media (max-width: 768px) {
+      .um-active-card-body {
+        padding: 8px 10px;
+        gap: 6px;
+      }
+
+      .um-formula-row {
+        flex-wrap: wrap;
+      }
+
+      .um-formula-cell {
+        padding: 5px 6px;
+        min-width: 0;
+      }
+
+      .um-formula-cell-label {
+        font-size: 9px;
+      }
+
+      .um-formula-cell-value {
+        font-size: 12px;
+      }
+
+      .um-result-eq {
+        font-size: 11px;
+      }
+
       .um-timeline-container {
         grid-template-columns: 1fr !important;
         gap: 10px 0;
@@ -2414,31 +2730,24 @@
     function renderStats(data) {
       const totalBatches = MASTER_DATA.length;
 
-      // 1. Filter Batches by Status
       const completedBatches = MASTER_DATA.filter(
-        (job) => job.steps && job.steps.every((s) => s.isDone),
+        (job) => job.steps && job.steps.every((s) => s.isDone)
       ).length;
 
       const todayTime = new Date().setHours(0, 0, 0, 0);
 
-      // Identify Delayed Batches
       const delayedBatchesCount = MASTER_DATA.filter((job) => {
         const activeStep = job.steps?.find((s) => !s.isDone);
         if (!activeStep) return false;
-
-        const isManuallyDelayed = String(activeStep.status)
-          .toLowerCase()
-          .includes("delayed");
+        const isManuallyDelayed = String(activeStep.status).toLowerCase().includes("delayed");
         const expTime = parseDateStringToTime(activeStep.expDate);
         const isOverdue = expTime && expTime < todayTime;
-
         return isManuallyDelayed || isOverdue;
       }).length;
 
       const activeTotal = totalBatches - completedBatches;
       const onTrackCount = activeTotal - delayedBatchesCount;
 
-      // 2. Process & Delay Breakdown
       const processCounts = {};
       const delayBreakdown = {};
       let totalDelayedSteps = 0;
@@ -2447,110 +2756,187 @@
         if (!job.steps || !Array.isArray(job.steps)) return;
         const activeStep = job.steps.find((s) => !s.isDone);
         if (activeStep) {
-          processCounts[activeStep.name] =
-            (processCounts[activeStep.name] || 0) + 1;
-
-          const isManuallyDelayed = String(activeStep.status)
-            .toLowerCase()
-            .includes("delayed");
+          processCounts[activeStep.name] = (processCounts[activeStep.name] || 0) + 1;
+          const isManuallyDelayed = String(activeStep.status).toLowerCase().includes("delayed");
           const expTime = parseDateStringToTime(activeStep.expDate);
           const isOverdue = expTime && expTime < todayTime;
-
           if (isManuallyDelayed || isOverdue) {
-            delayBreakdown[activeStep.name] =
-              (delayBreakdown[activeStep.name] || 0) + 1;
+            delayBreakdown[activeStep.name] = (delayBreakdown[activeStep.name] || 0) + 1;
             totalDelayedSteps++;
           }
         }
       });
 
       const now = new Date();
-      const lastSyncStr =
-        now.toLocaleDateString() +
-        " " +
+      const lastSyncStr = now.toLocaleDateString() + " " +
         now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
       const container = document.getElementById("statsBar");
+      const isMobile = window.innerWidth <= 768;
       const tooltipMsg = "Click to filter table below";
 
-      // Helper for Process Load HTML
-      let loadHtml = Object.entries(processCounts)
-        .sort((a, b) => b[1] - a[1])
-        .map(([name, count], index, array) => {
-          const isActive = activeFilters.processes.has(name);
-          const positionClass =
-            index > array.length - 3 ? "show-above" : "show-below";
-          return `
-                    <div onclick="toggleProcessFilter('${name}')"
-                        class="filter-item tooltip-trigger ${positionClass} ${isActive ? "active-filter-pill" : ""}"
-                        data-tooltip="${tooltipMsg}">
-                        <span>${name}</span>
-                        <span style="font-weight: bold; color: ${isActive ? "white" : "var(--primary)"};">${count}</span>
-                    </div>`;
-        })
-        .join("");
+      if (isMobile) {
+        // ── MOBILE: compact 2-col grid + accordions ──────────────────────────────
+        const processTypes = Object.keys(processCounts).length;
 
-      // Helper for Delay Breakdown HTML
-      let delayHtml =
-        Object.entries(delayBreakdown)
+        // Process load accordion rows
+        const loadRows = Object.entries(processCounts)
+          .sort((a, b) => b[1] - a[1])
+          .map(([name, count]) => {
+            const isActive = activeFilters.processes.has(name);
+            return `<div onclick="toggleProcessFilter('${name}')"
+                     class="mb-filter-row${isActive ? " active" : ""}">
+                  <span>${name}</span>
+                  <span class="mb-filter-count">${count}</span>
+                </div>`;
+          }).join("");
+
+        // Delay breakdown accordion rows
+        const delayRows = Object.entries(delayBreakdown)
+          .sort((a, b) => b[1] - a[1])
+          .map(([name, count]) => {
+            const isActive = activeFilters.delayedProcesses.has(name);
+            return `<div onclick="toggleDelayedProcessFilter('${name}')"
+                     class="mb-filter-row${isActive ? " active-delay" : ""}">
+                  <span>${name}</span>
+                  <span class="mb-filter-count red">${count}</span>
+                </div>`;
+          }).join("") || `<div style="text-align:center;color:#94a3b8;font-size:12px;padding:8px 0;">No active delays</div>`;
+
+        container.innerHTML = `
+          <div class="stat-card" style="grid-column:1;">
+            <div style="font-size:10px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">
+              Overview — ${totalBatches} batches
+            </div>
+            <div class="mb-stat-row">
+              <div onclick="toggleStatusFilter('On Track')"
+                  class="mb-stat-chip track${activeFilters.statusTypes.has('On Track') ? ' active-track' : ''}">
+                <span class="v">${onTrackCount}</span><span class="l">On track</span>
+              </div>
+              <div onclick="toggleStatusFilter('Delayed')"
+                  class="mb-stat-chip delay${activeFilters.statusTypes.has('Delayed') ? ' active-delayed' : ''}">
+                <span class="v">${delayedBatchesCount}</span><span class="l">Delayed</span>
+              </div>
+              <div onclick="toggleStatusFilter('Done')"
+                  class="mb-stat-chip done${activeFilters.statusTypes.has('Done') ? ' active-done' : ''}">
+                <span class="v">${completedBatches}</span><span class="l">Done</span>
+              </div>
+            </div>
+          </div>
+    
+          <div class="stat-card" style="grid-column:2;">
+            <div style="font-size:10px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">System</div>
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;">
+              <span style="width:7px;height:7px;border-radius:50%;background:#10b981;display:inline-block;"></span>
+              <span style="font-size:13px;font-weight:700;color:#10b981;">Online</span>
+            </div>
+            <div style="font-size:10px;color:#94a3b8;">${lastSyncStr}</div>
+          </div>
+    
+          <div class="mb-accordion" style="grid-column:1/-1;">
+            <div class="mb-accordion-toggle" onclick="mbToggleAccordion('proc')">
+              <span class="mb-accordion-title">Active process load</span>
+              <div class="mb-accordion-meta">
+                <span class="mb-accordion-badge blue">${processTypes} types</span>
+                <span class="mb-accordion-chevron" id="mb-chev-proc">▾</span>
+              </div>
+            </div>
+            <div class="mb-accordion-body" id="mb-body-proc">
+              ${loadRows}
+            </div>
+          </div>
+    
+          <div class="mb-accordion delay-accent" style="grid-column:1/-1;">
+            <div class="mb-accordion-toggle" onclick="mbToggleAccordion('delay')">
+              <span class="mb-accordion-title danger">Delay breakdown</span>
+              <div class="mb-accordion-meta">
+                <span class="mb-accordion-badge red">${totalDelayedSteps} delayed</span>
+                <span class="mb-accordion-chevron" id="mb-chev-delay">▾</span>
+              </div>
+            </div>
+            <div class="mb-accordion-body" id="mb-body-delay">
+              ${delayRows}
+            </div>
+          </div>
+        `;
+
+      } else {
+        // ── DESKTOP: original 4-card grid (unchanged) ─────────────────────────────
+        let loadHtml = Object.entries(processCounts)
+          .sort((a, b) => b[1] - a[1])
+          .map(([name, count], index, array) => {
+            const isActive = activeFilters.processes.has(name);
+            const positionClass = index > array.length - 3 ? "show-above" : "show-below";
+            return `<div onclick="toggleProcessFilter('${name}')"
+                     class="filter-item tooltip-trigger ${positionClass} ${isActive ? "active-filter-pill" : ""}"
+                     data-tooltip="${tooltipMsg}">
+                  <span>${name}</span>
+                  <span style="font-weight:bold;color:${isActive ? "white" : "var(--primary)"};">${count}</span>
+                </div>`;
+          }).join("");
+
+        let delayHtml = Object.entries(delayBreakdown)
           .sort((a, b) => b[1] - a[1])
           .map(([name, count], index, array) => {
             const isActive = activeFilters.delayedProcesses.has(name);
-            const positionClass =
-              index > array.length - 3 ? "show-above" : "show-below";
-            return `
-                      <div onclick="toggleDelayedProcessFilter('${name}')"
-                          class="filter-item-delayed tooltip-trigger ${positionClass} ${isActive ? "active-filter-delayed" : ""}"
-                          data-tooltip="${tooltipMsg}">
-                          <span>${name}</span>
-                          <span style="font-weight: bold;">${count}</span>
-                      </div>`;
-          })
-          .join("") ||
-        '<div style="text-align: center; color: #94a3b8;">No active delays</div>';
+            const positionClass = index > array.length - 3 ? "show-above" : "show-below";
+            return `<div onclick="toggleDelayedProcessFilter('${name}')"
+                     class="filter-item-delayed tooltip-trigger ${positionClass} ${isActive ? "active-filter-delayed" : ""}"
+                     data-tooltip="${tooltipMsg}">
+                  <span>${name}</span>
+                  <span style="font-weight:bold;">${count}</span>
+                </div>`;
+          }).join("") || '<div style="text-align:center;color:#94a3b8;">No active delays</div>';
 
-      container.innerHTML = `
-                <div class="stat-card">
-                    <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 8px; font-weight: 600;">Production Overview</div>
-                    <div class="stat-val" style="font-size: 1.8rem; margin-bottom: 4px;">${totalBatches}</div>
-                    <div style="display: flex; justify-content: space-between; margin-top: 4px; border-top: 1px solid #f1f5f9; padding-top: 8px;">
-                        <div onclick="toggleStatusFilter('On Track')" data-tooltip="${tooltipMsg}" class="status-btn tooltip-trigger show-below ${activeFilters.statusTypes.has("On Track") ? "active-track" : ""}">
-                            <div class="label">On Track</div>
-                            <div class="val">${onTrackCount}</div>
-                        </div>
-                        <div onclick="toggleStatusFilter('Delayed')" data-tooltip="${tooltipMsg}" class="status-btn tooltip-trigger show-below ${activeFilters.statusTypes.has("Delayed") ? "active-delayed" : ""}">
-                            <div class="label">Delayed</div>
-                            <div class="val">${delayedBatchesCount}</div>
-                        </div>
-                        <div onclick="toggleStatusFilter('Done')" data-tooltip="${tooltipMsg}" class="status-btn tooltip-trigger show-below ${activeFilters.statusTypes.has("Done") ? "active-done" : ""}">
-                            <div class="label">Done</div>
-                            <div class="val">${completedBatches}</div>
-                        </div>
-                    </div>
-                </div>
+        container.innerHTML = `
+          <div class="stat-card">
+            <div style="font-size:0.9rem;color:#64748b;margin-bottom:8px;font-weight:600;">Production Overview</div>
+            <div class="stat-val" style="font-size:1.8rem;margin-bottom:4px;">${totalBatches}</div>
+            <div style="display:flex;justify-content:space-between;margin-top:4px;border-top:1px solid #f1f5f9;padding-top:8px;">
+              <div onclick="toggleStatusFilter('On Track')" data-tooltip="${tooltipMsg}"
+                  class="status-btn tooltip-trigger show-below ${activeFilters.statusTypes.has("On Track") ? "active-track" : ""}">
+                <div class="label">On Track</div><div class="val">${onTrackCount}</div>
+              </div>
+              <div onclick="toggleStatusFilter('Delayed')" data-tooltip="${tooltipMsg}"
+                  class="status-btn tooltip-trigger show-below ${activeFilters.statusTypes.has("Delayed") ? "active-delayed" : ""}">
+                <div class="label">Delayed</div><div class="val">${delayedBatchesCount}</div>
+              </div>
+              <div onclick="toggleStatusFilter('Done')" data-tooltip="${tooltipMsg}"
+                  class="status-btn tooltip-trigger show-below ${activeFilters.statusTypes.has("Done") ? "active-done" : ""}">
+                <div class="label">Done</div><div class="val">${completedBatches}</div>
+              </div>
+            </div>
+          </div>
+    
+          <div class="stat-card">
+            <div style="font-size:0.9rem;color:#64748b;margin-bottom:8px;">System Status</div>
+            <div class="stat-val" style="color:#10b981;font-size:1.5rem;display:flex;align-items:center;gap:6px;">
+              <span style="height:8px;width:8px;background-color:#10b981;border-radius:50%;display:inline-block;box-shadow:0 0 5px #10b981;"></span>
+              Online
+            </div>
+            <div style="font-size:0.8rem;color:#94a3b8;margin-top:auto;">Last Sync: ${lastSyncStr}</div>
+          </div>
+    
+          <div class="stat-card">
+            <div style="font-size:0.9rem;color:#64748b;margin-bottom:12px;font-weight:600;">Active Process Load</div>
+            <div style="overflow-y:auto;flex-grow:1;padding-right:8px;">${loadHtml}</div>
+          </div>
+    
+          <div class="stat-card" style="border-left:5px solid var(--danger);">
+            <div style="font-size:0.9rem;color:var(--danger);font-weight:bold;margin-bottom:12px;">Active Delay Breakdown (${totalDelayedSteps})</div>
+            <div style="overflow-y:auto;flex-grow:1;padding-right:8px;">${delayHtml}</div>
+          </div>
+        `;
+      }
+    }
 
-                <div class="stat-card">
-                    <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 8px;">System Status</div>
-                    <div class="stat-val" style="color: #10b981; font-size: 1.5rem; display: flex; align-items: center; gap: 6px;">
-                        <span style="height: 8px; width: 8px; background-color: #10b981; border-radius: 50%; display: inline-block; box-shadow: 0 0 5px #10b981;"></span>
-                        Online
-                    </div>
-                    <div style="font-size: 0.8rem; color: #94a3b8; margin-top: auto;">Last Sync: ${lastSyncStr}</div>
-                </div>
-
-                <div class="stat-card">
-                    <div style="font-size: 0.9rem; color: #64748b; margin-bottom: 12px; font-weight: 600;">Active Process Load</div>
-                    <div style="overflow-y: auto; flex-grow: 1; padding-right: 8px;">
-                        ${loadHtml}
-                    </div>
-                </div>
-
-                <div class="stat-card" style="border-left: 5px solid var(--danger);">
-                    <div style="font-size: 0.9rem; color: var(--danger); font-weight: bold; margin-bottom: 12px;">Active Delay Breakdown (${totalDelayedSteps})</div>
-                    <div style="overflow-y: auto; flex-grow: 1; padding-right: 8px;">
-                        ${delayHtml}
-                    </div>
-                </div>
-            `;
+    // ── Mobile accordion toggle helper (add alongside other global helpers) ──────
+    function mbToggleAccordion(id) {
+      const body = document.getElementById("mb-body-" + id);
+      const chev = document.getElementById("mb-chev-" + id);
+      if (!body || !chev) return;
+      body.classList.toggle("open");
+      chev.classList.toggle("open");
     }
 
 
@@ -2694,54 +3080,112 @@
 
       // 4. Render Rows
       filteredData.forEach((job) => {
-        // Defensive check for steps
         if (!job.steps || !Array.isArray(job.steps)) {
-          console.warn(
-            "renderTable: Job",
-            job.batchId,
-            "has no valid steps array",
-          );
+          console.warn("renderTable: Job", job.batchId, "has no valid steps array");
           return;
         }
 
-        // Use the helper to get the exact text
         const pillText = getStatusText(job, todayTime);
+        const doneCount = job.steps.filter((s) => s.isDone).length;
+        const isMobile = window.innerWidth <= 768;
 
-        // Determine class based on the text content
         let pillClass = "pill-running";
         if (pillText.includes("Delayed")) pillClass = "pill-delayed";
-        else if (pillText === "Partially Delivered")
-          pillClass = "pill-partial";
+        else if (pillText === "Partially Delivered") pillClass = "pill-partial";
         else if (pillText === "Completed") pillClass = "pill-completed";
 
-        const doneCount = job.steps.filter((s) => s.isDone).length;
-
         const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td data-label="PSN"><b>${job.psn}</b></td>
-          <td data-label="Batch ID"><span style="color: #64748b; font-family: monospace;">${job.batchId}</span></td>
-          <td data-label="Job Name">${job.jobName}</td>
-          <td data-label="Quantity">${Number(job.qty).toLocaleString()}</td>
-          <td data-label="Progress">
-            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:3px;">
-              <div class="progress-track"><div class="progress-fill" style="width:${job.progress * 100}%"></div></div>
-              <div style="font-size: 0.7rem; color: #64748b;">
-                ${(job.progress * 100).toFixed(0)}% (${doneCount} / ${job.steps.length})
+
+        if (isMobile) {
+          // ── Mobile: 2-cell compact card layout ──────────────────────────────────
+
+          // Determine progress fill colour class
+          let fillClass = "";
+          if (pillText.includes("Delayed")) fillClass = "delayed";
+          else if (pillText === "Completed" || pillText === "Partially Delivered") fillClass = "done";
+
+          // Status pill class for mobile
+          let mbPillClass = "running";
+          if (pillText.includes("Delayed")) mbPillClass = "delayed";
+          else if (pillText === "Completed" || pillText === "Partially Delivered") mbPillClass = "done";
+          else if (pillText === "Partially Delivered") mbPillClass = "partial";
+
+          const progressPct = Math.round(job.progress * 100);
+          const uniqueId = "act-" + job.row;
+
+          tr.innerHTML = `
+            <td class="mb-main-cell">
+              <div class="mb-card-main">
+                <div class="mb-card-top">
+                  <div style="min-width:0; flex:1;">
+                    <div class="mb-card-id">${job.batchId}</div>
+                    <div class="mb-card-name">${job.jobName}</div>
+                  </div>
+                  <span class="mb-status-pill ${mbPillClass}">${pillText}</span>
+                </div>
+                <div class="mb-card-bottom">
+                  <div class="mb-progress-wrap">
+                    <div class="mb-progress-track">
+                      <div class="mb-progress-fill ${fillClass}" style="width:${progressPct}%"></div>
+                    </div>
+                    <div class="mb-progress-label">${progressPct}% · ${doneCount}/${job.steps.length} steps</div>
+                  </div>
+                  <div class="mb-qty-label">${Number(job.qty).toLocaleString()}</div>
+                </div>
               </div>
-            </div>
-          </td>
-          <td data-label="Status"><span class="pill ${pillClass}">${pillText}</span></td>
-          <td data-label="Actions">
-            <button class="update-btn" onclick="openUpdatePopup(${job.row})">Update Status</button>
-            <button class="edit-btn"
-                    onclick="openEditPopup(${job.row})"
-                    style="background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600;">
-              Edit Batch Date
-            </button>
-          </td>
-        `;
+            </td>
+            <td class="mb-actions-cell">
+              <div class="mb-actions-toggle" onclick="mbToggleActions('${uniqueId}')">
+                <span class="mb-actions-label">Actions</span>
+                <span class="mb-actions-chevron" id="chev-${uniqueId}">▾</span>
+              </div>
+              <div class="mb-actions-body" id="${uniqueId}">
+                <button class="mb-action-btn primary"   onclick="openUpdatePopup(${job.row})">Update status</button>
+                <button class="mb-action-btn secondary" onclick="openEditPopup(${job.row})">Edit dates</button>
+              </div>
+            </td>
+          `;
+
+        } else {
+          // ── Desktop: original table row (unchanged) ──────────────────────────────
+          tr.innerHTML = `
+            <td data-label="PSN"><b>${job.psn}</b></td>
+            <td data-label="Batch ID"><span style="color:#64748b;font-family:monospace;">${job.batchId}</span></td>
+            <td data-label="Job Name">${job.jobName}</td>
+            <td data-label="Quantity">${Number(job.qty).toLocaleString()}</td>
+            <td data-label="Progress">
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;">
+                <div class="progress-track">
+                  <div class="progress-fill" style="width:${job.progress * 100}%"></div>
+                </div>
+                <div style="font-size:0.7rem;color:#64748b;">
+                  ${(job.progress * 100).toFixed(0)}% (${doneCount} / ${job.steps.length})
+                </div>
+              </div>
+            </td>
+            <td data-label="Status"><span class="pill ${pillClass}">${pillText}</span></td>
+            <td data-label="Actions">
+              <button class="update-btn" onclick="openUpdatePopup(${job.row})">Update Status</button>
+              <button class="edit-btn"
+                      onclick="openEditPopup(${job.row})"
+                      style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600;">
+                Edit Batch Date
+              </button>
+            </td>
+          `;
+        }
+
         tbody.appendChild(tr);
       });
+    }
+
+    // ── Per-card actions toggle helper (add alongside other global helpers) ──────
+    function mbToggleActions(id) {
+      const body = document.getElementById(id);
+      const chev = document.getElementById("chev-" + id);
+      if (!body || !chev) return;
+      body.classList.toggle("open");
+      chev.classList.toggle("open");
     }
 
     // Helper to get status string for sorting
