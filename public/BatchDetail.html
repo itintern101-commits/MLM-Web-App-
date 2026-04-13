@@ -23,7 +23,10 @@
 
     /* Sidebar Integration Wrapper */
     .main {
+      flex: 1;
       min-height: 100vh;
+      min-width: 0;
+      overflow-x: hidden;
     }
 
     /* Header & Stats */
@@ -2115,30 +2118,56 @@
 <body>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      const pageContent = document.getElementById('page-content').innerHTML;
-
       fetch('/Sidebar.html')
         .then((r) => r.text())
         .then((html) => {
           const parser = new DOMParser();
           const doc = parser.parseFromString(html, 'text/html');
 
+          // 1. Copy sidebar CSS into <head>
           doc.head.querySelectorAll('style, link[rel="stylesheet"]').forEach((node) => {
             document.head.appendChild(node.cloneNode(true));
           });
 
-          const sidebarBody = doc.body ? doc.body.innerHTML : html;
-          document.body.innerHTML = sidebarBody;
-
-          const mainEl = document.querySelector('.main');
-          if (!mainEl) {
-            console.error('Sidebar load failed: .main not found after injection');
+          // 2. Get the <aside id="sidebar"> from Sidebar.html
+          const sidebarEl = doc.getElementById('sidebar');
+          if (!sidebarEl) {
+            console.error('Sidebar load failed: #sidebar not found in Sidebar.html');
             return;
           }
-          mainEl.innerHTML = pageContent;
 
+          // 3. Scoop up every existing node in <body> into a fragment
+          //    This includes: loader, page content, toast, modal — everything
+          const fragment = document.createDocumentFragment();
+          while (document.body.firstChild) {
+            fragment.appendChild(document.body.firstChild);
+          }
+
+          // 4. Build the flex layout in JS:
+          //    <div class="sidebar-wrapper">
+          //      <aside id="sidebar">  ← from Sidebar.html
+          //      <div class="main">    ← all original BatchDetail content
+          //    </div>
+          const wrapper = document.createElement('div');
+          wrapper.className = 'sidebar-wrapper';
+
+          const mainDiv = document.createElement('div');
+          mainDiv.className = 'main';
+          mainDiv.appendChild(fragment);
+
+          wrapper.appendChild(sidebarEl.cloneNode(true));
+          wrapper.appendChild(mainDiv);
+          document.body.appendChild(wrapper);
+
+          // 5. Wire up toggle
           const btn = document.getElementById('sidebarToggle');
           const sidebar = document.getElementById('sidebar');
+
+          if (!btn || !sidebar) {
+            console.error('Sidebar: #sidebarToggle or #sidebar missing after DOM build');
+            return;
+          }
+
           function setSidebar(collapsed) {
             sidebar.classList.toggle('sidebar--collapsed', collapsed);
             btn.setAttribute('aria-expanded', String(!collapsed));
@@ -2146,14 +2175,17 @@
               el.setAttribute('aria-hidden', String(collapsed));
             });
           }
+
           const savedState = localStorage.getItem('sidebar-collapsed') === '1';
           setSidebar(savedState);
+
           btn.addEventListener('click', () => {
             const collapsed = !sidebar.classList.contains('sidebar--collapsed');
             setSidebar(collapsed);
             localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0');
           });
 
+          // 6. Highlight active nav link
           const currentPage = window.location.pathname
             .split('/')
             .pop()
@@ -2163,6 +2195,16 @@
               link.classList.add('active');
             }
           });
+
+          // 7. Wire up logout
+          const logoutBtn = document.getElementById('logoutBtn');
+          if (logoutBtn) {
+            logoutBtn.addEventListener('click', (e) => {
+              e.preventDefault();
+              localStorage.clear();
+              window.location.href = '/login.html';
+            });
+          }
         })
         .catch(console.error);
     });
@@ -2172,13 +2214,13 @@
     <h2>Initializing Batch Webpage...</h2>
   </div>
 
-  <div id="page-content">
-    <div class="dashboard-header">
-      <h1 style="font-weight: bold; color: #ffffff">Batch Dashboard</h1>
-      <div>
-        <input type="text" id="searchInput" placeholder="Search PSN or Job Name..." onkeyup="renderTable()"
-          style="padding: 8px; width: 100%; max-width: 300px; border-radius: 4px; border: 1px solid #ccc; flex: 1; min-width: 160px; box-sizing: border-box;" />
-        <button onclick="fetchData()" style="
+
+  <div class="dashboard-header">
+    <h1 style="font-weight: bold; color: #ffffff">Batch Dashboard</h1>
+    <div>
+      <input type="text" id="searchInput" placeholder="Search PSN or Job Name..." onkeyup="renderTable()"
+        style="padding: 8px; width: 100%; max-width: 300px; border-radius: 4px; border: 1px solid #ccc; flex: 1; min-width: 160px; box-sizing: border-box;" />
+      <button onclick="fetchData()" style="
               padding: 8px 16px;
               background: var(--primary);
               color: white;
@@ -2187,10 +2229,10 @@
               cursor: pointer;
               margin-left: 10px;
             ">
-          Refresh Data
-        </button>
+        Refresh Data
+      </button>
 
-        <button id="clearSortBtn" onclick="clearAllFilters()" style="
+      <button id="clearSortBtn" onclick="clearAllFilters()" style="
               padding: 8px 16px;
               background: #fff1f2;
               color: #e11d48;
@@ -2200,42 +2242,42 @@
               display: none;
               font-weight: 600;
             ">
-          ✕ Clear All Filters
-        </button>
-      </div>
-    </div>
-
-    <div class="stats-bar" id="statsBar"></div>
-
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th onclick="handleSort('psn')">
-              PSN <span class="sort-icon">↕</span>
-            </th>
-            <th onclick="handleSort('batchId')">
-              Batch ID <span class="sort-icon">↕</span>
-            </th>
-            <th onclick="handleSort('jobName')">
-              Job Name <span class="sort-icon">↕</span>
-            </th>
-            <th onclick="handleSort('qty')">
-              Quantity <span class="sort-icon">↕</span>
-            </th>
-            <th onclick="handleSort('progress')">
-              Overall Progress <span class="sort-icon">↕</span>
-            </th>
-            <th onclick="handleSort('status')">
-              Current Status <span class="sort-icon">↕</span>
-            </th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="jobTableBody"></tbody>
-      </table>
+        ✕ Clear All Filters
+      </button>
     </div>
   </div>
+
+  <div class="stats-bar" id="statsBar"></div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th onclick="handleSort('psn')">
+            PSN <span class="sort-icon">↕</span>
+          </th>
+          <th onclick="handleSort('batchId')">
+            Batch ID <span class="sort-icon">↕</span>
+          </th>
+          <th onclick="handleSort('jobName')">
+            Job Name <span class="sort-icon">↕</span>
+          </th>
+          <th onclick="handleSort('qty')">
+            Quantity <span class="sort-icon">↕</span>
+          </th>
+          <th onclick="handleSort('progress')">
+            Overall Progress <span class="sort-icon">↕</span>
+          </th>
+          <th onclick="handleSort('status')">
+            Current Status <span class="sort-icon">↕</span>
+          </th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="jobTableBody"></tbody>
+    </table>
+  </div>
+
   <div id="toast-container"></div>
 
   <div id="updateModal" style="
