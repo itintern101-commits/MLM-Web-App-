@@ -40,8 +40,7 @@
     }
 
     .container {
-      width: 100%;
-      max-width: 950px;
+      max-width: 1000px;
       background: white;
       padding: 40px;
       border-radius: 16px;
@@ -312,8 +311,13 @@
       transition: opacity 0.2s;
     }
 
-    .drag-handle:hover { opacity: 1; }
-    .drag-handle:active { cursor: grabbing; }
+    .drag-handle:hover {
+      opacity: 1;
+    }
+
+    .drag-handle:active {
+      cursor: grabbing;
+    }
 
     /* STEP 4: Up/Down reorder buttons — only shown on mobile */
     .mobile-reorder-btns {
@@ -338,8 +342,15 @@
       padding: 0;
     }
 
-    .reorder-btn:hover { background: var(--primary); color: white; }
-    .reorder-btn:disabled { opacity: 0.3; cursor: default; }
+    .reorder-btn:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    .reorder-btn:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
 
     .delivery-row {
       background: #fffbeb !important;
@@ -378,12 +389,11 @@
       background: white;
       border: 1px solid var(--border);
       border-radius: 12px;
-      box-shadow: 0 -4px 16px rgba(0,0,0,0.10);
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.10);
       padding: 16px 20px;
       margin-bottom: 20px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
       gap: 10px;
     }
 
@@ -391,7 +401,7 @@
       margin: 0;
       border: none;
       padding: 0;
-      font-size: 14px;
+      font-size: 18px;
     }
 
     .remaining-value {
@@ -437,25 +447,46 @@
       box-sizing: border-box;
     }
 
-    .toast.error { border-bottom: 4px solid var(--danger); }
-    .toast.success { border-bottom: 4px solid var(--success); }
+    .toast.error {
+      border-bottom: 4px solid var(--danger);
+    }
+
+    .toast.success {
+      border-bottom: 4px solid var(--success);
+    }
 
     @keyframes popDown {
-      from { transform: translateY(-50px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+      from {
+        transform: translateY(-50px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
     }
 
     @keyframes fadeOutUp {
-      from { transform: translateY(0); opacity: 1; }
-      to { transform: translateY(-20px); opacity: 0; }
+      from {
+        transform: translateY(0);
+        opacity: 1;
+      }
+
+      to {
+        transform: translateY(-20px);
+        opacity: 0;
+      }
     }
 
     /* Custom Confirmation Dialog */
     .confirm-overlay {
       display: none;
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background: rgba(0, 0, 0, 0.6);
       z-index: 1100;
       justify-content: center;
@@ -463,7 +494,9 @@
       backdrop-filter: blur(2px);
     }
 
-    .confirm-overlay.show { display: flex; }
+    .confirm-overlay.show {
+      display: flex;
+    }
 
     .confirm-dialog-content {
       background: white;
@@ -476,8 +509,15 @@
     }
 
     @keyframes modalSlideIn {
-      from { opacity: 0; transform: translateY(-20px) scale(0.95); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
+      from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
 
     .confirm-header {
@@ -510,26 +550,38 @@
     }
 
     .confirm-btn-cancel {
-      background: #e2e8f0; color: #64748b;
-      border: none; padding: 0.65rem 1rem;
-      border-radius: 8px; cursor: pointer;
-      font-size: 0.9rem; font-weight: 600;
+      background: #e2e8f0;
+      color: #64748b;
+      border: none;
+      padding: 0.65rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
       transition: background 0.2s;
       min-height: 44px;
     }
 
-    .confirm-btn-cancel:hover { background: #cbd5e1; }
+    .confirm-btn-cancel:hover {
+      background: #cbd5e1;
+    }
 
     .confirm-btn-ok {
-      background: var(--success); color: white;
-      border: none; padding: 0.65rem 1rem;
-      border-radius: 8px; cursor: pointer;
-      font-size: 0.9rem; font-weight: 600;
+      background: var(--success);
+      color: white;
+      border: none;
+      padding: 0.65rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
       transition: background 0.2s;
       min-height: 44px;
     }
 
-    .confirm-btn-ok:hover { background: #228a3f; }
+    .confirm-btn-ok:hover {
+      background: #228a3f;
+    }
 
     /* =========================================================
        TABLET  ≤1024px
@@ -576,8 +628,10 @@
         font-size: 12px;
       }
 
-      input, select {
-        font-size: 16px; /* Prevents iOS auto-zoom */
+      input,
+      select {
+        font-size: 16px;
+        /* Prevents iOS auto-zoom */
         padding: 10px 12px;
         min-height: 44px;
       }
@@ -589,7 +643,9 @@
         padding: 12px;
       }
 
-      .process-pool { gap: 6px; }
+      .process-pool {
+        gap: 6px;
+      }
 
       .proc-pill {
         padding: 8px 14px;
@@ -597,11 +653,19 @@
         min-height: 40px;
       }
 
-      .selected-sequence { padding: 12px; gap: 6px; }
+      .selected-sequence {
+        padding: 12px;
+        gap: 6px;
+      }
 
-      .seq-item { padding: 6px 12px; font-size: 12px; }
+      .seq-item {
+        padding: 6px 12px;
+        font-size: 12px;
+      }
 
-      .batch-container { border-radius: 10px; }
+      .batch-container {
+        border-radius: 10px;
+      }
 
       .batch-header {
         padding: 12px 14px;
@@ -614,7 +678,10 @@
         font-size: 15px;
       }
 
-      .vertical-steps { padding: 8px; gap: 8px; }
+      .vertical-steps {
+        padding: 8px;
+        gap: 8px;
+      }
 
       /* STEP 3: 2-tier mobile step-row layout */
       .step-row {
@@ -624,13 +691,29 @@
         grid-template-rows: auto auto;
         gap: 4px 8px;
         padding: 10px 10px 8px;
-        transform: none !important; /* disable translateX hover on mobile */
+        transform: none !important;
+        /* disable translateX hover on mobile */
       }
 
       /* Tier 1 items */
-      .step-row .step-num   { grid-column: 1; grid-row: 1; align-self: center; }
-      .step-row .step-name  { grid-column: 2; grid-row: 1; align-self: center; }
-      .step-row .step-reorder { grid-column: 3; grid-row: 1 / 3; align-self: center; justify-self: center; }
+      .step-row .step-num {
+        grid-column: 1;
+        grid-row: 1;
+        align-self: center;
+      }
+
+      .step-row .step-name {
+        grid-column: 2;
+        grid-row: 1;
+        align-self: center;
+      }
+
+      .step-row .step-reorder {
+        grid-column: 3;
+        grid-row: 1 / 3;
+        align-self: center;
+        justify-self: center;
+      }
 
       /* Tier 2: Date input spans full width below */
       .step-row .step-date {
@@ -646,12 +729,20 @@
       }
 
       /* Desktop drag handle hidden on mobile */
-      .drag-handle { display: none !important; }
+      .drag-handle {
+        display: none !important;
+      }
 
       /* STEP 4: Show Up/Down buttons on mobile */
-      .mobile-reorder-btns { display: flex; }
+      .mobile-reorder-btns {
+        display: flex;
+      }
 
-      .step-num-badge { width: 26px; height: 26px; font-size: 11px; }
+      .step-num-badge {
+        width: 26px;
+        height: 26px;
+        font-size: 11px;
+      }
 
       .step-select-input {
         font-size: 14px;
@@ -666,7 +757,13 @@
         margin-bottom: 0;
       }
 
-      .remaining-value { font-size: 20px; }
+      .remaining-sticky h3 {
+        font-size: 14px;
+      }
+
+      .remaining-value {
+        font-size: 17px;
+      }
 
       .btn-submit {
         padding: 16px;
@@ -702,28 +799,57 @@
        SMALL PHONES  ≤480px
     ========================================================= */
     @media (max-width: 480px) {
-      .main { padding: 10px 8px; }
-      h2 { font-size: 1.25rem; }
+      .main {
+        padding: 10px 8px;
+      }
 
-      .section-card { padding: 12px 10px; }
+      h2 {
+        font-size: 1.25rem;
+      }
 
-      .grid { gap: 10px; }
+      .section-card {
+        padding: 12px 10px;
+      }
 
-      .proc-pill { padding: 6px 12px; font-size: 11px; }
+      .grid {
+        gap: 10px;
+      }
 
-      .seq-item { padding: 5px 10px; font-size: 11px; }
+      .proc-pill {
+        padding: 6px 12px;
+        font-size: 11px;
+      }
 
-      .batch-header { padding: 10px 12px; }
+      .seq-item {
+        padding: 5px 10px;
+        font-size: 11px;
+      }
 
-      .step-row { padding: 8px 8px 6px; }
+      .batch-header {
+        padding: 10px 12px;
+      }
 
-      .btn-submit { padding: 14px; font-size: 15px; }
+      .step-row {
+        padding: 8px 8px 6px;
+      }
 
-      .toast { font-size: 13px; padding: 12px 16px; }
+      .btn-submit {
+        padding: 14px;
+        font-size: 15px;
+      }
 
-      .remaining-sticky { padding: 10px 12px; }
+      .toast {
+        font-size: 13px;
+        padding: 12px 16px;
+      }
 
-      .remaining-value { font-size: 18px; }
+      .remaining-sticky {
+        padding: 10px 12px;
+      }
+
+      .remaining-value {
+        font-size: 18px;
+      }
     }
   </style>
 </head>
@@ -748,6 +874,7 @@
 
           const btn = document.getElementById('sidebarToggle');
           const sidebar = document.getElementById('sidebar');
+          const logo = document.getElementById('sidebarLogo');
           function setSidebar(collapsed) {
             sidebar.classList.toggle('sidebar--collapsed', collapsed);
             btn.setAttribute('aria-expanded', String(!collapsed));
@@ -757,6 +884,14 @@
           }
           const savedState = localStorage.getItem('sidebar-collapsed') === '1';
           setSidebar(savedState);
+
+          if (logo) {
+            logo.addEventListener('click', () => {
+              const collapsed = !sidebar.classList.contains('sidebar--collapsed');
+              setSidebar(collapsed);
+              localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0');
+            });
+          }
           btn.addEventListener('click', () => {
             const collapsed = !sidebar.classList.contains('sidebar--collapsed');
             setSidebar(collapsed);
@@ -773,389 +908,394 @@
 
   <div id="page-content" style="display:none;">
 
-  <div id="toast-container"></div>
+    <div id="toast-container"></div>
 
-  <!-- Remaining Quantity Confirmation Dialog -->
-  <div id="confirmOverlay" class="confirm-overlay">
-    <div class="confirm-dialog-content">
-      <div class="confirm-header">⚠️ Remaining Production Quantity</div>
-      <div class="confirm-body" id="confirmMessage">Remaining Production Quantity is <strong>0</strong>. Do you want to proceed and save the remaining for later batches?</div>
-      <div class="confirm-actions">
-        <button class="confirm-btn-cancel" onclick="cancelConfirm()">Cancel</button>
-        <button class="confirm-btn-ok" onclick="proceedWithSubmit()">Proceed</button>
+    <!-- Remaining Quantity Confirmation Dialog -->
+    <div id="confirmOverlay" class="confirm-overlay">
+      <div class="confirm-dialog-content">
+        <div class="confirm-header">⚠️ Remaining Production Quantity</div>
+        <div class="confirm-body" id="confirmMessage">Remaining Production Quantity is <strong>0</strong>. Do you want
+          to proceed and save the remaining for later batches?</div>
+        <div class="confirm-actions">
+          <button class="confirm-btn-cancel" onclick="cancelConfirm()">Cancel</button>
+          <button class="confirm-btn-ok" onclick="proceedWithSubmit()">Proceed</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="main">
-    <div class="container">
-      <h2>📋 Create Job &amp; Batch Entry</h2>
+    <div class="main">
+      <div class="container">
+        <h2>📋 Create Job &amp; Batch Entry</h2>
 
-      <!-- SECTION 1: Main Job Details -->
-      <div class="section-card">
-        <h3>1. Main Job Details</h3>
-        <div class="grid">
-          <div class="input-group"><label>PSN</label><input type="text" id="psn" placeholder="e.g. 260000" inputmode="numeric"></div>
-          <div class="input-group"><label>PI Number</label><input type="text" id="piNumber" placeholder="XXXX/26" onblur="formatPINumber(this)"></div>
-          <div class="input-group"><label>Total Quantity</label><input type="number" id="totalQuantity" inputmode="numeric" oninput="distributeQuantities()"></div>
-          <div class="input-group span-full"><label>Job Name</label><input type="text" id="jobName"></div>
-          <div class="input-group"><label>Order Date</label><input type="date" id="orderDate"></div>
-          <div class="input-group"><label>Final Delivery Date</label><input type="date" id="deliveryDate"></div>
-          <div class="input-group"><label>Item Name</label><input type="text" id="item"></div>
+        <!-- SECTION 1: Main Job Details -->
+        <div class="section-card">
+          <h3>1. Main Job Details</h3>
+          <div class="grid">
+            <div class="input-group"><label>PSN</label><input type="text" id="psn" placeholder="e.g. 260000"
+                inputmode="numeric"></div>
+            <div class="input-group"><label>PI Number</label><input type="text" id="piNumber" placeholder="XXXX/26"
+                onblur="formatPINumber(this)"></div>
+            <div class="input-group"><label>Total Quantity</label><input type="number" id="totalQuantity"
+                inputmode="numeric" oninput="distributeQuantities()"></div>
+            <div class="input-group span-full"><label>Job Name</label><input type="text" id="jobName"></div>
+            <div class="input-group"><label>Order Date</label><input type="date" id="orderDate"></div>
+            <div class="input-group"><label>Final Delivery Date</label><input type="date" id="deliveryDate"></div>
+            <div class="input-group"><label>Item Name</label><input type="text" id="item"></div>
 
-          <div class="input-group">
-            <label>Sales Code</label>
-            <select id="salesCode">
-              <option value="">Please Choose Sales Code</option>
-              <option value="AO">AO</option>
-              <option value="SHU">SHU</option>
-              <option value="NT">NT</option>
-              <option value="AK">AK</option>
-              <option value="NY">NY</option>
-              <option value="OC">OC</option>
-              <option value="PAO">PAO</option>
-              <option value="PNY">PNY</option>
-              <option value="SO">SO</option>
-              <option value="SC">SC</option>
-            </select>
-          </div>
-          <div class="input-group">
-            <label>Job Type</label>
-            <select id="jobType">
-              <option value="">Please Choose Job Type</option>
-              <option value="Offset">Offset</option>
-              <option value="FSC">FSC</option>
-              <option value="Flexo & MMB/SOS">Flexo &amp; MMB/SOS</option>
-              <option value="Fully Outsourced">Fully Outsourced</option>
-              <option value="FSCFully Outsourced">FSC Fully Outsourced</option>
-              <option value="Drawdown">Drawdown</option>
-              <option value="K SERIES">K SERIES</option>
-              <option value="Mock-Up">Mock-Up</option>
-            </select>
-          </div>
-          <div class="input-group">
-            <label>Priority</label>
-            <select id="priority">
-              <option value="Normal">Normal</option>
-              <option value="Cut Queue">Cut Queue</option>
-              <option value="Urgent">Urgent</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <!-- SECTION 2: Build Production Sequence -->
-      <div class="section-card">
-        <div class="section2-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-          <h3 style="margin:0;">2. Build Production Sequence</h3>
-          <div style="display:flex; gap:10px; align-items:center;">
-            <button class="btn-clear" onclick="clearSequence()">Clear All Steps</button>
-            <span id="counter" style="font-size:12px; font-weight:bold; color: var(--primary);">0 / 11</span>
+            <div class="input-group">
+              <label>Sales Code</label>
+              <select id="salesCode">
+                <option value="">Please Choose Sales Code</option>
+                <option value="AO">AO</option>
+                <option value="SHU">SHU</option>
+                <option value="NT">NT</option>
+                <option value="AK">AK</option>
+                <option value="NY">NY</option>
+                <option value="OC">OC</option>
+                <option value="PAO">PAO</option>
+                <option value="PNY">PNY</option>
+                <option value="SO">SO</option>
+                <option value="SC">SC</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Job Type</label>
+              <select id="jobType">
+                <option value="">Please Choose Job Type</option>
+                <option value="Offset">Offset</option>
+                <option value="FSC">FSC</option>
+                <option value="Flexo & MMB/SOS">Flexo &amp; MMB/SOS</option>
+                <option value="Fully Outsourced">Fully Outsourced</option>
+                <option value="FSCFully Outsourced">FSC Fully Outsourced</option>
+                <option value="Drawdown">Drawdown</option>
+                <option value="K SERIES">K SERIES</option>
+                <option value="Mock-Up">Mock-Up</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Priority</label>
+              <select id="priority">
+                <option value="Normal">Normal</option>
+                <option value="Cut Queue">Cut Queue</option>
+                <option value="Urgent">Urgent</option>
+              </select>
+            </div>
           </div>
         </div>
-        <div class="process-pool" id="processPool"></div>
-        <div class="selected-sequence" id="selectedSequence">
-          <span style="color:#94a3b8; font-size:13px;">No steps selected...</span>
-        </div>
-      </div>
 
-      <!-- SECTION 3: Batching -->
-      <div class="section-card">
-        <h3>3. Batching</h3>
-        <div class="grid">
-          <div class="input-group">
-            <label>Number of Batches</label>
-            <select id="batchCount" onchange="refreshUI(); distributeQuantities()" style="max-width: 250px;">
-              <option value="1">1 Batch</option>
-              <option value="2">2 Batches</option>
-              <option value="3">3 Batches</option>
-              <option value="4">4 Batches</option>
-              <option value="5">5 Batches</option>
-            </select>
+        <!-- SECTION 2: Build Production Sequence -->
+        <div class="section-card">
+          <div class="section2-header"
+            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3 style="margin:0;">2. Build Production Sequence</h3>
+            <div style="display:flex; gap:10px; align-items:center;">
+              <button class="btn-clear" onclick="clearSequence()">Clear All Steps</button>
+              <span id="counter" style="font-size:12px; font-weight:bold; color: var(--primary);">0 / 11</span>
+            </div>
+          </div>
+          <div class="process-pool" id="processPool"></div>
+          <div class="selected-sequence" id="selectedSequence">
+            <span style="color:#94a3b8; font-size:13px;">No steps selected...</span>
           </div>
         </div>
+
+        <!-- SECTION 3: Batching -->
+        <div class="section-card">
+          <h3>3. Batching</h3>
+          <div class="grid">
+            <div class="input-group">
+              <label>Number of Batches</label>
+              <select id="batchCount" onchange="refreshUI(); distributeQuantities()" style="max-width: 250px;">
+                <option value="1">1 Batch</option>
+                <option value="2">2 Batches</option>
+                <option value="3">3 Batches</option>
+                <option value="4">4 Batches</option>
+                <option value="5">5 Batches</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div id="batchArea"></div>
+
+        <!-- STEP 5: Sticky Remaining Quantity Bar -->
+        <div class="remaining-sticky">
+          <h3>Remaining Production Quantity : </h3>
+          <div class="remaining-value" id="remainingDisplay">0</div>
+        </div>
+
+        <button class="btn-submit" id="submitBtn" onclick="submitForm()">Create Entry &amp; Save</button>
+
+        <div id="loadingMsg" class="loading">⌛ Saving to Database, Waiting Some Time...</div>
       </div>
-
-      <div id="batchArea"></div>
-
-      <!-- STEP 5: Sticky Remaining Quantity Bar -->
-      <div class="remaining-sticky">
-        <h3>Remaining Production Quantity</h3>
-        <div class="remaining-value" id="remainingDisplay">0</div>
-      </div>
-
-      <button class="btn-submit" id="submitBtn" onclick="submitForm()">Create Entry &amp; Save</button>
-
-      <div id="loadingMsg" class="loading">⌛ Saving to Database, Waiting Some Time...</div>
     </div>
-  </div>
 
-  <script>
-    const processList = ["Sheeting", "Printing", "Lamination", "Efluting", "Die-cut", "Convert", "Baseboard", "Hotstamping", "Packing", "Double-Side-Tape", "Emboss", "Blind Emboss", "Gluing", "Side Glue", "2 Point Glue", "Attach Handle", "Peeling", "Punch Hole", "Slitting LF", "FlexoSlitting", "Spot UV", "Texture", "Trimming", "Varnish", "Waterbase"];
-    let selectedSteps = [];
-    let draggedElement = null;
-    let pendingSubmitData = null;
+    <script>
+      const processList = ["Sheeting", "Printing", "Lamination", "Efluting", "Die-cut", "Convert", "Baseboard", "Hotstamping", "Packing", "Double-Side-Tape", "Emboss", "Blind Emboss", "Gluing", "Side Glue", "2 Point Glue", "Attach Handle", "Peeling", "Punch Hole", "Slitting LF", "FlexoSlitting", "Spot UV", "Texture", "Trimming", "Varnish", "Waterbase"];
+      let selectedSteps = [];
+      let draggedElement = null;
+      let pendingSubmitData = null;
 
-    window.onload = () => {
-      document.getElementById('orderDate').value = new Date().toISOString().split('T')[0];
-      document.getElementById('deliveryDate').addEventListener('change', syncDeliveryDates);
-      renderPool();
-      setupCreateJobEnterNavigation();
-      updateRemaining();
-    };
+      window.onload = () => {
+        document.getElementById('orderDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('deliveryDate').addEventListener('change', syncDeliveryDates);
+        renderPool();
+        setupCreateJobEnterNavigation();
+        updateRemaining();
+      };
 
-    // STEP 6: Enter key navigates fields with smooth-scroll to prevent mobile keyboard covering
-    function setupCreateJobEnterNavigation() {
-      const order = ['psn', 'piNumber', 'totalQuantity', 'jobName', 'item'];
+      // STEP 6: Enter key navigates fields with smooth-scroll to prevent mobile keyboard covering
+      function setupCreateJobEnterNavigation() {
+        const order = ['psn', 'piNumber', 'totalQuantity', 'jobName', 'item'];
 
-      order.forEach((id, idx) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.addEventListener('keydown', (evt) => {
-          if (evt.key === 'Enter') {
-            evt.preventDefault();
-            if (id === 'piNumber') formatPINumber(el);
-            const next = document.getElementById(order[idx + 1]);
-            if (next) {
-              next.focus();
-              if (typeof next.select === 'function') next.select();
-              // STEP 6: Smooth scroll so keyboard doesn't hide the focused field
-              setTimeout(() => {
-                next.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }, 100);
+        order.forEach((id, idx) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.addEventListener('keydown', (evt) => {
+            if (evt.key === 'Enter') {
+              evt.preventDefault();
+              if (id === 'piNumber') formatPINumber(el);
+              const next = document.getElementById(order[idx + 1]);
+              if (next) {
+                next.focus();
+                if (typeof next.select === 'function') next.select();
+                // STEP 6: Smooth scroll so keyboard doesn't hide the focused field
+                setTimeout(() => {
+                  next.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+              }
             }
-          }
+          });
         });
-      });
-    }
-
-    function showToast(message, type = 'error') {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
-      let icon = type === 'error' ? '⚠️' : (type === 'success' ? '✅' : 'ℹ️');
-      toast.innerHTML = `<span>${icon} ${message}</span>`;
-      container.appendChild(toast);
-      setTimeout(() => {
-        toast.style.animation = 'fadeOutUp 0.5s forwards';
-        setTimeout(() => toast.remove(), 500);
-      }, 3000);
-    }
-
-    function formatPINumber(input) {
-      let value = input.value.trim();
-      if (value.endsWith('/26')) return;
-      value = value.replace(/\/26$/, '');
-      if (/^\d{4}(-\d)?$/.test(value)) input.value = value + '/26';
-    }
-
-    function syncDeliveryDates() {
-      const finalDeliveryDate = document.getElementById('deliveryDate').value;
-      if (!finalDeliveryDate) return;
-      const count = parseInt(document.getElementById('batchCount').value);
-      for (let b = 1; b <= count; b++) {
-        const deliveryInput = document.getElementById(`date_b${b}_s${selectedSteps.length + 1}`);
-        if (deliveryInput) deliveryInput.value = finalDeliveryDate;
       }
-    }
 
-    function renderPool() {
-      const pool = document.getElementById('processPool');
-      pool.innerHTML = processList.map(p => {
-        const isSel = selectedSteps.includes(p);
-        return `<div class="proc-pill ${isSel ? 'selected' : ''}" onclick="addStep('${p}')">${p}</div>`;
-      }).join('');
-      document.getElementById('counter').innerText = `${selectedSteps.length} / 11`;
-    }
+      function showToast(message, type = 'error') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        let icon = type === 'error' ? '⚠️' : (type === 'success' ? '✅' : 'ℹ️');
+        toast.innerHTML = `<span>${icon} ${message}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => {
+          toast.style.animation = 'fadeOutUp 0.5s forwards';
+          setTimeout(() => toast.remove(), 500);
+        }, 3000);
+      }
 
-    function addStep(p) {
-      if (selectedSteps.length >= 11) { showToast("Max 11 steps", "warning"); return; }
-      if (!selectedSteps.includes(p)) {
-        selectedSteps.push(p);
+      function formatPINumber(input) {
+        let value = input.value.trim();
+        if (value.endsWith('/26')) return;
+        value = value.replace(/\/26$/, '');
+        if (/^\d{4}(-\d)?$/.test(value)) input.value = value + '/26';
+      }
+
+      function syncDeliveryDates() {
+        const finalDeliveryDate = document.getElementById('deliveryDate').value;
+        if (!finalDeliveryDate) return;
+        const count = parseInt(document.getElementById('batchCount').value);
+        for (let b = 1; b <= count; b++) {
+          const deliveryInput = document.getElementById(`date_b${b}_s${selectedSteps.length + 1}`);
+          if (deliveryInput) deliveryInput.value = finalDeliveryDate;
+        }
+      }
+
+      function renderPool() {
+        const pool = document.getElementById('processPool');
+        pool.innerHTML = processList.map(p => {
+          const isSel = selectedSteps.includes(p);
+          return `<div class="proc-pill ${isSel ? 'selected' : ''}" onclick="addStep('${p}')">${p}</div>`;
+        }).join('');
+        document.getElementById('counter').innerText = `${selectedSteps.length} / 11`;
+      }
+
+      function addStep(p) {
+        if (selectedSteps.length >= 11) { showToast("Max 11 steps", "warning"); return; }
+        if (!selectedSteps.includes(p)) {
+          selectedSteps.push(p);
+          renderSeq();
+          refreshUI();
+          distributeQuantities();
+        }
+      }
+
+      function removeStep(i) {
+        selectedSteps.splice(i, 1);
         renderSeq();
         refreshUI();
         distributeQuantities();
       }
-    }
 
-    function removeStep(i) {
-      selectedSteps.splice(i, 1);
-      renderSeq();
-      refreshUI();
-      distributeQuantities();
-    }
-
-    function distributeQuantities() {
-      const total = parseInt(document.getElementById('totalQuantity').value) || 0;
-      const count = parseInt(document.getElementById('batchCount').value);
-      const area = document.getElementById('batchArea');
-      if (area.innerHTML === "" && selectedSteps.length > 0) refreshUI();
-      if (total <= 0) return;
-      let baseQty = Math.floor((total / count) / 100) * 100;
-      let currentSum = 0;
-      for (let i = 1; i <= count; i++) {
-        let val = (i === count) ? (total - currentSum) : baseQty;
-        const input = document.getElementById(`qty_b${i}`);
-        if (input) input.value = val;
-        currentSum += val;
+      function distributeQuantities() {
+        const total = parseInt(document.getElementById('totalQuantity').value) || 0;
+        const count = parseInt(document.getElementById('batchCount').value);
+        const area = document.getElementById('batchArea');
+        if (area.innerHTML === "" && selectedSteps.length > 0) refreshUI();
+        if (total <= 0) return;
+        let baseQty = Math.floor((total / count) / 100) * 100;
+        let currentSum = 0;
+        for (let i = 1; i <= count; i++) {
+          let val = (i === count) ? (total - currentSum) : baseQty;
+          const input = document.getElementById(`qty_b${i}`);
+          if (input) input.value = val;
+          currentSum += val;
+        }
+        updateRemaining();
       }
-      updateRemaining();
-    }
 
-    function updateRemaining() {
-      const total = parseInt(document.getElementById('totalQuantity').value) || 0;
-      const count = parseInt(document.getElementById('batchCount').value);
-      let sum = 0;
-      for (let i = 1; i <= count; i++) {
-        sum += parseInt(document.getElementById(`qty_b${i}`)?.value) || 0;
+      function updateRemaining() {
+        const total = parseInt(document.getElementById('totalQuantity').value) || 0;
+        const count = parseInt(document.getElementById('batchCount').value);
+        let sum = 0;
+        for (let i = 1; i <= count; i++) {
+          sum += parseInt(document.getElementById(`qty_b${i}`)?.value) || 0;
+        }
+        const remaining = total - sum;
+        const el = document.getElementById('remainingDisplay');
+        el.textContent = remaining;
+        // Highlight red if over-allocated
+        el.classList.toggle('over', remaining < 0);
       }
-      const remaining = total - sum;
-      const el = document.getElementById('remainingDisplay');
-      el.textContent = remaining;
-      // Highlight red if over-allocated
-      el.classList.toggle('over', remaining < 0);
-    }
 
-    function clearSequence() {
-      if (selectedSteps.length === 0) return;
-      selectedSteps = [];
-      renderSeq();
-      refreshUI();
-      showToast("Sequence cleared.", "success");
-    }
-
-    function renderSeq() {
-      const container = document.getElementById('selectedSequence');
-      renderPool();
-      if (selectedSteps.length === 0) {
-        container.innerHTML = '<span style="color:#94a3b8; font-size:13px;">No steps selected...</span>';
-        return;
+      function clearSequence() {
+        if (selectedSteps.length === 0) return;
+        selectedSteps = [];
+        renderSeq();
+        refreshUI();
+        showToast("Sequence cleared.", "success");
       }
-      container.innerHTML = selectedSteps.map((p, i) => `
+
+      function renderSeq() {
+        const container = document.getElementById('selectedSequence');
+        renderPool();
+        if (selectedSteps.length === 0) {
+          container.innerHTML = '<span style="color:#94a3b8; font-size:13px;">No steps selected...</span>';
+          return;
+        }
+        container.innerHTML = selectedSteps.map((p, i) => `
         <div class="seq-item">${i + 1}. ${p} <span class="remove-btn" onclick="removeStep(${i})">✕</span></div>
       `).join('');
-    }
+      }
 
-    function handleQtyChange(changedIdx) {
-      const total = parseInt(document.getElementById('totalQuantity').value) || 0;
-      const count = parseInt(document.getElementById('batchCount').value);
-      let currentSum = 0;
-      for (let i = 1; i <= changedIdx; i++) currentSum += parseInt(document.getElementById(`qty_b${i}`).value) || 0;
-      if (currentSum > total) { showToast("Exceeds Total!", "error"); distributeQuantities(); return; }
-      const remainingCount = count - changedIdx;
-      if (remainingCount > 0) {
-        const remaining = total - currentSum;
-        let nextBase = Math.floor((remaining / remainingCount) / 100) * 100;
-        let tempSum = currentSum;
-        for (let i = changedIdx + 1; i <= count; i++) {
-          let val = (i === count) ? (total - tempSum) : nextBase;
-          document.getElementById(`qty_b${i}`).value = Math.max(0, val);
-          tempSum += val;
+      function handleQtyChange(changedIdx) {
+        const total = parseInt(document.getElementById('totalQuantity').value) || 0;
+        const count = parseInt(document.getElementById('batchCount').value);
+        let currentSum = 0;
+        for (let i = 1; i <= changedIdx; i++) currentSum += parseInt(document.getElementById(`qty_b${i}`).value) || 0;
+        if (currentSum > total) { showToast("Exceeds Total!", "error"); distributeQuantities(); return; }
+        const remainingCount = count - changedIdx;
+        if (remainingCount > 0) {
+          const remaining = total - currentSum;
+          let nextBase = Math.floor((remaining / remainingCount) / 100) * 100;
+          let tempSum = currentSum;
+          for (let i = changedIdx + 1; i <= count; i++) {
+            let val = (i === count) ? (total - tempSum) : nextBase;
+            document.getElementById(`qty_b${i}`).value = Math.max(0, val);
+            tempSum += val;
+          }
         }
-      }
-      updateRemaining();
-    }
-
-    function validateDate(batch, step, input) {
-      input.classList.remove('input-error');
-      const selectedDate = new Date(input.value);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      if (selectedDate < today) {
-        showToast("Past date forbidden", "error");
-        input.classList.add('input-error');
-        input.value = "";
-        return;
+        updateRemaining();
       }
 
-      if (step > 1) {
-        const prevInput = document.getElementById(`date_b${batch}_s${step - 1}`);
-        if (prevInput && prevInput.value && selectedDate <= new Date(prevInput.value)) {
-          showToast(`Must be after Step ${step - 1}`, "error");
+      function validateDate(batch, step, input) {
+        input.classList.remove('input-error');
+        const selectedDate = new Date(input.value);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        if (selectedDate < today) {
+          showToast("Past date forbidden", "error");
           input.classList.add('input-error');
           input.value = "";
           return;
         }
+
+        if (step > 1) {
+          const prevInput = document.getElementById(`date_b${batch}_s${step - 1}`);
+          if (prevInput && prevInput.value && selectedDate <= new Date(prevInput.value)) {
+            showToast(`Must be after Step ${step - 1}`, "error");
+            input.classList.add('input-error');
+            input.value = "";
+            return;
+          }
+        }
       }
-    }
 
-    // --- DRAG AND DROP (Desktop) ---
-    function handleDragStart(e) {
-      draggedElement = e.currentTarget;
-      e.dataTransfer.effectAllowed = 'move';
-      draggedElement.classList.add('dragging');
-    }
-
-    function handleDragOver(e) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      e.currentTarget.classList.add('drag-over');
-    }
-
-    function handleDragLeave(e) {
-      e.currentTarget.classList.remove('drag-over');
-    }
-
-    function handleDrop(e) {
-      e.preventDefault();
-      const targetElement = e.currentTarget;
-      targetElement.classList.remove('drag-over');
-      draggedElement.classList.remove('dragging');
-
-      if (targetElement !== draggedElement && !targetElement.classList.contains('delivery-row')) {
-        const dSelect = draggedElement.querySelector('select');
-        const dDate = draggedElement.querySelector('input[type="date"]');
-        const tSelect = targetElement.querySelector('select');
-        const tDate = targetElement.querySelector('input[type="date"]');
-
-        const tempName = dSelect.value;
-        const tempDate = dDate.value;
-
-        dSelect.value = tSelect.value;
-        dDate.value = tDate.value;
-        tSelect.value = tempName;
-        tDate.value = tempDate;
-
-        showToast("Steps Swapped!", "success");
+      // --- DRAG AND DROP (Desktop) ---
+      function handleDragStart(e) {
+        draggedElement = e.currentTarget;
+        e.dataTransfer.effectAllowed = 'move';
+        draggedElement.classList.add('dragging');
       }
-    }
 
-    // STEP 4: Mobile reorder — move step up or down in the DOM
-    function moveStep(batchNum, stepIndex, direction) {
-      const totalSteps = selectedSteps.length;
-      const newIndex = stepIndex + direction;
+      function handleDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        e.currentTarget.classList.add('drag-over');
+      }
 
-      // Clamp
-      if (newIndex < 1 || newIndex > totalSteps) return;
+      function handleDragLeave(e) {
+        e.currentTarget.classList.remove('drag-over');
+      }
 
-      // Swap the select values and date values between current and neighbour
-      const curSelect = document.getElementById(`name_b${batchNum}_s${stepIndex}`);
-      const curDate   = document.getElementById(`date_b${batchNum}_s${stepIndex}`);
-      const nxtSelect = document.getElementById(`name_b${batchNum}_s${newIndex}`);
-      const nxtDate   = document.getElementById(`date_b${batchNum}_s${newIndex}`);
+      function handleDrop(e) {
+        e.preventDefault();
+        const targetElement = e.currentTarget;
+        targetElement.classList.remove('drag-over');
+        draggedElement.classList.remove('dragging');
 
-      if (!curSelect || !nxtSelect) return;
+        if (targetElement !== draggedElement && !targetElement.classList.contains('delivery-row')) {
+          const dSelect = draggedElement.querySelector('select');
+          const dDate = draggedElement.querySelector('input[type="date"]');
+          const tSelect = targetElement.querySelector('select');
+          const tDate = targetElement.querySelector('input[type="date"]');
 
-      const tmpName = curSelect.value;
-      const tmpDate = curDate.value;
-      curSelect.value = nxtSelect.value;
-      curDate.value   = nxtDate.value;
-      nxtSelect.value = tmpName;
-      nxtDate.value   = tmpDate;
+          const tempName = dSelect.value;
+          const tempDate = dDate.value;
 
-      showToast("Steps Reordered!", "success");
-    }
+          dSelect.value = tSelect.value;
+          dDate.value = tDate.value;
+          tSelect.value = tempName;
+          tDate.value = tempDate;
 
-    // Build the batch + step HTML
-    function refreshUI() {
-      const count = parseInt(document.getElementById('batchCount').value);
-      const area = document.getElementById('batchArea');
-      if (selectedSteps.length === 0) { area.innerHTML = ''; return; }
+          showToast("Steps Swapped!", "success");
+        }
+      }
 
-      let html = '';
-      for (let b = 1; b <= count; b++) {
-        html += `
+      // STEP 4: Mobile reorder — move step up or down in the DOM
+      function moveStep(batchNum, stepIndex, direction) {
+        const totalSteps = selectedSteps.length;
+        const newIndex = stepIndex + direction;
+
+        // Clamp
+        if (newIndex < 1 || newIndex > totalSteps) return;
+
+        // Swap the select values and date values between current and neighbour
+        const curSelect = document.getElementById(`name_b${batchNum}_s${stepIndex}`);
+        const curDate = document.getElementById(`date_b${batchNum}_s${stepIndex}`);
+        const nxtSelect = document.getElementById(`name_b${batchNum}_s${newIndex}`);
+        const nxtDate = document.getElementById(`date_b${batchNum}_s${newIndex}`);
+
+        if (!curSelect || !nxtSelect) return;
+
+        const tmpName = curSelect.value;
+        const tmpDate = curDate.value;
+        curSelect.value = nxtSelect.value;
+        curDate.value = nxtDate.value;
+        nxtSelect.value = tmpName;
+        nxtDate.value = tmpDate;
+
+        showToast("Steps Reordered!", "success");
+      }
+
+      // Build the batch + step HTML
+      function refreshUI() {
+        const count = parseInt(document.getElementById('batchCount').value);
+        const area = document.getElementById('batchArea');
+        if (selectedSteps.length === 0) { area.innerHTML = ''; return; }
+
+        let html = '';
+        for (let b = 1; b <= count; b++) {
+          html += `
         <div class="batch-container">
           <div class="batch-header">
             <span class="batch-title">BATCH ${b}</span>
@@ -1167,12 +1307,12 @@
           <div class="vertical-steps">
         `;
 
-        selectedSteps.forEach((proc, i) => {
-          const sNum = i + 1;
-          const isFirst = sNum === 1;
-          const isLast  = sNum === selectedSteps.length;
+          selectedSteps.forEach((proc, i) => {
+            const sNum = i + 1;
+            const isFirst = sNum === 1;
+            const isLast = sNum === selectedSteps.length;
 
-          html += `
+            html += `
           <div class="step-row"
                draggable="true"
                ondragstart="handleDragStart(event)"
@@ -1189,198 +1329,200 @@
                 ${processList.map(p => `<option value="${p}" ${p === proc ? 'selected' : ''}>${p}</option>`).join('')}
               </select>
             </div>
+            
+            <!-- STEP 3: Date in Tier 2 — full width on mobile -->
+            <div class="step-date">
+              <input type="date" id="date_b${b}_s${sNum}" onchange="validateDate(${b}, ${sNum}, this)">
+            </div>
 
             <!-- STEP 4: Mobile Up/Down reorder buttons -->
             <div class="step-reorder">
               <div class="drag-handle" title="Hold to drag and reorder">✋</div>
               <div class="mobile-reorder-btns">
                 <button class="reorder-btn" onclick="moveStep(${b}, ${sNum}, -1)" ${isFirst ? 'disabled' : ''} title="Move up">▲</button>
-                <button class="reorder-btn" onclick="moveStep(${b}, ${sNum}, 1)"  ${isLast  ? 'disabled' : ''} title="Move down">▼</button>
+                <button class="reorder-btn" onclick="moveStep(${b}, ${sNum}, 1)"  ${isLast ? 'disabled' : ''} title="Move down">▼</button>
               </div>
             </div>
 
-            <!-- STEP 3: Date in Tier 2 — full width on mobile -->
-            <div class="step-date">
-              <input type="date" id="date_b${b}_s${sNum}" onchange="validateDate(${b}, ${sNum}, this)">
-            </div>
           </div>`;
-        });
+          });
 
-        // Delivery row
-        html += `
+          // Delivery row
+          html += `
           <div class="step-row delivery-row">
             <div class="step-num">★</div>
             <div class="step-name">
               <input type="text" id="name_b${b}_delivery" value="Delivery" readonly
                 style="border:none; background:transparent; font-weight:bold; width:100%; min-height:auto;">
             </div>
-            <div class="step-reorder"></div>
             <div class="step-date">
               <input type="date" id="date_b${b}_s${selectedSteps.length + 1}" onchange="validateDate(${b}, ${selectedSteps.length + 1}, this)">
             </div>
+            <div class="step-reorder"></div>
           </div>
         </div></div>`;
-      }
+        }
 
-      area.innerHTML = html;
-      syncDeliveryDates();
+        area.innerHTML = html;
+        syncDeliveryDates();
 
-      // STEP 6: Bind Enter-key scroll for date inputs in batch area
-      document.querySelectorAll('#batchArea input[type="date"]').forEach((dateInput) => {
-        dateInput.addEventListener('keydown', (evt) => {
-          if (evt.key === 'Enter') {
-            evt.preventDefault();
-            const match = dateInput.id.match(/^date_b(\d+)_s(\d+)$/);
-            if (match) {
-              const batch = match[1];
-              const step  = parseInt(match[2], 10);
-              const next  = document.getElementById(`date_b${batch}_s${step + 1}`);
-              if (next) {
-                next.focus();
-                if (typeof next.select === 'function') next.select();
-                // Smooth scroll so mobile keyboard doesn't cover the field
-                setTimeout(() => {
-                  next.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 100);
+        // STEP 6: Bind Enter-key scroll for date inputs in batch area
+        document.querySelectorAll('#batchArea input[type="date"]').forEach((dateInput) => {
+          dateInput.addEventListener('keydown', (evt) => {
+            if (evt.key === 'Enter') {
+              evt.preventDefault();
+              const match = dateInput.id.match(/^date_b(\d+)_s(\d+)$/);
+              if (match) {
+                const batch = match[1];
+                const step = parseInt(match[2], 10);
+                const next = document.getElementById(`date_b${batch}_s${step + 1}`);
+                if (next) {
+                  next.focus();
+                  if (typeof next.select === 'function') next.select();
+                  // Smooth scroll so mobile keyboard doesn't cover the field
+                  setTimeout(() => {
+                    next.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }, 100);
+                }
               }
             }
-          }
+          });
         });
-      });
 
-      updateRemaining();
-    }
-
-    async function submitForm() {
-      const psn         = document.getElementById('psn').value.trim();
-      const piNumber    = document.getElementById('piNumber').value.trim();
-      const totalQty    = parseInt(document.getElementById('totalQuantity').value);
-      const orderDate   = document.getElementById('orderDate').value;
-      const deliveryDate= document.getElementById('deliveryDate').value;
-      const jobName     = document.getElementById('jobName').value.trim();
-      const item        = document.getElementById('item').value.trim();
-      const salesCode   = document.getElementById('salesCode').value;
-      const jobType     = document.getElementById('jobType').value;
-
-      if (!psn)          { showToast('PSN is required', 'error'); return; }
-      if (!piNumber)     { showToast('PI Number is required', 'error'); return; }
-      if (!/^\d{4}(-\d)?\/26$/.test(piNumber)) { showToast('PI Number must be in format XXXX/26 or XXXX-Y/26', 'error'); return; }
-      if (!totalQty || totalQty <= 0) { showToast('Total Quantity must be greater than 0', 'error'); return; }
-      if (!jobName)      { showToast('Job Name is required', 'error'); return; }
-      if (!orderDate)    { showToast('Order Date is required', 'error'); return; }
-      if (!deliveryDate) { showToast('Final Delivery Date is required', 'error'); return; }
-      if (!item)         { showToast('Item Name is required', 'error'); return; }
-      if (!salesCode)    { showToast('Please Choose the Sales Code', 'error'); return; }
-      if (!jobType)      { showToast('Please Choose the Job Type', 'error'); return; }
-      if (selectedSteps.length === 0) { showToast('Please add at least one production step', 'error'); return; }
-
-      let allData = [];
-      const bCount = parseInt(document.getElementById('batchCount').value);
-
-      for (let b = 1; b <= bCount; b++) {
-        let steps = [];
-        for (let s = 1; s <= selectedSteps.length; s++) {
-          const customName = document.getElementById(`name_b${b}_s${s}`).value;
-          const d = document.getElementById(`date_b${b}_s${s}`).value;
-          if (!d) { showToast(`Date missing in Batch ${b}`); return; }
-          steps.push({ processName: customName, expDate: d });
-        }
-        const deliveryD = document.getElementById(`date_b${b}_s${selectedSteps.length + 1}`).value;
-        const qtyInput  = document.getElementById(`qty_b${b}`).value;
-
-        if (!qtyInput || isNaN(qtyInput) || parseInt(qtyInput) <= 0) {
-          showToast(`Batch ${b} quantity must be greater than 0`, 'error'); return;
-        }
-        if (!deliveryD) { showToast(`Delivery date missing B${b}`); return; }
-        steps.push({ processName: "Delivery", expDate: deliveryD });
-
-        allData.push({
-          batchId: bCount > 1 ? `${psn}-${b}` : psn,
-          batchQty: parseInt(qtyInput),
-          steps: steps
-        });
+        updateRemaining();
       }
 
-      const remaining = totalQty - allData.reduce((sum, batch) => sum + batch.batchQty, 0);
-      if (remaining > 0) {
-        pendingSubmitData = {
+      async function submitForm() {
+        const psn = document.getElementById('psn').value.trim();
+        const piNumber = document.getElementById('piNumber').value.trim();
+        const totalQty = parseInt(document.getElementById('totalQuantity').value);
+        const orderDate = document.getElementById('orderDate').value;
+        const deliveryDate = document.getElementById('deliveryDate').value;
+        const jobName = document.getElementById('jobName').value.trim();
+        const item = document.getElementById('item').value.trim();
+        const salesCode = document.getElementById('salesCode').value;
+        const jobType = document.getElementById('jobType').value;
+
+        if (!psn) { showToast('PSN is required', 'error'); return; }
+        if (!piNumber) { showToast('PI Number is required', 'error'); return; }
+        if (!/^\d{4}(-\d)?\/26$/.test(piNumber)) { showToast('PI Number must be in format XXXX/26 or XXXX-Y/26', 'error'); return; }
+        if (!totalQty || totalQty <= 0) { showToast('Total Quantity must be greater than 0', 'error'); return; }
+        if (!jobName) { showToast('Job Name is required', 'error'); return; }
+        if (!orderDate) { showToast('Order Date is required', 'error'); return; }
+        if (!deliveryDate) { showToast('Final Delivery Date is required', 'error'); return; }
+        if (!item) { showToast('Item Name is required', 'error'); return; }
+        if (!salesCode) { showToast('Please Choose the Sales Code', 'error'); return; }
+        if (!jobType) { showToast('Please Choose the Job Type', 'error'); return; }
+        if (selectedSteps.length === 0) { showToast('Please add at least one production step', 'error'); return; }
+
+        let allData = [];
+        const bCount = parseInt(document.getElementById('batchCount').value);
+
+        for (let b = 1; b <= bCount; b++) {
+          let steps = [];
+          for (let s = 1; s <= selectedSteps.length; s++) {
+            const customName = document.getElementById(`name_b${b}_s${s}`).value;
+            const d = document.getElementById(`date_b${b}_s${s}`).value;
+            if (!d) { showToast(`Date missing in Batch ${b}`); return; }
+            steps.push({ processName: customName, expDate: d });
+          }
+          const deliveryD = document.getElementById(`date_b${b}_s${selectedSteps.length + 1}`).value;
+          const qtyInput = document.getElementById(`qty_b${b}`).value;
+
+          if (!qtyInput || isNaN(qtyInput) || parseInt(qtyInput) <= 0) {
+            showToast(`Batch ${b} quantity must be greater than 0`, 'error'); return;
+          }
+          if (!deliveryD) { showToast(`Delivery date missing B${b}`); return; }
+          steps.push({ processName: "Delivery", expDate: deliveryD });
+
+          allData.push({
+            batchId: bCount > 1 ? `${psn}-${b}` : psn,
+            batchQty: parseInt(qtyInput),
+            steps: steps
+          });
+        }
+
+        const remaining = totalQty - allData.reduce((sum, batch) => sum + batch.batchQty, 0);
+        if (remaining > 0) {
+          pendingSubmitData = {
+            psn, piNumber, jobName, quantity: totalQty, orderDate, deliveryDate, item,
+            salesCode: document.getElementById('salesCode').value,
+            jobType: document.getElementById('jobType').value,
+            priority: document.getElementById('priority').value,
+            batches: allData, remaining, balanceToDelivery: totalQty
+          };
+          showRemainingConfirm(remaining);
+          return;
+        }
+
+        await performSubmit({
           psn, piNumber, jobName, quantity: totalQty, orderDate, deliveryDate, item,
           salesCode: document.getElementById('salesCode').value,
           jobType: document.getElementById('jobType').value,
           priority: document.getElementById('priority').value,
           batches: allData, remaining, balanceToDelivery: totalQty
-        };
-        showRemainingConfirm(remaining);
-        return;
+        });
       }
 
-      await performSubmit({
-        psn, piNumber, jobName, quantity: totalQty, orderDate, deliveryDate, item,
-        salesCode: document.getElementById('salesCode').value,
-        jobType: document.getElementById('jobType').value,
-        priority: document.getElementById('priority').value,
-        batches: allData, remaining, balanceToDelivery: totalQty
-      });
-    }
+      function showRemainingConfirm(remaining) {
+        document.getElementById('confirmMessage').innerHTML = `Remaining Production Quantity is <strong>${remaining}</strong>. Do you want to proceed and save the remaining for later batches?`;
+        document.getElementById('confirmOverlay').classList.add('show');
+      }
 
-    function showRemainingConfirm(remaining) {
-      document.getElementById('confirmMessage').innerHTML = `Remaining Production Quantity is <strong>${remaining}</strong>. Do you want to proceed and save the remaining for later batches?`;
-      document.getElementById('confirmOverlay').classList.add('show');
-    }
-
-    function cancelConfirm() {
-      document.getElementById('confirmOverlay').classList.remove('show');
-      pendingSubmitData = null;
-      document.getElementById('submitBtn').disabled = false;
-      document.getElementById('loadingMsg').style.display = 'none';
-    }
-
-    function proceedWithSubmit() {
-      document.getElementById('confirmOverlay').classList.remove('show');
-      if (pendingSubmitData) performSubmit(pendingSubmitData);
-    }
-
-    async function performSubmit(data) {
-      document.getElementById('submitBtn').disabled = true;
-      document.getElementById('loadingMsg').style.display = 'block';
-      const dashboard_url = '/dashboard.html';
-      try {
-        const response = await fetch('/api/submitData', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-          sessionStorage.setItem('toastMessage', '✅ Entry Saved Successfully!');
-          setTimeout(() => executeRedirect(dashboard_url), 1500);
-        } else {
-          showToast(result.error || 'Failed to save entry', 'error');
-          document.getElementById('submitBtn').disabled = false;
-          document.getElementById('loadingMsg').style.display = 'none';
-        }
-      } catch (error) {
-        console.error(error);
-        showToast('Network or server error while saving entry', 'error');
+      function cancelConfirm() {
+        document.getElementById('confirmOverlay').classList.remove('show');
+        pendingSubmitData = null;
         document.getElementById('submitBtn').disabled = false;
         document.getElementById('loadingMsg').style.display = 'none';
       }
-    }
 
-    function executeRedirect(dashboard_url) {
-      if (window.top && window.top.location) {
-        try {
-          window.top.location.href = dashboard_url;
-        } catch (e) {
-          window.location.replace(dashboard_url);
-        }
-      } else {
-        window.location.href = dashboard_url;
+      function proceedWithSubmit() {
+        document.getElementById('confirmOverlay').classList.remove('show');
+        if (pendingSubmitData) performSubmit(pendingSubmitData);
       }
-    }
-  </script>
+
+      async function performSubmit(data) {
+        document.getElementById('submitBtn').disabled = true;
+        document.getElementById('loadingMsg').style.display = 'block';
+        const dashboard_url = '/dashboard.html';
+        try {
+          const response = await fetch('/api/submitData', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            sessionStorage.setItem('toastMessage', '✅ Entry Saved Successfully!');
+            setTimeout(() => executeRedirect(dashboard_url), 1500);
+          } else {
+            showToast(result.error || 'Failed to save entry', 'error');
+            document.getElementById('submitBtn').disabled = false;
+            document.getElementById('loadingMsg').style.display = 'none';
+          }
+        } catch (error) {
+          console.error(error);
+          showToast('Network or server error while saving entry', 'error');
+          document.getElementById('submitBtn').disabled = false;
+          document.getElementById('loadingMsg').style.display = 'none';
+        }
+      }
+
+      function executeRedirect(dashboard_url) {
+        if (window.top && window.top.location) {
+          try {
+            window.top.location.href = dashboard_url;
+          } catch (e) {
+            window.location.replace(dashboard_url);
+          }
+        } else {
+          window.location.href = dashboard_url;
+        }
+      }
+    </script>
   </div>
 </body>
+
 </html>

@@ -3,6 +3,8 @@
 
 <head>
   <base target="_top" />
+  <!-- VIEWPORT: Locked to 1.0 — prevents browser from guessing zoom level -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <style>
     :root {
       --primary: #2563eb;
@@ -10,7 +12,6 @@
       --danger: #ef4444;
       --success: #10b981;
       --sidebar-width: 280px;
-      /* Defined for easy adjustment */
     }
 
     body {
@@ -27,13 +28,16 @@
       overflow-x: hidden;
     }
 
+    /* ===== HEADER ===== */
     .dashboard-header {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
-      padding: 2rem 2rem;
+      padding: 1.25rem 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
       border-bottom: 2px solid rgba(102, 126, 234, 0.3);
       position: sticky;
       top: 0;
@@ -43,16 +47,17 @@
 
     .dashboard-header h1 {
       margin: 0;
-      font-size: 2.5rem;
+      font-size: 1.8rem;
       font-weight: 700;
       color: white;
       text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
-    .dashboard-header .header-right {
+    .header-right {
       display: flex;
       gap: 10px;
       align-items: center;
+      flex-wrap: wrap;
     }
 
     .dashboard-header .header-right .filter-select,
@@ -62,26 +67,7 @@
       border: 1px solid rgba(255, 255, 255, 0.3);
     }
 
-    .dashboard-header .header-right .filter-select:focus,
-    .dashboard-header .header-right .search-input:focus {
-      background: white;
-      border-color: #667eea;
-    }
-
-    /* Sticky Filters Bar */
-    .filters {
-      display: flex;
-      gap: 12px;
-      padding: 1rem 2rem;
-      flex-wrap: wrap;
-      background: white;
-      position: sticky;
-      top: 67px;
-      z-index: 99;
-      border-bottom: 1px solid #e2e8f0;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    }
-
+    /* ===== STATS BAR ===== */
     .stats-bar {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -123,6 +109,7 @@
       cursor: pointer;
       transition: background 0.2s ease;
       border-bottom: 1px solid #f1f5f9;
+      min-height: 36px;
     }
 
     .filter-item:hover {
@@ -134,36 +121,34 @@
       color: white !important;
     }
 
-    .filter-item.active:hover {
-      background-color: #3b82f6 !important;
-      color: black;
-      transform: scale(1.01);
-      transition: all 0.2s ease;
+    /* ===== RESULT SUMMARY ===== */
+    .result-summary {
+      font-size: 0.85rem;
+      color: #64748b;
+      padding: 8px 25px;
+      font-weight: 500;
     }
 
-    /* ===== TABLE AREA ===== */
+    /* ===== TABLE AREA (DESKTOP) ===== */
     .table-container {
       padding: 0 25px 25px 25px;
       width: 95%;
       max-width: 100%;
       overflow: hidden;
-      /* keep */
       position: relative;
     }
 
-    /* SCROLL AREA */
     .table-scroll {
       width: 100%;
       overflow-x: auto;
       overflow-y: auto;
       display: block;
       max-height: 650px;
+      -webkit-overflow-scrolling: touch;
     }
 
-    /* ===== TABLE ===== */
     table {
       width: max-content;
-      /* 🔥 bigger */
       min-width: 1600px;
       max-width: none;
       border-collapse: separate;
@@ -175,8 +160,6 @@
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     }
 
-
-    /* ===== CELL ===== */
     th,
     td {
       padding: 10px 6px;
@@ -186,7 +169,6 @@
       text-overflow: ellipsis;
     }
 
-    /* HEADER */
     th {
       background: #f8f9fa;
       font-weight: 600;
@@ -201,12 +183,11 @@
       z-index: 25;
     }
 
-    /* ===== HOVER ===== */
     tbody tr:hover td {
       background: #f9fafb;
     }
 
-    /* ===== STICKY RIGHT ===== */
+    /* ===== STICKY RIGHT COLUMNS ===== */
     .sticky {
       position: sticky;
       background: white;
@@ -219,7 +200,6 @@
       background: #f8f9fa;
     }
 
-    /* keep row color */
     tbody tr.row-urgent .sticky,
     tbody tr.row-critical .sticky,
     tbody tr.row-warning .sticky,
@@ -227,12 +207,10 @@
       background: inherit;
     }
 
-    /* keep hover */
     tbody tr:hover .sticky {
       background: #f9fafb;
     }
 
-    /* ===== RIGHT FIXED COLUMNS ===== */
     th:nth-last-child(4),
     td:nth-last-child(4) {
       right: 360px;
@@ -261,13 +239,11 @@
       min-width: 140px;
     }
 
-    /* ===== COLUMN WIDTH CONTROL ===== */
     td:nth-child(4),
     td:nth-child(9) {
       max-width: 250px;
     }
 
-    /* ===== SCROLLBAR ===== */
     .table-scroll::-webkit-scrollbar {
       height: 8px;
     }
@@ -277,7 +253,7 @@
       border-radius: 4px;
     }
 
-    /* ===== ROW COLORS (KEEP SAME) ===== */
+    /* ===== ROW COLORS ===== */
     .row-urgent {
       background-color: #fee2e2;
     }
@@ -294,12 +270,13 @@
       background-color: white;
     }
 
-    /* Status Pills */
+    /* ===== STATUS/PRIORITY PILLS ===== */
     .pill {
       padding: 4px 8px;
       border-radius: 4px;
       font-weight: 500;
       font-size: 0.75rem;
+      display: inline-block;
     }
 
     .pill-overdue {
@@ -332,7 +309,7 @@
       color: var(--success);
     }
 
-    /* Action Button */
+    /* ===== ACTION BUTTONS (DESKTOP) ===== */
     .action-btn {
       background: white;
       color: var(--primary);
@@ -349,12 +326,18 @@
       color: white;
     }
 
-    /* Filters */
+    /* ===== FILTERS BAR ===== */
     .filters {
       display: flex;
       gap: 10px;
       padding: 1rem 2rem;
       flex-wrap: wrap;
+      background: white;
+      position: sticky;
+      top: 70px;
+      z-index: 99;
+      border-bottom: 1px solid #e2e8f0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
 
     .filter-select {
@@ -362,6 +345,7 @@
       border: 1px solid #cbd5e1;
       border-radius: 4px;
       font-size: 0.9rem;
+      min-height: 38px;
     }
 
     .search-input {
@@ -370,9 +354,155 @@
       border-radius: 4px;
       font-size: 0.9rem;
       width: 250px;
+      min-height: 21px;
     }
 
-    /* Loading */
+    /* ===== MOBILE CARD VIEW ===== */
+    /* Hidden on desktop, shown on mobile via @media */
+    .mobile-card-list {
+      display: none;
+    }
+
+    .mobile-card-list-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 12px 12px 24px;
+    }
+
+    /* Each card represents one job row */
+    .job-card {
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+
+    .job-card:active {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Row colour stripe replicated on cards */
+    .job-card.row-urgent {
+      border-left: 5px solid var(--danger);
+    }
+
+    .job-card.row-critical {
+      border-left: 5px solid #dc2626;
+    }
+
+    .job-card.row-warning {
+      border-left: 5px solid var(--warning);
+    }
+
+    .job-card.row-safe {
+      border-left: 5px solid #10b981;
+    }
+
+    /* Card top pill strip — Priority + Status at-a-glance */
+    .card-pill-strip {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 10px 14px 6px;
+      background: #f8fafc;
+      border-bottom: 1px solid #f1f3f4;
+    }
+
+    /* Card PSN hero link */
+    .card-psn {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-decoration: none;
+      display: block;
+      padding: 10px 14px 4px;
+    }
+
+    .card-job-name {
+      font-size: 0.85rem;
+      color: #475569;
+      padding: 0 14px 10px;
+      font-weight: 500;
+      border-bottom: 1px solid #f1f3f4;
+    }
+
+    /* Data rows inside card — label + value */
+    .card-body {
+      padding: 6px 0 2px;
+    }
+
+    .card-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 7px 14px;
+      border-bottom: 1px solid #f8fafc;
+      gap: 8px;
+    }
+
+    .card-row:last-child {
+      border-bottom: none;
+    }
+
+    .card-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      flex-shrink: 0;
+      min-width: 90px;
+    }
+
+    .card-value {
+      font-size: 0.82rem;
+      color: #1e293b;
+      font-weight: 600;
+      text-align: right;
+      word-break: break-word;
+      flex: 1;
+    }
+
+    /* Card action buttons — full-width for thumb-tapping */
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      padding: 10px 14px 14px;
+      border-top: 1px solid #f1f3f4;
+      background: #fafbfc;
+    }
+
+    .card-btn {
+      flex: 1;
+      padding: 12px 8px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      min-height: 44px;
+      transition: opacity 0.15s;
+    }
+
+    .card-btn:active {
+      opacity: 0.8;
+    }
+
+    .card-btn-edit {
+      background: var(--primary);
+      color: white;
+    }
+
+    .card-btn-batch {
+      background: var(--success);
+      color: white;
+    }
+
+    /* ===== LOADING ===== */
     .loading-overlay {
       position: fixed;
       top: 0;
@@ -387,18 +517,7 @@
       z-index: 1000;
     }
 
-    /* Mobile Responsiveness */
-    @media (max-width: 1024px) {
-      .main {
-        margin-left: 0;
-      }
-
-      .stats-bar {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    /* Toast */
+    /* ===== TOAST ===== */
     #toast-container {
       position: fixed;
       top: 20px;
@@ -410,6 +529,8 @@
       align-items: center;
       gap: 10px;
       pointer-events: none;
+      width: 90%;
+      max-width: 400px;
     }
 
     .toast {
@@ -417,7 +538,7 @@
       color: white;
       padding: 16px 32px;
       border-radius: 12px;
-      min-width: 300px;
+      width: 100%;
       text-align: center;
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
       display: flex;
@@ -427,6 +548,7 @@
       font-weight: 600;
       pointer-events: auto;
       animation: popDown 0.4s forwards;
+      box-sizing: border-box;
     }
 
     .toast.error {
@@ -465,7 +587,7 @@
       }
     }
 
-    /* Custom Tooltip Logic using data-tooltip */
+    /* ===== TOOLTIP ===== */
     .tooltip-trigger {
       position: relative;
       cursor: pointer;
@@ -490,7 +612,6 @@
       pointer-events: none;
     }
 
-    /* Tooltip Arrow */
     .tooltip-trigger:hover::before {
       content: "";
       position: absolute;
@@ -508,14 +629,7 @@
       position: relative;
     }
 
-    .stat-card>div[style*="overflow-y: auto"] {
-      overflow-y: auto;
-      overflow-x: visible !important;
-      position: relative;
-      padding-bottom: 20px;
-    }
-
-    /* Modal Styles */
+    /* ===== MODALS ===== */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -532,18 +646,22 @@
 
     .modal-overlay.show {
       display: flex;
-      padding-top: 20px;
-      padding-bottom: 20px;
+      padding: 16px;
+      box-sizing: border-box;
     }
 
+    /* D. MODAL: 95% width on all screens, max-width capped on desktop */
     .modal-content {
       background: white;
       border-radius: 16px;
       padding: 0;
+      width: 95%;
       max-width: 500px;
-      width: 90%;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
       animation: modalSlideIn 0.3s ease-out;
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
     }
 
     @keyframes modalSlideIn {
@@ -560,7 +678,8 @@
 
     .large-modal {
       max-width: 1000px;
-      max-height: 1000px;
+      width: 95%;
+      max-height: 92vh;
       display: flex;
       flex-direction: column;
     }
@@ -573,7 +692,8 @@
 
     .small-modal {
       max-width: 500px;
-      max-height: 750px;
+      width: 95%;
+      max-height: 92vh;
       display: flex;
       flex-direction: column;
     }
@@ -582,172 +702,6 @@
       overflow-y: auto;
       flex: 1;
       min-height: 0;
-    }
-
-    /* Custom Confirmation Dialog */
-    .confirm-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.6);
-      z-index: 1100;
-      justify-content: center;
-      align-items: center;
-      backdrop-filter: blur(2px);
-    }
-
-    .confirm-overlay.show {
-      display: flex;
-    }
-
-    .confirm-dialog-content {
-      background: white;
-      border-radius: 16px;
-      padding: 0;
-      max-width: 500px;
-      width: 90%;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-      animation: modalSlideIn 0.3s ease-out;
-    }
-
-    @keyframes modalSlideIn {
-      from {
-        opacity: 0;
-        transform: translateY(-20px) scale(0.95);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-    }
-
-    .confirm-header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 1rem;
-      border-radius: 16px 16px 0 0;
-      font-size: 1.1rem;
-      font-weight: 700;
-      text-align: center;
-    }
-
-    .confirm-body {
-      padding: 1.5rem;
-      text-align: center;
-      color: #4e5969;
-      font-size: 0.95rem;
-      line-height: 1.6;
-    }
-
-    .confirm-actions {
-      padding: 1rem 1.5rem 1.5rem;
-      display: flex;
-      gap: 0.75rem;
-      justify-content: center;
-      border-top: 1px solid #e2e8f0;
-      background: #f8fafc;
-      border-bottom-left-radius: 16px;
-      border-bottom-right-radius: 16px;
-    }
-
-    .confirm-btn-cancel {
-      background: #e2e8f0;
-      color: #64748b;
-      border: none;
-      padding: 0.65rem 1rem;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      font-weight: 600;
-      transition: background 0.2s;
-    }
-
-    .confirm-btn-cancel:hover {
-      background: #cbd5e1;
-    }
-
-    .confirm-btn-ok {
-      background: var(--success);
-      color: white;
-      border: none;
-      padding: 0.65rem 1rem;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      font-weight: 600;
-      transition: background 0.2s;
-    }
-
-    .confirm-btn-ok:hover {
-      background: #228a3f;
-    }
-
-    /* Confirmation Dialog Styles */
-    .confirm-dialog {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 1100;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .confirm-dialog.show {
-      display: flex;
-    }
-
-    .confirm-dialog-content {
-      background: white;
-      border-radius: 12px;
-      padding: 2rem;
-      max-width: 400px;
-      width: 90%;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-      text-align: center;
-      animation: modalSlideIn 0.3s ease-out;
-    }
-
-    .confirm-overlay-content {
-      background: white;
-      border-radius: 16px;
-      padding: 0;
-      max-width: 500px;
-      width: 90%;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-      animation: modalSlideIn 0.3s ease-out;
-    }
-
-    .confirm-dialog-icon {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
-    }
-
-    .confirm-dialog-title {
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: #1e293b;
-      margin-bottom: 0.5rem;
-    }
-
-    .confirm-dialog-message {
-      font-size: 0.95rem;
-      color: #64748b;
-      margin-bottom: 1.5rem;
-      line-height: 1.5;
-    }
-
-    .confirm-dialog-buttons {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
     }
 
     .modal-header {
@@ -759,6 +713,7 @@
       font-weight: 700;
       text-align: center;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      flex-shrink: 0;
     }
 
     .job-summary {
@@ -768,6 +723,7 @@
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
+      flex-shrink: 0;
     }
 
     .job-summary-item {
@@ -828,7 +784,7 @@
       transition: all 0.2s ease;
       text-align: center;
       word-wrap: break-word;
-      min-height: 34px;
+      min-height: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -864,7 +820,9 @@
       font-size: 0.9rem;
     }
 
-    .form-group input {
+    /* D. INPUT FIELDS: Full-width in modals — prevents iOS zoom */
+    .form-group input,
+    .form-group input[type="date"] {
       width: 100%;
       padding: 0.6rem 0.75rem;
       border: 2px solid #e2e8f0;
@@ -872,6 +830,9 @@
       font-size: 0.9rem;
       transition: border-color 0.2s;
       box-sizing: border-box;
+      min-height: 44px;
+      -webkit-appearance: none;
+      appearance: none;
     }
 
     .form-group input:focus {
@@ -885,6 +846,7 @@
       box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
     }
 
+    /* ===== BATCH MODAL LAYOUT ===== */
     .batch-modal-body {
       display: grid;
       grid-template-columns: minmax(280px, 1fr) 1.2fr;
@@ -1011,7 +973,6 @@
       overflow-y: auto;
       flex: 1;
       max-height: 420px;
-      border: none;
       background: #f8fafc;
       padding: 0rem 1rem 0.75rem 1rem;
     }
@@ -1083,7 +1044,8 @@
       text-align: left;
     }
 
-    .process-row input {
+    /* D. Date input in process rows — full width */
+    .process-row input[type="date"] {
       width: 100%;
       padding: 0.65rem 0.75rem;
       border: 1px solid #cbd5e1;
@@ -1092,38 +1054,9 @@
       color: #0f172a;
       background: #f8fafc;
       box-sizing: border-box;
-    }
-
-    #addBatchModal .edit-form {
-      overflow: hidden;
-    }
-
-    .batch-summary-top,
-    .batch-summary-item,
-    .batch-summary-item .label,
-    .batch-summary-item .value {
-      display: initial;
-    }
-
-    @media (max-width: 920px) {
-      .batch-modal-body {
-        grid-template-columns: 1fr;
-      }
-
-      .large-modal {
-        max-width: 100%;
-      }
-
-    }
-
-    @media (max-width: 920px) {
-      .batch-modal-body {
-        grid-template-columns: 1fr;
-      }
-
-      .large-modal {
-        max-width: 100%;
-      }
+      min-height: 44px;
+      -webkit-appearance: none;
+      appearance: none;
     }
 
     .sales-code-locked {
@@ -1139,9 +1072,10 @@
       transition: all 0.2s;
       text-align: center;
       box-sizing: border-box;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .sales-code-locked:hover {
@@ -1157,6 +1091,7 @@
       font-size: 0.9rem;
       background: white;
       box-sizing: border-box;
+      min-height: 44px;
     }
 
     .sales-code-select.changed {
@@ -1164,9 +1099,9 @@
       box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
     }
 
+    /* ===== MODAL ACTIONS ===== */
     .modal-actions {
       padding: 1rem 1.5rem 1.5rem;
-      text-align: right;
       display: flex;
       gap: 0.75rem;
       justify-content: flex-end;
@@ -1178,6 +1113,7 @@
       position: sticky;
       bottom: 0;
       z-index: 15;
+      flex-wrap: wrap;
     }
 
     .btn-unlock {
@@ -1190,6 +1126,7 @@
       font-size: 0.9rem;
       font-weight: 600;
       transition: background 0.2s;
+      min-height: 44px;
     }
 
     .btn-unlock:hover {
@@ -1206,6 +1143,7 @@
       font-size: 1rem;
       font-weight: 600;
       transition: all 0.2s;
+      min-height: 44px;
     }
 
     .btn-save:hover {
@@ -1229,12 +1167,163 @@
       font-size: 1rem;
       font-weight: 600;
       transition: background 0.2s;
+      min-height: 44px;
     }
 
     .btn-cancel:hover {
       background: #cbd5e1;
     }
 
+    /* ===== CONFIRM DIALOGS ===== */
+    .confirm-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 1100;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(2px);
+    }
+
+    .confirm-overlay.show {
+      display: flex;
+    }
+
+    .confirm-overlay-content {
+      background: white;
+      border-radius: 16px;
+      padding: 0;
+      max-width: 500px;
+      width: 92%;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      animation: modalSlideIn 0.3s ease-out;
+    }
+
+    .confirm-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1rem;
+      border-radius: 16px 16px 0 0;
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .confirm-body {
+      padding: 1.5rem;
+      text-align: center;
+      color: #4e5969;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .confirm-actions {
+      padding: 1rem 1.5rem 1.5rem;
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      border-top: 1px solid #e2e8f0;
+      background: #f8fafc;
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 16px;
+    }
+
+    .confirm-btn-cancel {
+      background: #e2e8f0;
+      color: #64748b;
+      border: none;
+      padding: 0.65rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: background 0.2s;
+      min-height: 44px;
+      flex: 1;
+    }
+
+    .confirm-btn-cancel:hover {
+      background: #cbd5e1;
+    }
+
+    .confirm-btn-ok {
+      background: var(--success);
+      color: white;
+      border: none;
+      padding: 0.65rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: background 0.2s;
+      min-height: 44px;
+      flex: 1;
+    }
+
+    .confirm-btn-ok:hover {
+      background: #228a3f;
+    }
+
+    .confirm-dialog {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1100;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+
+    .confirm-dialog.show {
+      display: flex;
+    }
+
+    .confirm-dialog-content {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      max-width: 400px;
+      width: 92%;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      animation: modalSlideIn 0.3s ease-out;
+    }
+
+    .confirm-dialog-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .confirm-dialog-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 0.5rem;
+    }
+
+    .confirm-dialog-message {
+      font-size: 0.95rem;
+      color: #64748b;
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+
+    .confirm-dialog-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    /* ===== SPINNER ===== */
     .spinner {
       width: 14px;
       height: 14px;
@@ -1249,6 +1338,177 @@
     @keyframes spin {
       to {
         transform: rotate(360deg);
+      }
+    }
+
+    /* =========================================================
+       TABLET  ≤1024px
+    ========================================================= */
+    @media (max-width: 1024px) {
+      .main {
+        margin-left: 0;
+      }
+
+      .stats-bar {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* =========================================================
+       MOBILE  ≤768px
+       Core change: table → vertical cards
+    ========================================================= */
+    @media (max-width: 768px) {
+      .dashboard-header {
+        padding: 0.9rem 1rem;
+        position: relative;
+        /* unstick header so content flows naturally */
+        top: auto;
+      }
+
+      .dashboard-header h1 {
+        font-size: 1.25rem;
+      }
+
+      /* Stack header controls vertically */
+      .header-right {
+        width: 100%;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .header-right .search-input,
+      .header-right .filter-select {
+        width: 100% !important;
+        box-sizing: border-box;
+        font-size: 0.9rem;
+      }
+
+      /* Stats cards: single column */
+      .stats-bar {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 10px 12px;
+      }
+
+      .stat-card {
+        min-height: auto;
+        padding: 0.9rem;
+        font-size: 1rem;
+      }
+
+      /* Result summary */
+      .result-summary {
+        padding: 6px 12px;
+      }
+
+      /* ── HIDE desktop table, SHOW mobile cards ── */
+      .table-container {
+        display: none;
+      }
+
+      .mobile-card-list {
+        display: block;
+      }
+
+      /* Filters bar — unstick, stack */
+      .filters {
+        position: relative;
+        top: auto;
+        flex-direction: column;
+        padding: 10px 12px;
+        gap: 8px;
+      }
+
+      .filter-select,
+      #searchInput {
+        width: 100% !important;
+        box-sizing: border-box;
+      }
+
+      /* D. Modals: wide on mobile */
+      .modal-overlay.show {
+        padding: 8px;
+        align-items: flex-end;
+      }
+
+      .modal-content,
+      .modal-content.small-modal,
+      .modal-content.large-modal {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 16px 16px 0 0;
+        max-height: 94vh;
+      }
+
+      /* Batch modal: single column on mobile */
+      .batch-modal-body {
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
+
+      /* Process rows in modal: 2-col on mobile */
+      .process-header,
+      .process-row {
+        grid-template-columns: 36px 1fr;
+        gap: 8px;
+        padding: 0.7rem 0.75rem;
+      }
+
+      /* Date input spans full width below process name */
+      .process-header> :nth-child(3),
+      .process-row>input[type="date"] {
+        grid-column: 1 / -1;
+      }
+
+      .process-scroll {
+        max-height: 280px;
+      }
+
+      /* Modal action buttons: full-width stack */
+      .modal-actions {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .btn-save,
+      .btn-cancel,
+      .btn-unlock {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+      }
+
+      .toast {
+        font-size: 14px;
+        padding: 14px 20px;
+      }
+    }
+
+    /* =========================================================
+       SMALL PHONES  ≤480px
+    ========================================================= */
+    @media (max-width: 480px) {
+      .dashboard-header h1 {
+        font-size: 1.1rem;
+      }
+
+      .card-label {
+        min-width: 80px;
+        font-size: 0.65rem;
+      }
+
+      .card-value {
+        font-size: 0.78rem;
+      }
+
+      .mobile-card-list-inner {
+        padding: 10px 10px 20px;
+        gap: 10px;
+      }
+
+      .stats-bar {
+        padding: 8px 10px;
       }
     }
   </style>
@@ -1302,7 +1562,7 @@
           // 5. Wire up toggle
           const btn = document.getElementById('sidebarToggle');
           const sidebar = document.getElementById('sidebar');
-
+          const logo = document.getElementById('sidebarLogo');
           if (!btn || !sidebar) {
             console.error('Sidebar: #sidebarToggle or #sidebar missing after DOM build');
             return;
@@ -1319,6 +1579,13 @@
           const savedState = localStorage.getItem('sidebar-collapsed') === '1';
           setSidebar(savedState);
 
+          if (logo) {
+            logo.addEventListener('click', () => {
+              const collapsed = !sidebar.classList.contains('sidebar--collapsed');
+              setSidebar(collapsed);
+              localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0');
+            });
+          }
           btn.addEventListener('click', () => {
             const collapsed = !sidebar.classList.contains('sidebar--collapsed');
             setSidebar(collapsed);
@@ -1349,7 +1616,10 @@
         .catch(console.error);
     });
   </script>
+
   <div class="main">
+
+    <!-- HEADER -->
     <div class="dashboard-header">
       <h1>Job Dashboard</h1>
       <div class="header-right">
@@ -1367,46 +1637,58 @@
           <option value="ALMOST DUE">ALMOST DUE</option>
           <option value="ON SCHEDULE">ON SCHEDULE</option>
         </select>
-        <button class="action-btn" id="clearFiltersBtn" style="font-size: 18px;" onclick="clearFilters()">Clear
+        <button class="action-btn" id="clearFiltersBtn" style="font-size:18px;" onclick="clearFilters()">Clear
           Filters</button>
       </div>
     </div>
 
+    <!-- STATS -->
     <div class="stats-bar" id="statsBar"></div>
 
+    <!-- RESULT COUNT -->
+    <div class="result-summary" id="jobCountSummary">Showing 0 of 0 jobs</div>
+
+    <!-- ── DESKTOP TABLE VIEW ── -->
     <div class="table-container">
-      <div class="result-summary" id="jobCountSummary">Showing 0 of 0 jobs</div>
-      <div class="table-scroll">
+      <div class="table-scroll" id="tableScrollArea">
         <table id="jobTable">
           <thead>
             <tr>
-              <th style="width: 60px;">PSN</th>
-              <th style="width: 60px;">PI Num</th>
-              <th style="width: 60px;">S-Code</th>
-              <th style="width: 160px;">Job Name</th>
-              <th style="width: 70px;">Quantity</th>
-              <th style="width: 70px;">Remaining</th>
-              <th style="width: 70px;">Partial Del</th>
-              <th style="width: 70px;">BTD</th>
-              <th style="width: 80px;">Total Del</th>
-              <th style="width: 95px;">Item</th>
-              <th style="width: 95px;">Job Type</th>
-              <th style="width: 80px;">Ord-Date</th>
-              <th class="sticky" style="right: 320px; width: 80px;">Del-Date</th>
-              <th class="sticky" style="right: 230px; width: 90px;">Priority</th>
-              <th class="sticky" style="right: 140px; width: 90px;">Status</th>
-              <th class="sticky" style="right: 0; width: 140px;">Action</th>
+              <th style="width:60px;">PSN</th>
+              <th style="width:60px;">PI Num</th>
+              <th style="width:60px;">S-Code</th>
+              <th style="width:160px;">Job Name</th>
+              <th style="width:70px;">Quantity</th>
+              <th style="width:70px;">Remaining</th>
+              <th style="width:70px;">Partial Del</th>
+              <th style="width:70px;">BTD</th>
+              <th style="width:80px;">Total Del</th>
+              <th style="width:95px;">Item</th>
+              <th style="width:95px;">Job Type</th>
+              <th style="width:80px;">Ord-Date</th>
+              <th class="sticky" style="right:320px;width:80px;">Del-Date</th>
+              <th class="sticky" style="right:230px;width:90px;">Priority</th>
+              <th class="sticky" style="right:140px;width:90px;">Status</th>
+              <th class="sticky" style="right:0;width:140px;">Action</th>
             </tr>
           </thead>
           <tbody id="jobTableBody">
             <tr>
-              <td colspan="16" style="text-align:center; padding: 40px;">Loading data...</td>
+              <td colspan="16" style="text-align:center;padding:40px;">Loading data...</td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
-  </div>
+
+    <!-- ── MOBILE CARD VIEW ── -->
+    <div class="mobile-card-list" id="mobileCardList">
+      <div class="mobile-card-list-inner" id="mobileCardListInner">
+        <div style="text-align:center;padding:40px;color:#64748b;">Loading data...</div>
+      </div>
+    </div>
+
+  </div><!-- /.main -->
 
   <div id="toast-container"></div>
 
@@ -1423,13 +1705,12 @@
     </div>
   </div>
 
-  <!-- Remaining Quantity Confirmation Dialog -->
+  <!-- Remaining Qty Confirm Overlay -->
   <div id="confirmOverlay" class="confirm-overlay">
     <div class="confirm-overlay-content">
       <div class="confirm-header" id="confirmHeader">⚠️ Remaining Production Quantity</div>
       <div class="confirm-body" id="confirmOverlayMessage">Remaining Production Quantity is <strong></strong>. Do you
-        want to
-        proceed and save the remaining for later batches?</div>
+        want to proceed?</div>
       <div class="confirm-actions">
         <button class="confirm-btn-cancel" onclick="cancelConfirm()">Cancel</button>
         <button class="confirm-btn-ok" onclick="confirmOverlayAction()">OK</button>
@@ -1441,7 +1722,6 @@
   <div id="priorityModal" class="modal-overlay">
     <div class="modal-content small-modal">
       <div class="modal-header">✏️ Edit Job Details</div>
-
       <div class="job-summary">
         <div class="job-summary-item">
           <div class="job-summary-label">PSN :</div>
@@ -1452,29 +1732,21 @@
           <div class="job-summary-value" id="summaryJobName">-</div>
         </div>
       </div>
-
       <div class="edit-form">
         <div class="form-section">
           <div class="form-section-title">🏭 Job Type</div>
-          <div class="button-grid" id="jobTypeButtons">
-            <!-- Buttons will be generated here -->
-          </div>
+          <div class="button-grid" id="jobTypeButtons"></div>
         </div>
-
         <div class="form-section">
           <div class="form-section-title">📦 Item</div>
           <div class="form-group">
             <input type="text" id="editItem" placeholder="Enter item name" oninput="handleEditItemChange()">
           </div>
         </div>
-
         <div class="form-section">
           <div class="form-section-title">⚡ Priority</div>
-          <div class="button-grid" id="priorityButtons">
-            <!-- Buttons will be generated here -->
-          </div>
+          <div class="button-grid" id="priorityButtons"></div>
         </div>
-
         <div class="form-section">
           <div class="form-section-title">🏢 Sales Code</div>
           <div class="form-group">
@@ -1484,7 +1756,6 @@
           </div>
         </div>
       </div>
-
       <div class="modal-actions">
         <button class="btn-cancel" onclick="closePriorityModal()">Cancel</button>
         <button id="saveBtn" class="btn-save" onclick="saveJobDetails()">💾 Save Changes</button>
@@ -1496,10 +1767,8 @@
   <div id="addBatchModal" class="modal-overlay">
     <div class="modal-content large-modal">
       <div class="modal-header">➕ Add New Batch</div>
-
       <div class="edit-form">
         <div class="batch-modal-body">
-          <!-- LEFT COLUMN -->
           <div class="batch-left-column">
             <div class="batch-card">
               <div class="batch-card-header">
@@ -1520,11 +1789,10 @@
                 </div>
                 <div class="batch-summary-row">
                   <div class="batch-summary-label">Remaining Production Qty</div>
-                  <div class="batch-summary-value" id="batchSummaryRemaining" style="color: #ef4444;">-</div>
+                  <div class="batch-summary-value" id="batchSummaryRemaining" style="color:#ef4444;">-</div>
                 </div>
               </div>
             </div>
-
             <div class="batch-detail-card">
               <div class="batch-card-header">
                 <h2>Batch Details</h2>
@@ -1536,14 +1804,11 @@
               <div class="form-group">
                 <label class="batch-detail-label">Remaining Production Qty After Creation</label>
                 <div id="remainingAfter" class="batch-detail-value"
-                  style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0.75rem 0.9rem; font-weight: 700;">
-                  -
-                </div>
+                  style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:0.75rem 0.9rem;font-weight:700;">
+                  -</div>
               </div>
             </div>
           </div>
-
-          <!-- RIGHT COLUMN -->
           <div class="process-panel">
             <div class="process-panel-header">
               <h2>Process Expected Dates</h2>
@@ -1551,6 +1816,7 @@
             <div class="process-scroll">
               <div id="processDatesContainer" class="process-table">
                 <div class="process-header">
+                  <div>Step</div>
                   <div>Process Name</div>
                   <div>Expected Date</div>
                 </div>
@@ -1560,7 +1826,6 @@
           </div>
         </div>
       </div>
-
       <div class="modal-actions">
         <button class="btn-cancel" onclick="closeAddBatchModal()">Cancel</button>
         <button id="createBatchBtn" class="btn-save" onclick="submitNewBatch()">➕ Create Batch</button>
@@ -1582,33 +1847,30 @@
     let pendingConfirmAction = null;
     let pendingSubmitData = null;
 
-    // Initialize the dashboard
-    window.onload = function () {
-      fetchData();
-      setupTableDragScroll();
-    };
-
-    // Input validation and dynamic styling for batch quantity
-    const input = document.getElementById("batchQuantity");
-
-    // Function to update input style based on its value
-    function updateStyle() {
-      if (input.value.trim() === "") {
-        input.style.background = "#f3f4f6"; // light grey
-        input.style.border = "2px solid red";
+    // ─── Batch quantity input styling ───
+    const batchInput = document.getElementById("batchQuantity");
+    function updateBatchInputStyle() {
+      if (!batchInput.value.trim()) {
+        batchInput.style.background = "#f3f4f6";
+        batchInput.style.border = "2px solid red";
       } else {
-        input.style.background = "#e8f5e8";
-        input.style.border = "2px solid var(--success)";
+        batchInput.style.background = "#e8f5e8";
+        batchInput.style.border = "2px solid var(--success)";
       }
     }
+    batchInput.addEventListener("input", updateBatchInputStyle);
+    updateBatchInputStyle();
 
-    // Attach the input event listener to validate and style the input in real-time
-    input.addEventListener("input", updateStyle);
+    // ─── Init ───
+    window.onload = function () {
+      fetchData();
+      // C. Drag-to-scroll only on desktop — disabled for touch screens
+      if (window.innerWidth > 768) {
+        setupTableDragScroll();
+      }
+    };
 
-    // run once when page loads
-    updateStyle();
-
-    // Fetch data from the server
+    // ─── Data fetch ───
     async function fetchData() {
       try {
         const resp = await fetch('/api/jobListing');
@@ -1616,186 +1878,58 @@
         MASTER_DATA = data || [];
         renderStats();
         renderTable();
-
-      } catch (error) {
-        console.error('Error fetching data:', error);
-
+      } catch (err) {
+        console.error('Error fetching data:', err);
         showToast('Failed to load data', 'error');
       }
     }
 
-    // Setup drag-to-scroll for the table
+    // C. Drag-to-scroll — only wired up on desktop (>768px)
     function setupTableDragScroll() {
       const scrollArea = document.querySelector('.table-scroll');
-
-      let isDown = false;
-      let startX;
-      let scrollLeft;
-
+      if (!scrollArea) return;
+      let isDown = false, startX, scrollLeft;
       scrollArea.addEventListener('mousedown', (e) => {
         isDown = true;
         scrollArea.classList.add('dragging');
         startX = e.pageX - scrollArea.offsetLeft;
         scrollLeft = scrollArea.scrollLeft;
       });
-
-      scrollArea.addEventListener('mouseleave', () => {
-        isDown = false;
-        scrollArea.classList.remove('dragging');
-      });
-
-      scrollArea.addEventListener('mouseup', () => {
-        isDown = false;
-        scrollArea.classList.remove('dragging');
-      });
-
+      scrollArea.addEventListener('mouseleave', () => { isDown = false; scrollArea.classList.remove('dragging'); });
+      scrollArea.addEventListener('mouseup', () => { isDown = false; scrollArea.classList.remove('dragging'); });
       scrollArea.addEventListener('mousemove', (e) => {
         if (!isDown) return;
-
         e.preventDefault();
-
         const x = e.pageX - scrollArea.offsetLeft;
-        const walk = (x - startX) * 1.5; // speed
-        scrollArea.scrollLeft = scrollLeft - walk;
+        scrollArea.scrollLeft = scrollLeft - (x - startX) * 1.5;
       });
     }
 
-    // Utility function to parse dates from various formats
+    // ─── Date utility ───
     function parseDate(dateStr) {
-      if (dateStr === undefined || dateStr === null || dateStr === '' || dateStr === '-') return null;
-
-      // Excel serial date handling (numeric value or numeric string)
+      if (!dateStr || dateStr === '' || dateStr === '-') return null;
       const serialNum = Number(dateStr);
       if (!isNaN(serialNum) && serialNum > 0) {
-        // Excel serial number: 1 => 1900-01-01 (using 1899-12-30 base)
         const excelEpoch = new Date(1899, 11, 30);
         return new Date(excelEpoch.getTime() + serialNum * 86400000);
       }
-
       const rawStr = String(dateStr).trim();
-
-      // dd/mm/yyyy or d/m/yyyy
       const slashParts = rawStr.split('/');
       if (slashParts.length === 3) {
         const [d, m, y] = slashParts.map(Number);
-        if (!isNaN(d) && !isNaN(m) && !isNaN(y)) {
-          return new Date(y, m - 1, d);
-        }
+        if (!isNaN(d) && !isNaN(m) && !isNaN(y)) return new Date(y, m - 1, d);
       }
-
-      // yyyy-mm-dd or other parseable format
       const parsed = new Date(rawStr);
       return isNaN(parsed.getTime()) ? null : parsed;
     }
 
-    // Calculate status based on delivery date
-    function renderStats() {
-      const stats = {
-        salesCodes: {},
-        priorities: { Urgent: 0, 'Cut Queue': 0, Normal: 0 },
-        statuses: { OVERDUE: 0, 'ALMOST DUE': 0, 'ON SCHEDULE': 0 }
-      };
-
-      MASTER_DATA.forEach(job => {
-        const salesCode = job.salesCode || job.Sales_Code || job.code || 'Unknown';
-        stats.salesCodes[salesCode] = (stats.salesCodes[salesCode] || 0) + 1;
-        const priority = job.Priority || 'Normal';
-        if (stats.priorities[priority] !== undefined) stats.priorities[priority]++;
-        const status = calculateStatus(job['Delivery Date'] || job.Delivery_Date || job.deliveryDate);
-        stats.statuses[status] = (stats.statuses[status] || 0) + 1;
-      });
-
-      const statsBar = document.getElementById('statsBar');
-      statsBar.innerHTML = '';
-
-      // Sales codes card
-      const salesCard = document.createElement('div');
-      salesCard.className = 'stat-card';
-      salesCard.innerHTML = '<h3 style="margin: 0 0 10px 0; color: #4f46e5; font-size: 1rem;">Sales Codes</h3>';
-      const allCodes = ['AO', 'SHU', 'NT', 'AK', 'NY', 'OC', 'PAO', 'PNY', 'SO', 'SC'];
-      allCodes.forEach(code => {
-        const count = stats.salesCodes[code] || 0;
-        const isActive = activeFilters.salesCodes.has(code);
-        const item = document.createElement('div');
-        item.className = `filter-item tooltip-trigger ${isActive ? 'active' : ''}`;
-        item.setAttribute('data-tooltip', 'Click to filter table below');
-        item.onclick = () => toggleFilter('salesCodes', code);
-        item.innerHTML = `
-          <span>${code}</span>
-          <span>${count}</span>
-        `;
-        salesCard.appendChild(item);
-      });
-      statsBar.appendChild(salesCard);
-
-      // Priorities and Statuses card
-      const priorityStatusCard = document.createElement('div');
-      priorityStatusCard.className = 'stat-card';
-      priorityStatusCard.innerHTML = '<h3 style="margin: 0 0 10px 0; color: #dc2626; font-size: 1rem;">Priorities & Status</h3><h4 style="margin: 10px 0 5px 0; color: #dc2626; font-size: 0.9rem; font-weight: 600;">Priorities</h4>';
-      // Add priorities
-      Object.entries(stats.priorities).forEach(([priority, count]) => {
-        const isActive = activeFilters.priorities.has(priority);
-        const item = document.createElement('div');
-        item.className = `filter-item tooltip-trigger ${isActive ? 'active' : ''}`;
-        item.setAttribute('data-tooltip', 'Click to filter table below');
-        item.onclick = () => toggleFilter('priorities', priority);
-        item.innerHTML = `
-          <span>${priority}</span>
-          <span>${count}</span>
-        `;
-        priorityStatusCard.appendChild(item);
-      });
-      // Add status subheading
-      const statusHeading = document.createElement('h4');
-      statusHeading.style.margin = '10px 0 5px 0';
-      statusHeading.style.color = '#b45309';
-      statusHeading.style.fontSize = '0.9rem';
-      statusHeading.style.fontWeight = '600';
-      statusHeading.textContent = 'Status';
-      priorityStatusCard.appendChild(statusHeading);
-      // Add statuses
-      Object.entries(stats.statuses).forEach(([status, count]) => {
-        const isActive = activeFilters.statuses.has(status);
-        const item = document.createElement('div');
-        item.className = `filter-item tooltip-trigger ${isActive ? 'active' : ''}`;
-        item.setAttribute('data-tooltip', 'Click to filter table below');
-        item.onclick = () => toggleFilter('statuses', status);
-        item.innerHTML = `
-          <span>${status}</span>
-          <span>${count}</span>
-        `;
-        priorityStatusCard.appendChild(item);
-      });
-      statsBar.appendChild(priorityStatusCard);
+    function formatDate(dateStr) {
+      if (!dateStr || dateStr === '-') return '-';
+      const date = parseDate(dateStr);
+      if (!date) return typeof dateStr === 'number' ? dateStr.toString() : dateStr;
+      return date.toLocaleDateString('en-GB');
     }
 
-    // Toggle filters for sales codes, priorities, and statuses
-    function toggleFilter(filterType, value) {
-      if (filterType === 'priorities' || filterType === 'statuses') {
-        const currentlyActive = activeFilters[filterType].size === 1 && activeFilters[filterType].has(value);
-        activeFilters[filterType] = currentlyActive ? new Set() : new Set([value]);
-        const selectId = filterType === 'priorities' ? 'priorityFilter' : 'statusFilter';
-        document.getElementById(selectId).value = currentlyActive ? '' : value;
-      } else {
-        if (activeFilters[filterType].has(value)) {
-          activeFilters[filterType].delete(value);
-        } else {
-          activeFilters[filterType].add(value);
-        }
-      }
-
-      renderStats();
-      filterTable();
-    }
-
-    // Set filter programmatically (used by dropdowns)
-    function setFilter(type, value) {
-      activeFilters[type] = value;
-      renderStats();
-      filterTable();
-    }
-
-    // Calculate job status based on delivery date
     function calculateStatus(deliveryDate) {
       if (!deliveryDate || deliveryDate === '-') return 'ON SCHEDULE';
       const today = new Date();
@@ -1807,63 +1941,26 @@
       return 'ON SCHEDULE';
     }
 
-    // Filter table based on active filters and search query
-    function filterTable() {
-      activeFilters.search = (document.getElementById('searchInput').value || '').trim().toUpperCase();
-
-      const prioritySelected = document.getElementById('priorityFilter').value;
-      const statusSelected = document.getElementById('statusFilter').value;
-
-      activeFilters.priorities = prioritySelected ? new Set([prioritySelected]) : new Set();
-      activeFilters.statuses = statusSelected ? new Set([statusSelected]) : new Set();
-
-      renderStats();
-      renderTable();
-    }
-
-    // Determine row color class based on priority and status
     function getRowColorClass(job) {
       const priority = job.Priority || 'Normal';
       const status = calculateStatus(job['Delivery Date'] || job.Delivery_Date || job.deliveryDate);
-
       const isUrgent = priority === 'Urgent';
       const isCutQueue = priority === 'Cut Queue';
       const isOverdue = status === 'OVERDUE';
       const isAlmost = status === 'ALMOST DUE';
-
       if (isOverdue && isUrgent) return 'row-critical';
       if (isOverdue || isUrgent) return 'row-urgent';
       if (isAlmost || isCutQueue) return 'row-warning';
       return 'row-safe';
     }
 
-    // Clear all filters and reset the table
-    function clearFilters() {
-      activeFilters = {
-        salesCodes: new Set(),
-        priorities: new Set(),
-        statuses: new Set(),
-        search: ''
-      };
-
-      document.getElementById('searchInput').value = '';
-      document.getElementById('priorityFilter').value = '';
-      document.getElementById('statusFilter').value = '';
-
-      renderStats();
-      renderTable();
-    }
-
-    // Get priority order for sorting (Urgent + Overdue > Urgent > Overdue > Almost Due > Cut Queue > Normal)
     function getPriorityOrder(job) {
       const priority = (job.Priority || 'Normal').toLowerCase();
       const status = calculateStatus(job['Delivery Date'] || job.Delivery_Date || job.deliveryDate).toUpperCase();
-
       const isUrgent = priority === 'urgent';
       const isCutQueue = priority === 'cut queue';
       const isOverdue = status === 'OVERDUE';
       const isAlmost = status === 'ALMOST DUE';
-
       if (isUrgent && isOverdue) return 0;
       if (isUrgent) return 1;
       if (isOverdue) return 2;
@@ -1872,12 +1969,106 @@
       return 5;
     }
 
-    // Render the job table based on filtered data
+    // ─── Stats cards ───
+    function renderStats() {
+      const stats = {
+        salesCodes: {},
+        priorities: { Urgent: 0, 'Cut Queue': 0, Normal: 0 },
+        statuses: { OVERDUE: 0, 'ALMOST DUE': 0, 'ON SCHEDULE': 0 }
+      };
+      MASTER_DATA.forEach(job => {
+        const sc = job.salesCode || job.Sales_Code || job.code || 'Unknown';
+        stats.salesCodes[sc] = (stats.salesCodes[sc] || 0) + 1;
+        const p = job.Priority || 'Normal';
+        if (stats.priorities[p] !== undefined) stats.priorities[p]++;
+        const s = calculateStatus(job['Delivery Date'] || job.Delivery_Date || job.deliveryDate);
+        stats.statuses[s] = (stats.statuses[s] || 0) + 1;
+      });
+
+      const statsBar = document.getElementById('statsBar');
+      statsBar.innerHTML = '';
+
+      const salesCard = document.createElement('div');
+      salesCard.className = 'stat-card';
+      salesCard.innerHTML = '<h3 style="margin:0 0 10px 0;color:#4f46e5;font-size:1rem;">Sales Codes</h3>';
+      ['AO', 'SHU', 'NT', 'AK', 'NY', 'OC', 'PAO', 'PNY', 'SO', 'SC'].forEach(code => {
+        const count = stats.salesCodes[code] || 0;
+        const item = document.createElement('div');
+        item.className = `filter-item tooltip-trigger ${activeFilters.salesCodes.has(code) ? 'active' : ''}`;
+        item.setAttribute('data-tooltip', 'Click to filter table below');
+        item.onclick = () => toggleFilter('salesCodes', code);
+        item.innerHTML = `<span>${code}</span><span>${count}</span>`;
+        salesCard.appendChild(item);
+      });
+      statsBar.appendChild(salesCard);
+
+      const psCard = document.createElement('div');
+      psCard.className = 'stat-card';
+      psCard.innerHTML = '<h3 style="margin:0 0 10px 0;color:#dc2626;font-size:1rem;">Priorities & Status</h3><h4 style="margin:10px 0 5px 0;color:#dc2626;font-size:0.9rem;font-weight:600;">Priorities</h4>';
+      Object.entries(stats.priorities).forEach(([priority, count]) => {
+        const item = document.createElement('div');
+        item.className = `filter-item tooltip-trigger ${activeFilters.priorities.has(priority) ? 'active' : ''}`;
+        item.setAttribute('data-tooltip', 'Click to filter table below');
+        item.onclick = () => toggleFilter('priorities', priority);
+        item.innerHTML = `<span>${priority}</span><span>${count}</span>`;
+        psCard.appendChild(item);
+      });
+      const sh = document.createElement('h4');
+      sh.style.cssText = 'margin:10px 0 5px 0;color:#b45309;font-size:0.9rem;font-weight:600;';
+      sh.textContent = 'Status';
+      psCard.appendChild(sh);
+      Object.entries(stats.statuses).forEach(([status, count]) => {
+        const item = document.createElement('div');
+        item.className = `filter-item tooltip-trigger ${activeFilters.statuses.has(status) ? 'active' : ''}`;
+        item.setAttribute('data-tooltip', 'Click to filter table below');
+        item.onclick = () => toggleFilter('statuses', status);
+        item.innerHTML = `<span>${status}</span><span>${count}</span>`;
+        psCard.appendChild(item);
+      });
+      statsBar.appendChild(psCard);
+    }
+
+    function toggleFilter(filterType, value) {
+      if (filterType === 'priorities' || filterType === 'statuses') {
+        const currentlyActive = activeFilters[filterType].size === 1 && activeFilters[filterType].has(value);
+        activeFilters[filterType] = currentlyActive ? new Set() : new Set([value]);
+        const selectId = filterType === 'priorities' ? 'priorityFilter' : 'statusFilter';
+        document.getElementById(selectId).value = currentlyActive ? '' : value;
+      } else {
+        activeFilters[filterType].has(value)
+          ? activeFilters[filterType].delete(value)
+          : activeFilters[filterType].add(value);
+      }
+      renderStats();
+      filterTable();
+    }
+
+    function filterTable() {
+      activeFilters.search = (document.getElementById('searchInput').value || '').trim().toUpperCase();
+      const pSel = document.getElementById('priorityFilter').value;
+      const sSel = document.getElementById('statusFilter').value;
+      activeFilters.priorities = pSel ? new Set([pSel]) : new Set();
+      activeFilters.statuses = sSel ? new Set([sSel]) : new Set();
+      renderStats();
+      renderTable();
+    }
+
+    function clearFilters() {
+      activeFilters = { salesCodes: new Set(), priorities: new Set(), statuses: new Set(), search: '' };
+      document.getElementById('searchInput').value = '';
+      document.getElementById('priorityFilter').value = '';
+      document.getElementById('statusFilter').value = '';
+      renderStats();
+      renderTable();
+    }
+
+    // ─── Render: both table (desktop) + cards (mobile) ───
     function renderTable() {
       const tbody = document.getElementById('jobTableBody');
+      const cardInner = document.getElementById('mobileCardListInner');
+
       let filteredData = MASTER_DATA.filter(job => {
         const search = (activeFilters.search || '').toUpperCase().trim();
-
         const psn = String(job["Product Serial Number"] || job.PSN || '').toUpperCase();
         const jobName = String(job["Job Name"] || job.Job_Name || job.client || '').toUpperCase();
         const pi = String(job["PI Number"] || job.PI_Number || job.pi || job.PI_No || '').toUpperCase();
@@ -1885,35 +2076,32 @@
         const item = String(job.Item || '').toUpperCase();
 
         const matchesSearch = !search ||
-          psn.includes(search) ||
-          jobName.includes(search) ||
-          pi.includes(search) ||
-          saleCode.includes(search) ||
+          psn.includes(search) || jobName.includes(search) ||
+          pi.includes(search) || saleCode.includes(search) ||
           item.includes(search);
 
-        const salesCode = job.salesCode || job.Sales_Code || job.code;
-        const matchesSalesCode = activeFilters.salesCodes.size === 0 || activeFilters.salesCodes.has(salesCode);
+        const sc = job.salesCode || job.Sales_Code || job.code;
+        const matchesSales = activeFilters.salesCodes.size === 0 || activeFilters.salesCodes.has(sc);
+        const p = job.Priority || 'Normal';
+        const matchesPriority = activeFilters.priorities.size === 0 || activeFilters.priorities.has(p);
+        const s = calculateStatus(job['Delivery Date'] || job.Delivery_Date || job.deliveryDate);
+        const matchesStatus = activeFilters.statuses.size === 0 || activeFilters.statuses.has(s);
 
-        const priority = job.Priority || 'Normal';
-        const matchesPriority = activeFilters.priorities.size === 0 || activeFilters.priorities.has(priority);
-
-        const status = calculateStatus(job['Delivery Date'] || job.Delivery_Date || job.deliveryDate);
-        const matchesStatus = activeFilters.statuses.size === 0 || activeFilters.statuses.has(status);
-
-        return matchesSearch && matchesSalesCode && matchesPriority && matchesStatus;
+        return matchesSearch && matchesSales && matchesPriority && matchesStatus;
       });
 
-      // Apply business priority + overdue ordering
       filteredData.sort((a, b) => getPriorityOrder(a) - getPriorityOrder(b));
 
-      tbody.innerHTML = '';
       const countSummary = document.getElementById('jobCountSummary');
-      if (countSummary) {
-        countSummary.textContent = `Showing ${filteredData.length} of ${MASTER_DATA.length} jobs`;
-      }
+      if (countSummary) countSummary.textContent = `Showing ${filteredData.length} of ${MASTER_DATA.length} jobs`;
+
+      // ── Clear both views ──
+      tbody.innerHTML = '';
+      cardInner.innerHTML = '';
 
       if (filteredData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="16" style="text-align:center; padding: 40px;">No matching jobs found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="16" style="text-align:center;padding:40px;">No matching jobs found.</td></tr>';
+        cardInner.innerHTML = '<div style="text-align:center;padding:40px;color:#64748b;">No matching jobs found.</div>';
         return;
       }
 
@@ -1924,239 +2112,218 @@
         const priorityClass = priority === 'Urgent' ? 'pill-urgent' : priority === 'Cut Queue' ? 'pill-cut-queue' : 'pill-normal-priority';
         const rowClass = getRowColorClass(job);
 
-        // Limit Job Name and Item to 30 characters with wrap
-        let jobName = job["Job Name"] || job.Job_Name || job.client || '-';
-        let item = job.Item || '-';
-
+        const jobName = job["Job Name"] || job.Job_Name || job.client || '-';
+        const item = job.Item || '-';
         const psnText = job["Product Serial Number"] || job.PSN || '-';
         const psnValue = psnText !== '-' ? (psnText.toString().endsWith('-1') ? psnText : `${psnText}-1`) : psnText;
-        const psnLink = psnText !== '-' ? `<a href="/BatchDetail.html?id=${encodeURIComponent(psnValue)}" target="_top" style="color: #2563eb; font-weight: 600; text-decoration: none;"><i class="fas fa-external-link-alt" style="font-size: 0.7rem; margin-right: 4px;"></i>${psnText}</a>` : psnText;
+        const psnLink = psnText !== '-'
+          ? `<a href="/BatchDetail.html?id=${encodeURIComponent(psnValue)}" target="_top" style="color:#2563eb;font-weight:600;text-decoration:none;">${psnText}</a>`
+          : psnText;
 
         const remaining = job.Remaining || job.remaining || 0;
         const partialDelivery = job['Partial Delivery'] || 0;
         const balanceToDelivery = job['Balance to Delivery'] || job['BTD'] || 0;
         const totalDelivery = job['Total Delivery'] || 0;
+        const psn = job["Product Serial Number"] || job.PSN;
 
-        const actionButtons = `<button class="action-btn" onclick="openPriorityModal('${job["Product Serial Number"] || job.PSN}')">Edit</button>`;
-        const createBatchBtn = remaining > 0 ? `<button class="action-btn" style="margin-left: 5px;" onclick="createBatch('${job["Product Serial Number"] || job.PSN}')">Add Batch</button>` : '';
-
+        // ── DESKTOP TABLE ROW ──
+        // A. data-label on every td for accessibility & mobile fallback
         const row = document.createElement('tr');
         row.className = rowClass;
         row.innerHTML = `
-            <td>${psnLink}</td>
-            <td>${job["PI Number"] || job.PI_Number || job.pi || job.PI_No || '-'}</td>
-            <td>${job.salesCode || job.Sales_Code || job.code || '-'}</td>
-            <td>${jobName}</td>
-            <td>${job.Quantity ? Number(job.Quantity).toLocaleString() : '-'}</td>
-            <td>${remaining ? Number(remaining).toLocaleString() : '-'}</td>
-            <td>${partialDelivery ? Number(partialDelivery).toLocaleString() : '-'}</td>
-            <td>${balanceToDelivery ? Number(balanceToDelivery).toLocaleString() : '-'}</td>
-            <td>${totalDelivery ? Number(totalDelivery).toLocaleString() : '-'}</td>
-            <td>${item}</td>
-            <td>${job["Job Type"] || '-'}</td>
-            <td>${formatDate(job["Order Date"] || job.Order_Date || job.orderDate)}</td>
-            <td class="sticky" style="right: 320px; width: 80px;">${formatDate(job["Delivery Date"] || job.Delivery_Date || job.deliveryDate)}</td>
-            <td class="sticky" style="right: 230px; width: 90px;"><span class="pill ${priorityClass}">${priority}</span></td>
-            <td class="sticky" style="right: 140px; width: 90px;"><span class="pill ${statusClass}">${status}</span></td>
-            <td class="sticky" style="right: 0; width: 140px;">${actionButtons}${createBatchBtn}</td>
-          `;
+          <td data-label="PSN">${psnLink}</td>
+          <td data-label="PI Num">${job["PI Number"] || job.PI_Number || job.pi || job.PI_No || '-'}</td>
+          <td data-label="S-Code">${job.salesCode || job.Sales_Code || job.code || '-'}</td>
+          <td data-label="Job Name">${jobName}</td>
+          <td data-label="Quantity">${job.Quantity ? Number(job.Quantity).toLocaleString() : '-'}</td>
+          <td data-label="Remaining">${remaining ? Number(remaining).toLocaleString() : '-'}</td>
+          <td data-label="Partial Del">${partialDelivery ? Number(partialDelivery).toLocaleString() : '-'}</td>
+          <td data-label="BTD">${balanceToDelivery ? Number(balanceToDelivery).toLocaleString() : '-'}</td>
+          <td data-label="Total Del">${totalDelivery ? Number(totalDelivery).toLocaleString() : '-'}</td>
+          <td data-label="Item">${item}</td>
+          <td data-label="Job Type">${job["Job Type"] || '-'}</td>
+          <td data-label="Ord-Date">${formatDate(job["Order Date"] || job.Order_Date || job.orderDate)}</td>
+          <td class="sticky" data-label="Del-Date" style="right:320px;width:80px;">${formatDate(job["Delivery Date"] || job.Delivery_Date || job.deliveryDate)}</td>
+          <td class="sticky" data-label="Priority" style="right:230px;width:90px;"><span class="pill ${priorityClass}">${priority}</span></td>
+          <td class="sticky" data-label="Status"   style="right:140px;width:90px;"><span class="pill ${statusClass}">${status}</span></td>
+          <td class="sticky" data-label="Action"   style="right:0;width:140px;">
+            <button class="action-btn" onclick="openPriorityModal('${psn}')">Edit</button>
+            ${remaining > 0 ? `<button class="action-btn" style="margin-left:5px;" onclick="createBatch('${psn}')">Add Batch</button>` : ''}
+          </td>`;
         tbody.appendChild(row);
+
+        // ── MOBILE CARD ──
+        const card = document.createElement('div');
+        card.className = `job-card ${rowClass}`;
+
+        // B. Priority + Status pills at top of card for quick-glance
+        card.innerHTML = `
+          <div class="card-pill-strip">
+            <span class="pill ${priorityClass}">${priority}</span>
+            <span class="pill ${statusClass}">${status}</span>
+            <span class="pill" style="background:#f1f5f9;color:#475569;font-size:0.7rem;">${job["Job Type"] || '-'}</span>
+          </div>
+
+          <a class="card-psn"
+             href="/BatchDetail.html?id=${encodeURIComponent(psnValue)}"
+             target="_top">${psnText}</a>
+          <div class="card-job-name">${jobName}</div>
+
+          <div class="card-body">
+            <div class="card-row">
+              <span class="card-label">PI Number</span>
+              <span class="card-value">${job["PI Number"] || job.PI_Number || job.pi || job.PI_No || '-'}</span>
+            </div>
+            <div class="card-row">
+              <span class="card-label">Sales Code</span>
+              <span class="card-value">${job.salesCode || job.Sales_Code || job.code || '-'}</span>
+            </div>
+            <div class="card-row">
+              <span class="card-label">Item</span>
+              <span class="card-value">${item}</span>
+            </div>
+            <div class="card-row">
+              <span class="card-label">Quantity</span>
+              <span class="card-value">${job.Quantity ? Number(job.Quantity).toLocaleString() : '-'}</span>
+            </div>
+            <div class="card-row">
+              <span class="card-label">Remaining</span>
+              <span class="card-value" style="color:${remaining > 0 ? 'var(--danger)' : 'var(--success)'};">${remaining ? Number(remaining).toLocaleString() : '-'}</span>
+            </div>
+            <div class="card-row">
+              <span class="card-label">Partial Del</span>
+              <span class="card-value">${partialDelivery ? Number(partialDelivery).toLocaleString() : '-'}</span>
+            </div>
+            <div class="card-row">
+              <span class="card-label">BTD</span>
+              <span class="card-value">${balanceToDelivery ? Number(balanceToDelivery).toLocaleString() : '-'}</span>
+            </div>
+            <div class="card-row">
+              <span class="card-label">Total Del</span>
+              <span class="card-value">${totalDelivery ? Number(totalDelivery).toLocaleString() : '-'}</span>
+            </div>
+            <div class="card-row">
+              <span class="card-label">Order Date</span>
+              <span class="card-value">${formatDate(job["Order Date"] || job.Order_Date || job.orderDate)}</span>
+            </div>
+            <div class="card-row">
+              <span class="card-label">Delivery Date</span>
+              <span class="card-value" style="font-weight:800;">${formatDate(job["Delivery Date"] || job.Delivery_Date || job.deliveryDate)}</span>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <button class="card-btn card-btn-edit" onclick="openPriorityModal('${psn}')">✏️ Edit</button>
+            ${remaining > 0
+            ? `<button class="card-btn card-btn-batch" onclick="createBatch('${psn}')">➕ Add Batch</button>`
+            : ''}
+          </div>`;
+        cardInner.appendChild(card);
       });
     }
 
-    // Format date strings into DD/MM/YYYY format, handling various input formats
-    function formatDate(dateStr) {
-      if (!dateStr || dateStr === '-' || (typeof dateStr !== 'string' && typeof dateStr !== 'number')) return '-';
-      const date = parseDate(dateStr);
-      if (!date) return typeof dateStr === 'number' ? dateStr.toString() : dateStr;
-      return date.toLocaleDateString('en-GB'); // DD/MM/YYYY
-    }
-
-    // Open the priority edit modal and populate it with job details
+    // ─── Priority / Edit Modal ───
     function openPriorityModal(psn) {
       currentEditingPsn = psn;
-      const job = MASTER_DATA.find(j => {
-        const masterValue = String(j["Product Serial Number"] || j.PSN || "");
-        return masterValue === String(psn);
-      });
-      if (job) {
-        const jobName = job["Job Name"] || job.Job_Name || job.client || 'Unknown';
+      const job = MASTER_DATA.find(j => String(j["Product Serial Number"] || j.PSN || "") === String(psn));
+      if (!job) return;
 
-        // Update summary
-        document.getElementById('summaryPsn').textContent = psn;
-        document.getElementById('summaryJobName').textContent = jobName;
+      document.getElementById('summaryPsn').textContent = psn;
+      document.getElementById('summaryJobName').textContent = job["Job Name"] || job.Job_Name || job.client || 'Unknown';
 
-        // Generate Job Type buttons
-        const jobTypes = ['Offset', 'FSC', 'Flexo & MMB/SOS', 'Fully Outsourced', 'FSC Fully Outsourced', 'Drawdown', 'K SERIES', 'Mock-Up'];
-        const jobTypeButtons = document.getElementById('jobTypeButtons');
-        jobTypeButtons.innerHTML = jobTypes.map(type =>
-          `<button class="option-btn ${job["Job Type"] === type ? 'selected' : ''}" onclick="selectJobType(this, '${type}')">${type}</button>`
-        ).join('');
+      const jobTypes = ['Offset', 'FSC', 'Flexo & MMB/SOS', 'Fully Outsourced', 'FSC Fully Outsourced', 'Drawdown', 'K SERIES', 'Mock-Up'];
+      document.getElementById('jobTypeButtons').innerHTML = jobTypes.map(type =>
+        `<button class="option-btn ${job["Job Type"] === type ? 'selected' : ''}" onclick="selectJobType(this,'${type}')">${type}</button>`
+      ).join('');
 
-        // Set Item input
-        document.getElementById('editItem').value = job.Item || '';
+      document.getElementById('editItem').value = job.Item || '';
 
-        // Generate Priority buttons
-        const priorities = ['Urgent', 'Cut Queue', 'Normal'];
-        const priorityButtons = document.getElementById('priorityButtons');
-        priorityButtons.innerHTML = priorities.map(priority =>
-          `<button class="option-btn ${job.Priority === priority ? 'selected' : ''}" onclick="selectPriority(this, '${priority}')">${priority}</button>`
-        ).join('');
+      const priorities = ['Urgent', 'Cut Queue', 'Normal'];
+      document.getElementById('priorityButtons').innerHTML = priorities.map(p =>
+        `<button class="option-btn ${job.Priority === p ? 'selected' : ''}" onclick="selectPriority(this,'${p}')">${p}</button>`
+      ).join('');
 
-        // Sales Code starts locked
-        document.getElementById('salesCodeContainer').innerHTML = '<div class="sales-code-locked" onclick="unlockSalesCode()">🔒 Click to Unlock Sales Code</div>';
+      document.getElementById('salesCodeContainer').innerHTML =
+        '<div class="sales-code-locked" onclick="unlockSalesCode()">🔒 Click to Unlock Sales Code</div>';
 
-        // Store current values
-        originalJobData = {
-          jobType: job["Job Type"] || '',
-          item: job.Item || '',
-          priority: job.Priority || 'Normal',
-          salesCode: job.salesCode || job.Sales_Code || ''
-        };
-        currentJobData = { ...originalJobData };
-        document.getElementById('saveBtn').disabled = true;
-        renderEditChangeState();
-
-        document.getElementById('priorityModal').classList.add('show');
-      }
+      originalJobData = {
+        jobType: job["Job Type"] || '',
+        item: job.Item || '',
+        priority: job.Priority || 'Normal',
+        salesCode: job.salesCode || job.Sales_Code || ''
+      };
+      currentJobData = { ...originalJobData };
+      document.getElementById('saveBtn').disabled = true;
+      renderEditChangeState();
+      document.getElementById('priorityModal').classList.add('show');
     }
 
-    // Handle selection of job type and update current job data
     function selectJobType(button, type) {
-      // Remove selected class from all buttons
-      document.querySelectorAll('#jobTypeButtons .option-btn').forEach(btn => btn.classList.remove('selected'));
-      // Add selected to clicked button
+      document.querySelectorAll('#jobTypeButtons .option-btn').forEach(b => b.classList.remove('selected'));
       button.classList.add('selected');
       currentJobData.jobType = type;
       renderEditChangeState();
     }
 
-    // Handle selection of priority and update current job data
     function selectPriority(button, priority) {
-      // Remove selected class from all buttons
-      document.querySelectorAll('#priorityButtons .option-btn').forEach(btn => btn.classList.remove('selected'));
-      // Add selected to clicked button
+      document.querySelectorAll('#priorityButtons .option-btn').forEach(b => b.classList.remove('selected'));
       button.classList.add('selected');
       currentJobData.priority = priority;
       renderEditChangeState();
     }
 
-    // Handle changes to the item input and update current job data
     function handleEditItemChange() {
       currentJobData.item = document.getElementById('editItem').value;
       renderEditChangeState();
     }
 
-    // Handle changes to the sales code dropdown and update current job data
     function handleSalesCodeChange() {
-      const salesCodeSelect = document.getElementById('editSalesCode');
-      if (salesCodeSelect) {
-        currentJobData.salesCode = salesCodeSelect.value;
-        renderEditChangeState();
-      }
+      const sel = document.getElementById('editSalesCode');
+      if (sel) { currentJobData.salesCode = sel.value; renderEditChangeState(); }
     }
 
-    // Update the UI to reflect changes and enable/disable save button
     function renderEditChangeState() {
       const saveBtn = document.getElementById('saveBtn');
       const editItem = document.getElementById('editItem');
       const salesCodeSelect = document.getElementById('editSalesCode');
-
       const hasChanges = (
         currentJobData.jobType !== originalJobData.jobType ||
         currentJobData.item !== originalJobData.item ||
         currentJobData.priority !== originalJobData.priority ||
         currentJobData.salesCode !== originalJobData.salesCode
       );
+      if (saveBtn) saveBtn.disabled = !hasChanges;
 
-      if (saveBtn) {
-        saveBtn.disabled = !hasChanges;
-      }
-
-      // Update button colors for job type
       document.querySelectorAll('#jobTypeButtons .option-btn').forEach(btn => {
         const type = btn.textContent.trim();
-        if (type === currentJobData.jobType) {
-          btn.classList.add('selected');
-        } else {
-          btn.classList.remove('selected');
-        }
-        if (type === originalJobData.jobType && currentJobData.jobType !== originalJobData.jobType) {
-          btn.classList.add('original');
-        } else {
-          btn.classList.remove('original');
-        }
+        btn.classList.toggle('selected', type === currentJobData.jobType);
+        btn.classList.toggle('original', type === originalJobData.jobType && currentJobData.jobType !== originalJobData.jobType);
       });
 
-      // Update button colors for priority
       document.querySelectorAll('#priorityButtons .option-btn').forEach(btn => {
-        const priority = btn.textContent.trim();
-        if (priority === currentJobData.priority) {
-          btn.classList.add('selected');
-        } else {
-          btn.classList.remove('selected');
-        }
-        if (priority === originalJobData.priority && currentJobData.priority !== originalJobData.priority) {
-          btn.classList.add('original');
-        } else {
-          btn.classList.remove('original');
-        }
+        const p = btn.textContent.trim();
+        btn.classList.toggle('selected', p === currentJobData.priority);
+        btn.classList.toggle('original', p === originalJobData.priority && currentJobData.priority !== originalJobData.priority);
       });
 
-      // Update input border for item
-      if (editItem) {
-        if (currentJobData.item !== originalJobData.item) {
-          editItem.classList.add('changed');
-        } else {
-          editItem.classList.remove('changed');
-        }
-      }
-
-      // Update dropdown for sales code
-      if (salesCodeSelect) {
-        if (currentJobData.salesCode !== originalJobData.salesCode) {
-          salesCodeSelect.classList.add('changed');
-        } else {
-          salesCodeSelect.classList.remove('changed');
-        }
-      }
+      if (editItem) editItem.classList.toggle('changed', currentJobData.item !== originalJobData.item);
+      if (salesCodeSelect) salesCodeSelect.classList.toggle('changed', currentJobData.salesCode !== originalJobData.salesCode);
     }
 
-    // Unlock the sales code field with confirmation before allowing edits
     function unlockSalesCode() {
-      showConfirmDialog(
-        '🔓 Unlock Sales Code',
-        'Are you sure you want to edit the Sales Code?',
-        () => performUnlockSalesCode()
-      );
+      showConfirmDialog('🔓 Unlock Sales Code', 'Are you sure you want to edit the Sales Code?', () => performUnlockSalesCode());
     }
 
-    // Replace the locked sales code display with a dropdown to allow editing
     function performUnlockSalesCode() {
       const container = document.getElementById('salesCodeContainer');
-      container.innerHTML = `
-        <select class="sales-code-select" id="editSalesCode">
-          <option value="AO">AO</option>
-          <option value="SHU">SHU</option>
-          <option value="NT">NT</option>
-          <option value="AK">AK</option>
-          <option value="NY">NY</option>
-          <option value="OC">OC</option>
-          <option value="PAO">PAO</option>
-          <option value="PNY">PNY</option>
-          <option value="SO">SO</option>
-          <option value="SC">SC</option>
-        </select>
-      `;
-      const editSalesCode = document.getElementById('editSalesCode');
-      if (editSalesCode) {
-        editSalesCode.value = currentJobData.salesCode;
-        editSalesCode.onchange = handleSalesCodeChange;
-        renderEditChangeState(); // Update colors after setting value
-      }
+      const codes = ['AO', 'SHU', 'NT', 'AK', 'NY', 'OC', 'PAO', 'PNY', 'SO', 'SC'];
+      container.innerHTML = `<select class="sales-code-select" id="editSalesCode">
+        ${codes.map(c => `<option value="${c}">${c}</option>`).join('')}
+      </select>`;
+      const sel = document.getElementById('editSalesCode');
+      if (sel) { sel.value = currentJobData.salesCode; sel.onchange = handleSalesCodeChange; renderEditChangeState(); }
     }
 
-    // Show a confirmation dialog with custom title, message, and confirm action
     function showConfirmDialog(title, message, onConfirm) {
       document.getElementById('confirmIcon').textContent = '⚠️';
       document.getElementById('confirmTitle').textContent = title;
@@ -2165,51 +2332,37 @@
       document.getElementById('confirmDialog').classList.add('show');
     }
 
-    // Handle the confirm action when user clicks "Yes"
     function confirmDialogAction() {
-      if (pendingConfirmAction) {
-        pendingConfirmAction();
-      }
+      if (pendingConfirmAction) pendingConfirmAction();
       cancelConfirmDialog();
     }
 
-    // Handle the confirm action for overlay
     function confirmOverlayAction() {
-      if (pendingConfirmAction) {
-        pendingConfirmAction();
-      }
+      if (pendingConfirmAction) pendingConfirmAction();
       cancelConfirm();
     }
 
-    // Handle the cancel action when user clicks "No"
     function cancelConfirmDialog() {
       document.getElementById('confirmDialog').classList.remove('show');
       pendingConfirmAction = null;
       pendingSubmitData = null;
     }
 
-    // Cancel the confirmation and reset pending data
     function cancelConfirm() {
       document.getElementById('confirmOverlay').classList.remove('show');
       pendingConfirmAction = null;
       pendingSubmitData = null;
     }
 
-    // Close the priority edit modal and reset current editing state
     function closePriorityModal() {
       document.getElementById('priorityModal').classList.remove('show');
       currentEditingPsn = null;
       currentJobData = {};
     }
 
-    // Save the edited job details by sending an update request to the server
     function saveJobDetails() {
       const saveBtn = document.getElementById('saveBtn');
-
-      // ✅ Prevent multiple clicks
       if (saveBtn.disabled) return;
-
-      // ✅ Set loading state
       saveBtn.disabled = true;
       const originalText = saveBtn.innerHTML;
       saveBtn.innerHTML = '<span class="spinner"></span> Saving...';
@@ -2228,7 +2381,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedData)
       })
-        .then(response => response.json())
+        .then(r => r.json())
         .then(data => {
           if (data.success) {
             showToast('Job details updated successfully', 'success');
@@ -2238,49 +2391,39 @@
             showToast('Failed to update: ' + (data.error || 'Unknown error'), 'error');
           }
         })
-        .catch(error => {
-          console.error('Error updating job:', error);
+        .catch(err => {
+          console.error('Error updating job:', err);
           showToast('Network error while updating', 'error');
         })
         .finally(() => {
-          // ✅ Restore button
           saveBtn.disabled = false;
           saveBtn.innerHTML = originalText;
         });
     }
 
-    // Open the create batch modal, fetch latest batch data for the job, and populate the process expected dates
+    // ─── Add Batch Modal ───
     function createBatch(psn) {
-      // Find the job data
-      const job = MASTER_DATA.find(j => {
-        const masterValue = String(j["Product Serial Number"] || j.PSN || "");
-        return masterValue === String(psn);
-      });
-      if (!job) {
-        showToast('Job not found', 'error');
-        return;
-      }
+      const job = MASTER_DATA.find(j => String(j["Product Serial Number"] || j.PSN || "") === String(psn));
+      if (!job) { showToast('Job not found', 'error'); return; }
 
-      // Set modal summary
       document.getElementById('batchSummaryPsn').textContent = psn;
       document.getElementById('batchSummaryJobName').textContent = job["Job Name"] || job.Job_Name || job.client || '-';
-      const totalQuantity = (job.Quantity || 0);
-      const currentRemaining = (job.Remaining || job.remaining || 0);
-      document.getElementById('batchSummaryTotalQty').textContent = totalQuantity.toLocaleString();
-      document.getElementById('batchSummaryRemaining').textContent = currentRemaining.toLocaleString();
+      const totalQty = job.Quantity || 0;
+      const remaining = job.Remaining || job.remaining || 0;
+      document.getElementById('batchSummaryTotalQty').textContent = totalQty.toLocaleString();
+      document.getElementById('batchSummaryRemaining').textContent = remaining.toLocaleString();
+      document.getElementById('remainingAfter').textContent = remaining.toLocaleString();
 
-      // Set initial remaining after
-      document.getElementById('remainingAfter').textContent = currentRemaining.toLocaleString();
-
-      // Add event listener to quantity input
-      const quantityInput = document.getElementById('batchQuantity');
-      quantityInput.addEventListener('input', () => {
-        const qty = parseInt(quantityInput.value) || 0;
-        const remainingAfter = Math.max(0, currentRemaining - qty);
-        document.getElementById('remainingAfter').textContent = remainingAfter.toLocaleString();
+      const qInput = document.getElementById('batchQuantity');
+      // Replace to remove old listeners
+      const newInput = qInput.cloneNode(true);
+      qInput.parentNode.replaceChild(newInput, qInput);
+      newInput.addEventListener('input', () => {
+        const qty = parseInt(newInput.value) || 0;
+        document.getElementById('remainingAfter').textContent = Math.max(0, remaining - qty).toLocaleString();
+        updateBatchInputStyle();
       });
 
-      // Set loading state while preserving the header and list wrapper
       const processDatesContainer = document.getElementById('processDatesContainer');
       if (processDatesContainer) {
         processDatesContainer.innerHTML = `
@@ -2289,70 +2432,40 @@
             <div>Process Name</div>
             <div>Expected Date</div>
           </div>
-          <div id="processDatesList" style="text-align: center;  color: #64748b;">Loading data...</div>
-        `;
+          <div id="processDatesList" style="text-align:center;color:#64748b;">Loading data...</div>`;
       }
 
-      // Fetch latest batch data and populate the modal
       fetchLatestBatchData(psn);
-
-      // Show modal
       document.getElementById('addBatchModal').classList.add('show');
     }
 
-    // Fetch the latest batch data for a given PSN and populate the process expected dates in the modal
     async function fetchLatestBatchData(psn) {
       try {
         const resp = await fetch('/api/batchListing');
         const batches = await resp.json();
-        console.log(batches);
-        // Filter batches for this PSN and find the latest one
         const psnBatches = batches.filter(b => String(b["Product Serial Number"] || b.psn || '').trim() === psn);
-        console.log(psnBatches);
-        if (psnBatches.length === 0) {
-          showToast('No existing batches found for this job', 'error');
-          return;
-        }
-
-        // Sort by batch ID descending to get the latest
+        if (psnBatches.length === 0) { showToast('No existing batches found for this job', 'error'); return; }
         psnBatches.sort((a, b) => {
           const idA = String(a["Batch ID"] || a.batchId || '').split('-').pop();
           const idB = String(b["Batch ID"] || b.batchId || '').split('-').pop();
           return parseInt(idB) - parseInt(idA);
         });
-
-        const latestBatch = psnBatches[0];
-        populateProcessDates(latestBatch);
-
-      } catch (error) {
-        console.error('Error fetching batch data:', error);
+        populateProcessDates(psnBatches[0]);
+      } catch (err) {
+        console.error('Error fetching batch data:', err);
         showToast('Failed to load batch data', 'error');
       }
     }
 
-    // Populate the process expected dates in the modal based on the latest batch data
     function populateProcessDates(latestBatch) {
       const listContainer = document.getElementById('processDatesList');
-      if (!listContainer) {
-        console.error('processDatesList element not found');
-        return;
-      }
+      if (!listContainer) return;
       listContainer.innerHTML = '';
-      console.log('latestBatch:', latestBatch);
-      // Process steps start from column 6, each block of 9 columns
-      const START_COL = 6;
-      const BLOCK_SIZE = 9;
-
-      // Convert object to array of values in column order
+      const START_COL = 6, BLOCK_SIZE = 9;
       const batchValues = Object.values(latestBatch);
-      console.log('batchValues:', batchValues);
       let rowCount = 0;
-
       for (let i = 0; i < 12; i++) {
         const processName = batchValues[START_COL + i * BLOCK_SIZE] || '';
-        const expectedDate = batchValues[START_COL + i * BLOCK_SIZE + 1] || '';
-        console.log(`i=${i}, index=${START_COL + i * BLOCK_SIZE}, processName="${processName}", expectedDate="${expectedDate}"`);
-
         if (processName && processName !== '') {
           rowCount++;
           const processRow = document.createElement('div');
@@ -2360,193 +2473,113 @@
           processRow.innerHTML = `
             <div class="step-num-badge">${i + 1}</div>
             <div class="process-name" title="${processName}">${processName}</div>
-            <input type="date" class="process-date" id="processDate_${i}" data-process-index="${i}" onchange="validateProcessDate(${i}, this)">
-          `;
+            <input type="date" class="process-date" id="processDate_${i}"
+                   data-process-index="${i}" onchange="validateProcessDate(${i}, this)">`;
           listContainer.appendChild(processRow);
         }
       }
-
       if (rowCount === 0) {
-        listContainer.innerHTML = '<div style="text-align: center;  color: #64748b; grid-column: 1 / -1;">No process steps found for this batch.</div>';
+        listContainer.innerHTML = '<div style="text-align:center;color:#64748b;grid-column:1/-1;">No process steps found.</div>';
       }
     }
 
-    // Validate the selected process date to ensure it is not in the past and follows the sequence of previous steps
     function validateProcessDate(stepIndex, input) {
       input.classList.remove('input-error');
-
       const selectedDate = new Date(input.value);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      // ❌ 1. Block past date
+      const today = new Date(); today.setHours(0, 0, 0, 0);
       if (selectedDate < today) {
         showToast("Past date forbidden", "error");
         input.classList.add('input-error');
         input.value = "";
         return;
       }
-
-      // ❌ 2. Check previous step
       if (stepIndex > 0) {
         const prevInput = document.getElementById(`processDate_${stepIndex - 1}`);
-
-        if (prevInput && prevInput.value) {
-          const prevDate = new Date(prevInput.value);
-
-          if (selectedDate <= prevDate) {
-            showToast(`Must be after Step ${stepIndex}`, "error");
-            input.classList.add('input-error');
-            input.value = "";
-            return;
-          }
+        if (prevInput && prevInput.value && selectedDate <= new Date(prevInput.value)) {
+          showToast(`Must be after Step ${stepIndex}`, "error");
+          input.classList.add('input-error');
+          input.value = "";
         }
       }
     }
-    // Format date for input fields (YYYY-MM-DD), handling various input formats
-    function formatDateForInput(dateStr) {
-      if (!dateStr || dateStr === '-') return '';
-      const date = parseDate(dateStr);
-      if (!date) return '';
-      return date.toISOString().split('T')[0];
+
+    function closeAddBatchModal() {
+      document.getElementById('addBatchModal').classList.remove('show');
+      const qi = document.getElementById('batchQuantity');
+      if (qi) qi.value = '';
+      const pc = document.getElementById('processDatesContainer');
+      if (pc) pc.innerHTML = '';
     }
 
-    // Show a confirmation dialog when there is remaining quantity after creating the batch
-    function showRemainingConfirm(remaining) {
-      console.log(remaining);
-      document.getElementById('confirm').innerHTML = `Remaining Production Quantity is <strong>${remaining}</strong>. Do you want to proceed and save the remaining for later batches?`;
-      document.getElementById('confirmOverlay').classList.add('show');
+    async function submitNewBatch() {
+      const psn = document.getElementById('batchSummaryPsn').textContent;
+      const qEl = document.getElementById('batchQuantity');
+      const quantity = parseInt(qEl.value);
+      const remaining = parseInt(document.getElementById('batchSummaryRemaining').textContent.replace(/,/g, ''));
+      const btn = document.getElementById('createBatchBtn');
+      if (btn.disabled) return;
+      if (!quantity || quantity <= 0) { showToast('Please enter a valid quantity', 'error'); return; }
+      if (quantity > remaining) { showToast('Batch quantity cannot exceed remaining production quantity', 'error'); return; }
+
+      const allInputs = document.querySelectorAll('.process-date');
+      let hasEmpty = false;
+      allInputs.forEach(input => {
+        if (!input.value) { hasEmpty = true; input.classList.add('input-error'); }
+        else input.classList.remove('input-error');
+      });
+      if (hasEmpty) { showToast('Please fill ALL expected dates', 'error'); return; }
+
+      btn.disabled = true;
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '⏳ Creating...';
+
+      const processDates = {};
+      allInputs.forEach(input => { processDates[input.dataset.processIndex] = input.value; });
+
+      const remainingAfter = remaining - quantity;
+      if (remainingAfter > 0) {
+        pendingSubmitData = { psn, quantity, processDates, remainingAfter };
+        document.getElementById('confirmHeader').innerHTML = '⚠️ Remaining Production Quantity';
+        document.getElementById('confirmOverlayMessage').innerHTML =
+          `Remaining Production Quantity is <strong>${remainingAfter.toLocaleString()}</strong>. Do you want to proceed and save the remaining for later batches?`;
+        pendingConfirmAction = () => { if (pendingSubmitData) performSubmitBatch(pendingSubmitData); };
+        document.getElementById('confirmOverlay').classList.add('show');
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        return;
+      }
+
+      await performSubmitBatch({ psn, quantity, processDates });
+      btn.disabled = false;
+      btn.innerHTML = originalText;
     }
 
-    // Cancel the confirmation and reset pending data
-    function cancelConfirm() {
-      document.getElementById('confirmOverlay').classList.remove('show');
-      pendingConfirmAction = null;
-      pendingSubmitData = null;
-    }
-
-    // Perform the actual batch submission
     async function performSubmitBatch(data) {
       try {
         const resp = await fetch('/api/createBatch', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            psn: data.psn,
-            quantity: data.quantity,
-            processDates: data.processDates
-          })
+          body: JSON.stringify({ psn: data.psn, quantity: data.quantity, processDates: data.processDates })
         });
-
         if (resp.ok) {
           showToast('Batch created successfully', 'success');
           closeAddBatchModal();
-          // Refresh data
           fetchData();
         } else {
-          const error = await resp.text();
-          showToast(`Failed to create batch: ${error}`, 'error');
+          const err = await resp.text();
+          showToast(`Failed to create batch: ${err}`, 'error');
         }
-      } catch (error) {
-        console.error('Error creating batch:', error);
+      } catch (err) {
+        console.error('Error creating batch:', err);
         showToast('Failed to create batch', 'error');
       }
     }
 
-    // Close the add batch modal and reset the input fields
-    function closeAddBatchModal() {
-      document.getElementById('addBatchModal').classList.remove('show');
-      document.getElementById('batchQuantity').value = '';
-      document.getElementById('processDatesContainer').innerHTML = '';
-    }
-
-    // Submit the new batch data to the server to create a new batch entry
-    async function submitNewBatch() {
-      const psn = document.getElementById('batchSummaryPsn').textContent;
-      const quantity = parseInt(document.getElementById('batchQuantity').value);
-      const currentRemaining = parseInt(document.getElementById('batchSummaryRemaining').textContent.replace(/,/g, ''));
-      const btn = document.getElementById('createBatchBtn');
-
-      // ✅ Prevent double click
-      if (btn.disabled) return;
-
-      if (!quantity || quantity <= 0) {
-        showToast('Please enter a valid quantity', 'error');
-        return;
-      }
-
-      if (quantity > currentRemaining) {
-        showToast('Batch quantity cannot exceed remaining production quantity', 'error');
-        return;
-      }
-
-
-      // ❗ NEW: Require ALL dates to be filled
-      const allInputs = document.querySelectorAll('.process-date');
-      let hasEmpty = false;
-
-      allInputs.forEach(input => {
-        if (!input.value) {
-          hasEmpty = true;
-          input.classList.add('input-error'); // highlight empty field
-        } else {
-          input.classList.remove('input-error');
-        }
-      });
-
-      if (hasEmpty) {
-        showToast('Please fill ALL expected dates', 'error');
-        return;
-      }
-
-      // ✅ Set loading state
-      btn.disabled = true;
-      const originalText = btn.innerHTML;
-      btn.innerHTML = '⏳ Creating...';
-      // ✅ Then collect data (only runs if all filled)
-      const processDates = {};
-      allInputs.forEach(input => {
-        const processIndex = input.dataset.processIndex;
-        processDates[processIndex] = input.value;
-      });
-
-      const remainingAfter = currentRemaining - quantity;
-      if (remainingAfter > 0) {
-        pendingSubmitData = {
-          psn,
-          quantity,
-          processDates,
-          remainingAfter
-        };
-        showRemainingConfirm(remainingAfter);
-        return;
-      }
-
-      await performSubmitBatch({
-        psn,
-        quantity,
-        processDates
-      });
-    }
-
-    // Show a confirmation dialog when there is remaining quantity after creating the batch
-    function showRemainingConfirm(remaining) {
-      document.getElementById('confirmHeader').innerHTML = '⚠️ Remaining Production Quantity';
-      document.getElementById('confirmOverlayMessage').innerHTML = `Remaining Production Quantity is <strong>${remaining.toLocaleString()}</strong>. Do you want to proceed and save the remaining for later batches?`;
-      pendingConfirmAction = () => {
-        if (pendingSubmitData) {
-          performSubmitBatch(pendingSubmitData);
-        }
-      };
-      document.getElementById('confirmOverlay').classList.add('show');
-    }
-
-    // Utility function to show toast notifications with different types (info, success, error)
     function showToast(message, type = 'info') {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
       toast.className = `toast ${type}`;
-      let icon = type === 'error' ? '⚠️' : (type === 'success' ? '✅' : 'ℹ️');
+      const icon = type === 'error' ? '⚠️' : type === 'success' ? '✅' : 'ℹ️';
       toast.innerHTML = `<span>${icon} ${message}</span>`;
       container.appendChild(toast);
       setTimeout(() => {
@@ -2556,8 +2589,5 @@
     }
   </script>
 </body>
-<!-- <script src="https://alcdn.msauth.net/browser/2.28.1/js/msal-browser.min.js"></script>
-<script src="/scripts/auth.js"></script> -->
 
 </html>
-</content>

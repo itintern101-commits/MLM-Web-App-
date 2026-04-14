@@ -34,16 +34,56 @@
     }
 
     /* =========================
+   SIDEBAR HEADER
+========================= */
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    /* LOGO */
+    .logo {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+    }
+
+    /* RIGHT SIDE (TEXT + BUTTON) */
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 10px;
+    }
+
+    /* COMPANY NAME */
+    .company-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a1f36;
+      white-space: nowrap;
+    }
+
+    /* =========================
    TOGGLE BUTTON
 ========================= */
+
+    /* TOGGLE BUTTON */
     .toggle-btn {
-      width: 100%;
-      padding: 12px;
+      width: 36px;
+      height: 36px;
       border: none;
       background: #1a73e8;
       color: white;
-      font-size: 18px;
+      font-size: 14px;
       cursor: pointer;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     /* =========================
@@ -90,9 +130,21 @@
     .label {
       white-space: nowrap;
       transition: opacity 0.15s ease;
+      font-size: 20px;
     }
 
-    /* HIDE LABEL WHEN COLLAPSED */
+    /* =========================
+    COLLAPSED STATE
+    ========================= */
+    .sidebar--collapsed .sidebar-header {
+      justify-content: center;
+    }
+
+    /* HIDE TEXT + BUTTON WHEN COLLAPSED */
+    .sidebar--collapsed .header-right {
+      display: none;
+    }
+
     .sidebar--collapsed .label {
       opacity: 0;
       pointer-events: none;
@@ -114,8 +166,19 @@
     <!-- SIDEBAR -->
     <aside class="sidebar sidebar--collapsed" id="sidebar">
 
-      <!-- TOGGLE -->
-      <button class="toggle-btn" id="sidebarToggle">☰</button>
+      <!-- HEADER -->
+      <div class="sidebar-header">
+
+        <!-- LOGO -->
+        <img src="/images/MLM Logo.png" alt="Logo" class="logo" id="sidebarLogo">
+
+        <!-- TITLE + TOGGLE (only show when expanded) -->
+        <div class="header-right">
+          <span class="company-name">MLM Packaging</span>
+          <button class="toggle-btn" id="sidebarToggle">☰</button>
+        </div>
+
+      </div>
 
       <!-- MENU -->
       <nav class="menu">

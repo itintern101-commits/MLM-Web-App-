@@ -2512,7 +2512,7 @@
           // 5. Wire up toggle
           const btn = document.getElementById('sidebarToggle');
           const sidebar = document.getElementById('sidebar');
-
+          const logo = document.getElementById('sidebarLogo');
           if (!btn || !sidebar) {
             console.error('Sidebar: #sidebarToggle or #sidebar missing after DOM build');
             return;
@@ -2529,6 +2529,13 @@
           const savedState = localStorage.getItem('sidebar-collapsed') === '1';
           setSidebar(savedState);
 
+          if (logo) {
+            logo.addEventListener('click', () => {
+              const collapsed = !sidebar.classList.contains('sidebar--collapsed');
+              setSidebar(collapsed);
+              localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0');
+            });
+          }
           btn.addEventListener('click', () => {
             const collapsed = !sidebar.classList.contains('sidebar--collapsed');
             setSidebar(collapsed);
