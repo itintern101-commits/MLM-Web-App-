@@ -40,8 +40,7 @@
     }
 
     .container {
-      width: 100%;
-      max-width: 950px;
+      max-width: 1000px;
       background: white;
       padding: 40px;
       border-radius: 16px;
@@ -383,7 +382,6 @@
       margin-bottom: 20px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
       gap: 10px;
     }
 
@@ -391,7 +389,7 @@
       margin: 0;
       border: none;
       padding: 0;
-      font-size: 14px;
+      font-size: 18px;
     }
 
     .remaining-value {
@@ -666,7 +664,11 @@
         margin-bottom: 0;
       }
 
-      .remaining-value { font-size: 20px; }
+      .remaining-sticky h3{
+        font-size: 14px;
+      }
+
+      .remaining-value { font-size: 17px; }
 
       .btn-submit {
         padding: 16px;
@@ -880,7 +882,7 @@
 
       <!-- STEP 5: Sticky Remaining Quantity Bar -->
       <div class="remaining-sticky">
-        <h3>Remaining Production Quantity</h3>
+        <h3>Remaining Production Quantity : </h3>
         <div class="remaining-value" id="remainingDisplay">0</div>
       </div>
 
@@ -1189,6 +1191,11 @@
                 ${processList.map(p => `<option value="${p}" ${p === proc ? 'selected' : ''}>${p}</option>`).join('')}
               </select>
             </div>
+            
+            <!-- STEP 3: Date in Tier 2 — full width on mobile -->
+            <div class="step-date">
+              <input type="date" id="date_b${b}_s${sNum}" onchange="validateDate(${b}, ${sNum}, this)">
+            </div>
 
             <!-- STEP 4: Mobile Up/Down reorder buttons -->
             <div class="step-reorder">
@@ -1199,10 +1206,6 @@
               </div>
             </div>
 
-            <!-- STEP 3: Date in Tier 2 — full width on mobile -->
-            <div class="step-date">
-              <input type="date" id="date_b${b}_s${sNum}" onchange="validateDate(${b}, ${sNum}, this)">
-            </div>
           </div>`;
         });
 
@@ -1214,10 +1217,10 @@
               <input type="text" id="name_b${b}_delivery" value="Delivery" readonly
                 style="border:none; background:transparent; font-weight:bold; width:100%; min-height:auto;">
             </div>
-            <div class="step-reorder"></div>
             <div class="step-date">
               <input type="date" id="date_b${b}_s${selectedSteps.length + 1}" onchange="validateDate(${b}, ${selectedSteps.length + 1}, this)">
             </div>
+            <div class="step-reorder"></div>
           </div>
         </div></div>`;
       }
