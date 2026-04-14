@@ -3,6 +3,7 @@
 
 <head>
   <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     :root {
       --primary: #1a73e8;
@@ -27,13 +28,25 @@
       font-family: 'Segoe UI', system-ui, sans-serif;
     }
 
+    /* =========================
+       MAIN CONTENT
+    ========================== */
+    .main {
+      flex: 1;
+      min-height: 100vh;
+      min-width: 0;
+      overflow-x: hidden;
+      padding: 40px;
+    }
+
     .container {
       width: 100%;
       max-width: 950px;
       background: white;
       padding: 40px;
       border-radius: 16px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      /* STEP 1: Standard card box-shadow */
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
       margin: auto;
     }
 
@@ -57,13 +70,16 @@
       background: #fff;
       border: 1px solid var(--border);
       border-radius: 12px;
+      /* STEP 1: Standard card box-shadow */
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
       padding: 20px;
       margin-bottom: 25px;
     }
 
+    /* STEP 1: Responsive Grid — auto-stacks when narrow */
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 20px;
     }
 
@@ -83,6 +99,7 @@
       color: #4e5969;
     }
 
+    /* STEP 6: Date Inputs — min 44px tap target */
     input,
     select {
       padding: 10px 14px;
@@ -92,6 +109,16 @@
       background: white;
       outline: none;
       transition: border 0.3s;
+      min-height: 44px;
+      box-sizing: border-box;
+    }
+
+    /* STEP 6: Force date appearance for iOS/Android */
+    input[type="date"] {
+      -webkit-appearance: none;
+      appearance: none;
+      min-height: 44px;
+      cursor: pointer;
     }
 
     input:focus {
@@ -119,6 +146,9 @@
       cursor: pointer;
       font-size: 12px;
       transition: 0.2s;
+      min-height: 36px;
+      display: flex;
+      align-items: center;
     }
 
     .proc-pill:hover {
@@ -173,19 +203,21 @@
       font-size: 11px;
       font-weight: bold;
       opacity: 0.9;
+      min-height: 30px;
     }
 
     .btn-clear:hover {
       opacity: 1;
     }
 
-    /* Batch UI - Redesigned for Drag & Drop */
+    /* Batch UI */
     .batch-container {
       border: 1px solid var(--border);
       border-radius: 12px;
       margin-bottom: 30px;
       background: #fff;
       overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
     }
 
     .batch-header {
@@ -209,7 +241,7 @@
       gap: 8px;
     }
 
-    /* Updated Grid for 4 columns: Num, Name, Date, Handle */
+    /* STEP 3: Desktop — 4-column grid */
     .step-row {
       display: grid;
       grid-template-columns: 50px 1fr 180px 40px;
@@ -223,7 +255,6 @@
       margin-bottom: 5px;
     }
 
-    /* Style for the dropdown with arrow spacing */
     .step-select-input {
       width: 95%;
       border: none;
@@ -232,9 +263,8 @@
       outline: none;
       cursor: pointer;
       appearance: auto;
-      /* Shows the dropdown arrow */
       padding-right: 20px;
-      /* Space for the arrow */
+      min-height: 36px;
     }
 
     .step-row:active {
@@ -252,6 +282,11 @@
       background: #f0f7ff;
     }
 
+    .drag-over {
+      background: #e8f0fe;
+      border-color: var(--primary);
+    }
+
     .step-num-badge {
       background: #f1f5f9;
       color: var(--primary);
@@ -265,9 +300,7 @@
       font-size: 13px;
     }
 
-
-
-    /* Drag handle styling */
+    /* Drag handle — HIDDEN on mobile, shown on desktop */
     .drag-handle {
       cursor: grab;
       font-size: 18px;
@@ -279,13 +312,34 @@
       transition: opacity 0.2s;
     }
 
-    .drag-handle:hover {
-      opacity: 1;
+    .drag-handle:hover { opacity: 1; }
+    .drag-handle:active { cursor: grabbing; }
+
+    /* STEP 4: Up/Down reorder buttons — only shown on mobile */
+    .mobile-reorder-btns {
+      display: none;
+      flex-direction: column;
+      gap: 2px;
     }
 
-    .drag-handle:active {
-      cursor: grabbing;
+    .reorder-btn {
+      background: #e2e8f0;
+      border: none;
+      border-radius: 4px;
+      width: 24px;
+      height: 22px;
+      cursor: pointer;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #475569;
+      transition: background 0.15s;
+      padding: 0;
     }
+
+    .reorder-btn:hover { background: var(--primary); color: white; }
+    .reorder-btn:disabled { opacity: 0.3; cursor: default; }
 
     .delivery-row {
       background: #fffbeb !important;
@@ -305,6 +359,7 @@
       font-size: 18px;
       font-weight: bold;
       margin-top: 10px;
+      min-height: 56px;
     }
 
     .loading {
@@ -313,6 +368,40 @@
       margin-top: 15px;
       color: var(--primary);
       font-weight: bold;
+    }
+
+    /* STEP 5: Sticky Remaining Quantity Bar */
+    .remaining-sticky {
+      position: sticky;
+      bottom: 0;
+      z-index: 100;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 -4px 16px rgba(0,0,0,0.10);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .remaining-sticky h3 {
+      margin: 0;
+      border: none;
+      padding: 0;
+      font-size: 14px;
+    }
+
+    .remaining-value {
+      font-size: 22px;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .remaining-value.over {
+      color: var(--danger);
     }
 
     #toast-container {
@@ -326,6 +415,8 @@
       align-items: center;
       gap: 10px;
       pointer-events: none;
+      width: 90%;
+      max-width: 400px;
     }
 
     .toast {
@@ -333,7 +424,7 @@
       color: white;
       padding: 16px 32px;
       border-radius: 12px;
-      min-width: 350px;
+      width: 100%;
       text-align: center;
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
       display: flex;
@@ -343,48 +434,28 @@
       font-weight: 600;
       pointer-events: auto;
       animation: popDown 0.4s forwards;
+      box-sizing: border-box;
     }
 
-    .toast.error {
-      border-bottom: 4px solid var(--danger);
-    }
-
-    .toast.success {
-      border-bottom: 4px solid var(--success);
-    }
+    .toast.error { border-bottom: 4px solid var(--danger); }
+    .toast.success { border-bottom: 4px solid var(--success); }
 
     @keyframes popDown {
-      from {
-        transform: translateY(-50px);
-        opacity: 0;
-      }
-
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
+      from { transform: translateY(-50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
 
     @keyframes fadeOutUp {
-      from {
-        transform: translateY(0);
-        opacity: 1;
-      }
-
-      to {
-        transform: translateY(-20px);
-        opacity: 0;
-      }
+      from { transform: translateY(0); opacity: 1; }
+      to { transform: translateY(-20px); opacity: 0; }
     }
 
     /* Custom Confirmation Dialog */
     .confirm-overlay {
       display: none;
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       background: rgba(0, 0, 0, 0.6);
       z-index: 1100;
       justify-content: center;
@@ -392,9 +463,7 @@
       backdrop-filter: blur(2px);
     }
 
-    .confirm-overlay.show {
-      display: flex;
-    }
+    .confirm-overlay.show { display: flex; }
 
     .confirm-dialog-content {
       background: white;
@@ -407,15 +476,8 @@
     }
 
     @keyframes modalSlideIn {
-      from {
-        opacity: 0;
-        transform: translateY(-20px) scale(0.95);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
+      from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     .confirm-header {
@@ -448,91 +510,63 @@
     }
 
     .confirm-btn-cancel {
-      background: #e2e8f0;
-      color: #64748b;
-      border: none;
-      padding: 0.65rem 1rem;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      font-weight: 600;
+      background: #e2e8f0; color: #64748b;
+      border: none; padding: 0.65rem 1rem;
+      border-radius: 8px; cursor: pointer;
+      font-size: 0.9rem; font-weight: 600;
       transition: background 0.2s;
+      min-height: 44px;
     }
 
-    .confirm-btn-cancel:hover {
-      background: #cbd5e1;
-    }
+    .confirm-btn-cancel:hover { background: #cbd5e1; }
 
     .confirm-btn-ok {
-      background: var(--success);
-      color: white;
-      border: none;
-      padding: 0.65rem 1rem;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      font-weight: 600;
+      background: var(--success); color: white;
+      border: none; padding: 0.65rem 1rem;
+      border-radius: 8px; cursor: pointer;
+      font-size: 0.9rem; font-weight: 600;
       transition: background 0.2s;
+      min-height: 44px;
     }
 
-    .confirm-btn-ok:hover {
-      background: #228a3f;
-    }
-
-    /* =========================================================
-       RESPONSIVE DESIGN - BASED ON DASHBOARD.HTML
-    ========================================================= */
-
-    /* =========================
-       LAYOUT WRAPPER (from Sidebar.html)
-    ========================== */
-    .sidebar-wrapper {
-      display: flex;
-      min-height: 100vh;
-      font-family: 'Segoe UI', system-ui, sans-serif;
-    }
-
-    /* =========================
-       MAIN CONTENT
-    ========================== */
-    .main {
-      flex: 1;
-      min-height: 100vh;
-      min-width: 0;
-      overflow-x: hidden;
-      padding: 40px;
-    }
+    .confirm-btn-ok:hover { background: #228a3f; }
 
     /* =========================================================
        TABLET  ≤1024px
     ========================================================= */
     @media (max-width: 1024px) {
       .grid {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: 15px;
       }
     }
 
     /* =========================================================
        MOBILE  ≤768px
-       Core changes: stack grids, adjust padding, resize elements
+       All 6 steps applied here
     ========================================================= */
     @media (max-width: 768px) {
       .main {
         padding: 14px 10px;
       }
 
+      .container {
+        padding: 16px 12px;
+        border-radius: 12px;
+      }
+
       h2 {
-        font-size: 1.7rem;
+        font-size: 1.4rem;
         margin-top: 0;
       }
 
       .section-card {
-        padding: 14px 10px;
+        padding: 14px 12px;
         border-radius: 10px;
-        margin-bottom: 18px;
+        margin-bottom: 16px;
       }
 
+      /* STEP 1: Single column on mobile */
       .grid {
         grid-template-columns: 1fr;
         gap: 12px;
@@ -543,73 +577,124 @@
       }
 
       input, select {
-        font-size: 13px;
-        padding: 8px 12px;
+        font-size: 16px; /* Prevents iOS auto-zoom */
+        padding: 10px 12px;
+        min-height: 44px;
       }
 
-      .process-pool {
-        gap: 6px;
+      /* STEP 6: Date inputs extra large tap target */
+      input[type="date"] {
+        font-size: 16px;
+        min-height: 48px;
+        padding: 12px;
       }
+
+      .process-pool { gap: 6px; }
 
       .proc-pill {
-        padding: 5px 12px;
-        font-size: 11px;
-      }
-
-      .selected-sequence {
-        padding: 12px;
-        gap: 6px;
-      }
-
-      .seq-item {
-        padding: 5px 10px;
+        padding: 8px 14px;
         font-size: 12px;
+        min-height: 40px;
       }
 
-      .batch-container {
-        border-radius: 10px;
-      }
+      .selected-sequence { padding: 12px; gap: 6px; }
+
+      .seq-item { padding: 6px 12px; font-size: 12px; }
+
+      .batch-container { border-radius: 10px; }
 
       .batch-header {
-        padding: 12px 15px;
+        padding: 12px 14px;
+        flex-wrap: wrap;
+        gap: 8px;
       }
 
-      .vertical-steps {
-        padding: 8px;
-        gap: 6px;
+      .batch-header input[type="number"] {
+        width: 90px !important;
+        font-size: 15px;
       }
 
+      .vertical-steps { padding: 8px; gap: 8px; }
+
+      /* STEP 3: 2-tier mobile step-row layout */
       .step-row {
-        padding: 10px;
-        grid-template-columns: 40px 1fr 140px 30px;
+        display: grid;
+        /* Tier 1: Badge | Name | Reorder buttons */
+        grid-template-columns: 36px 1fr 52px;
+        grid-template-rows: auto auto;
+        gap: 4px 8px;
+        padding: 10px 10px 8px;
+        transform: none !important; /* disable translateX hover on mobile */
       }
 
-      .step-num-badge {
-        width: 24px;
-        height: 24px;
-        font-size: 11px;
+      /* Tier 1 items */
+      .step-row .step-num   { grid-column: 1; grid-row: 1; align-self: center; }
+      .step-row .step-name  { grid-column: 2; grid-row: 1; align-self: center; }
+      .step-row .step-reorder { grid-column: 3; grid-row: 1 / 3; align-self: center; justify-self: center; }
+
+      /* Tier 2: Date input spans full width below */
+      .step-row .step-date {
+        grid-column: 1 / 3;
+        grid-row: 2;
       }
+
+      .step-row .step-date input[type="date"] {
+        width: 100%;
+        box-sizing: border-box;
+        font-size: 15px;
+        min-height: 44px;
+      }
+
+      /* Desktop drag handle hidden on mobile */
+      .drag-handle { display: none !important; }
+
+      /* STEP 4: Show Up/Down buttons on mobile */
+      .mobile-reorder-btns { display: flex; }
+
+      .step-num-badge { width: 26px; height: 26px; font-size: 11px; }
 
       .step-select-input {
-        font-size: 12px;
+        font-size: 14px;
+        width: 100%;
+        min-height: 36px;
       }
 
-      input[type="date"] {
-        font-size: 12px;
+      /* STEP 5: Sticky bar gets tighter padding on mobile */
+      .remaining-sticky {
+        padding: 12px 14px;
+        border-radius: 10px 10px 0 0;
+        margin-bottom: 0;
       }
 
-      .drag-handle {
-        font-size: 16px;
-      }
+      .remaining-value { font-size: 20px; }
 
       .btn-submit {
         padding: 16px;
         font-size: 16px;
+        min-height: 52px;
       }
 
       .toast {
-        min-width: 280px;
         font-size: 14px;
+        padding: 14px 20px;
+      }
+
+      /* Section 2 header: stack on mobile */
+      .section2-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 8px !important;
+      }
+
+      /* Delivery row on mobile also 2-tier */
+      .delivery-row {
+        grid-template-columns: 36px 1fr 52px;
+        grid-template-rows: auto auto;
+      }
+
+      .delivery-row .step-date {
+        grid-column: 1 / 3;
+        grid-row: 2;
       }
     }
 
@@ -617,61 +702,28 @@
        SMALL PHONES  ≤480px
     ========================================================= */
     @media (max-width: 480px) {
-      .main {
-        padding: 10px 8px;
-      }
+      .main { padding: 10px 8px; }
+      h2 { font-size: 1.25rem; }
 
-      h2 {
-        font-size: 1.5rem;
-      }
+      .section-card { padding: 12px 10px; }
 
-      .section-card {
-        padding: 10px 8px;
-      }
+      .grid { gap: 10px; }
 
-      .grid {
-        gap: 10px;
-      }
+      .proc-pill { padding: 6px 12px; font-size: 11px; }
 
-      input, select {
-        padding: 6px 10px;
-        font-size: 12px;
-      }
+      .seq-item { padding: 5px 10px; font-size: 11px; }
 
-      .proc-pill {
-        padding: 4px 10px;
-        font-size: 10px;
-      }
+      .batch-header { padding: 10px 12px; }
 
-      .selected-sequence {
-        padding: 10px;
-      }
+      .step-row { padding: 8px 8px 6px; }
 
-      .seq-item {
-        padding: 4px 8px;
-        font-size: 11px;
-      }
+      .btn-submit { padding: 14px; font-size: 15px; }
 
-      .step-row {
-        padding: 8px;
-        grid-template-columns: 35px 1fr 120px 25px;
-      }
+      .toast { font-size: 13px; padding: 12px 16px; }
 
-      .step-num-badge {
-        width: 20px;
-        height: 20px;
-        font-size: 10px;
-      }
+      .remaining-sticky { padding: 10px 12px; }
 
-      .btn-submit {
-        padding: 14px;
-        font-size: 15px;
-      }
-
-      .toast {
-        min-width: 250px;
-        font-size: 13px;
-      }
+      .remaining-value { font-size: 18px; }
     }
   </style>
 </head>
@@ -693,7 +745,7 @@
           const sidebarBody = doc.body ? doc.body.innerHTML : html;
           document.body.innerHTML = sidebarBody;
           document.querySelector('.main').innerHTML = pageContent;
-          // Toggle system
+
           const btn = document.getElementById('sidebarToggle');
           const sidebar = document.getElementById('sidebar');
           function setSidebar(collapsed) {
@@ -710,28 +762,24 @@
             setSidebar(collapsed);
             localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0');
           });
-          // Active page
           const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
           document.querySelectorAll('.item').forEach(link => {
-            if (link.dataset.page === currentPage) {
-              link.classList.add('active');
-            }
+            if (link.dataset.page === currentPage) link.classList.add('active');
           });
         })
         .catch(console.error);
     });
   </script>
+
   <div id="page-content" style="display:none;">
 
-  
   <div id="toast-container"></div>
 
   <!-- Remaining Quantity Confirmation Dialog -->
   <div id="confirmOverlay" class="confirm-overlay">
     <div class="confirm-dialog-content">
       <div class="confirm-header">⚠️ Remaining Production Quantity</div>
-      <div class="confirm-body" id="confirmMessage">Remaining Production Quantity is <strong>0</strong>. Do you want to
-        proceed and save the remaining for later batches?</div>
+      <div class="confirm-body" id="confirmMessage">Remaining Production Quantity is <strong>0</strong>. Do you want to proceed and save the remaining for later batches?</div>
       <div class="confirm-actions">
         <button class="confirm-btn-cancel" onclick="cancelConfirm()">Cancel</button>
         <button class="confirm-btn-ok" onclick="proceedWithSubmit()">Proceed</button>
@@ -741,16 +789,15 @@
 
   <div class="main">
     <div class="container">
-      <h2>📋 Create Job & Batch Entry</h2>
+      <h2>📋 Create Job &amp; Batch Entry</h2>
 
+      <!-- SECTION 1: Main Job Details -->
       <div class="section-card">
         <h3>1. Main Job Details</h3>
         <div class="grid">
-          <div class="input-group"><label>PSN</label><input type="text" id="psn" placeholder="e.g. 260000"></div>
-          <div class="input-group"><label>PI Number</label><input type="text" id="piNumber" placeholder="XXXX/26"
-              onblur="formatPINumber(this)"></div>
-          <div class="input-group"><label>Total Quantity</label><input type="number" id="totalQuantity"
-              oninput="distributeQuantities()"></div>
+          <div class="input-group"><label>PSN</label><input type="text" id="psn" placeholder="e.g. 260000" inputmode="numeric"></div>
+          <div class="input-group"><label>PI Number</label><input type="text" id="piNumber" placeholder="XXXX/26" onblur="formatPINumber(this)"></div>
+          <div class="input-group"><label>Total Quantity</label><input type="number" id="totalQuantity" inputmode="numeric" oninput="distributeQuantities()"></div>
           <div class="input-group span-full"><label>Job Name</label><input type="text" id="jobName"></div>
           <div class="input-group"><label>Order Date</label><input type="date" id="orderDate"></div>
           <div class="input-group"><label>Final Delivery Date</label><input type="date" id="deliveryDate"></div>
@@ -778,7 +825,7 @@
               <option value="">Please Choose Job Type</option>
               <option value="Offset">Offset</option>
               <option value="FSC">FSC</option>
-              <option value="Flexo & MMB/SOS">Flexo & MMB/SOS</option>
+              <option value="Flexo & MMB/SOS">Flexo &amp; MMB/SOS</option>
               <option value="Fully Outsourced">Fully Outsourced</option>
               <option value="FSCFully Outsourced">FSC Fully Outsourced</option>
               <option value="Drawdown">Drawdown</option>
@@ -797,9 +844,10 @@
         </div>
       </div>
 
+      <!-- SECTION 2: Build Production Sequence -->
       <div class="section-card">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <h3>2. Build Production Sequence</h3>
+        <div class="section2-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+          <h3 style="margin:0;">2. Build Production Sequence</h3>
           <div style="display:flex; gap:10px; align-items:center;">
             <button class="btn-clear" onclick="clearSequence()">Clear All Steps</button>
             <span id="counter" style="font-size:12px; font-weight:bold; color: var(--primary);">0 / 11</span>
@@ -811,6 +859,7 @@
         </div>
       </div>
 
+      <!-- SECTION 3: Batching -->
       <div class="section-card">
         <h3>3. Batching</h3>
         <div class="grid">
@@ -829,16 +878,15 @@
 
       <div id="batchArea"></div>
 
-      <div class="section-card">
+      <!-- STEP 5: Sticky Remaining Quantity Bar -->
+      <div class="remaining-sticky">
         <h3>Remaining Production Quantity</h3>
-        <div style="font-size: 18px; font-weight: bold; color: var(--primary);">
-          Remaining: <span id="remainingDisplay">0</span>
-        </div>
+        <div class="remaining-value" id="remainingDisplay">0</div>
       </div>
 
-      <button class="btn-submit" id="submitBtn" onclick="submitForm()">Create Entry & Save</button>
+      <button class="btn-submit" id="submitBtn" onclick="submitForm()">Create Entry &amp; Save</button>
 
-      <div id="loadingMsg" class="loading">⌛ Saving to Database , Waiting Some Time...</div>
+      <div id="loadingMsg" class="loading">⌛ Saving to Database, Waiting Some Time...</div>
     </div>
   </div>
 
@@ -848,7 +896,6 @@
     let draggedElement = null;
     let pendingSubmitData = null;
 
-    // Initialize the form with default values and set up event listeners for dynamic interactions like date synchronization, instant tabbing, and process rendering
     window.onload = () => {
       document.getElementById('orderDate').value = new Date().toISOString().split('T')[0];
       document.getElementById('deliveryDate').addEventListener('change', syncDeliveryDates);
@@ -857,7 +904,7 @@
       updateRemaining();
     };
 
-    // Form shortcut: Enter navigates fields in order for faster data entry (PSN + PI + Qty + Job Name + Item Name)
+    // STEP 6: Enter key navigates fields with smooth-scroll to prevent mobile keyboard covering
     function setupCreateJobEnterNavigation() {
       const order = ['psn', 'piNumber', 'totalQuantity', 'jobName', 'item'];
 
@@ -867,26 +914,26 @@
         el.addEventListener('keydown', (evt) => {
           if (evt.key === 'Enter') {
             evt.preventDefault();
-            if (id === 'piNumber') {
-              formatPINumber(el);
-            }
+            if (id === 'piNumber') formatPINumber(el);
             const next = document.getElementById(order[idx + 1]);
             if (next) {
               next.focus();
               if (typeof next.select === 'function') next.select();
+              // STEP 6: Smooth scroll so keyboard doesn't hide the focused field
+              setTimeout(() => {
+                next.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }, 100);
             }
           }
         });
       });
     }
 
-    // --- Helper Functions ---
-    // Universal toast function for showing messages to the user with different types (error, success, warning)
     function showToast(message, type = 'error') {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
       toast.className = `toast ${type}`;
-      let icon = type === 'error' ? '⚠️ ' : (type === 'success' ? '✅ ' : 'ℹ️ ');
+      let icon = type === 'error' ? '⚠️' : (type === 'success' ? '✅' : 'ℹ️');
       toast.innerHTML = `<span>${icon} ${message}</span>`;
       container.appendChild(toast);
       setTimeout(() => {
@@ -895,21 +942,13 @@
       }, 3000);
     }
 
-    // Function to format the PI Number input to ensure it follows the required pattern of 4 digits followed by optional -digit and /26
     function formatPINumber(input) {
       let value = input.value.trim();
-      // If already ends with /26, do nothing
       if (value.endsWith('/26')) return;
-      // Remove any trailing /26 if present
       value = value.replace(/\/26$/, '');
-      // Check if it matches the pattern
-      if (/^\d{4}(-\d)?$/.test(value)) {
-        input.value = value + '/26';
-      }
-      // If not matching, leave as is (user can correct)
+      if (/^\d{4}(-\d)?$/.test(value)) input.value = value + '/26';
     }
 
-    // Function to synchronize the final delivery date across all batches and steps when the main delivery date is changed
     function syncDeliveryDates() {
       const finalDeliveryDate = document.getElementById('deliveryDate').value;
       if (!finalDeliveryDate) return;
@@ -920,7 +959,6 @@
       }
     }
 
-    // Function to render the available processes in the pool area, showing which ones are currently selected and allowing users to click to add them to the sequence
     function renderPool() {
       const pool = document.getElementById('processPool');
       pool.innerHTML = processList.map(p => {
@@ -930,7 +968,6 @@
       document.getElementById('counter').innerText = `${selectedSteps.length} / 11`;
     }
 
-    // Function to add a process step to the selected sequence when clicked in the pool, with a maximum limit of 11 steps and automatic UI refresh and quantity distribution
     function addStep(p) {
       if (selectedSteps.length >= 11) { showToast("Max 11 steps", "warning"); return; }
       if (!selectedSteps.includes(p)) {
@@ -941,7 +978,6 @@
       }
     }
 
-    // Function to remove a process step from the selected sequence when the remove button is clicked, with automatic UI refresh and quantity redistribution
     function removeStep(i) {
       selectedSteps.splice(i, 1);
       renderSeq();
@@ -949,7 +985,6 @@
       distributeQuantities();
     }
 
-    // Function to automatically distribute the total quantity evenly across the batches whenever the total quantity or batch count changes, ensuring that the sum of batch quantities always equals the total quantity
     function distributeQuantities() {
       const total = parseInt(document.getElementById('totalQuantity').value) || 0;
       const count = parseInt(document.getElementById('batchCount').value);
@@ -967,19 +1002,20 @@
       updateRemaining();
     }
 
-    // Function to update the remaining quantity display
     function updateRemaining() {
       const total = parseInt(document.getElementById('totalQuantity').value) || 0;
       const count = parseInt(document.getElementById('batchCount').value);
       let sum = 0;
       for (let i = 1; i <= count; i++) {
-        sum += parseInt(document.getElementById(`qty_b${i}`).value) || 0;
+        sum += parseInt(document.getElementById(`qty_b${i}`)?.value) || 0;
       }
       const remaining = total - sum;
-      document.getElementById('remainingDisplay').textContent = remaining;
+      const el = document.getElementById('remainingDisplay');
+      el.textContent = remaining;
+      // Highlight red if over-allocated
+      el.classList.toggle('over', remaining < 0);
     }
 
-    // Function to clear the entire selected process sequence with a single click, resetting the UI and showing a confirmation toast message
     function clearSequence() {
       if (selectedSteps.length === 0) return;
       selectedSteps = [];
@@ -988,7 +1024,6 @@
       showToast("Sequence cleared.", "success");
     }
 
-    // Function to render the currently selected process sequence in the UI, showing each step with its order number and a remove button, or a placeholder message if no steps are selected
     function renderSeq() {
       const container = document.getElementById('selectedSequence');
       renderPool();
@@ -997,11 +1032,10 @@
         return;
       }
       container.innerHTML = selectedSteps.map((p, i) => `
-      <div class="seq-item">${i + 1}. ${p} <span class="remove-btn" onclick="removeStep(${i})">✕</span></div>
-    `).join('');
+        <div class="seq-item">${i + 1}. ${p} <span class="remove-btn" onclick="removeStep(${i})">✕</span></div>
+      `).join('');
     }
 
-    // Function to handle changes in batch quantity inputs, ensuring that the total quantity is not exceeded and automatically redistributing remaining quantities across subsequent batches if needed
     function handleQtyChange(changedIdx) {
       const total = parseInt(document.getElementById('totalQuantity').value) || 0;
       const count = parseInt(document.getElementById('batchCount').value);
@@ -1022,7 +1056,6 @@
       updateRemaining();
     }
 
-    // Function to validate the date input for each step, ensuring that it is not in the past and that it follows the correct sequence order relative to previous steps
     function validateDate(batch, step, input) {
       input.classList.remove('input-error');
       const selectedDate = new Date(input.value);
@@ -1045,33 +1078,32 @@
           return;
         }
       }
-
     }
 
-
-
-    // --- DRAG AND DROP LOGIC ---
-    // Function to handle the start of dragging a step row, storing the reference to the dragged element and applying visual feedback
+    // --- DRAG AND DROP (Desktop) ---
     function handleDragStart(e) {
       draggedElement = e.currentTarget;
       e.dataTransfer.effectAllowed = 'move';
       draggedElement.classList.add('dragging');
     }
 
-    // Function to allow dropping by preventing the default behavior when dragging over another step row
     function handleDragOver(e) {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
+      e.currentTarget.classList.add('drag-over');
     }
 
-    // Function to handle dropping a dragged step row onto another, swapping their process names and dates while ensuring that delivery rows cannot be dragged or dropped onto, and providing visual feedback for the swap action
+    function handleDragLeave(e) {
+      e.currentTarget.classList.remove('drag-over');
+    }
+
     function handleDrop(e) {
       e.preventDefault();
       const targetElement = e.currentTarget;
+      targetElement.classList.remove('drag-over');
       draggedElement.classList.remove('dragging');
 
       if (targetElement !== draggedElement && !targetElement.classList.contains('delivery-row')) {
-        // Swap Values logic
         const dSelect = draggedElement.querySelector('select');
         const dDate = draggedElement.querySelector('input[type="date"]');
         const tSelect = targetElement.querySelector('select');
@@ -1082,7 +1114,6 @@
 
         dSelect.value = tSelect.value;
         dDate.value = tDate.value;
-
         tSelect.value = tempName;
         tDate.value = tempDate;
 
@@ -1090,7 +1121,33 @@
       }
     }
 
-    // Function to refresh the batch UI whenever there are changes in the selected steps or batch count, dynamically generating the HTML for each batch and step while ensuring that the delivery date is synchronized across all batches
+    // STEP 4: Mobile reorder — move step up or down in the DOM
+    function moveStep(batchNum, stepIndex, direction) {
+      const totalSteps = selectedSteps.length;
+      const newIndex = stepIndex + direction;
+
+      // Clamp
+      if (newIndex < 1 || newIndex > totalSteps) return;
+
+      // Swap the select values and date values between current and neighbour
+      const curSelect = document.getElementById(`name_b${batchNum}_s${stepIndex}`);
+      const curDate   = document.getElementById(`date_b${batchNum}_s${stepIndex}`);
+      const nxtSelect = document.getElementById(`name_b${batchNum}_s${newIndex}`);
+      const nxtDate   = document.getElementById(`date_b${batchNum}_s${newIndex}`);
+
+      if (!curSelect || !nxtSelect) return;
+
+      const tmpName = curSelect.value;
+      const tmpDate = curDate.value;
+      curSelect.value = nxtSelect.value;
+      curDate.value   = nxtDate.value;
+      nxtSelect.value = tmpName;
+      nxtDate.value   = tmpDate;
+
+      showToast("Steps Reordered!", "success");
+    }
+
+    // Build the batch + step HTML
     function refreshUI() {
       const count = parseInt(document.getElementById('batchCount').value);
       const area = document.getElementById('batchArea');
@@ -1099,46 +1156,76 @@
       let html = '';
       for (let b = 1; b <= count; b++) {
         html += `
-      <div class="batch-container">
-        <div class="batch-header">
-          <span class="batch-title">BATCH ${b}</span>
-          <div style="display:flex; align-items:center; gap:10px;">
-            <label>Qty:</label>
-            <input type="number" id="qty_b${b}" onchange="handleQtyChange(${b})" style="width:120px; font-weight:bold;">
+        <div class="batch-container">
+          <div class="batch-header">
+            <span class="batch-title">BATCH ${b}</span>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <label style="font-size:13px; font-weight:600;">Qty:</label>
+              <input type="number" id="qty_b${b}" onchange="handleQtyChange(${b})" inputmode="numeric" style="width:100px; font-weight:bold; min-height:40px;">
+            </div>
           </div>
-        </div>
-        <div class="vertical-steps">
-    `;
+          <div class="vertical-steps">
+        `;
 
         selectedSteps.forEach((proc, i) => {
           const sNum = i + 1;
+          const isFirst = sNum === 1;
+          const isLast  = sNum === selectedSteps.length;
+
           html += `
-        <div class="step-row" draggable="true" ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
-          <div class="step-num"><div class="step-num-badge">${sNum}</div></div>
-          <div class="step-name">
-            <select id="name_b${b}_s${sNum}" class="step-select-input">
-              ${processList.map(p => `<option value="${p}" ${p === proc ? 'selected' : ''}>${p}</option>`).join('')}
-            </select>
-          </div>
-          <input type="date" id="date_b${b}_s${sNum}" onchange="validateDate(${b}, ${sNum}, this)">
-          <div class="drag-handle" title="Hold to drag and reorder">✋</div>
-        </div>`;
+          <div class="step-row"
+               draggable="true"
+               ondragstart="handleDragStart(event)"
+               ondragover="handleDragOver(event)"
+               ondragleave="handleDragLeave(event)"
+               ondrop="handleDrop(event)">
+
+            <div class="step-num">
+              <div class="step-num-badge">${sNum}</div>
+            </div>
+
+            <div class="step-name">
+              <select id="name_b${b}_s${sNum}" class="step-select-input">
+                ${processList.map(p => `<option value="${p}" ${p === proc ? 'selected' : ''}>${p}</option>`).join('')}
+              </select>
+            </div>
+
+            <!-- STEP 4: Mobile Up/Down reorder buttons -->
+            <div class="step-reorder">
+              <div class="drag-handle" title="Hold to drag and reorder">✋</div>
+              <div class="mobile-reorder-btns">
+                <button class="reorder-btn" onclick="moveStep(${b}, ${sNum}, -1)" ${isFirst ? 'disabled' : ''} title="Move up">▲</button>
+                <button class="reorder-btn" onclick="moveStep(${b}, ${sNum}, 1)"  ${isLast  ? 'disabled' : ''} title="Move down">▼</button>
+              </div>
+            </div>
+
+            <!-- STEP 3: Date in Tier 2 — full width on mobile -->
+            <div class="step-date">
+              <input type="date" id="date_b${b}_s${sNum}" onchange="validateDate(${b}, ${sNum}, this)">
+            </div>
+          </div>`;
         });
 
+        // Delivery row
         html += `
-        <div class="step-row delivery-row" style="grid-template-columns: 50px 1fr 180px 40px;">
-          <div class="step-num">★</div>
-          <div class="step-name">
-            <input type="text" id="name_b${b}_delivery" value="Delivery" readonly style="border:none; background:transparent; font-weight:bold; width:100%;">
+          <div class="step-row delivery-row">
+            <div class="step-num">★</div>
+            <div class="step-name">
+              <input type="text" id="name_b${b}_delivery" value="Delivery" readonly
+                style="border:none; background:transparent; font-weight:bold; width:100%; min-height:auto;">
+            </div>
+            <div class="step-reorder"></div>
+            <div class="step-date">
+              <input type="date" id="date_b${b}_s${selectedSteps.length + 1}" onchange="validateDate(${b}, ${selectedSteps.length + 1}, this)">
+            </div>
           </div>
-          <input type="date" id="date_b${b}_s${selectedSteps.length + 1}" onchange="validateDate(${b}, ${selectedSteps.length + 1}, this)">
-          <div></div> </div>
-      </div></div>`;
+        </div></div>`;
       }
+
       area.innerHTML = html;
       syncDeliveryDates();
 
-      // Bind Enter key behavior for dynamically generated step date fields in each batch row
+      // STEP 6: Bind Enter-key scroll for date inputs in batch area
       document.querySelectorAll('#batchArea input[type="date"]').forEach((dateInput) => {
         dateInput.addEventListener('keydown', (evt) => {
           if (evt.key === 'Enter') {
@@ -1146,52 +1233,50 @@
             const match = dateInput.id.match(/^date_b(\d+)_s(\d+)$/);
             if (match) {
               const batch = match[1];
-              const step = parseInt(match[2], 10);
-              const next = document.getElementById(`date_b${batch}_s${step + 1}`);
+              const step  = parseInt(match[2], 10);
+              const next  = document.getElementById(`date_b${batch}_s${step + 1}`);
               if (next) {
                 next.focus();
                 if (typeof next.select === 'function') next.select();
+                // Smooth scroll so mobile keyboard doesn't cover the field
+                setTimeout(() => {
+                  next.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
               }
             }
           }
         });
       });
+
       updateRemaining();
     }
 
-
-
-    // Function to handle the form submission when the user clicks the "Create Entry & Save" button, performing validation on all inputs, gathering the data into a structured format, and sending it to the server via a POST request while providing feedback on the submission status and handling redirection upon success
     async function submitForm() {
-      console.log("Hi I am Here");
-      const psn = document.getElementById('psn').value.trim();
-      const piNumber = document.getElementById('piNumber').value.trim();
-      const totalQty = parseInt(document.getElementById('totalQuantity').value);
-      const orderDate = document.getElementById('orderDate').value;
-      const deliveryDate = document.getElementById('deliveryDate').value;
-      const jobName = document.getElementById('jobName').value.trim();
-      const item = document.getElementById('item').value.trim();
-      const salesCode = document.getElementById('salesCode').value;
-      const jobType = document.getElementById('jobType').value;
+      const psn         = document.getElementById('psn').value.trim();
+      const piNumber    = document.getElementById('piNumber').value.trim();
+      const totalQty    = parseInt(document.getElementById('totalQuantity').value);
+      const orderDate   = document.getElementById('orderDate').value;
+      const deliveryDate= document.getElementById('deliveryDate').value;
+      const jobName     = document.getElementById('jobName').value.trim();
+      const item        = document.getElementById('item').value.trim();
+      const salesCode   = document.getElementById('salesCode').value;
+      const jobType     = document.getElementById('jobType').value;
 
-      // --- Validation ---
-      if (!psn) { showToast('PSN is required', 'error'); return; }
-      if (!piNumber) { showToast('PI Number is required', 'error'); return; }
+      if (!psn)          { showToast('PSN is required', 'error'); return; }
+      if (!piNumber)     { showToast('PI Number is required', 'error'); return; }
       if (!/^\d{4}(-\d)?\/26$/.test(piNumber)) { showToast('PI Number must be in format XXXX/26 or XXXX-Y/26', 'error'); return; }
       if (!totalQty || totalQty <= 0) { showToast('Total Quantity must be greater than 0', 'error'); return; }
-      if (!jobName) { showToast('Job Name is required', 'error'); return; }
-      if (!orderDate) { showToast('Order Date is required', 'error'); return; }
+      if (!jobName)      { showToast('Job Name is required', 'error'); return; }
+      if (!orderDate)    { showToast('Order Date is required', 'error'); return; }
       if (!deliveryDate) { showToast('Final Delivery Date is required', 'error'); return; }
-      if (!item) { showToast('Item Name is required', 'error'); return; }
-      if (!salesCode) { showToast('Please Choose the Sales Code', 'error'); return; }
-      if (!jobType) { showToast('Please Choose the Job Type', 'error'); return; }
+      if (!item)         { showToast('Item Name is required', 'error'); return; }
+      if (!salesCode)    { showToast('Please Choose the Sales Code', 'error'); return; }
+      if (!jobType)      { showToast('Please Choose the Job Type', 'error'); return; }
       if (selectedSteps.length === 0) { showToast('Please add at least one production step', 'error'); return; }
 
       let allData = [];
       const bCount = parseInt(document.getElementById('batchCount').value);
 
-      // Gather data for each batch and its steps, validating that all required fields are filled and 
-      // that the delivery date is included for each batch, while structuring the data in a way that can be easily processed by the server  
       for (let b = 1; b <= bCount; b++) {
         let steps = [];
         for (let s = 1; s <= selectedSteps.length; s++) {
@@ -1201,11 +1286,10 @@
           steps.push({ processName: customName, expDate: d });
         }
         const deliveryD = document.getElementById(`date_b${b}_s${selectedSteps.length + 1}`).value;
-        const qtyInput = document.getElementById(`qty_b${b}`).value;
+        const qtyInput  = document.getElementById(`qty_b${b}`).value;
 
         if (!qtyInput || isNaN(qtyInput) || parseInt(qtyInput) <= 0) {
-          showToast(`Batch ${b} quantity must be greater than 0`, 'error');
-          return;
+          showToast(`Batch ${b} quantity must be greater than 0`, 'error'); return;
         }
         if (!deliveryD) { showToast(`Delivery date missing B${b}`); return; }
         steps.push({ processName: "Delivery", expDate: deliveryD });
@@ -1217,54 +1301,33 @@
         });
       }
 
-      
       const remaining = totalQty - allData.reduce((sum, batch) => sum + batch.batchQty, 0);
       if (remaining > 0) {
         pendingSubmitData = {
-          psn,
-          piNumber,
-          jobName,
-          quantity: totalQty,
-          orderDate,
-          deliveryDate,
-          item,
+          psn, piNumber, jobName, quantity: totalQty, orderDate, deliveryDate, item,
           salesCode: document.getElementById('salesCode').value,
           jobType: document.getElementById('jobType').value,
           priority: document.getElementById('priority').value,
-          batches: allData,
-          remaining: remaining,
-          balanceToDelivery: totalQty
+          batches: allData, remaining, balanceToDelivery: totalQty
         };
         showRemainingConfirm(remaining);
         return;
       }
 
       await performSubmit({
-        psn,
-        piNumber,
-        jobName,
-        quantity: totalQty,
-        orderDate,
-        deliveryDate,
-        item,
+        psn, piNumber, jobName, quantity: totalQty, orderDate, deliveryDate, item,
         salesCode: document.getElementById('salesCode').value,
         jobType: document.getElementById('jobType').value,
         priority: document.getElementById('priority').value,
-        batches: allData,
-        remaining: remaining,
-        balanceToDelivery: totalQty
+        batches: allData, remaining, balanceToDelivery: totalQty
       });
     }
 
-    // Function to show a custom confirmation dialog when there is a remaining quantity that has not been allocated to batches,
-    // asking the user if they want to proceed with saving the entry while keeping the remaining quantity for later processing
     function showRemainingConfirm(remaining) {
       document.getElementById('confirmMessage').innerHTML = `Remaining Production Quantity is <strong>${remaining}</strong>. Do you want to proceed and save the remaining for later batches?`;
       document.getElementById('confirmOverlay').classList.add('show');
     }
 
-    // Function to handle the cancellation of the confirmation dialog, hiding the dialog  
-    // resetting any pending submission data while re-enabling the submit button and hiding the loading message
     function cancelConfirm() {
       document.getElementById('confirmOverlay').classList.remove('show');
       pendingSubmitData = null;
@@ -1272,18 +1335,11 @@
       document.getElementById('loadingMsg').style.display = 'none';
     }
 
-    // Function to proceed with the form submission after the user confirms that they want to save the entry with the remaining quantity, hiding the confirmation dialog and calling the performSubmit function with the pending submission data
     function proceedWithSubmit() {
       document.getElementById('confirmOverlay').classList.remove('show');
-      if (pendingSubmitData) {
-        performSubmit(pendingSubmitData);
-      }
+      if (pendingSubmitData) performSubmit(pendingSubmitData);
     }
 
-    // Function to perform the actual submission of the form data to the server, 
-    // sending a POST request to the specified API endpoint with the structured data, 
-    // handling the response to show appropriate success or error messages, 
-    // and managing the UI state during the submission process including disabling the submit button and showing a loading message
     async function performSubmit(data) {
       document.getElementById('submitBtn').disabled = true;
       document.getElementById('loadingMsg').style.display = 'block';
@@ -1298,7 +1354,6 @@
         const result = await response.json();
 
         if (response.ok) {
-          // Keep success toast visible, then redirect after a small delay
           sessionStorage.setItem('toastMessage', '✅ Entry Saved Successfully!');
           setTimeout(() => executeRedirect(dashboard_url), 1500);
         } else {
@@ -1314,26 +1369,18 @@
       }
     }
 
-    // Function to handle redirection to the dashboard after successful form submission, with a fallback mechanism in case of cross-origin restrictions when trying to access the top-level window
     function executeRedirect(dashboard_url) {
-      // Use the global variable we stored earlier
       if (window.top && window.top.location) {
         try {
-          // Standard way to redirect the entire Google Script IFRAME
           window.top.location.href = dashboard_url;
         } catch (e) {
-          // Fallback if top-level access is restricted by the browser
           window.location.replace(dashboard_url);
         }
       } else {
-        // If top-level access is not available, redirect the current window as a fallback
         window.location.href = dashboard_url;
       }
     }
   </script>
   </div>
 </body>
-<!-- <script src="https://alcdn.msauth.net/browser/2.28.1/js/msal-browser.min.js"></script>
-<script src="/scripts/auth.js"></script> -->
-
 </html>
