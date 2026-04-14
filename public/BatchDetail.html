@@ -243,6 +243,39 @@
       }
     }
 
+    /* Desktop header arrangement */
+    @media (min-width: 769px) {
+      .dashboard-header > div {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 8px;
+        max-width: 320px;
+      }
+
+      .dashboard-header > div > input {
+        width: 100%;
+        max-width: 300px;
+        flex: 1;
+        min-width: 160px;
+        box-sizing: border-box;
+      }
+
+      .dashboard-header > div > button {
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      .dashboard-header > div > button#clearSortBtn {
+        width: 100%;
+        margin-left: 0;
+        margin-top: 8px;
+      }
+    }
+
     /*button responsiveness*/
     @keyframes spin {
       0% {
