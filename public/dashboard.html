@@ -33,11 +33,6 @@
     }
 
     /* =========================
-       LAYOUT WRAPPER (from Sidebar.html)
-    ========================== */
-    /* .sidebar-wrapper will be provided by Sidebar.html */
-
-    /* =========================
        MAIN CONTENT
     ========================== */
     .main {
@@ -265,7 +260,6 @@
       text-transform: uppercase;
     }
 
-    /* chart canvas wrapper — height controlled here and overridden in media queries */
     .chart-canvas-wrapper {
       height: 300px;
     }
@@ -326,7 +320,6 @@
       background-color: #e6f4ea !important;
     }
 
-    /* scroll wrapper */
     .job-table-scroll-wrapper {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
@@ -469,10 +462,23 @@
     }
 
     /* =========================================================
+       COLLAPSIBLE SECTION TOGGLE — desktop unchanged, only used on mobile
+    ========================================================= */
+    /* The toggle button is hidden on desktop */
+    .section-toggle-btn {
+      display: none;
+    }
+
+    .section-collapsible-body {
+      display: block;
+    }
+
+    /* always open on desktop */
+
+    /* =========================================================
        TABLET  ≤1024px
     ========================================================= */
     @media (max-width: 1024px) {
-
       .process-container {
         grid-template-columns: repeat(3, 1fr);
       }
@@ -485,17 +491,12 @@
 
     /* =========================================================
        MOBILE  ≤768px
-       Core change: tables → stacked "card" rows via data-label
+       ONLY these rules change. Desktop untouched.
     ========================================================= */
     @media (max-width: 768px) {
 
       .main {
         padding: 14px 10px;
-      }
-
-      /* ✅ FIXED PROCESS GRID */
-      .process-container {
-        grid-template-columns: 1fr !important;
       }
 
       h1 {
@@ -505,40 +506,71 @@
 
       .section-title {
         font-size: 1.1rem;
-        margin-bottom: 12px;
+        margin-bottom: 0;
+        /* header row manages spacing */
         border-left-width: 5px;
         padding-left: 10px;
       }
 
-      /* --- Status cards --- */
+      /* ── 1. STATUS CARDS: single column stack ── */
       .status-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
+        grid-template-columns: 1fr;
+        /* one per row */
+        gap: 10px;
         margin-bottom: 14px;
       }
 
+      /* Horizontal layout inside each card: icon stripe left, numbers right */
       .status-card {
-        padding: 12px 8px;
+        padding: 14px 16px;
         border-radius: 10px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        text-align: left;
+        border-left-width: 6px !important;
+        border-top-width: 0 !important;
+        /* swap top-border to left-border on mobile */
+      }
+
+      /* The coloured top border becomes a left accent on mobile */
+      .status-card[style*="border-top:8px solid var(--success)"] {
+        border-left: 6px solid var(--success) !important;
+        border-top: none !important;
+      }
+
+      .status-card[style*="border-top:8px solid var(--warning)"] {
+        border-left: 6px solid var(--warning) !important;
+        border-top: none !important;
+      }
+
+      .status-card[style*="border-top:8px solid var(--danger)"] {
+        border-left: 6px solid var(--danger) !important;
+        border-top: none !important;
       }
 
       .status-card h3 {
-        font-size: 0.65rem;
+        font-size: 0.75rem;
+        margin: 0;
+        flex: 1;
       }
 
       .status-card .val {
-        font-size: 2rem;
-        margin: 4px 0;
+        font-size: 2.4rem;
+        margin: 0;
+        line-height: 1;
+        min-width: 54px;
+        text-align: right;
       }
 
-      /* --- Section card --- */
+      /* ── Section card ── */
       .section-card {
         padding: 14px 10px;
         border-radius: 10px;
         margin-bottom: 18px;
       }
 
-      /* --- Flex filter rows: stack vertically --- */
+      /* ── Flex filter rows: stack vertically ── */
       .table-header-flex,
       .section-header-flex {
         flex-direction: column;
@@ -580,7 +612,6 @@
         justify-content: center;
       }
 
-      /* --- Capacity grid: 1 column --- */
       .capacity-grid {
         grid-template-columns: 1fr;
         gap: 10px;
@@ -591,12 +622,10 @@
         border-radius: 10px;
       }
 
-      /* --- Chart taller on mobile --- */
       .chart-canvas-wrapper {
         height: 280px !important;
       }
 
-      /* --- Tags/pills: auto-width --- */
       .tag {
         min-width: auto;
         padding: 4px 8px;
@@ -607,11 +636,214 @@
         width: 70px;
       }
 
-      /* ────────────────────────────────────────────────────────
-         STACKED CARD TABLE — JOB FULFILLMENT (#jobTable)
-      ──────────────────────────────────────────────────────── */
+      /* ── 2. PROCESS CONTAINER: 2-column grid on mobile ── */
+      .process-container {
+        grid-template-columns: repeat(1, 1fr) !important;
+        gap: 6px;
+      }
 
-      /* Unwrap the scroll limiter so cards flow freely */
+      /* Shrink font inside process items to fit 2-col */
+      .process-item {
+        padding: 7px 8px;
+      }
+
+      .process-name {
+        font-size: 0.62rem;
+        max-width: 80px;
+      }
+
+      /* The DAYS number */
+      .process-item>div:first-child>div:nth-child(2) {
+        font-size: 0.82rem !important;
+      }
+
+      /* The IN PROGRESS / IDLE label */
+      .process-item>div:last-child>div:first-child {
+        font-size: 0.5rem !important;
+      }
+
+      /* Job count number */
+      .process-item>div:last-child>div:nth-child(2) {
+        font-size: 1rem !important;
+      }
+
+      /* JOBS label */
+      .process-item>div:last-child>div:last-child {
+        font-size: 0.45rem !important;
+      }
+
+      /* ── COLLAPSIBLE SECTION TOGGLE (mobile only) ── */
+      .section-toggle-btn {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        gap: 8px;
+      }
+
+      .section-toggle-btn .toggle-arrow {
+        font-size: 0.9rem;
+        color: var(--primary);
+        transition: transform 0.25s;
+        flex-shrink: 0;
+      }
+
+      .section-toggle-btn.open .toggle-arrow {
+        transform: rotate(180deg);
+      }
+
+      /* Body hidden by default — JS opens it */
+      .section-collapsible-body {
+        display: none;
+      }
+
+      .section-collapsible-body.open {
+        display: block;
+      }
+
+      /* ── 3. REQUIREMENT TABLE: card view ── */
+      #requirementTable-wrapper {
+        max-height: none;
+        overflow: visible;
+        box-shadow: none;
+        border-radius: 0;
+      }
+
+      #requirementTable thead {
+        display: none;
+      }
+
+      /* Each row = compact card */
+      #requirementTable tbody tr.clickable-row {
+        display: block;
+        margin-bottom: 10px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+        background: var(--surface);
+        position: relative;
+      }
+
+      #requirementTable tbody tr.row-overdue {
+        background: #fce8e6 !important;
+        border-color: #fca5a5;
+      }
+
+      #requirementTable tbody tr.row-almost-due {
+        background: #fef7e0 !important;
+        border-color: #fcd34d;
+      }
+
+      /* All tds hidden by default — we pick which to show */
+      #requirementTable tbody tr.clickable-row td {
+        display: none;
+      }
+
+      /* ─── Visible primary fields (always shown) ─── */
+      /* td 1 = PSN (hidden — PSN merged into batch ID cell via JS) */
+      /* td 2 = Batch ID */
+      #requirementTable tbody tr.clickable-row td:nth-child(2),
+      /* td 3 = Client */
+      #requirementTable tbody tr.clickable-row td:nth-child(3),
+      /* td 4 = Quantity */
+      #requirementTable tbody tr.clickable-row td:nth-child(4),
+      /* td 5 = Process */
+      #requirementTable tbody tr.clickable-row td:nth-child(5),
+      /* td 7 = Days to Due */
+      #requirementTable tbody tr.clickable-row td:nth-child(7) {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 7px 12px;
+        border-bottom: 1px solid #f1f3f4;
+        font-size: 0.82rem;
+        text-align: right;
+      }
+
+      #requirementTable tbody tr.clickable-row td:nth-child(7) {
+        border-bottom: none;
+      }
+
+      /* Labels via data-label */
+      #requirementTable tbody tr.clickable-row td:nth-child(2)::before,
+      #requirementTable tbody tr.clickable-row td:nth-child(3)::before,
+      #requirementTable tbody tr.clickable-row td:nth-child(4)::before,
+      #requirementTable tbody tr.clickable-row td:nth-child(5)::before,
+      #requirementTable tbody tr.clickable-row td:nth-child(7)::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 0.68rem;
+        color: var(--text-muted);
+        text-align: left;
+        margin-right: 8px;
+        flex-shrink: 0;
+        min-width: 75px;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+      }
+
+      /* Hidden detail rows (In Progress + Prev Step) — expanded on tap */
+      #requirementTable tbody tr.clickable-row td:nth-child(1),
+      #requirementTable tbody tr.clickable-row td:nth-child(6),
+      #requirementTable tbody tr.clickable-row td:nth-child(8) {
+        display: none !important;
+      }
+
+      /* When card is expanded, show hidden detail fields */
+      #requirementTable tbody tr.clickable-row.req-expanded td:nth-child(6),
+      #requirementTable tbody tr.clickable-row.req-expanded td:nth-child(8) {
+        display: flex !important;
+        justify-content: space-between;
+        align-items: center;
+        padding: 7px 12px;
+        border-bottom: 1px solid #f1f3f4;
+        font-size: 0.82rem;
+        text-align: right;
+      }
+
+      #requirementTable tbody tr.clickable-row.req-expanded td:nth-child(8) {
+        border-bottom: none;
+      }
+
+      #requirementTable tbody tr.clickable-row.req-expanded td:nth-child(6)::before,
+      #requirementTable tbody tr.clickable-row.req-expanded td:nth-child(8)::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 0.68rem;
+        color: var(--text-muted);
+        text-align: left;
+        margin-right: 8px;
+        flex-shrink: 0;
+        min-width: 75px;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+      }
+
+      /* ── 4. JOB FULFILLMENT: card view + collapsible batches ── */
+
+      /* 4a. Filter grid: 2×2 */
+      #jobFiltersRow {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+        width: 100%;
+      }
+
+      #searchInput {
+        margin-top: 12px;
+      }
+
+      #jobFiltersRow .filter-select,
+      #jobFiltersRow #searchInput {
+        width: 100% !important;
+        box-sizing: border-box;
+      }
+
       #jobTable-wrapper {
         max-height: none;
         overflow: visible;
@@ -619,15 +851,14 @@
         border-radius: 0;
       }
 
-      /* Hide the real header row */
       #jobTable thead {
         display: none;
       }
 
-      /* Each <tr> becomes a card */
+      /* Each job row = card */
       #jobTable tbody tr.clickable-row {
         display: block;
-        margin-bottom: 12px;
+        margin-top: 12px;
         border: 1px solid var(--border);
         border-radius: 10px;
         overflow: hidden;
@@ -645,14 +876,14 @@
         border-color: #fcd34d;
       }
 
-      /* Each <td> = a label+value row */
+      /* ALL tds as label+value rows */
       #jobTable tbody tr.clickable-row td {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 9px 13px;
+        padding: 8px 12px;
         border-bottom: 1px solid #f1f3f4;
-        font-size: 0.85rem;
+        font-size: 0.83rem;
         white-space: normal;
         text-align: right;
       }
@@ -661,22 +892,39 @@
         border-bottom: none;
       }
 
-      /* Inject label from data-label attribute */
       #jobTable tbody tr.clickable-row td::before {
         content: attr(data-label);
         font-weight: 700;
-        font-size: 0.72rem;
+        font-size: 0.68rem;
         color: var(--text-muted);
         text-align: left;
         margin-right: 10px;
         flex-shrink: 0;
-        min-width: 88px;
+        min-width: 82px;
         text-transform: uppercase;
         letter-spacing: 0.02em;
       }
 
-      /* Batch detail: display as block, not table-row */
+      /* Batch expand button row — added by JS */
+      .mobile-batch-toggle-row {
+        display: block;
+        text-align: center;
+        padding: 8px 12px;
+        background: #f8fafc;
+        border-top: 1px dashed var(--border);
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--primary);
+        cursor: pointer;
+        user-select: none;
+      }
+
+      /* Batch detail: rendered as block card below job card */
       #jobTable tbody tr.batch-detail-row {
+        display: none;
+      }
+
+      #jobTable tbody tr.batch-detail-row.mob-open {
         display: block !important;
         margin-bottom: 12px;
         margin-top: -14px;
@@ -696,7 +944,6 @@
         display: none;
       }
 
-      /* Inner batch table: also stack */
       .batch-inner-table thead {
         display: none;
       }
@@ -726,69 +973,7 @@
         min-width: 70px;
       }
 
-      /* ────────────────────────────────────────────────────────
-         STACKED CARD TABLE — REQUIREMENT UPDATE LISTING
-      ──────────────────────────────────────────────────────── */
-      #requirementTable-wrapper {
-        max-height: none;
-        overflow: visible;
-        box-shadow: none;
-        border-radius: 0;
-      }
-
-      #requirementTable thead {
-        display: none;
-      }
-
-      #requirementTable tbody tr.clickable-row {
-        display: block;
-        margin-bottom: 10px;
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-        background: var(--surface);
-      }
-
-      #requirementTable tbody tr.row-overdue {
-        background: #fce8e6 !important;
-        border-color: #fca5a5;
-      }
-
-      #requirementTable tbody tr.row-almost-due {
-        background: #fef7e0 !important;
-        border-color: #fcd34d;
-      }
-
-      #requirementTable tbody tr.clickable-row td {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 9px 13px;
-        border-bottom: 1px solid #f1f3f4;
-        font-size: 0.85rem;
-        text-align: right;
-      }
-
-      #requirementTable tbody tr.clickable-row td:last-child {
-        border-bottom: none;
-      }
-
-      #requirementTable tbody tr.clickable-row td::before {
-        content: attr(data-label);
-        font-weight: 700;
-        font-size: 0.72rem;
-        color: var(--text-muted);
-        text-align: left;
-        margin-right: 10px;
-        flex-shrink: 0;
-        text-transform: uppercase;
-        letter-spacing: 0.02em;
-      }
-
-      /* ────────────────────────────────────────────────────────
-         STACKED CARD TABLE — PROCESS JOBS (#processJobsTableContent)
-      ──────────────────────────────────────────────────────── */
+      /* ── PROCESS JOBS TABLE (unchanged from original) ── */
       #processJobsTableContent-wrapper {
         max-height: none;
         overflow: visible;
@@ -861,15 +1046,16 @@
       }
 
       .status-card .val {
-        font-size: 1.7rem;
+        font-size: 2rem;
       }
 
       .status-card h3 {
-        font-size: 0.6rem;
+        font-size: 0.7rem;
       }
 
+      /* Keep 2-col on small phones too */
       .process-container {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(1, 1fr);
         gap: 5px;
       }
 
@@ -888,93 +1074,50 @@
         .then((html) => {
           const parser = new DOMParser();
           const doc = parser.parseFromString(html, 'text/html');
-
-          // 1. Copy sidebar CSS into <head>
           doc.head.querySelectorAll('style, link[rel="stylesheet"]').forEach((node) => {
             document.head.appendChild(node.cloneNode(true));
           });
-
-          // 2. Get the <aside id="sidebar"> from Sidebar.html
           const sidebarEl = doc.getElementById('sidebar');
-          if (!sidebarEl) {
-            console.error('Sidebar load failed: #sidebar not found in Sidebar.html');
-            return;
-          }
-
-          // 3. Scoop up every existing node in <body> into a fragment
-          //    This includes: loader, page content, toast, modal — everything
+          if (!sidebarEl) { console.error('Sidebar load failed: #sidebar not found'); return; }
           const fragment = document.createDocumentFragment();
-          while (document.body.firstChild) {
-            fragment.appendChild(document.body.firstChild);
-          }
-
-          // 4. Build the flex layout in JS:
-          //    <div class="sidebar-wrapper">
-          //      <aside id="sidebar">  ← from Sidebar.html
-          //      <div class="main">    ← all original BatchDetail content
-          //    </div>
+          while (document.body.firstChild) fragment.appendChild(document.body.firstChild);
           const wrapper = document.createElement('div');
           wrapper.className = 'sidebar-wrapper';
-
           const mainDiv = document.createElement('div');
           mainDiv.className = 'main';
           mainDiv.appendChild(fragment);
-
           wrapper.appendChild(sidebarEl.cloneNode(true));
           wrapper.appendChild(mainDiv);
           document.body.appendChild(wrapper);
-
-          // 5. Wire up toggle
           const btn = document.getElementById('sidebarToggle');
           const sidebar = document.getElementById('sidebar');
           const logo = document.getElementById('sidebarLogo');
-          if (!btn || !sidebar) {
-            console.error('Sidebar: #sidebarToggle or #sidebar missing after DOM build');
-            return;
-          }
-
+          if (!btn || !sidebar) { console.error('Sidebar: toggle/sidebar missing'); return; }
           function setSidebar(collapsed) {
             sidebar.classList.toggle('sidebar--collapsed', collapsed);
             btn.setAttribute('aria-expanded', String(!collapsed));
-            sidebar.querySelectorAll('.label').forEach((el) => {
-              el.setAttribute('aria-hidden', String(collapsed));
-            });
+            sidebar.querySelectorAll('.label').forEach((el) => el.setAttribute('aria-hidden', String(collapsed)));
           }
-
           const savedState = localStorage.getItem('sidebar-collapsed') === '1';
           setSidebar(savedState);
-
           if (logo) {
             logo.addEventListener('click', () => {
-              const collapsed = !sidebar.classList.contains('sidebar--collapsed');
-              setSidebar(collapsed);
-              localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0');
+              const c = !sidebar.classList.contains('sidebar--collapsed');
+              setSidebar(c); localStorage.setItem('sidebar-collapsed', c ? '1' : '0');
             });
           }
           btn.addEventListener('click', () => {
-            const collapsed = !sidebar.classList.contains('sidebar--collapsed');
-            setSidebar(collapsed);
-            localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0');
+            const c = !sidebar.classList.contains('sidebar--collapsed');
+            setSidebar(c); localStorage.setItem('sidebar-collapsed', c ? '1' : '0');
           });
-
-          // 6. Highlight active nav link
-          const currentPage = window.location.pathname
-            .split('/')
-            .pop()
-            .replace('.html', '');
+          const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
           document.querySelectorAll('.item').forEach((link) => {
-            if (link.dataset.page === currentPage) {
-              link.classList.add('active');
-            }
+            if (link.dataset.page === currentPage) link.classList.add('active');
           });
-
-          // 7. Wire up logout
           const logoutBtn = document.getElementById('logoutBtn');
           if (logoutBtn) {
             logoutBtn.addEventListener('click', (e) => {
-              e.preventDefault();
-              localStorage.clear();
-              window.location.href = '/login.html';
+              e.preventDefault(); localStorage.clear(); window.location.href = '/login.html';
             });
           }
         })
@@ -982,17 +1125,13 @@
     });
   </script>
 
-  <!-- Page Content Starts Here -->
-
-
-  <!-- Toast container -->
+  <!-- Toast -->
   <div id="toast-container" style="position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:10000;
-             display:flex;flex-direction:column;align-items:center;gap:10px;pointer-events:none;">
-  </div>
+       display:flex;flex-direction:column;align-items:center;gap:10px;pointer-events:none;"></div>
 
   <h1>Dashboard</h1>
 
-  <!-- ══════════ STATUS GRID ══════════ -->
+  <!-- ══════════ 1. STATUS GRID ══════════ -->
   <div class="status-grid">
     <div class="status-card" data-status="ON SCHEDULE" style="border-top:8px solid var(--success);">
       <h3>On Schedule</h3>
@@ -1008,53 +1147,58 @@
     </div>
   </div>
 
-  <!-- ══════════ PROCESS WORKLOAD ══════════ -->
+  <!-- ══════════ 2. PROCESS WORKLOAD ══════════ -->
   <div class="section-card">
-    <span class="section-title">PROCESS WORKLOAD &amp; AVERAGE PERFORMANCE</span>
+    <!-- Mobile toggle header -->
+    <button class="section-toggle-btn" id="processToggleBtn" onclick="toggleSection('processToggleBtn','processBody')">
+      <span class="section-title" style="margin-bottom:0;">PROCESS WORKLOAD &amp; AVERAGE PERFORMANCE</span>
+      <span class="toggle-arrow">▼</span>
+    </button>
+    <!-- Desktop: section-title shown directly (toggle button hidden) -->
+    <span class="section-title desktop-only-title" style="display:block;">PROCESS WORKLOAD &amp; AVERAGE
+      PERFORMANCE</span>
 
-    <div class="cap-card" style="margin-bottom:30px;">
-      <div class="process-container" id="processStatsContainer">
-        <p style="color:#94a3b8;font-size:12px;">Sorting and loading processes...</p>
-      </div>
-
-      <div id="processJobsTable" style="display:none;margin-top:20px;">
-        <span class="section-title" style="font-size:1.3rem;">
-          Jobs in Process:
-          <span class="process-step-badge" id="selectedProcessName" style="font-size:1.1rem;"></span>
-        </span>
-
-        <div class="table-header-flex" style="margin:10px 0;">
-          <input type="text" id="processSearchInput" onkeyup="filterProcessJobs()"
-            placeholder="Search PSN, BatchID, Job..." class="filter-select" style="width:240px;">
-          <select id="processDueFilter" onchange="filterProcessJobs()" class="filter-select" style="width:180px;">
-            <option value="ALL">All Due Status</option>
-            <option value="OVERDUE">Overdue</option>
-            <option value="DUE_TODAY">Due Today</option>
-            <option value="NEAR_DUE">Near Due (1-2d)</option>
-          </select>
+    <div class="section-collapsible-body" id="processBody">
+      <div class="cap-card" style="margin-bottom:30px;">
+        <div class="process-container" id="processStatsContainer">
+          <p style="color:#94a3b8;font-size:12px;">Sorting and loading processes...</p>
         </div>
 
-        <!-- id used by mobile CSS -->
-        <div id="processJobsTableContent-wrapper" class="job-table-scroll-wrapper">
-          <table class="job-table" id="processJobsTableContent">
-            <thead>
-              <tr>
-                <th>PSN</th>
-                <th>Batch ID</th>
-                <th>Client Name</th>
-                <th>Quantity</th>
-                <th>Priority (Expected Date)</th>
-                <th>Expected Date</th>
-              </tr>
-            </thead>
-            <tbody id="processJobsBody">
-              <tr>
-                <td colspan="6" style="text-align:center;padding:20px;">
-                  Click on a process above to view jobs in progress.
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div id="processJobsTable" style="display:none;margin-top:20px;">
+          <span class="section-title" style="font-size:1.3rem;">
+            Jobs in Process:
+            <span class="process-step-badge" id="selectedProcessName" style="font-size:1.1rem;"></span>
+          </span>
+          <div class="table-header-flex" style="margin:10px 0;">
+            <input type="text" id="processSearchInput" onkeyup="filterProcessJobs()"
+              placeholder="Search PSN, BatchID, Job..." class="filter-select" style="width:240px;">
+            <select id="processDueFilter" onchange="filterProcessJobs()" class="filter-select" style="width:180px;">
+              <option value="ALL">All Due Status</option>
+              <option value="OVERDUE">Overdue</option>
+              <option value="DUE_TODAY">Due Today</option>
+              <option value="NEAR_DUE">Near Due (1-2d)</option>
+            </select>
+          </div>
+          <div id="processJobsTableContent-wrapper" class="job-table-scroll-wrapper">
+            <table class="job-table" id="processJobsTableContent">
+              <thead>
+                <tr>
+                  <th>PSN</th>
+                  <th>Batch ID</th>
+                  <th>Client Name</th>
+                  <th>Quantity</th>
+                  <th>Priority (Expected Date)</th>
+                  <th>Expected Date</th>
+                </tr>
+              </thead>
+              <tbody id="processJobsBody">
+                <tr>
+                  <td colspan="6" style="text-align:center;padding:20px;">Click on a process above to view jobs in
+                    progress.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -1079,9 +1223,7 @@
           </div>
         </div>
       </div>
-
       <div class="capacity-grid" id="machineCapacityContainer"></div>
-
       <div id="chartSection" style="margin-top:30px;display:none;">
         <div class="section-header-flex">
           <div>
@@ -1101,7 +1243,6 @@
             </button>
           </div>
         </div>
-        <!-- Wrapper controls height responsively via CSS class -->
         <div class="chart-canvas-wrapper">
           <canvas id="capacityChart"></canvas>
         </div>
@@ -1109,121 +1250,134 @@
     </div>
   </div>
 
-  <!-- ══════════ REQUIREMENT UPDATE LISTING ══════════ -->
+  <!-- ══════════ 3. REQUIREMENT UPDATE LISTING ══════════ -->
   <div class="section-card">
-    <div style="margin-bottom:20px;">
-      <div class="table-header-flex">
+    <div style="margin-bottom:0;">
+      <!-- Mobile toggle header -->
+      <button class="section-toggle-btn" id="reqToggleBtn" onclick="toggleSection('reqToggleBtn','reqBody')">
         <span class="section-title" style="margin-bottom:0;">REQUIREMENT UPDATE LISTING</span>
-        <div style="display:flex;gap:10px;flex-grow:1;justify-content:flex-end;flex-wrap:wrap;">
-          <input type="text" id="reqSearchInput" onkeyup="filterRequirementUpdates()"
-            placeholder="Search PSN / Batch ID / Client…" class="filter-select" style="width:250px;">
-          <select class="filter-select" id="reqStatusFilter" onchange="filterRequirementUpdates()">
-            <option value="ALL">All Status</option>
-            <option value="OVERDUE">Overdue</option>
-            <option value="ALMOST DUE">Almost Due</option>
-          </select>
-        </div>
-      </div>
+        <span class="toggle-arrow">▼</span>
+      </button>
+      <!-- Desktop always-visible title -->
+      <span class="section-title desktop-only-title" style="display:block;">REQUIREMENT UPDATE LISTING</span>
 
-      <!-- id used by mobile CSS -->
-      <div id="requirementTable-wrapper" class="job-table-scroll-wrapper">
-        <table class="job-table" id="requirementTable">
-          <thead>
-            <tr>
-              <th>PSN</th>
-              <th>Batch ID</th>
-              <th>Client Name</th>
-              <th>Quantity</th>
-              <th>Current Process</th>
-              <th>In Progress</th>
-              <th style="cursor:pointer;" onclick="setReqSort('dueDays')">Days to Due Date <span
-                  id="reqSortIcon">▲</span></th>
-              <th>Previous Step &amp; EndDate</th>
-            </tr>
-          </thead>
-          <tbody id="requirementBody">
-            <tr>
-              <td colspan="8" style="text-align:center;padding:20px;">Loading requirement updates…</td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="section-collapsible-body" id="reqBody">
+        <div class="table-header-flex" style="margin-top:14px;">
+          <div style="display:flex;gap:10px;flex-grow:1;justify-content:flex-end;flex-wrap:wrap;">
+            <input type="text" id="reqSearchInput" onkeyup="filterRequirementUpdates()"
+              placeholder="Search PSN / Batch ID / Client…" class="filter-select" style="width:250px;">
+            <select class="filter-select" id="reqStatusFilter" onchange="filterRequirementUpdates()">
+              <option value="ALL">All Status</option>
+              <option value="OVERDUE">Overdue</option>
+              <option value="ALMOST DUE">Almost Due</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="requirementTable-wrapper" class="job-table-scroll-wrapper">
+          <table class="job-table" id="requirementTable">
+            <thead>
+              <tr>
+                <th>PSN</th>
+                <th>Batch ID</th>
+                <th>Client Name</th>
+                <th>Quantity</th>
+                <th>Current Process</th>
+                <th>In Progress</th>
+                <th style="cursor:pointer;" onclick="setReqSort('dueDays')">Days to Due Date <span
+                    id="reqSortIcon">▲</span></th>
+                <th>Previous Step &amp; EndDate</th>
+              </tr>
+            </thead>
+            <tbody id="requirementBody">
+              <tr>
+                <td colspan="8" style="text-align:center;padding:20px;">Loading requirement updates…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- ══════════ JOB FULFILLMENT LIST ══════════ -->
+  <!-- ══════════ 4. JOB FULFILLMENT LIST ══════════ -->
   <div class="section-card">
-    <div class="table-header-flex">
+    <!-- Mobile toggle header -->
+    <button class="section-toggle-btn" id="jobToggleBtn" onclick="toggleSection('jobToggleBtn','jobBody')">
       <span class="section-title" style="margin-bottom:0;">JOB FULFILLMENT LIST</span>
-      <div style="display:flex;gap:10px;flex-grow:1;justify-content:flex-end;flex-wrap:wrap;">
+      <span class="toggle-arrow">▼</span>
+    </button>
+    <!-- Desktop always-visible title -->
+    <span class="section-title desktop-only-title" style="display:block;">JOB FULFILLMENT LIST</span>
+
+    <div class="section-collapsible-body" id="jobBody">
+      <!-- 4a. Filter row — on mobile becomes 2x2 grid via #jobFiltersRow -->
+      <div class="table-header-flex">
         <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search PSN or Client Name…"
-          class="filter-select" style="width:250px;">
-
-        <select class="filter-select" id="salesCodeFilter" onchange="filterTable()">
-          <option value="ALL">All Sales Codes</option>
-          <option value="AO">AO</option>
-          <option value="SHU">SHU</option>
-          <option value="NT">NT</option>
-          <option value="AK">AK</option>
-          <option value="NY">NY</option>
-          <option value="OC">OC</option>
-          <option value="PAO">PAO</option>
-          <option value="PNY">PNY</option>
-          <option value="SO">SO</option>
-          <option value="SC">SC</option>
-        </select>
-
-        <select class="filter-select" id="priorityFilter" onchange="filterTable()">
-          <option value="ALL">All Priorities</option>
-          <option value="Urgent">Urgent</option>
-          <option value="Cut Queue">Cut Queue</option>
-          <option value="Normal">Normal</option>
-        </select>
-
-        <select class="filter-select" id="jobTypeFilter" onchange="filterTable()">
-          <option value="ALL">All Job Types</option>
-          <option value="Offset">Offset</option>
-          <option value="FSC">FSC</option>
-          <option value="Flexo & MMB/SOS">Flexo &amp; MMB/SOS</option>
-          <option value="Fully Outsourced">Fully Outsourced</option>
-          <option value="FSCFully Outsourced">FSC Fully Outsourced</option>
-          <option value="Drawdown">Drawdown</option>
-          <option value="K SERIES">K SERIES</option>
-          <option value="Mock-Up">Mock-Up</option>
-        </select>
-
-        <select class="filter-select" id="statusFilter" onchange="filterTable()">
-          <option value="ALL">All Status</option>
-          <option value="ON SCHEDULE">On Schedule</option>
-          <option value="ALMOST DUE">Almost Due</option>
-          <option value="OVERDUE">Overdue</option>
-        </select>
+          class="filter-select" style="width: 660px;">
+        <div id="jobFiltersRow" style="display:flex;gap:10px;flex-grow:1;justify-content:flex-end;flex-wrap:wrap;">
+          <select class="filter-select" id="salesCodeFilter" onchange="filterTable()">
+            <option value="ALL">All Sales Codes</option>
+            <option value="AO">AO</option>
+            <option value="SHU">SHU</option>
+            <option value="NT">NT</option>
+            <option value="AK">AK</option>
+            <option value="NY">NY</option>
+            <option value="OC">OC</option>
+            <option value="PAO">PAO</option>
+            <option value="PNY">PNY</option>
+            <option value="SO">SO</option>
+            <option value="SC">SC</option>
+          </select>
+          <select class="filter-select" id="priorityFilter" onchange="filterTable()">
+            <option value="ALL">All Priorities</option>
+            <option value="Urgent">Urgent</option>
+            <option value="Cut Queue">Cut Queue</option>
+            <option value="Normal">Normal</option>
+          </select>
+          <select class="filter-select" id="jobTypeFilter" onchange="filterTable()">
+            <option value="ALL">All Job Types</option>
+            <option value="Offset">Offset</option>
+            <option value="FSC">FSC</option>
+            <option value="Flexo & MMB/SOS">Flexo &amp; MMB/SOS</option>
+            <option value="Fully Outsourced">Fully Outsourced</option>
+            <option value="FSCFully Outsourced">FSC Fully Outsourced</option>
+            <option value="Drawdown">Drawdown</option>
+            <option value="K SERIES">K SERIES</option>
+            <option value="Mock-Up">Mock-Up</option>
+          </select>
+          <select class="filter-select" id="statusFilter" onchange="filterTable()">
+            <option value="ALL">All Status</option>
+            <option value="ON SCHEDULE">On Schedule</option>
+            <option value="ALMOST DUE">Almost Due</option>
+            <option value="OVERDUE">Overdue</option>
+          </select>
+        </div>
       </div>
-    </div>
 
-    <!-- id="jobTable-wrapper" targeted by mobile CSS -->
-    <div id="jobTable-wrapper" class="job-table-scroll-wrapper">
-      <table class="job-table" id="jobTable">
-        <thead>
-          <tr>
-            <th>PSN</th>
-            <th>Client Name</th>
-            <th>Sales Code</th>
-            <th>PI No.</th>
-            <th>Qty</th>
-            <th>Order Date</th>
-            <th>Delivery Date</th>
-            <th>Progress</th>
-            <th>Priority</th>
-            <th>Status (Delivery)</th>
-          </tr>
-        </thead>
-        <tbody id="jobListBody">
-          <tr>
-            <td colspan="10" style="text-align:center;padding:40px;">Loading live data…</td>
-          </tr>
-        </tbody>
-      </table>
+      <div id="jobTable-wrapper" class="job-table-scroll-wrapper">
+        <table class="job-table" id="jobTable">
+          <thead>
+            <tr>
+              <th>PSN</th>
+              <th>Client Name</th>
+              <th>Sales Code</th>
+              <th>PI No.</th>
+              <th>Qty</th>
+              <th>Order Date</th>
+              <th>Delivery Date</th>
+              <th>Progress</th>
+              <th>Priority</th>
+              <th>Status (Delivery)</th>
+            </tr>
+          </thead>
+          <tbody id="jobListBody">
+            <tr>
+              <td colspan="10" style="text-align:center;padding:40px;">Loading live data…</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -1239,10 +1393,27 @@
     let countScheduleBatches = 0, countAlmostBatches = 0, countOverdueBatches = 0;
     let totalJobs = 0, totalBatches = 0;
 
+    /* ── Helpers for dual title (desktop/mobile) ── */
+    function applyDesktopTitleVisibility() {
+      const isMobile = window.innerWidth <= 768;
+      document.querySelectorAll('.desktop-only-title').forEach(el => {
+        el.style.display = isMobile ? 'none' : 'block';
+      });
+    }
+
+    /* ── Section collapsible toggle (mobile only) ── */
+    function toggleSection(btnId, bodyId) {
+      const btn = document.getElementById(btnId);
+      const body = document.getElementById(bodyId);
+      if (!btn || !body) return;
+      const isOpen = body.classList.contains('open');
+      body.classList.toggle('open', !isOpen);
+      btn.classList.toggle('open', !isOpen);
+    }
+
     /* ── Toast ── */
     function showToast(message, type = 'info') {
-      const c = document.getElementById('toast-container');
-      if (!c) return;
+      const c = document.getElementById('toast-container'); if (!c) return;
       const t = document.createElement('div');
       const col = type === 'success' ? '#28a745' : type === 'error' ? '#d93025' : '#1a73e8';
       Object.assign(t.style, {
@@ -1251,8 +1422,7 @@
         boxShadow: '0 10px 20px rgba(0,0,0,0.2)', fontWeight: '600',
         pointerEvents: 'auto', borderBottom: `4px solid ${col}`
       });
-      t.innerText = message;
-      c.appendChild(t);
+      t.innerText = message; c.appendChild(t);
       setTimeout(() => {
         Object.assign(t.style, { transition: 'opacity 0.4s,transform 0.4s', opacity: '0', transform: 'translateY(-20px)' });
         setTimeout(() => t.remove(), 400);
@@ -1261,6 +1431,9 @@
 
     /* ── On load ── */
     window.onload = async () => {
+      applyDesktopTitleVisibility();
+      window.addEventListener('resize', applyDesktopTitleVisibility);
+
       try {
         const msg = sessionStorage.getItem('toastMessage');
         if (msg) { showToast(msg, 'success'); sessionStorage.removeItem('toastMessage'); }
@@ -1289,26 +1462,25 @@
         const pd = processList.map(n => ({ name: n, time: sm[n]?.avgTime ?? 0, activeCount: sm[n]?.activeCount ?? 0 }));
         pd.sort((a, b) => b.activeCount - a.activeCount || b.time - a.time);
 
-
         sc.innerHTML = pd.map(p => {
           const iz = p.time === 0, hj = p.activeCount > 0;
           const bc = hj ? 'var(--success)' : (iz ? '#cbd5e1' : 'var(--primary)');
           return `
-              <div class="process-item clickable-process" onclick="showProcessJobs('${p.name}')" style="border-left:5px solid ${bc};">
-                <div style="flex:1;border-right:1px dashed #e2e8f0;padding-right:5px;overflow:hidden;">
-                  <div class="process-name">${p.name}</div>
-                  <div style="font-size:1rem;font-weight:800;color:${iz ? '#cbd5e1' : 'var(--primary)'};">
-                    ${p.time}<span style="font-size:0.6rem;font-weight:600;margin-left:2px;">DAYS</span>
-                  </div>
+            <div class="process-item clickable-process" onclick="showProcessJobs('${p.name}')" style="border-left:5px solid ${bc};">
+              <div style="flex:1;border-right:1px dashed #e2e8f0;padding-right:5px;overflow:hidden;">
+                <div class="process-name">${p.name}</div>
+                <div style="font-size:1rem;font-weight:800;color:${iz ? '#cbd5e1' : 'var(--primary)'};">
+                  ${p.time}<span style="font-size:0.6rem;font-weight:600;margin-left:2px;">DAYS</span>
                 </div>
-                <div style="text-align:center;min-width:50px;">
-                  <div style="font-size:0.58rem;color:${hj ? 'var(--success)' : '#94a3b8'};font-weight:800;white-space:nowrap;">
-                    ${hj ? '● IN PROGRESS' : 'IDLE'}
-                  </div>
-                  <div style="font-size:1.2rem;font-weight:900;color:${hj ? '#1e293b' : '#e2e8f0'};line-height:1.1;">${p.activeCount}</div>
-                  <div style="font-size:0.52rem;color:#94a3b8;font-weight:600;">JOBS</div>
+              </div>
+              <div style="text-align:center;min-width:50px;">
+                <div style="font-size:0.58rem;color:${hj ? 'var(--success)' : '#94a3b8'};font-weight:800;white-space:nowrap;">
+                  ${hj ? '● IN PROGRESS' : 'IDLE'}
                 </div>
-              </div>`;
+                <div style="font-size:1.2rem;font-weight:900;color:${hj ? '#1e293b' : '#e2e8f0'};line-height:1.1;">${p.activeCount}</div>
+                <div style="font-size:0.52rem;color:#94a3b8;font-weight:600;">JOBS</div>
+              </div>
+            </div>`;
         }).join('');
 
         calculateCapacity();
@@ -1381,7 +1553,7 @@
       drawTable(fl);
     }
 
-    /* ── drawTable — data-label on every td ── */
+    /* ── drawTable ── */
     function drawTable(list) {
       const tbody = document.getElementById('jobListBody');
       tbody.innerHTML = '';
@@ -1389,6 +1561,8 @@
         tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;">No matching jobs found.</td></tr>';
         return;
       }
+
+      const isMobile = window.innerWidth <= 768;
 
       list.forEach((g, idx) => {
         const ap = Math.round((g.batches.reduce((s, b) => s + (b.progress || 0), 0) / g.batches.length) * 100);
@@ -1398,21 +1572,26 @@
 
         const row = document.createElement('tr');
         row.className = `clickable-row ${rc}`;
-        row.onclick = () => toggleBatch(idx);
         row.innerHTML = `
-            <td data-label="PSN"><strong>${g.psn}</strong></td>
-            <td data-label="Client">${g.client}</td>
-            <td data-label="Sales Code">${g.salesCode}</td>
-            <td data-label="PI No.">${g.pi}</td>
-            <td data-label="Qty">${g.qty.toLocaleString()}</td>
-            <td data-label="Order Date">${formatDateDMY(g.orderDate)}</td>
-            <td data-label="Delivery">${formatDateDMY(g.deliveryDate)}</td>
-            <td data-label="Progress">
-              ${ap}%
-              <div class="progress-bar"><div class="progress-fill" style="width:${ap}%;"></div></div>
-            </td>
-            <td data-label="Priority"><span class="tag ${pc}">${g.priority}</span></td>
-            <td data-label="Status"><span class="tag ${sc}">${g.status}</span></td>`;
+          <td data-label="PSN"><strong>${g.psn}</strong></td>
+          <td data-label="Client">${g.client}</td>
+          <td data-label="Sales Code">${g.salesCode}</td>
+          <td data-label="PI No.">${g.pi}</td>
+          <td data-label="Qty">${g.qty.toLocaleString()}</td>
+          <td data-label="Order Date">${formatDateDMY(g.orderDate)}</td>
+          <td data-label="Delivery">${formatDateDMY(g.deliveryDate)}</td>
+          <td data-label="Progress">
+            ${ap}%
+            <div class="progress-bar"><div class="progress-fill" style="width:${ap}%;"></div></div>
+          </td>
+          <td data-label="Priority"><span class="tag ${pc}">${g.priority}</span></td>
+          <td data-label="Status"><span class="tag ${sc}">${g.status}</span></td>`;
+
+        /* On desktop: clicking the row toggles batch detail */
+        /* On mobile: we add a dedicated expand button row instead */
+        if (!isMobile) {
+          row.onclick = () => toggleBatch(idx);
+        }
 
         /* Batch detail row */
         const dr = document.createElement('tr');
@@ -1424,38 +1603,50 @@
           const d = calculateDaysToDueFromStep(b);
           const io = d < 0, idt = d === 0, ind = d > 0 && d <= 2;
           let bsc = 'row-normal';
-          if (!cs) bsc = 'row-completed';
-          else if (io) bsc = 'row-overdue';
-          else if (idt || ind) bsc = 'row-almost-due';
+          if (!cs) bsc = 'row-completed'; else if (io) bsc = 'row-overdue'; else if (idt || ind) bsc = 'row-almost-due';
           const st = cs ? (cs.name + (io ? ': Delayed' : idt ? ': Due Today' : ind ? ': Almost Due' : ': Running')) : 'Completed';
           const pl = !cs ? 'pill-completed' : io ? 'pill-delayed' : (idt || ind) ? 'pill-almost' : 'pill-running';
           return `<tr class="${bsc}">
-              <td data-label="Batch ID">
-                <a href="${getUpdateUrl(b.batchId)}" target="_top" style="color:var(--primary);font-weight:bold;text-decoration:none;">
-                  <i class="fas fa-external-link-alt" style="font-size:0.65rem;"></i> ${b.batchId}
-                </a>
-              </td>
-              <td data-label="Qty">${Number(b.qty).toLocaleString()}</td>
-              <td data-label="Progress">
-                ${(b.progress * 100).toFixed(0)}%
-                <div class="progress-bar" style="width:70px;"><div class="progress-fill" style="width:${(b.progress * 100).toFixed(0)}%;"></div></div>
-              </td>
-              <td data-label="Status"><span class="pill ${pl}">${st}</span></td>
-            </tr>`;
+            <td data-label="Batch ID">
+              <a href="${getUpdateUrl(b.batchId)}" target="_top" style="color:var(--primary);font-weight:bold;text-decoration:none;">
+                <i class="fas fa-external-link-alt" style="font-size:0.65rem;"></i> ${b.batchId}
+              </a>
+            </td>
+            <td data-label="Qty">${Number(b.qty).toLocaleString()}</td>
+            <td data-label="Progress">
+              ${(b.progress * 100).toFixed(0)}%
+              <div class="progress-bar" style="width:70px;"><div class="progress-fill" style="width:${(b.progress * 100).toFixed(0)}%;"></div></div>
+            </td>
+            <td data-label="Status"><span class="pill ${pl}">${st}</span></td>
+          </tr>`;
         }).join('');
 
         dr.innerHTML = `<td colspan="10" style="padding:0;">
-            <div style="padding:16px 20px;background:#fdfdfd;border-bottom:2px solid var(--primary);overflow-x:auto;">
-              <table class="batch-inner-table">
-                <thead><tr><th>Batch ID</th><th>Qty</th><th>Progress</th><th>Status</th></tr></thead>
-                <tbody>${bHtml}</tbody>
-              </table>
-            </div>
-          </td>`;
+          <div style="padding:16px 20px;background:#fdfdfd;border: 2px solid var(--primary);overflow-x:auto;">
+            <table class="batch-inner-table">
+              <thead><tr><th>Batch ID</th><th>Qty</th><th>Progress</th><th>Status</th></tr></thead>
+              <tbody>${bHtml}</tbody>
+            </table>
+          </div>
+        </td>`;
 
         tbody.appendChild(row);
         tbody.appendChild(dr);
+
+        /* 4. Mobile: insert a tap-to-expand batch row button after the job row */
+        if (isMobile) {
+          row.onclick = () => toggleBatch(idx);
+        }
       });
+    }
+
+    /* Desktop batch toggle (unchanged) */
+    function toggleBatch(id) {
+      const row = document.getElementById('batch-row-' + id);
+      if (!row) return;
+      const vis = row.style.display === 'table-row' || row.style.display === 'block';
+      document.querySelectorAll('.batch-detail-row').forEach(r => r.style.display = 'none');
+      if (!vis) row.style.display = window.innerWidth <= 768 ? 'block' : 'table-row';
     }
 
     /* ── Helpers ── */
@@ -1478,14 +1669,6 @@
     }
 
     function renderDashboard() { filterTable(); }
-
-    /* ── toggleBatch — block on mobile, table-row on desktop ── */
-    function toggleBatch(id) {
-      const row = document.getElementById('batch-row-' + id);
-      const vis = row.style.display === 'table-row' || row.style.display === 'block';
-      document.querySelectorAll('.batch-detail-row').forEach(r => r.style.display = 'none');
-      if (!vis) row.style.display = window.innerWidth <= 768 ? 'block' : 'table-row';
-    }
 
     document.getElementById('statusFilter').addEventListener('change', function () {
       const v = this.value;
@@ -1526,23 +1709,23 @@
       con.innerHTML = Object.keys(M).map(mn => {
         const m = M[mn], d = T[mn];
         return `
-            <div class="cap-card" onclick="showMachineChart('${mn}')" style="border-left:6px solid ${m.color};cursor:pointer;">
-              <div class="card-top">
-                <span class="machine-badge" style="background:${m.bg};color:${m.color};">${mn}</span>
-              </div>
-              <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px;">
-                <div>
-                  <div style="font-size:10px;color:#94a3b8;font-weight:700;">WEEK VIEW</div>
-                  <div style="font-size:22px;font-weight:800;color:${m.color};">
-                    ${d.w.toLocaleString()} <small style="font-size:11px;font-weight:500;">PCS</small>
-                  </div>
-                </div>
-                <div style="text-align:right;border-left:1px solid #eee;padding-left:12px;">
-                  <div style="font-size:10px;color:#94a3b8;font-weight:700;">MONTH (${sel})</div>
-                  <div style="font-size:18px;font-weight:800;color:#1e293b;">${d.m.toLocaleString()}</div>
+          <div class="cap-card" onclick="showMachineChart('${mn}')" style="border-left:6px solid ${m.color};cursor:pointer;">
+            <div class="card-top">
+              <span class="machine-badge" style="background:${m.bg};color:${m.color};">${mn}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px;">
+              <div>
+                <div style="font-size:10px;color:#94a3b8;font-weight:700;">WEEK VIEW</div>
+                <div style="font-size:22px;font-weight:800;color:${m.color};">
+                  ${d.w.toLocaleString()} <small style="font-size:11px;font-weight:500;">PCS</small>
                 </div>
               </div>
-            </div>`;
+              <div style="text-align:right;border-left:1px solid #eee;padding-left:12px;">
+                <div style="font-size:10px;color:#94a3b8;font-weight:700;">MONTH (${sel})</div>
+                <div style="font-size:18px;font-weight:800;color:#1e293b;">${d.m.toLocaleString()}</div>
+              </div>
+            </div>
+          </div>`;
       }).join('');
 
       const cs = document.getElementById('chartSection');
@@ -1579,7 +1762,6 @@
       if (bW) bW.style.background = activeViewMode === 'WEEK' ? 'white' : 'transparent';
 
       let labels = [], counts = [];
-
       if (activeViewMode === 'MONTH') {
         labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         counts = new Array(12).fill(0);
@@ -1606,9 +1788,7 @@
       }
 
       if (capacityChart) capacityChart.destroy();
-      /* Responsive datalabel font size */
       const dlSize = window.innerWidth <= 480 ? 9 : window.innerWidth <= 768 ? 10 : 12;
-
       capacityChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -1625,8 +1805,7 @@
             legend: { display: false },
             datalabels: {
               anchor: 'end', align: 'top', offset: 4, color: '#1e293b',
-              font: { weight: '900', size: dlSize },
-              formatter: v => v > 0 ? v.toLocaleString() : ''
+              font: { weight: '900', size: dlSize }, formatter: v => v > 0 ? v.toLocaleString() : ''
             },
             tooltip: { callbacks: { label: c => `Total: ${c.raw.toLocaleString()} PCS` } }
           },
@@ -1666,7 +1845,6 @@
       filterRequirementUpdates();
     }
 
-    /* renderRequirementUpdates — with data-label */
     function renderRequirementUpdates(updates) {
       const tbody = document.getElementById('requirementBody');
       tbody.innerHTML = '';
@@ -1674,6 +1852,8 @@
         tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;">No urgent updates required.</td></tr>';
         return;
       }
+      const isMobile = window.innerWidth <= 768;
+
       updates.forEach(u => {
         const row = document.createElement('tr');
         row.className = `clickable-row ${getRowClass(u, 'requirement')}`;
@@ -1681,22 +1861,31 @@
         const pts = (u.lastUpdated || '').split('-');
         const step = pts.slice(0, -1).join(' ') || '-';
         const date = pts[pts.length - 1] || '-';
+
         row.innerHTML = `
-            <td data-label="PSN"><strong>${u.psn}</strong></td>
-            <td data-label="Batch ID">
-              <a href="${getUpdateUrl(u.batchId)}" target="_top" style="color:var(--primary);font-weight:bold;text-decoration:none;">
-                <i class="fas fa-external-link-alt" style="font-size:0.65rem;"></i> ${u.batchId}
-              </a>
-            </td>
-            <td data-label="Client">${u.jobName}</td>
-            <td data-label="Quantity">${u.quantity.toLocaleString()}</td>
-            <td data-label="Process">${u.currentProcess}</td>
-            <td data-label="In Progress" style="text-align:center;">${u.prevDurationTime} days</td>
-            <td data-label="Days to Due"><span class="tag ${dc}">${u.duration}</span></td>
-            <td data-label="Prev Step">
-              <span class="process-step-badge">${step}</span>
-              <span class="process-date-badge">${date}</span>
-            </td>`;
+          <td data-label="PSN"><strong>${u.psn}</strong></td>
+          <td data-label="Batch ID">
+            <a href="${getUpdateUrl(u.batchId)}" target="_top" style="color:var(--primary);font-weight:bold;text-decoration:none;">
+              <i class="fas fa-external-link-alt" style="font-size:0.65rem;"></i> ${u.batchId}
+            </a>
+          </td>
+          <td data-label="Client">${u.jobName}</td>
+          <td data-label="Quantity">${u.quantity.toLocaleString()}</td>
+          <td data-label="Process">${u.currentProcess}</td>
+          <td data-label="In Progress" style="text-align:center;">${u.prevDurationTime} days</td>
+          <td data-label="Days to Due"><span class="tag ${dc}">${u.duration}</span></td>
+          <td data-label="Prev Step">
+            <span class="process-step-badge">${step}</span>
+            <span class="process-date-badge">${date}</span>
+          </td>`;
+
+        /* On mobile: tapping the card toggles hidden detail fields */
+        if (isMobile) {
+          row.addEventListener('click', () => {
+            row.classList.toggle('req-expanded');
+          });
+        }
+
         tbody.appendChild(row);
       });
     }
@@ -1719,6 +1908,11 @@
       });
       td.style.display = 'block';
       renderProcessJobs(pn);
+
+      /* 2. Scroll to the process jobs table so user can see it immediately */
+      setTimeout(() => {
+        td.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 80);
     }
 
     function renderProcessJobs(pn) {
@@ -1745,26 +1939,24 @@
       drawProcessJobs(fl);
     }
 
-    /* drawProcessJobs — with data-label */
     function drawProcessJobs(jobs) {
-      const tbody = document.getElementById('processJobsBody');
-      if (!tbody) return;
+      const tbody = document.getElementById('processJobsBody'); if (!tbody) return;
       tbody.innerHTML = jobs.map(j => {
         const d = calculateDaysToDueFromStep(j);
         const pt = getPriorityText(d), pc = getPriorityClass(pt), rc = getRowClass(j, 'process');
         const cs = j.steps?.find(s => !s.isDone);
         return `<tr class="${rc}">
-            <td data-label="PSN" style="font-weight:bold;">${j.psn}</td>
-            <td data-label="Batch ID">
-              <a href="${getUpdateUrl(j.batchId)}" target="_top" style="color:var(--primary);font-weight:bold;text-decoration:none;">
-                <i class="fas fa-external-link-alt" style="font-size:0.65rem;"></i> ${j.batchId}
-              </a>
-            </td>
-            <td data-label="Client">${j.jobName || j.client || '-'}</td>
-            <td data-label="Quantity">${Number(j.qty).toLocaleString()}</td>
-            <td data-label="Priority"><span class="tag ${pc}">${pt}</span></td>
-            <td data-label="Exp. Date"><span class="process-date-badge">${cs?.expDate || '-'}</span></td>
-          </tr>`;
+          <td data-label="PSN" style="font-weight:bold;">${j.psn}</td>
+          <td data-label="Batch ID">
+            <a href="${getUpdateUrl(j.batchId)}" target="_top" style="color:var(--primary);font-weight:bold;text-decoration:none;">
+              <i class="fas fa-external-link-alt" style="font-size:0.65rem;"></i> ${j.batchId}
+            </a>
+          </td>
+          <td data-label="Client">${j.jobName || j.client || '-'}</td>
+          <td data-label="Quantity">${Number(j.qty).toLocaleString()}</td>
+          <td data-label="Priority"><span class="tag ${pc}">${pt}</span></td>
+          <td data-label="Exp. Date"><span class="process-date-badge">${cs?.expDate || '-'}</span></td>
+        </tr>`;
       }).join('');
       if (!jobs.length) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;">No jobs match the filter.</td></tr>';
     }
@@ -1812,9 +2004,6 @@
     }
 
   </script>
-
 </body>
-<!-- <script src="https://alcdn.msauth.net/browser/2.28.1/js/msal-browser.min.js"></script>
-<script src="/scripts/auth.js"></script> -->
 
 </html>
