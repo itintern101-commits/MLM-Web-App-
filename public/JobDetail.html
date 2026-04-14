@@ -112,7 +112,9 @@
       min-height: 36px;
     }
 
-    .filter-item:hover { background-color: #f1f5f9 !important; }
+    .filter-item:hover {
+      background-color: #f1f5f9 !important;
+    }
 
     .filter-item.active {
       background: var(--primary) !important;
@@ -158,7 +160,8 @@
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     }
 
-    th, td {
+    th,
+    td {
       padding: 10px 6px;
       border-bottom: 1px solid #f3f4f6;
       white-space: nowrap;
@@ -180,7 +183,9 @@
       z-index: 25;
     }
 
-    tbody tr:hover td { background: #f9fafb; }
+    tbody tr:hover td {
+      background: #f9fafb;
+    }
 
     /* ===== STICKY RIGHT COLUMNS ===== */
     .sticky {
@@ -198,24 +203,72 @@
     tbody tr.row-urgent .sticky,
     tbody tr.row-critical .sticky,
     tbody tr.row-warning .sticky,
-    tbody tr.row-safe .sticky { background: inherit; }
+    tbody tr.row-safe .sticky {
+      background: inherit;
+    }
 
-    tbody tr:hover .sticky { background: #f9fafb; }
+    tbody tr:hover .sticky {
+      background: #f9fafb;
+    }
 
-    th:nth-last-child(4), td:nth-last-child(4) { right: 360px; width: 100px; min-width: 100px; }
-    th:nth-last-child(3), td:nth-last-child(3) { right: 260px; width: 110px; min-width: 110px; }
-    th:nth-last-child(2), td:nth-last-child(2) { right: 140px; width: 120px; min-width: 120px; }
-    th:nth-last-child(1), td:nth-last-child(1) { right: 0; width: 140px; min-width: 140px; }
-    td:nth-child(4), td:nth-child(9) { max-width: 250px; }
+    th:nth-last-child(4),
+    td:nth-last-child(4) {
+      right: 360px;
+      width: 100px;
+      min-width: 100px;
+    }
 
-    .table-scroll::-webkit-scrollbar { height: 8px; }
-    .table-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    th:nth-last-child(3),
+    td:nth-last-child(3) {
+      right: 260px;
+      width: 110px;
+      min-width: 110px;
+    }
+
+    th:nth-last-child(2),
+    td:nth-last-child(2) {
+      right: 140px;
+      width: 120px;
+      min-width: 120px;
+    }
+
+    th:nth-last-child(1),
+    td:nth-last-child(1) {
+      right: 0;
+      width: 140px;
+      min-width: 140px;
+    }
+
+    td:nth-child(4),
+    td:nth-child(9) {
+      max-width: 250px;
+    }
+
+    .table-scroll::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .table-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
 
     /* ===== ROW COLORS ===== */
-    .row-urgent   { background-color: #fee2e2; }
-    .row-critical { background-color: #f8d7da; }
-    .row-warning  { background-color: #fef9c3; }
-    .row-safe     { background-color: white; }
+    .row-urgent {
+      background-color: #fee2e2;
+    }
+
+    .row-critical {
+      background-color: #f8d7da;
+    }
+
+    .row-warning {
+      background-color: #fef9c3;
+    }
+
+    .row-safe {
+      background-color: white;
+    }
 
     /* ===== STATUS/PRIORITY PILLS ===== */
     .pill {
@@ -226,12 +279,35 @@
       display: inline-block;
     }
 
-    .pill-overdue         { background: #fee2e2; color: var(--danger); }
-    .pill-almost          { background: #fef3c7; color: #92400e; }
-    .pill-normal          { background: #dcfce7; color: var(--success); }
-    .pill-urgent          { background: #fee2e2; color: var(--danger); }
-    .pill-cut-queue       { background: #fef3c7; color: #92400e; }
-    .pill-normal-priority { background: #dcfce7; color: var(--success); }
+    .pill-overdue {
+      background: #fee2e2;
+      color: var(--danger);
+    }
+
+    .pill-almost {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .pill-normal {
+      background: #dcfce7;
+      color: var(--success);
+    }
+
+    .pill-urgent {
+      background: #fee2e2;
+      color: var(--danger);
+    }
+
+    .pill-cut-queue {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .pill-normal-priority {
+      background: #dcfce7;
+      color: var(--success);
+    }
 
     /* ===== ACTION BUTTONS (DESKTOP) ===== */
     .action-btn {
@@ -283,7 +359,10 @@
 
     /* ===== MOBILE CARD VIEW ===== */
     /* Hidden on desktop, shown on mobile via @media */
-    .mobile-card-list { display: none; }
+    .mobile-card-list {
+      display: none;
+    }
+
     .mobile-card-list-inner {
       display: flex;
       flex-direction: column;
@@ -296,18 +375,31 @@
       background: white;
       border-radius: 12px;
       border: 1px solid #e2e8f0;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
       overflow: hidden;
       transition: box-shadow 0.2s;
     }
 
-    .job-card:active { box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+    .job-card:active {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
 
     /* Row colour stripe replicated on cards */
-    .job-card.row-urgent   { border-left: 5px solid var(--danger); }
-    .job-card.row-critical { border-left: 5px solid #dc2626; }
-    .job-card.row-warning  { border-left: 5px solid var(--warning); }
-    .job-card.row-safe     { border-left: 5px solid #10b981; }
+    .job-card.row-urgent {
+      border-left: 5px solid var(--danger);
+    }
+
+    .job-card.row-critical {
+      border-left: 5px solid #dc2626;
+    }
+
+    .job-card.row-warning {
+      border-left: 5px solid var(--warning);
+    }
+
+    .job-card.row-safe {
+      border-left: 5px solid #10b981;
+    }
 
     /* Card top pill strip — Priority + Status at-a-glance */
     .card-pill-strip {
@@ -352,7 +444,9 @@
       gap: 8px;
     }
 
-    .card-row:last-child { border-bottom: none; }
+    .card-row:last-child {
+      border-bottom: none;
+    }
 
     .card-label {
       font-size: 0.7rem;
@@ -394,7 +488,9 @@
       transition: opacity 0.15s;
     }
 
-    .card-btn:active { opacity: 0.8; }
+    .card-btn:active {
+      opacity: 0.8;
+    }
 
     .card-btn-edit {
       background: var(--primary);
@@ -409,8 +505,10 @@
     /* ===== LOADING ===== */
     .loading-overlay {
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background: rgba(255, 255, 255, 0.8);
       display: flex;
       flex-direction: column;
@@ -453,27 +551,54 @@
       box-sizing: border-box;
     }
 
-    .toast.error   { border-bottom: 4px solid var(--danger); }
-    .toast.success { border-bottom: 4px solid var(--success); }
-    .toast.info    { border-bottom: 4px solid var(--primary); }
+    .toast.error {
+      border-bottom: 4px solid var(--danger);
+    }
+
+    .toast.success {
+      border-bottom: 4px solid var(--success);
+    }
+
+    .toast.info {
+      border-bottom: 4px solid var(--primary);
+    }
 
     @keyframes popDown {
-      from { transform: translateY(-50px); opacity: 0; }
-      to   { transform: translateY(0); opacity: 1; }
+      from {
+        transform: translateY(-50px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
     }
 
     @keyframes fadeOutUp {
-      from { transform: translateY(0); opacity: 1; }
-      to   { transform: translateY(-20px); opacity: 0; }
+      from {
+        transform: translateY(0);
+        opacity: 1;
+      }
+
+      to {
+        transform: translateY(-20px);
+        opacity: 0;
+      }
     }
 
     /* ===== TOOLTIP ===== */
-    .tooltip-trigger { position: relative; cursor: pointer; transition: all 0.2s ease; }
+    .tooltip-trigger {
+      position: relative;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
 
     .tooltip-trigger:hover::after {
       content: attr(data-tooltip);
       position: absolute;
-      top: 125%; left: 50%;
+      top: 125%;
+      left: 50%;
       transform: translateX(-50%);
       background-color: #1e293b;
       color: #ffffff;
@@ -483,14 +608,15 @@
       font-weight: normal;
       white-space: nowrap;
       z-index: 30;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
       pointer-events: none;
     }
 
     .tooltip-trigger:hover::before {
       content: "";
       position: absolute;
-      top: 110%; left: 50%;
+      top: 110%;
+      left: 50%;
       transform: translateX(-50%);
       border: 6px solid transparent;
       border-top-color: #1e293b;
@@ -498,14 +624,19 @@
       pointer-events: none;
     }
 
-    .tooltip-trigger:hover { z-index: 9999; position: relative; }
+    .tooltip-trigger:hover {
+      z-index: 9999;
+      position: relative;
+    }
 
     /* ===== MODALS ===== */
     .modal-overlay {
       display: none;
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background: rgba(0, 0, 0, 0.6);
       z-index: 1000;
       justify-content: center;
@@ -534,8 +665,15 @@
     }
 
     @keyframes modalSlideIn {
-      from { opacity: 0; transform: translateY(-20px) scale(0.95); }
-      to   { opacity: 1; transform: translateY(0) scale(1); }
+      from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
 
     .large-modal {
@@ -574,7 +712,7 @@
       font-size: 1.25rem;
       font-weight: 700;
       text-align: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       flex-shrink: 0;
     }
 
@@ -610,9 +748,13 @@
       flex: 1;
     }
 
-    .edit-form { padding: 1rem; }
+    .edit-form {
+      padding: 1rem;
+    }
 
-    .form-section { margin-bottom: 1rem; }
+    .form-section {
+      margin-bottom: 1rem;
+    }
 
     .form-section-title {
       font-size: 0.95rem;
@@ -648,11 +790,27 @@
       justify-content: center;
     }
 
-    .option-btn:hover  { border-color: #667eea; background: #f0f4ff; color: #667eea; }
-    .option-btn.selected { background: #667eea; border-color: #667eea; color: white; }
-    .option-btn.original { background: #e2e8f0; border-color: #cbd5e1; color: #64748b; }
+    .option-btn:hover {
+      border-color: #667eea;
+      background: #f0f4ff;
+      color: #667eea;
+    }
 
-    .form-group { margin-bottom: 1rem; }
+    .option-btn.selected {
+      background: #667eea;
+      border-color: #667eea;
+      color: white;
+    }
+
+    .option-btn.original {
+      background: #e2e8f0;
+      border-color: #cbd5e1;
+      color: #64748b;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
 
     .form-group label {
       display: block;
@@ -680,12 +838,12 @@
     .form-group input:focus {
       outline: none;
       border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
 
     .form-group input.changed {
       border-color: #10b981;
-      box-shadow: 0 0 0 2px rgba(16,185,129,0.2);
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
     }
 
     /* ===== BATCH MODAL LAYOUT ===== */
@@ -697,7 +855,10 @@
       min-height: 450px;
     }
 
-    .batch-left-column { display: grid; gap: 1rem; }
+    .batch-left-column {
+      display: grid;
+      gap: 1rem;
+    }
 
     .batch-card,
     .batch-detail-card,
@@ -705,11 +866,16 @@
       background: white;
       border: 1px solid #e2e8f0;
       border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(15,23,42,0.05);
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
     }
 
-    .batch-card { padding: 1rem 1rem 0.9rem 1rem; }
-    .batch-card + .batch-card { margin-top: 0.5rem; }
+    .batch-card {
+      padding: 1rem 1rem 0.9rem 1rem;
+    }
+
+    .batch-card+.batch-card {
+      margin-top: 0.5rem;
+    }
 
     .batch-card-header {
       display: flex;
@@ -719,10 +885,22 @@
       margin-bottom: 1rem;
     }
 
-    .batch-card-header h2 { margin: 0; font-size: 1rem; font-weight: 700; color: #111827; }
-    .batch-card-header span { font-size: 0.85rem; color: #64748b; }
+    .batch-card-header h2 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #111827;
+    }
 
-    .batch-summary-list { display: grid; gap: 0.85rem; }
+    .batch-card-header span {
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+
+    .batch-summary-list {
+      display: grid;
+      gap: 0.85rem;
+    }
 
     .batch-summary-row {
       display: flex;
@@ -733,16 +911,20 @@
       border-bottom: 1px solid #eff2f7;
     }
 
-    .batch-summary-row:last-child { border-bottom: none; }
+    .batch-summary-row:last-child {
+      border-bottom: none;
+    }
 
-    .batch-summary-label, .batch-detail-label {
+    .batch-summary-label,
+    .batch-detail-label {
       color: #64748b;
       font-size: 0.82rem;
       font-weight: 600;
       min-width: 115px;
     }
 
-    .batch-summary-value, .batch-detail-value {
+    .batch-summary-value,
+    .batch-detail-value {
       font-size: 0.95rem;
       color: #111827;
       font-weight: 700;
@@ -775,8 +957,17 @@
       gap: 1rem;
     }
 
-    .process-panel-header h2 { margin: 0; font-size: 1rem; font-weight: 700; color: #111827; }
-    .process-panel-header small { color: #64748b; font-size: 0.82rem; }
+    .process-panel-header h2 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .process-panel-header small {
+      color: #64748b;
+      font-size: 0.82rem;
+    }
 
     .process-scroll {
       overflow-y: auto;
@@ -786,7 +977,11 @@
       padding: 0rem 1rem 0.75rem 1rem;
     }
 
-    .process-table { display: grid; gap: 0.75rem; width: 100%; }
+    .process-table {
+      display: grid;
+      gap: 0.75rem;
+      width: 100%;
+    }
 
     .process-header {
       display: grid;
@@ -818,15 +1013,18 @@
       transition: transform 0.2s, box-shadow 0.2s;
     }
 
-    .process-row:nth-of-type(odd) { background: #f8fafc; }
+    .process-row:nth-of-type(odd) {
+      background: #f8fafc;
+    }
 
     .process-row:hover {
       transform: translateY(-1px);
-      box-shadow: 0 8px 20px rgba(15,23,42,0.08);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
     }
 
     .step-num-badge {
-      width: 32px; height: 32px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       background: #eef2ff;
       color: var(--primary);
@@ -880,7 +1078,10 @@
       justify-content: center;
     }
 
-    .sales-code-locked:hover { background: #f3f4f6; border-color: #9ca3af; }
+    .sales-code-locked:hover {
+      background: #f3f4f6;
+      border-color: #9ca3af;
+    }
 
     .sales-code-select {
       width: 100%;
@@ -895,7 +1096,7 @@
 
     .sales-code-select.changed {
       border-color: #10b981;
-      box-shadow: 0 0 0 2px rgba(16,185,129,0.2);
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
     }
 
     /* ===== MODAL ACTIONS ===== */
@@ -916,58 +1117,81 @@
     }
 
     .btn-unlock {
-      background: #f59e0b; color: white;
-      border: none; padding: 0.65rem 1rem;
-      border-radius: 8px; cursor: pointer;
-      font-size: 0.9rem; font-weight: 600;
+      background: #f59e0b;
+      color: white;
+      border: none;
+      padding: 0.65rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
       transition: background 0.2s;
       min-height: 44px;
     }
 
-    .btn-unlock:hover { background: #d97706; }
+    .btn-unlock:hover {
+      background: #d97706;
+    }
 
     .btn-save {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white; border: none;
+      color: white;
+      border: none;
       padding: 0.75rem 1.5rem;
-      border-radius: 8px; cursor: pointer;
-      font-size: 1rem; font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
       transition: all 0.2s;
       min-height: 44px;
     }
 
     .btn-save:hover {
       background: linear-gradient(135deg, #5568d3 0%, #653a91 100%);
-      box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
     }
 
-    .btn-save:disabled { background: #94a3b8; cursor: not-allowed; opacity: 0.6; }
+    .btn-save:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
 
     .btn-cancel {
-      background: #e2e8f0; color: #64748b;
-      border: none; padding: 0.75rem 1.5rem;
-      border-radius: 8px; cursor: pointer;
-      font-size: 1rem; font-weight: 600;
+      background: #e2e8f0;
+      color: #64748b;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
       transition: background 0.2s;
       min-height: 44px;
     }
 
-    .btn-cancel:hover { background: #cbd5e1; }
+    .btn-cancel:hover {
+      background: #cbd5e1;
+    }
 
     /* ===== CONFIRM DIALOGS ===== */
     .confirm-overlay {
       display: none;
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
       z-index: 1100;
       justify-content: center;
       align-items: center;
       backdrop-filter: blur(2px);
     }
 
-    .confirm-overlay.show { display: flex; }
+    .confirm-overlay.show {
+      display: flex;
+    }
 
     .confirm-overlay-content {
       background: white;
@@ -975,7 +1199,7 @@
       padding: 0;
       max-width: 500px;
       width: 92%;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
       animation: modalSlideIn 0.3s ease-out;
     }
 
@@ -1009,33 +1233,49 @@
     }
 
     .confirm-btn-cancel {
-      background: #e2e8f0; color: #64748b;
-      border: none; padding: 0.65rem 1rem;
-      border-radius: 8px; cursor: pointer;
-      font-size: 0.9rem; font-weight: 600;
+      background: #e2e8f0;
+      color: #64748b;
+      border: none;
+      padding: 0.65rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
       transition: background 0.2s;
-      min-height: 44px; flex: 1;
+      min-height: 44px;
+      flex: 1;
     }
 
-    .confirm-btn-cancel:hover { background: #cbd5e1; }
+    .confirm-btn-cancel:hover {
+      background: #cbd5e1;
+    }
 
     .confirm-btn-ok {
-      background: var(--success); color: white;
-      border: none; padding: 0.65rem 1rem;
-      border-radius: 8px; cursor: pointer;
-      font-size: 0.9rem; font-weight: 600;
+      background: var(--success);
+      color: white;
+      border: none;
+      padding: 0.65rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
       transition: background 0.2s;
-      min-height: 44px; flex: 1;
+      min-height: 44px;
+      flex: 1;
     }
 
-    .confirm-btn-ok:hover { background: #228a3f; }
+    .confirm-btn-ok:hover {
+      background: #228a3f;
+    }
 
     .confirm-dialog {
       display: none;
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
       z-index: 1100;
       justify-content: center;
       align-items: center;
@@ -1043,7 +1283,9 @@
       box-sizing: border-box;
     }
 
-    .confirm-dialog.show { display: flex; }
+    .confirm-dialog.show {
+      display: flex;
+    }
 
     .confirm-dialog-content {
       background: white;
@@ -1051,14 +1293,29 @@
       padding: 2rem;
       max-width: 400px;
       width: 92%;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
       text-align: center;
       animation: modalSlideIn 0.3s ease-out;
     }
 
-    .confirm-dialog-icon   { font-size: 2.5rem; margin-bottom: 1rem; }
-    .confirm-dialog-title  { font-size: 1.3rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem; }
-    .confirm-dialog-message{ font-size: 0.95rem; color: #64748b; margin-bottom: 1.5rem; line-height: 1.5; }
+    .confirm-dialog-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .confirm-dialog-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 0.5rem;
+    }
+
+    .confirm-dialog-message {
+      font-size: 0.95rem;
+      color: #64748b;
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
 
     .confirm-dialog-buttons {
       display: flex;
@@ -1068,7 +1325,8 @@
 
     /* ===== SPINNER ===== */
     .spinner {
-      width: 14px; height: 14px;
+      width: 14px;
+      height: 14px;
       border: 2px solid #fff;
       border-top: 2px solid transparent;
       border-radius: 50%;
@@ -1077,14 +1335,23 @@
       margin-right: 5px;
     }
 
-    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
 
     /* =========================================================
        TABLET  ≤1024px
     ========================================================= */
     @media (max-width: 1024px) {
-      .main { margin-left: 0; }
-      .stats-bar { grid-template-columns: repeat(2, 1fr); }
+      .main {
+        margin-left: 0;
+      }
+
+      .stats-bar {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
     /* =========================================================
@@ -1094,11 +1361,14 @@
     @media (max-width: 768px) {
       .dashboard-header {
         padding: 0.9rem 1rem;
-        position: relative; /* unstick header so content flows naturally */
+        position: relative;
+        /* unstick header so content flows naturally */
         top: auto;
       }
 
-      .dashboard-header h1 { font-size: 1.25rem; }
+      .dashboard-header h1 {
+        font-size: 1.25rem;
+      }
 
       /* Stack header controls vertically */
       .header-right {
@@ -1128,11 +1398,18 @@
       }
 
       /* Result summary */
-      .result-summary { padding: 6px 12px; }
+      .result-summary {
+        padding: 6px 12px;
+      }
 
       /* ── HIDE desktop table, SHOW mobile cards ── */
-      .table-container { display: none; }
-      .mobile-card-list { display: block; }
+      .table-container {
+        display: none;
+      }
+
+      .mobile-card-list {
+        display: block;
+      }
 
       /* Filters bar — unstick, stack */
       .filters {
@@ -1144,10 +1421,16 @@
       }
 
       .filter-select,
-      #searchInput { width: 100% !important; box-sizing: border-box; }
+      #searchInput {
+        width: 100% !important;
+        box-sizing: border-box;
+      }
 
       /* D. Modals: wide on mobile */
-      .modal-overlay.show { padding: 8px; align-items: flex-end; }
+      .modal-overlay.show {
+        padding: 8px;
+        align-items: flex-end;
+      }
 
       .modal-content,
       .modal-content.small-modal,
@@ -1173,12 +1456,14 @@
       }
 
       /* Date input spans full width below process name */
-      .process-header > :nth-child(3),
-      .process-row > input[type="date"] {
+      .process-header> :nth-child(3),
+      .process-row>input[type="date"] {
         grid-column: 1 / -1;
       }
 
-      .process-scroll { max-height: 280px; }
+      .process-scroll {
+        max-height: 280px;
+      }
 
       /* Modal action buttons: full-width stack */
       .modal-actions {
@@ -1186,27 +1471,45 @@
         gap: 8px;
       }
 
-      .btn-save, .btn-cancel, .btn-unlock {
+      .btn-save,
+      .btn-cancel,
+      .btn-unlock {
         width: 100%;
         text-align: center;
         justify-content: center;
       }
 
-      .toast { font-size: 14px; padding: 14px 20px; }
+      .toast {
+        font-size: 14px;
+        padding: 14px 20px;
+      }
     }
 
     /* =========================================================
        SMALL PHONES  ≤480px
     ========================================================= */
     @media (max-width: 480px) {
-      .dashboard-header h1 { font-size: 1.1rem; }
+      .dashboard-header h1 {
+        font-size: 1.1rem;
+      }
 
-      .card-label { min-width: 80px; font-size: 0.65rem; }
-      .card-value { font-size: 0.78rem; }
+      .card-label {
+        min-width: 80px;
+        font-size: 0.65rem;
+      }
 
-      .mobile-card-list-inner { padding: 10px 10px 20px; gap: 10px; }
+      .card-value {
+        font-size: 0.78rem;
+      }
 
-      .stats-bar { padding: 8px 10px; }
+      .mobile-card-list-inner {
+        padding: 10px 10px 20px;
+        gap: 10px;
+      }
+
+      .stats-bar {
+        padding: 8px 10px;
+      }
     }
   </style>
 </head>
@@ -1220,30 +1523,50 @@
         .then((html) => {
           const parser = new DOMParser();
           const doc = parser.parseFromString(html, 'text/html');
+
+          // 1. Copy sidebar CSS into <head>
           doc.head.querySelectorAll('style, link[rel="stylesheet"]').forEach((node) => {
             document.head.appendChild(node.cloneNode(true));
           });
+
+          // 2. Get the <aside id="sidebar"> from Sidebar.html
           const sidebarEl = doc.getElementById('sidebar');
           if (!sidebarEl) {
-            console.error('Sidebar load failed: #sidebar not found');
+            console.error('Sidebar load failed: #sidebar not found in Sidebar.html');
             return;
           }
+
+          // 3. Scoop up every existing node in <body> into a fragment
+          //    This includes: loader, page content, toast, modal — everything
           const fragment = document.createDocumentFragment();
           while (document.body.firstChild) {
             fragment.appendChild(document.body.firstChild);
           }
+
+          // 4. Build the flex layout in JS:
+          //    <div class="sidebar-wrapper">
+          //      <aside id="sidebar">  ← from Sidebar.html
+          //      <div class="main">    ← all original BatchDetail content
+          //    </div>
           const wrapper = document.createElement('div');
           wrapper.className = 'sidebar-wrapper';
+
           const mainDiv = document.createElement('div');
           mainDiv.className = 'main';
           mainDiv.appendChild(fragment);
+
           wrapper.appendChild(sidebarEl.cloneNode(true));
           wrapper.appendChild(mainDiv);
           document.body.appendChild(wrapper);
 
+          // 5. Wire up toggle
           const btn = document.getElementById('sidebarToggle');
           const sidebar = document.getElementById('sidebar');
-          if (!btn || !sidebar) return;
+          const logo = document.getElementById('sidebarLogo');
+          if (!btn || !sidebar) {
+            console.error('Sidebar: #sidebarToggle or #sidebar missing after DOM build');
+            return;
+          }
 
           function setSidebar(collapsed) {
             sidebar.classList.toggle('sidebar--collapsed', collapsed);
@@ -1252,17 +1575,35 @@
               el.setAttribute('aria-hidden', String(collapsed));
             });
           }
+
           const savedState = localStorage.getItem('sidebar-collapsed') === '1';
           setSidebar(savedState);
+
+          if (logo) {
+            logo.addEventListener('click', () => {
+              const collapsed = !sidebar.classList.contains('sidebar--collapsed');
+              setSidebar(collapsed);
+              localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0');
+            });
+          }
           btn.addEventListener('click', () => {
             const collapsed = !sidebar.classList.contains('sidebar--collapsed');
             setSidebar(collapsed);
             localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0');
           });
-          const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
+
+          // 6. Highlight active nav link
+          const currentPage = window.location.pathname
+            .split('/')
+            .pop()
+            .replace('.html', '');
           document.querySelectorAll('.item').forEach((link) => {
-            if (link.dataset.page === currentPage) link.classList.add('active');
+            if (link.dataset.page === currentPage) {
+              link.classList.add('active');
+            }
           });
+
+          // 7. Wire up logout
           const logoutBtn = document.getElementById('logoutBtn');
           if (logoutBtn) {
             logoutBtn.addEventListener('click', (e) => {
@@ -1282,7 +1623,8 @@
     <div class="dashboard-header">
       <h1>Job Dashboard</h1>
       <div class="header-right">
-        <input type="text" id="searchInput" class="search-input" placeholder="Search PSN or Job Name..." onkeyup="filterTable()">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search PSN or Job Name..."
+          onkeyup="filterTable()">
         <select id="priorityFilter" class="filter-select" onchange="filterTable()">
           <option value="">All Priorities</option>
           <option value="Urgent">Urgent</option>
@@ -1295,7 +1637,8 @@
           <option value="ALMOST DUE">ALMOST DUE</option>
           <option value="ON SCHEDULE">ON SCHEDULE</option>
         </select>
-        <button class="action-btn" id="clearFiltersBtn" style="font-size:18px;" onclick="clearFilters()">Clear Filters</button>
+        <button class="action-btn" id="clearFiltersBtn" style="font-size:18px;" onclick="clearFilters()">Clear
+          Filters</button>
       </div>
     </div>
 
@@ -1330,7 +1673,9 @@
             </tr>
           </thead>
           <tbody id="jobTableBody">
-            <tr><td colspan="16" style="text-align:center;padding:40px;">Loading data...</td></tr>
+            <tr>
+              <td colspan="16" style="text-align:center;padding:40px;">Loading data...</td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -1364,7 +1709,8 @@
   <div id="confirmOverlay" class="confirm-overlay">
     <div class="confirm-overlay-content">
       <div class="confirm-header" id="confirmHeader">⚠️ Remaining Production Quantity</div>
-      <div class="confirm-body" id="confirmOverlayMessage">Remaining Production Quantity is <strong></strong>. Do you want to proceed?</div>
+      <div class="confirm-body" id="confirmOverlayMessage">Remaining Production Quantity is <strong></strong>. Do you
+        want to proceed?</div>
       <div class="confirm-actions">
         <button class="confirm-btn-cancel" onclick="cancelConfirm()">Cancel</button>
         <button class="confirm-btn-ok" onclick="confirmOverlayAction()">OK</button>
@@ -1425,7 +1771,9 @@
         <div class="batch-modal-body">
           <div class="batch-left-column">
             <div class="batch-card">
-              <div class="batch-card-header"><h2>Batch Info</h2></div>
+              <div class="batch-card-header">
+                <h2>Batch Info</h2>
+              </div>
               <div class="batch-summary-list">
                 <div class="batch-summary-row">
                   <div class="batch-summary-label">PSN</div>
@@ -1446,7 +1794,9 @@
               </div>
             </div>
             <div class="batch-detail-card">
-              <div class="batch-card-header"><h2>Batch Details</h2></div>
+              <div class="batch-card-header">
+                <h2>Batch Details</h2>
+              </div>
               <div class="form-group">
                 <label class="batch-detail-label">📦 Batch Quantity</label>
                 <input type="number" id="batchQuantity" placeholder="🔢 Enter batch quantity" min="1">
@@ -1454,7 +1804,8 @@
               <div class="form-group">
                 <label class="batch-detail-label">Remaining Production Qty After Creation</label>
                 <div id="remainingAfter" class="batch-detail-value"
-                  style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:0.75rem 0.9rem;font-weight:700;">-</div>
+                  style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:0.75rem 0.9rem;font-weight:700;">
+                  -</div>
               </div>
             </div>
           </div>
@@ -1545,8 +1896,8 @@
         scrollLeft = scrollArea.scrollLeft;
       });
       scrollArea.addEventListener('mouseleave', () => { isDown = false; scrollArea.classList.remove('dragging'); });
-      scrollArea.addEventListener('mouseup',    () => { isDown = false; scrollArea.classList.remove('dragging'); });
-      scrollArea.addEventListener('mousemove',  (e) => {
+      scrollArea.addEventListener('mouseup', () => { isDown = false; scrollArea.classList.remove('dragging'); });
+      scrollArea.addEventListener('mousemove', (e) => {
         if (!isDown) return;
         e.preventDefault();
         const x = e.pageX - scrollArea.offsetLeft;
@@ -1606,15 +1957,15 @@
     function getPriorityOrder(job) {
       const priority = (job.Priority || 'Normal').toLowerCase();
       const status = calculateStatus(job['Delivery Date'] || job.Delivery_Date || job.deliveryDate).toUpperCase();
-      const isUrgent   = priority === 'urgent';
+      const isUrgent = priority === 'urgent';
       const isCutQueue = priority === 'cut queue';
-      const isOverdue  = status === 'OVERDUE';
-      const isAlmost   = status === 'ALMOST DUE';
+      const isOverdue = status === 'OVERDUE';
+      const isAlmost = status === 'ALMOST DUE';
       if (isUrgent && isOverdue) return 0;
-      if (isUrgent)    return 1;
-      if (isOverdue)   return 2;
-      if (isAlmost)    return 3;
-      if (isCutQueue)  return 4;
+      if (isUrgent) return 1;
+      if (isOverdue) return 2;
+      if (isAlmost) return 3;
+      if (isCutQueue) return 4;
       return 5;
     }
 
@@ -1623,7 +1974,7 @@
       const stats = {
         salesCodes: {},
         priorities: { Urgent: 0, 'Cut Queue': 0, Normal: 0 },
-        statuses:   { OVERDUE: 0, 'ALMOST DUE': 0, 'ON SCHEDULE': 0 }
+        statuses: { OVERDUE: 0, 'ALMOST DUE': 0, 'ON SCHEDULE': 0 }
       };
       MASTER_DATA.forEach(job => {
         const sc = job.salesCode || job.Sales_Code || job.code || 'Unknown';
@@ -1640,11 +1991,11 @@
       const salesCard = document.createElement('div');
       salesCard.className = 'stat-card';
       salesCard.innerHTML = '<h3 style="margin:0 0 10px 0;color:#4f46e5;font-size:1rem;">Sales Codes</h3>';
-      ['AO','SHU','NT','AK','NY','OC','PAO','PNY','SO','SC'].forEach(code => {
+      ['AO', 'SHU', 'NT', 'AK', 'NY', 'OC', 'PAO', 'PNY', 'SO', 'SC'].forEach(code => {
         const count = stats.salesCodes[code] || 0;
         const item = document.createElement('div');
         item.className = `filter-item tooltip-trigger ${activeFilters.salesCodes.has(code) ? 'active' : ''}`;
-        item.setAttribute('data-tooltip','Click to filter table below');
+        item.setAttribute('data-tooltip', 'Click to filter table below');
         item.onclick = () => toggleFilter('salesCodes', code);
         item.innerHTML = `<span>${code}</span><span>${count}</span>`;
         salesCard.appendChild(item);
@@ -1657,7 +2008,7 @@
       Object.entries(stats.priorities).forEach(([priority, count]) => {
         const item = document.createElement('div');
         item.className = `filter-item tooltip-trigger ${activeFilters.priorities.has(priority) ? 'active' : ''}`;
-        item.setAttribute('data-tooltip','Click to filter table below');
+        item.setAttribute('data-tooltip', 'Click to filter table below');
         item.onclick = () => toggleFilter('priorities', priority);
         item.innerHTML = `<span>${priority}</span><span>${count}</span>`;
         psCard.appendChild(item);
@@ -1669,7 +2020,7 @@
       Object.entries(stats.statuses).forEach(([status, count]) => {
         const item = document.createElement('div');
         item.className = `filter-item tooltip-trigger ${activeFilters.statuses.has(status) ? 'active' : ''}`;
-        item.setAttribute('data-tooltip','Click to filter table below');
+        item.setAttribute('data-tooltip', 'Click to filter table below');
         item.onclick = () => toggleFilter('statuses', status);
         item.innerHTML = `<span>${status}</span><span>${count}</span>`;
         psCard.appendChild(item);
@@ -1697,7 +2048,7 @@
       const pSel = document.getElementById('priorityFilter').value;
       const sSel = document.getElementById('statusFilter').value;
       activeFilters.priorities = pSel ? new Set([pSel]) : new Set();
-      activeFilters.statuses   = sSel ? new Set([sSel]) : new Set();
+      activeFilters.statuses = sSel ? new Set([sSel]) : new Set();
       renderStats();
       renderTable();
     }
@@ -1718,23 +2069,23 @@
 
       let filteredData = MASTER_DATA.filter(job => {
         const search = (activeFilters.search || '').toUpperCase().trim();
-        const psn      = String(job["Product Serial Number"] || job.PSN || '').toUpperCase();
-        const jobName  = String(job["Job Name"] || job.Job_Name || job.client || '').toUpperCase();
-        const pi       = String(job["PI Number"] || job.PI_Number || job.pi || job.PI_No || '').toUpperCase();
+        const psn = String(job["Product Serial Number"] || job.PSN || '').toUpperCase();
+        const jobName = String(job["Job Name"] || job.Job_Name || job.client || '').toUpperCase();
+        const pi = String(job["PI Number"] || job.PI_Number || job.pi || job.PI_No || '').toUpperCase();
         const saleCode = String(job.salesCode || job.Sales_Code || job.code || '').toUpperCase();
-        const item     = String(job.Item || '').toUpperCase();
+        const item = String(job.Item || '').toUpperCase();
 
         const matchesSearch = !search ||
           psn.includes(search) || jobName.includes(search) ||
-          pi.includes(search)  || saleCode.includes(search) ||
+          pi.includes(search) || saleCode.includes(search) ||
           item.includes(search);
 
         const sc = job.salesCode || job.Sales_Code || job.code;
-        const matchesSales    = activeFilters.salesCodes.size === 0 || activeFilters.salesCodes.has(sc);
+        const matchesSales = activeFilters.salesCodes.size === 0 || activeFilters.salesCodes.has(sc);
         const p = job.Priority || 'Normal';
         const matchesPriority = activeFilters.priorities.size === 0 || activeFilters.priorities.has(p);
         const s = calculateStatus(job['Delivery Date'] || job.Delivery_Date || job.deliveryDate);
-        const matchesStatus   = activeFilters.statuses.size === 0 || activeFilters.statuses.has(s);
+        const matchesStatus = activeFilters.statuses.size === 0 || activeFilters.statuses.has(s);
 
         return matchesSearch && matchesSales && matchesPriority && matchesStatus;
       });
@@ -1755,25 +2106,25 @@
       }
 
       filteredData.forEach(job => {
-        const status       = calculateStatus(job['Delivery Date'] || job.Delivery_Date || job.deliveryDate);
-        const statusClass  = status === 'OVERDUE' ? 'pill-overdue' : status === 'ALMOST DUE' ? 'pill-almost' : 'pill-normal';
-        const priority     = job.Priority || 'Normal';
-        const priorityClass= priority === 'Urgent' ? 'pill-urgent' : priority === 'Cut Queue' ? 'pill-cut-queue' : 'pill-normal-priority';
-        const rowClass     = getRowColorClass(job);
+        const status = calculateStatus(job['Delivery Date'] || job.Delivery_Date || job.deliveryDate);
+        const statusClass = status === 'OVERDUE' ? 'pill-overdue' : status === 'ALMOST DUE' ? 'pill-almost' : 'pill-normal';
+        const priority = job.Priority || 'Normal';
+        const priorityClass = priority === 'Urgent' ? 'pill-urgent' : priority === 'Cut Queue' ? 'pill-cut-queue' : 'pill-normal-priority';
+        const rowClass = getRowColorClass(job);
 
         const jobName = job["Job Name"] || job.Job_Name || job.client || '-';
-        const item    = job.Item || '-';
+        const item = job.Item || '-';
         const psnText = job["Product Serial Number"] || job.PSN || '-';
-        const psnValue= psnText !== '-' ? (psnText.toString().endsWith('-1') ? psnText : `${psnText}-1`) : psnText;
+        const psnValue = psnText !== '-' ? (psnText.toString().endsWith('-1') ? psnText : `${psnText}-1`) : psnText;
         const psnLink = psnText !== '-'
           ? `<a href="/BatchDetail.html?id=${encodeURIComponent(psnValue)}" target="_top" style="color:#2563eb;font-weight:600;text-decoration:none;">${psnText}</a>`
           : psnText;
 
-        const remaining        = job.Remaining || job.remaining || 0;
-        const partialDelivery  = job['Partial Delivery'] || 0;
-        const balanceToDelivery= job['Balance to Delivery'] || job['BTD'] || 0;
-        const totalDelivery    = job['Total Delivery'] || 0;
-        const psn              = job["Product Serial Number"] || job.PSN;
+        const remaining = job.Remaining || job.remaining || 0;
+        const partialDelivery = job['Partial Delivery'] || 0;
+        const balanceToDelivery = job['Balance to Delivery'] || job['BTD'] || 0;
+        const totalDelivery = job['Total Delivery'] || 0;
+        const psn = job["Product Serial Number"] || job.PSN;
 
         // ── DESKTOP TABLE ROW ──
         // A. data-label on every td for accessibility & mobile fallback
@@ -1864,8 +2215,8 @@
           <div class="card-actions">
             <button class="card-btn card-btn-edit" onclick="openPriorityModal('${psn}')">✏️ Edit</button>
             ${remaining > 0
-              ? `<button class="card-btn card-btn-batch" onclick="createBatch('${psn}')">➕ Add Batch</button>`
-              : ''}
+            ? `<button class="card-btn card-btn-batch" onclick="createBatch('${psn}')">➕ Add Batch</button>`
+            : ''}
           </div>`;
         cardInner.appendChild(card);
       });
@@ -1880,14 +2231,14 @@
       document.getElementById('summaryPsn').textContent = psn;
       document.getElementById('summaryJobName').textContent = job["Job Name"] || job.Job_Name || job.client || 'Unknown';
 
-      const jobTypes = ['Offset','FSC','Flexo & MMB/SOS','Fully Outsourced','FSC Fully Outsourced','Drawdown','K SERIES','Mock-Up'];
+      const jobTypes = ['Offset', 'FSC', 'Flexo & MMB/SOS', 'Fully Outsourced', 'FSC Fully Outsourced', 'Drawdown', 'K SERIES', 'Mock-Up'];
       document.getElementById('jobTypeButtons').innerHTML = jobTypes.map(type =>
         `<button class="option-btn ${job["Job Type"] === type ? 'selected' : ''}" onclick="selectJobType(this,'${type}')">${type}</button>`
       ).join('');
 
       document.getElementById('editItem').value = job.Item || '';
 
-      const priorities = ['Urgent','Cut Queue','Normal'];
+      const priorities = ['Urgent', 'Cut Queue', 'Normal'];
       document.getElementById('priorityButtons').innerHTML = priorities.map(p =>
         `<button class="option-btn ${job.Priority === p ? 'selected' : ''}" onclick="selectPriority(this,'${p}')">${p}</button>`
       ).join('');
@@ -1896,9 +2247,9 @@
         '<div class="sales-code-locked" onclick="unlockSalesCode()">🔒 Click to Unlock Sales Code</div>';
 
       originalJobData = {
-        jobType:   job["Job Type"] || '',
-        item:      job.Item || '',
-        priority:  job.Priority || 'Normal',
+        jobType: job["Job Type"] || '',
+        item: job.Item || '',
+        priority: job.Priority || 'Normal',
         salesCode: job.salesCode || job.Sales_Code || ''
       };
       currentJobData = { ...originalJobData };
@@ -1936,9 +2287,9 @@
       const editItem = document.getElementById('editItem');
       const salesCodeSelect = document.getElementById('editSalesCode');
       const hasChanges = (
-        currentJobData.jobType   !== originalJobData.jobType   ||
-        currentJobData.item      !== originalJobData.item      ||
-        currentJobData.priority  !== originalJobData.priority  ||
+        currentJobData.jobType !== originalJobData.jobType ||
+        currentJobData.item !== originalJobData.item ||
+        currentJobData.priority !== originalJobData.priority ||
         currentJobData.salesCode !== originalJobData.salesCode
       );
       if (saveBtn) saveBtn.disabled = !hasChanges;
@@ -1965,7 +2316,7 @@
 
     function performUnlockSalesCode() {
       const container = document.getElementById('salesCodeContainer');
-      const codes = ['AO','SHU','NT','AK','NY','OC','PAO','PNY','SO','SC'];
+      const codes = ['AO', 'SHU', 'NT', 'AK', 'NY', 'OC', 'PAO', 'PNY', 'SO', 'SC'];
       container.innerHTML = `<select class="sales-code-select" id="editSalesCode">
         ${codes.map(c => `<option value="${c}">${c}</option>`).join('')}
       </select>`;
@@ -2018,10 +2369,10 @@
 
       const salesCodeSelect = document.getElementById('editSalesCode');
       const updatedData = {
-        psn:       currentEditingPsn,
-        jobType:   currentJobData.jobType,
-        item:      document.getElementById('editItem').value,
-        priority:  currentJobData.priority,
+        psn: currentEditingPsn,
+        jobType: currentJobData.jobType,
+        item: document.getElementById('editItem').value,
+        priority: currentJobData.priority,
         salesCode: salesCodeSelect ? salesCodeSelect.value : currentJobData.salesCode
       };
 
@@ -2055,13 +2406,13 @@
       const job = MASTER_DATA.find(j => String(j["Product Serial Number"] || j.PSN || "") === String(psn));
       if (!job) { showToast('Job not found', 'error'); return; }
 
-      document.getElementById('batchSummaryPsn').textContent     = psn;
-      document.getElementById('batchSummaryJobName').textContent  = job["Job Name"] || job.Job_Name || job.client || '-';
-      const totalQty   = job.Quantity || 0;
-      const remaining  = job.Remaining || job.remaining || 0;
-      document.getElementById('batchSummaryTotalQty').textContent  = totalQty.toLocaleString();
+      document.getElementById('batchSummaryPsn').textContent = psn;
+      document.getElementById('batchSummaryJobName').textContent = job["Job Name"] || job.Job_Name || job.client || '-';
+      const totalQty = job.Quantity || 0;
+      const remaining = job.Remaining || job.remaining || 0;
+      document.getElementById('batchSummaryTotalQty').textContent = totalQty.toLocaleString();
       document.getElementById('batchSummaryRemaining').textContent = remaining.toLocaleString();
-      document.getElementById('remainingAfter').textContent        = remaining.toLocaleString();
+      document.getElementById('remainingAfter').textContent = remaining.toLocaleString();
 
       const qInput = document.getElementById('batchQuantity');
       // Replace to remove old listeners
@@ -2161,11 +2512,11 @@
     }
 
     async function submitNewBatch() {
-      const psn       = document.getElementById('batchSummaryPsn').textContent;
-      const qEl       = document.getElementById('batchQuantity');
-      const quantity  = parseInt(qEl.value);
+      const psn = document.getElementById('batchSummaryPsn').textContent;
+      const qEl = document.getElementById('batchQuantity');
+      const quantity = parseInt(qEl.value);
       const remaining = parseInt(document.getElementById('batchSummaryRemaining').textContent.replace(/,/g, ''));
-      const btn       = document.getElementById('createBatchBtn');
+      const btn = document.getElementById('createBatchBtn');
       if (btn.disabled) return;
       if (!quantity || quantity <= 0) { showToast('Please enter a valid quantity', 'error'); return; }
       if (quantity > remaining) { showToast('Batch quantity cannot exceed remaining production quantity', 'error'); return; }
@@ -2238,4 +2589,5 @@
     }
   </script>
 </body>
+
 </html>

@@ -245,7 +245,7 @@
 
     /* Desktop header arrangement */
     @media (min-width: 769px) {
-      .dashboard-header > div {
+      .dashboard-header>div {
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
@@ -254,7 +254,7 @@
         max-width: 320px;
       }
 
-      .dashboard-header > div > input {
+      .dashboard-header>div>input {
         width: 100%;
         max-width: 300px;
         flex: 1;
@@ -262,14 +262,14 @@
         box-sizing: border-box;
       }
 
-      .dashboard-header > div > button {
+      .dashboard-header>div>button {
         padding: 8px 16px;
         border-radius: 4px;
         cursor: pointer;
         font-weight: 600;
       }
 
-      .dashboard-header > div > button#clearSortBtn {
+      .dashboard-header>div>button#clearSortBtn {
         width: 100%;
         margin-left: 0;
         margin-top: 8px;
@@ -2511,7 +2511,7 @@
           // 5. Wire up toggle
           const btn = document.getElementById('sidebarToggle');
           const sidebar = document.getElementById('sidebar');
-
+          const logo = document.getElementById('sidebarLogo');
           if (!btn || !sidebar) {
             console.error('Sidebar: #sidebarToggle or #sidebar missing after DOM build');
             return;
@@ -2528,6 +2528,13 @@
           const savedState = localStorage.getItem('sidebar-collapsed') === '1';
           setSidebar(savedState);
 
+          if (logo) {
+            logo.addEventListener('click', () => {
+              const collapsed = !sidebar.classList.contains('sidebar--collapsed');
+              setSidebar(collapsed);
+              localStorage.setItem('sidebar-collapsed', collapsed ? '1' : '0');
+            });
+          }
           btn.addEventListener('click', () => {
             const collapsed = !sidebar.classList.contains('sidebar--collapsed');
             setSidebar(collapsed);
